@@ -1,0 +1,25 @@
+{
+  "types": [
+    {
+      "id": "type_web_app",
+      "name": "Web/App",
+      "description": "Phát triển Web và ứng dụng",
+      "active": true,
+      "createdAt": "2026-09-12T10:00:00.000Z"
+    },
+    {
+      "id": "type_ap",
+      "name": "AP",
+      "description": "Autonomous Platform",
+      "active": true,
+      "createdAt": "2026-09-12T10:00:00.000Z"
+    },
+    {
+      "id": "type_peer_admin",
+      "name": "Peer Admin",
+      "description": "Quản trị mạng & vận hành",
+      "active": true,
+      "createdAt": "2026-09-12T10:00:00.000Z"
+    }
+  ]
+}

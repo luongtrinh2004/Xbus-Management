@@ -1,0 +1,61 @@
+{
+  "funds": [
+    {
+      "id": "fund_2026_09",
+      "year": 2026,
+      "month": 9,
+      "openingBalance": 500000,
+      "members": [
+        {
+          "userId": "usr_001",
+          "paid": true,
+          "amount": 100000,
+          "paidAt": "2026-09-05T09:30:00.000Z",
+          "updatedAt": "2026-09-05T09:30:00.000Z"
+        },
+        {
+          "userId": "usr_002",
+          "paid": true,
+          "amount": 50000,
+          "paidAt": "2026-09-06T14:20:00.000Z",
+          "updatedAt": "2026-09-06T14:20:00.000Z"
+        },
+        {
+          "userId": "usr_003",
+          "paid": true,
+          "amount": 50000,
+          "paidAt": "2026-09-06T15:00:00.000Z",
+          "updatedAt": "2026-09-06T15:00:00.000Z"
+        },
+        {
+          "userId": "usr_004",
+          "paid": false,
+          "amount": 0,
+          "paidAt": null,
+          "updatedAt": null
+        },
+        {
+          "userId": "usr_005",
+          "paid": true,
+          "amount": 100000,
+          "paidAt": "2026-09-07T10:00:00.000Z",
+          "updatedAt": "2026-09-07T10:00:00.000Z"
+        }
+      ],
+      "expenses": [
+        {
+          "id": "exp_001",
+          "title": "Mua nước đóng chai",
+          "amount": 200000,
+          "spentAt": "2026-09-08T10:00:00.000Z",
+          "note": "4 bình nước",
+          "createdBy": "usr_admin_001",
+          "createdAt": "2026-09-08T10:00:00.000Z"
+        }
+      ],
+      "createdBy": "usr_admin_001",
+      "createdAt": "2026-09-01T08:00:00.000Z",
+      "updatedAt": "2026-09-08T10:00:00.000Z"
+    }
+  ]
+}

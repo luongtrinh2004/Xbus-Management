@@ -1,0 +1,9 @@
+{
+  "companyEmailDomains": [
+    "phenikaa-x.com",
+    "company.com"
+  ],
+  "defaultRole": "user",
+  "defaultUserStatus": "disabled",
+  "defaultWaterParticipants": 5
+}

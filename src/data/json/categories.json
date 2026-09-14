@@ -1,0 +1,24 @@
+{
+  "categories": [
+    {
+      "id": "category_collaborator",
+      "name": "Cộng tác viên",
+      "active": true
+    },
+    {
+      "id": "category_intern",
+      "name": "Thực tập",
+      "active": true
+    },
+    {
+      "id": "category_probation",
+      "name": "Thử việc",
+      "active": true
+    },
+    {
+      "id": "category_official",
+      "name": "Chính thức",
+      "active": true
+    }
+  ]
+}

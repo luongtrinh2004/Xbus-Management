@@ -1,0 +1,56 @@
+{
+  "assets": [
+    {
+      "id": "asset_001",
+      "code": "DEV-MAC-01",
+      "name": "MacBook Pro M2 16GB",
+      "category": "Laptop",
+      "assignedToUserId": "usr_001",
+      "status": "in_use",
+      "serialNumber": "C02G1234MD6R",
+      "assignedDate": "2026-09-01",
+      "note": "Máy cấp cho DEV Web/App",
+      "createdAt": "2026-09-01T08:00:00.000Z",
+      "updatedAt": "2026-09-01T08:00:00.000Z"
+    },
+    {
+      "id": "asset_002",
+      "code": "DEV-MNTR-02",
+      "name": "Màn hình Dell Ultrasharp 27 inch",
+      "category": "Màn hình",
+      "assignedToUserId": "usr_001",
+      "status": "in_use",
+      "serialNumber": "CN-098765-12345",
+      "assignedDate": "2026-09-02",
+      "note": "Màn hình mở rộng",
+      "createdAt": "2026-09-02T08:00:00.000Z",
+      "updatedAt": "2026-09-02T08:00:00.000Z"
+    },
+    {
+      "id": "asset_003",
+      "code": "DEV-PC-01",
+      "name": "Workstation AP Testing",
+      "category": "Máy tính bàn",
+      "assignedToUserId": "usr_003",
+      "status": "in_use",
+      "serialNumber": "WS-AP-2026-003",
+      "assignedDate": "2026-09-03",
+      "note": "Phục vụ mô phỏng & chạy AP",
+      "createdAt": "2026-09-03T08:00:00.000Z",
+      "updatedAt": "2026-09-03T08:00:00.000Z"
+    },
+    {
+      "id": "asset_004",
+      "code": "DEV-MOUSE-01",
+      "name": "Chuột Logitech MX Master 3S",
+      "category": "Phụ kiện",
+      "assignedToUserId": null,
+      "status": "available",
+      "serialNumber": "LOGI-MX3S-889",
+      "assignedDate": null,
+      "note": "Trong kho phòng ban",
+      "createdAt": "2026-09-01T08:00:00.000Z",
+      "updatedAt": "2026-09-01T08:00:00.000Z"
+    }
+  ]
+}

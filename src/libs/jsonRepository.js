@@ -1,0 +1,176 @@
+import fs from "fs";
+import path from "path";
+
+const DATA_DIR = path.join(process.cwd(), "src", "data", "json");
+
+// Đảm bảo thư mục dữ liệu tồn tại
+if (!fs.existsSync(DATA_DIR)) {
+  fs.mkdirSync(DATA_DIR, { recursive: true });
+}
+
+/**
+ * Đọc file JSON an toàn
+ */
+export function readJsonFile(fileName, defaultValue = {}) {
+  const filePath = path.join(DATA_DIR, fileName);
+  try {
+    if (!fs.existsSync(filePath)) {
+      writeJsonFile(fileName, defaultValue);
+      return defaultValue;
+    }
+    const content = fs.readFileSync(filePath, "utf-8");
+    return JSON.parse(content);
+  } catch (error) {
+    console.error(`[JsonRepository] Lỗi đọc file ${fileName}:`, error);
+    return defaultValue;
+  }
+}
+
+/**
+ * Ghi file JSON theo cơ chế Atomic (ghi file tạm rồi đổi tên)
+ * Tránh hỏng file khi có sự cố ngắt giữa chừng
+ */
+export function writeJsonFile(fileName, data) {
+  const filePath = path.join(DATA_DIR, fileName);
+  const tempPath = path.join(DATA_DIR, `${fileName}.${Date.now()}.tmp`);
+
+  try {
+    const jsonString = JSON.stringify(data, null, 2);
+    fs.writeFileSync(tempPath, jsonString, "utf-8");
+    fs.renameSync(tempPath, filePath);
+    return true;
+  } catch (error) {
+    console.error(`[JsonRepository] Lỗi ghi file ${fileName}:`, error);
+    if (fs.existsSync(tempPath)) {
+      try {
+        fs.unlinkSync(tempPath);
+      } catch (e) {
+        // ignore
+      }
+    }
+    throw error;
+  }
+}
+
+// === CÁC HÀM GET / SAVE CHUYÊN BIỆT ===
+
+export function getUsers() {
+  const data = readJsonFile("users.json", { users: [] });
+  return data.users || [];
+}
+
+export function saveUsers(users) {
+  return writeJsonFile("users.json", { users });
+}
+
+export function getTypes() {
+  const data = readJsonFile("types.json", { types: [] });
+  return data.types || [];
+}
+
+export function saveTypes(types) {
+  return writeJsonFile("types.json", { types });
+}
+
+export function getCategories() {
+  const data = readJsonFile("categories.json", { categories: [] });
+  return data.categories || [];
+}
+
+export function saveCategories(categories) {
+  return writeJsonFile("categories.json", { categories });
+}
+
+export function getSettings() {
+  return readJsonFile("settings.json", {
+    companyEmailDomains: ["phenikaa-x.com"],
+    defaultRole: "user",
+    defaultUserStatus: "disabled",
+  });
+}
+
+export function saveSettings(settings) {
+  return writeJsonFile("settings.json", settings);
+}
+
+export function getWaterSchedules() {
+  const data = readJsonFile("water-schedules.json", { schedules: [] });
+  return data.schedules || [];
+}
+
+export function saveWaterSchedules(schedules) {
+  return writeJsonFile("water-schedules.json", { schedules });
+}
+
+export function getWaterExemptions() {
+  return readJsonFile("water-exemptions.json", { userIds: [] }).userIds || [];
+}
+
+export function saveWaterExemptions(userIds) {
+  return writeJsonFile("water-exemptions.json", { userIds });
+}
+
+export function getFunds() {
+  const data = readJsonFile("funds.json", { funds: [] });
+  return data.funds || [];
+}
+
+export function saveFunds(funds) {
+  return writeJsonFile("funds.json", { funds });
+}
+
+export function getAssets() {
+  const data = readJsonFile("assets.json", { assets: [] });
+  return data.assets || [];
+}
+
+export function saveAssets(assets) {
+  return writeJsonFile("assets.json", { assets });
+}
+
+export function getAfternoonTea() {
+  return readJsonFile("afternoon-tea.json", {
+    menuImageUrl: "",
+    invitations: [],
+  });
+}
+
+export function saveAfternoonTea(data) {
+  return writeJsonFile("afternoon-tea.json", data);
+}
+
+export function getAuditLogs() {
+  const data = readJsonFile("audit-logs.json", { auditLogs: [] });
+  return data.auditLogs || [];
+}
+
+/**
+ * Ghi nhật ký hoạt động của Admin (chỉ ghi thêm, không sửa/xóa)
+ */
+export function appendAuditLog({
+  adminId,
+  adminName,
+  adminEmail,
+  action,
+  targetType,
+  targetId,
+  details,
+  ip = "127.0.0.1",
+}) {
+  const logs = getAuditLogs();
+  const newLog = {
+    id: `log_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+    adminId,
+    adminName,
+    adminEmail,
+    action,
+    targetType,
+    targetId,
+    details,
+    ip,
+    timestamp: new Date().toISOString(),
+  };
+  logs.unshift(newLog); // đưa log mới nhất lên đầu
+  writeJsonFile("audit-logs.json", { auditLogs: logs });
+  return newLog;
+}

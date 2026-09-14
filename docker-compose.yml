@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  admin-dolphin:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: admin-dolphin
+    ports:
+      - "3001:3001"
+    env_file:
+      - .env
+    volumes:
+      # Mount thư mục uploads trên host -> vào container
+      - /home/stackops/dolphin/admin/public/uploads:/app/public/uploads
+    networks:
+      - server_backend
+    restart: unless-stopped   # container sẽ tự restart khi crash/reboot
+
+networks:
+  server_backend:
+    external: true
