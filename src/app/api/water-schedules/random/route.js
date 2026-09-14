@@ -16,7 +16,7 @@ const secret = process.env.NEXTAUTH_SECRET;
 export async function POST(req) {
   try {
     const token = await getToken({ req, secret });
-    if (token?.role !== "admin") {
+    if (!["admin", "assistant"].includes(token?.role)) {
       return NextResponse.json(
         { error: "Chỉ quản trị viên mới có quyền xếp lịch random" },
         { status: 403 },

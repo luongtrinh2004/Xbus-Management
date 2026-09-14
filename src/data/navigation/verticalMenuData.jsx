@@ -3,44 +3,44 @@ const verticalMenuData = [
     label: "Trang chủ",
     href: "/home",
     icon: "tabler-smart-home",
-    roles: ["user", "admin"],
+    roles: ["user", "assistant", "admin"],
   },
 
   {
     label: "Nhân sự",
     href: "/users",
     icon: "tabler-users",
-    roles: ["user", "admin"],
+    roles: ["user", "assistant", "admin"],
   },
   {
     label: "Lịch bê nước",
     href: "/water-schedule",
     icon: "tabler-droplet",
-    roles: ["user", "admin"],
+    roles: ["user", "assistant", "admin"],
   },
   {
     label: "Quỹ phòng",
     href: "/fund",
     icon: "tabler-wallet",
-    roles: ["user", "admin"],
+    roles: ["user", "assistant", "admin"],
   },
   {
-    label: "Tài sản cá nhân",
+    label: "Quản lý tài sản",
     href: "/assets",
     icon: "tabler-package",
-    roles: ["user", "admin"],
+    roles: ["assistant", "admin"],
   },
   {
     label: "Trà chiều",
     href: "/afternoon-tea",
     icon: "tabler-bubble-tea",
-    roles: ["user", "admin"],
+    roles: ["user", "assistant", "admin"],
   },
   {
     label: "Lịch sử hoạt động",
     href: "/audit-logs",
     icon: "tabler-history",
-    roles: ["admin"],
+    roles: ["assistant", "admin"],
   },
 ];
 

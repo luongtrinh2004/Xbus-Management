@@ -13,7 +13,7 @@ const secret = process.env.NEXTAUTH_SECRET;
 export async function POST(req, { params }) {
   try {
     const token = await getToken({ req, secret });
-    if (token?.role !== "admin") {
+    if (!["admin", "assistant"].includes(token?.role)) {
       return NextResponse.json(
         { error: "Chỉ quản trị viên mới có quyền xác nhận hoàn thành lịch" },
         { status: 403 },

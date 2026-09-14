@@ -55,7 +55,7 @@ export default function AfternoonTeaPage() {
   const { data: session } = useSession();
   const [data, setData] = useState({ menuImageUrl: "", invitations: [] });
   const isAdmin =
-    session?.user?.role === "admin" ||
+    ["admin", "assistant"].includes(session?.user?.role) ||
     data.users?.some(
       (user) =>
         user.email?.toLowerCase() === session?.user?.email?.toLowerCase() &&

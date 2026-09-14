@@ -1,6 +1,78 @@
 {
   "auditLogs": [
     {
+      "id": "log_1789364118243_rj29",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "UPDATE_USER",
+      "targetType": "USER",
+      "targetId": "usr_012",
+      "details": "Cập nhật thông tin nhân sự Trần Việt Dũng (PNKX316): name, email, code, phone, gender, role, typeId, categoryId, status, avatarUrl, schedulingPoints",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-14T05:35:18.243Z"
+    },
+    {
+      "id": "log_1789363917630_8kwq",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "UPDATE_USER",
+      "targetType": "USER",
+      "targetId": "usr_008",
+      "details": "Cập nhật thông tin nhân sự Nguyễn Hữu Lâm (PNKX283): name, email, code, phone, gender, role, typeId, categoryId, status, avatarUrl, schedulingPoints, password",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-14T05:31:57.630Z"
+    },
+    {
+      "id": "log_1789363894402_1a8y",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "UPDATE_USER",
+      "targetType": "USER",
+      "targetId": "usr_009",
+      "details": "Cập nhật thông tin nhân sự Bùi Đình Quý (PNKX296): name, email, code, phone, gender, role, typeId, categoryId, status, avatarUrl, schedulingPoints",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-14T05:31:34.402Z"
+    },
+    {
+      "id": "log_1789363695831_vfzq",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "UPDATE_USER",
+      "targetType": "USER",
+      "targetId": "usr_006",
+      "details": "Cập nhật thông tin nhân sự Trần Hoàng Hà (PNKX335): name, email, code, phone, gender, role, typeId, categoryId, status, avatarUrl, schedulingPoints, password",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-14T05:28:15.831Z"
+    },
+    {
+      "id": "log_1789363642461_rihr",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "UPDATE_USER",
+      "targetType": "USER",
+      "targetId": "usr_001",
+      "details": "Cập nhật thông tin nhân sự Vũ Hoàng Dũng (PNKX047): name, email, code, phone, gender, role, typeId, categoryId, status, avatarUrl, schedulingPoints, password",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-14T05:27:22.461Z"
+    },
+    {
+      "id": "log_1789361905832_vea1",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "UPDATE_USER",
+      "targetType": "USER",
+      "targetId": "usr_007",
+      "details": "Cập nhật thông tin nhân sự Nguyễn Thị Hồng Quyên (PNKX281): name, email, code, phone, gender, role, typeId, categoryId, status, avatarUrl, schedulingPoints",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-14T04:58:25.832Z"
+    },
+    {
       "id": "log_1789323770879_g14c",
       "adminId": "usr_admin_001",
       "adminName": "Quản trị viên Hệ thống",

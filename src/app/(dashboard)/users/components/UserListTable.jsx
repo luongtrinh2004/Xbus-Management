@@ -70,6 +70,9 @@ const UserListTable = ({
   fetchUsers,
   onUserUpdated,
   isLoading,
+  sortBy,
+  sortOrder,
+  onSort,
 }) => {
   const { data: session } = useSession();
   const isAdmin = session?.user?.role === "admin";
@@ -175,6 +178,7 @@ const UserListTable = ({
     () => [
       columnHelper.accessor("name", {
         header: "Nhân sự",
+        meta: { sortable: true },
         cell: ({ row }) => (
           <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
             <CustomAvatar
@@ -201,6 +205,7 @@ const UserListTable = ({
       }),
       columnHelper.accessor("code", {
         header: "Mã NV",
+        meta: { sortable: true },
         cell: ({ row }) => (
           <Typography fontWeight={600} color="primary.main" variant="body2">
             {row.original.code || "—"}
@@ -209,6 +214,7 @@ const UserListTable = ({
       }),
       columnHelper.accessor("gender", {
         header: "Giới tính",
+        meta: { sortable: true },
         cell: ({ row }) => (
           <Typography variant="body2">
             {genderNameMap[row.original.gender] || "—"}
@@ -217,12 +223,14 @@ const UserListTable = ({
       }),
       columnHelper.accessor("phone", {
         header: "Số điện thoại",
+        meta: { sortable: true },
         cell: ({ row }) => (
           <Typography variant="body2">{row.original.phone || "—"}</Typography>
         ),
       }),
       columnHelper.accessor("typeId", {
         header: "Bộ phận",
+        meta: { sortable: true },
         cell: ({ row }) => (
           <Chip
             size="small"
@@ -239,6 +247,7 @@ const UserListTable = ({
       }),
       columnHelper.accessor("categoryId", {
         header: "Hình thức",
+        meta: { sortable: true },
         cell: ({ row }) => (
           <Typography variant="body2">
             {categoryNameMap[row.original.categoryId] ||
@@ -249,6 +258,7 @@ const UserListTable = ({
       }),
       columnHelper.accessor("role", {
         header: "Vai trò",
+        meta: { sortable: true },
         cell: ({ row }) => (
           <Chip
             size="small"
@@ -257,14 +267,16 @@ const UserListTable = ({
                 className={
                   row.original.role === "admin"
                     ? "tabler-crown text-sm"
-                    : "tabler-user text-sm"
+                    : row.original.role === "assistant"
+                      ? "tabler-user-cog text-sm"
+                      : "tabler-user text-sm"
                 }
               />
             }
             label={
-              row.original.role === "admin" ? "Quản trị viên" : "Nhân viên"
+              row.original.role === "admin" ? "Quản trị viên" : row.original.role === "assistant" ? "Trợ lý" : "Nhân viên"
             }
-            color={row.original.role === "admin" ? "error" : "secondary"}
+            color={row.original.role === "admin" ? "error" : row.original.role === "assistant" ? "warning" : "secondary"}
             variant="tonal"
           />
         ),
@@ -420,11 +432,16 @@ const UserListTable = ({
           >
             <CustomTextField
               size="small"
+              type="search"
+              id="staff-directory-search"
+              name="staff_directory_search"
+              autoComplete="off"
               placeholder="Tìm theo tên, email, mã NV..."
               value={globalFilter}
               onChange={(e) => setGlobalFilter(e.target.value)}
               sx={{ minWidth: 260 }}
               InputProps={{
+                autoComplete: "off",
                 startAdornment: (
                   <i className="tabler-search text-gray-400 mr-2" />
                 ),
@@ -463,12 +480,12 @@ const UserListTable = ({
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
                     <th key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
+                      {header.isPlaceholder ? null : header.column.columnDef.meta?.sortable ? (
+                        <Box component="button" type="button" onClick={() => onSort?.(header.column.id)} sx={{ border: 0, p: 0, bgcolor: "transparent", color: "inherit", font: "inherit", display: "flex", alignItems: "center", gap: 1, cursor: "pointer", textTransform: "uppercase" }}>
+                          {flexRender(header.column.columnDef.header, header.getContext())}
+                          <i className={sortBy === header.column.id ? (sortOrder === "asc" ? "tabler-chevron-up" : "tabler-chevron-down") : "tabler-selector"} />
+                        </Box>
+                      ) : flexRender(header.column.columnDef.header, header.getContext())}
                     </th>
                   ))}
                 </tr>

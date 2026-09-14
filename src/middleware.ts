@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 
 // Định nghĩa kiểu role và quyền truy cập
-type Role = "user" | "admin";
+type Role = "user" | "assistant" | "admin";
 
 const accessControl: Record<Role, string[]> = {
   user: [
@@ -10,8 +10,16 @@ const accessControl: Record<Role, string[]> = {
     "/users",
     "/water-schedule",
     "/fund",
+    "/afternoon-tea",
+  ],
+  assistant: [
+    "/home",
+    "/users",
+    "/water-schedule",
+    "/fund",
     "/assets",
     "/afternoon-tea",
+    "/audit-logs",
   ],
   admin: ["*"], // Admin có thể truy cập tất cả (bao gồm /audit-logs)
 };

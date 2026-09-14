@@ -58,6 +58,7 @@ const TableFilters = ({ role, setRole, type, setType, category, setCategory }) =
             >
               <MenuItem value=''>Tất cả vai trò</MenuItem>
               <MenuItem value='admin'>Quản trị viên</MenuItem>
+              <MenuItem value='assistant'>Trợ lý</MenuItem>
               <MenuItem value='user'>Nhân viên</MenuItem>
             </CustomTextField>
           </Grid>

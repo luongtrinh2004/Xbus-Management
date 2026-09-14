@@ -14,7 +14,7 @@ export async function GET() {
 
 export async function PATCH(req) {
   const token = await getToken({ req, secret });
-  if (token?.role !== "admin") {
+  if (!["admin", "assistant"].includes(token?.role)) {
     return NextResponse.json(
       { error: "Chỉ Admin có quyền quản lý danh sách miễn bê nước" },
       { status: 403 },

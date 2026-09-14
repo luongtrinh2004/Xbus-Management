@@ -1,5 +1,6 @@
 const accountAvatarMap = {
   admin: '/images/avatars/admin.png',
+  assistant: '/images/avatars/assistant.png',
   user: '/images/avatars/user.png',
   customer: '/images/avatars/customer.png'
 }

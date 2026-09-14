@@ -300,6 +300,7 @@ export default function PendingUsersTable({ tableData, onUserUpdated }) {
               >
                 <MenuItem value="user">Nhân viên (User)</MenuItem>
                 <MenuItem value="admin">Quản trị viên (Admin)</MenuItem>
+                <MenuItem value="assistant">Trợ lý</MenuItem>
               </CustomTextField>
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>

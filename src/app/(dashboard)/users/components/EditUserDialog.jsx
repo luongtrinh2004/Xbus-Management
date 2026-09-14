@@ -304,6 +304,8 @@ const EditUserDialog = ({
           <Grid size={{ xs: 12, sm: 6 }}>
             <CustomTextField
               fullWidth
+              name="staff_email_edit"
+              autoComplete="off"
               label="Email"
               value={userData.email}
               disabled
@@ -314,6 +316,8 @@ const EditUserDialog = ({
             <CustomTextField
               fullWidth
               type="password"
+              name="staff_password_edit"
+              autoComplete="new-password"
               label="Mật khẩu mới"
               value={userData.password}
               placeholder="Không nhập nếu không đổi"
@@ -406,6 +410,7 @@ const EditUserDialog = ({
             >
               <MenuItem value="user">Nhân viên</MenuItem>
               <MenuItem value="admin">Quản trị viên</MenuItem>
+              <MenuItem value="assistant">Trợ lý</MenuItem>
             </CustomTextField>
           </Grid>
           <Grid size={{ xs: 12, sm: 4 }}>

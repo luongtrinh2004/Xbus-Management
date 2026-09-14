@@ -8,6 +8,9 @@ const secret = process.env.NEXTAUTH_SECRET;
 export async function PATCH(req, { params }) {
   try {
     const token = await getToken({ req, secret });
+    if (token?.role !== "admin") {
+      return NextResponse.json({ error: "Chỉ quản trị viên có quyền cập nhật nhân sự" }, { status: 403 });
+    }
     const { id } = await params;
     const body = await req.json();
 
@@ -88,6 +91,9 @@ export async function PATCH(req, { params }) {
 export async function DELETE(req, { params }) {
   try {
     const token = await getToken({ req, secret });
+    if (token?.role !== "admin") {
+      return NextResponse.json({ error: "Chỉ quản trị viên có quyền xóa nhân sự" }, { status: 403 });
+    }
     const { id } = await params;
 
     const users = getUsers();

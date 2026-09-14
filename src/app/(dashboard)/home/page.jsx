@@ -276,7 +276,7 @@ export default function HomePage() {
     return [{ x: start.getTime(), y: beforeStart }, ...inRange];
   }, [fund?.openingBalance, fundEvents, period]);
 
-  const isAdmin = session?.user?.role === "admin";
+  const isAdmin = ["admin", "assistant"].includes(session?.user?.role);
   const teaCountdown = getFridayCountdown();
   const balance = fund?.balance || 0;
 

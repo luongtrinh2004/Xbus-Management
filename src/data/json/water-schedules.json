@@ -123,16 +123,22 @@
         "19/09/2026",
         "20/09/2026"
       ],
-      "date": "16/09/2026",
+      "date": "14/09/2026",
       "time": "09:00",
       "requiredPeople": 5,
       "status": "upcoming",
       "note": "",
       "participants": [
         {
-          "userId": "usr_003",
-          "name": "Hoàng Duy Lộc",
-          "code": "PNKX029",
+          "userId": "usr_002",
+          "name": "Hà Quốc Việt",
+          "code": "PNKX019",
+          "completed": false
+        },
+        {
+          "userId": "usr_009",
+          "name": "Bùi Đình Quý",
+          "code": "PNKX296",
           "completed": false
         },
         {
@@ -142,26 +148,20 @@
           "completed": false
         },
         {
-          "userId": "usr_007",
-          "name": "Nguyễn Thị Hồng Quyên",
-          "code": "PNKX281",
-          "completed": false
-        },
-        {
-          "userId": "usr_027",
-          "name": "Lê Ngọc Sơn",
-          "code": "HĐK213",
-          "completed": false
-        },
-        {
           "userId": "usr_004",
           "name": "Nguyễn Trung Kiên",
           "code": "PNKX062",
           "completed": false
+        },
+        {
+          "userId": "usr_005",
+          "name": "Trần Cao Khâm",
+          "code": "PNKX170",
+          "completed": false
         }
       ],
       "savedAt": "2026-09-13T18:29:05.378Z",
-      "updatedAt": "2026-09-13T18:29:05.378Z"
+      "updatedAt": "2026-09-14T04:06:23.643Z"
     },
     {
       "id": "water_202609_week_4",

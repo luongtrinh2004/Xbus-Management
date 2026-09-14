@@ -10,7 +10,7 @@ import UserScheduleView from "./components/UserScheduleView";
 
 export default function WaterSchedulePage() {
   const { data: session, status } = useSession();
-  const isAdmin = session?.user?.role === "admin";
+  const isAdmin = ["admin", "assistant"].includes(session?.user?.role);
 
   const [month, setMonth] = useState(9);
   const [year, setYear] = useState(2026);

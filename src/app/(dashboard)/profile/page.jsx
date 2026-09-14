@@ -276,7 +276,7 @@ export default function ProfilePage() {
             </Typography>
             <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
               <Chip
-                label={profile.role === "admin" ? "Quản trị viên" : "Nhân viên"}
+                label={profile.role === "admin" ? "Quản trị viên" : profile.role === "assistant" ? "Trợ lý" : "Nhân viên"}
                 size="small"
                 icon={<i className={`${profile.role === "admin" ? "tabler-shield-check" : "tabler-user"} text-white`} />}
                 sx={{ bgcolor: "rgba(255,255,255,0.2)", color: "white", backdropFilter: "blur(8px)", fontWeight: 600, "& .MuiChip-icon": { color: "white" } }}
@@ -352,7 +352,7 @@ export default function ProfilePage() {
               <Divider />
               <InfoRow icon="tabler-briefcase" label="Hình thức" value={CATEGORY_LABEL[profile.categoryId] || profile.categoryId} />
               <Divider />
-              <InfoRow icon="tabler-shield" label="Vai trò" value={profile.role === "admin" ? "Quản trị viên" : "Nhân viên"} chip chipColor={profile.role === "admin" ? "error" : "primary"} />
+              <InfoRow icon="tabler-shield" label="Vai trò" value={profile.role === "admin" ? "Quản trị viên" : profile.role === "assistant" ? "Trợ lý" : "Nhân viên"} chip chipColor={profile.role === "admin" ? "error" : "primary"} />
               <Divider />
               <InfoRow icon="tabler-circle-dot" label="Trạng thái" value={STATUS_LABEL[profile.status] || profile.status} chip chipColor={STATUS_COLOR[profile.status]} />
               {joinDate && (

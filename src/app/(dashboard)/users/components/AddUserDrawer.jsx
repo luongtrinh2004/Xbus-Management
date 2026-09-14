@@ -191,6 +191,7 @@ const AddUserDrawer = props => {
         >
           <MenuItem value='user'>Nhân viên</MenuItem>
           <MenuItem value='admin'>Quản trị viên</MenuItem>
+          <MenuItem value='assistant'>Trợ lý</MenuItem>
         </CustomTextField>
 
         <CustomTextField

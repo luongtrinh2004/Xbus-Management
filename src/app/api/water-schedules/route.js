@@ -71,8 +71,8 @@ export async function GET(req) {
       year,
       schedules: result,
       weeksMeta,
-      eligibleUsers: token?.role === "admin" ? eligibleUsers : [],
-      exemptUserIds: token?.role === "admin" ? exemptUserIds : [],
+      eligibleUsers: ["admin", "assistant"].includes(token?.role) ? eligibleUsers : [],
+      exemptUserIds: ["admin", "assistant"].includes(token?.role) ? exemptUserIds : [],
       currentUser: currentUser
         ? {
             id: currentUser.id,
@@ -93,7 +93,7 @@ export async function GET(req) {
 export async function POST(req) {
   try {
     const token = await getToken({ req, secret });
-    if (token?.role !== "admin") {
+    if (!["admin", "assistant"].includes(token?.role)) {
       return NextResponse.json(
         { error: "Chỉ quản trị viên mới có quyền lưu lịch" },
         { status: 403 },

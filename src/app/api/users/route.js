@@ -17,6 +17,8 @@ export async function GET(req) {
     const page = parseInt(searchParams.get('page') || '1', 10)
     const limit = parseInt(searchParams.get('limit') || '10', 10)
     const isExport = searchParams.get('export') === 'excel'
+    const sortBy = searchParams.get('sortBy') || ''
+    const sortOrder = searchParams.get('sortOrder') === 'desc' ? -1 : 1
 
     let users = getUsers()
 
@@ -49,6 +51,21 @@ export async function GET(req) {
       )
     }
 
+    const sortableFields = new Set(['name', 'code', 'gender', 'phone', 'typeId', 'categoryId', 'role'])
+    if (sortableFields.has(sortBy)) {
+      const ranks = {
+        gender: { female: 0, male: 1, other: 2, unspecified: 3 },
+        categoryId: { category_official: 0, category_probation: 1, category_intern: 2, category_collaborator: 3 },
+        role: { admin: 0, assistant: 1, user: 2 }
+      }
+      users.sort((a, b) => {
+        if (ranks[sortBy]) return ((ranks[sortBy][a[sortBy]] ?? 99) - (ranks[sortBy][b[sortBy]] ?? 99)) * sortOrder
+        if (!a[sortBy] && b[sortBy]) return 1
+        if (a[sortBy] && !b[sortBy]) return -1
+        return String(a[sortBy] || '').localeCompare(String(b[sortBy] || ''), 'vi', { numeric: true, sensitivity: 'base' }) * sortOrder
+      })
+    }
+
     // Xuất Excel nếu có param export=excel
     if (isExport) {
       const exportData = users.map(u => ({
@@ -57,7 +74,7 @@ export async function GET(req) {
         'Email': u.email || '',
         'Giới tính': u.gender === 'male' ? 'Nam' : u.gender === 'female' ? 'Nữ' : 'Khác',
         'Số điện thoại': u.phone || '',
-        'Vai trò': u.role === 'admin' ? 'Quản trị viên' : 'Nhân viên',
+        'Vai trò': u.role === 'admin' ? 'Quản trị viên' : u.role === 'assistant' ? 'Trợ lý' : 'Nhân viên',
         'Bộ phận': u.typeId || '',
         'Hình thức': u.categoryId || '',
         'Trạng thái': u.status === 'able' ? 'Đang hoạt động' : 'Chờ kích hoạt / Vô hiệu hóa',
@@ -99,6 +116,9 @@ export async function GET(req) {
 export async function POST(req) {
   try {
     const token = await getToken({ req, secret })
+    if (token?.role !== 'admin') {
+      return NextResponse.json({ error: 'Chỉ quản trị viên có quyền thêm nhân sự' }, { status: 403 })
+    }
     const body = await req.json()
 
     if (!body.email || !body.name) {

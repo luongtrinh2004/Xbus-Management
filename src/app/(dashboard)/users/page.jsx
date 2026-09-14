@@ -20,10 +20,12 @@ const Page = () => {
   const [category, setCategory] = useState("");
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
+  const [sortBy, setSortBy] = useState("");
+  const [sortOrder, setSortOrder] = useState("asc");
 
   // Fetch active users (chỉ status = 'able')
   const fetchUsers = async ({ queryKey }) => {
-    const [_key, { role, type, category, page, limit }] = queryKey;
+    const [_key, { role, type, category, page, limit, sortBy, sortOrder }] = queryKey;
     const queryParams = new URLSearchParams({
       status: "able",
       ...(role && { role }),
@@ -31,6 +33,7 @@ const Page = () => {
       ...(category && { category }),
       page: page.toString(),
       limit: limit.toString(),
+      ...(sortBy && { sortBy, sortOrder }),
     });
     const response = await fetch(`/api/users?${queryParams.toString()}`);
     if (!response.ok) throw new Error("Failed to fetch users");
@@ -38,7 +41,7 @@ const Page = () => {
   };
 
   const { data, isLoading, refetch } = useQuery({
-    queryKey: ["users", { role, type, category, page, limit }],
+    queryKey: ["users", { role, type, category, page, limit, sortBy, sortOrder }],
     queryFn: fetchUsers,
     placeholderData: (previousData) => previousData,
     staleTime: 10000,
@@ -139,6 +142,13 @@ const Page = () => {
           fetchUsers={handleRefreshAll}
           onUserUpdated={handleUserUpdated}
           isLoading={isLoading}
+          sortBy={sortBy}
+          sortOrder={sortOrder}
+          onSort={(column) => {
+            setSortOrder(sortBy === column && sortOrder === "asc" ? "desc" : "asc");
+            setSortBy(column);
+            setPage(1);
+          }}
         />
       </Grid>
 

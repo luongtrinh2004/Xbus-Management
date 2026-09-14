@@ -1,118 +1,123 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import Grid from '@mui/material/Grid2'
-import Card from '@mui/material/Card'
-import CardHeader from '@mui/material/CardHeader'
-import CardContent from '@mui/material/CardContent'
-import Typography from '@mui/material/Typography'
-import Button from '@mui/material/Button'
-import Chip from '@mui/material/Chip'
-import Box from '@mui/material/Box'
-import Avatar from '@mui/material/Avatar'
-import Divider from '@mui/material/Divider'
-import Table from '@mui/material/Table'
-import TableBody from '@mui/material/TableBody'
-import TableCell from '@mui/material/TableCell'
-import TableContainer from '@mui/material/TableContainer'
-import TableHead from '@mui/material/TableHead'
-import TableRow from '@mui/material/TableRow'
-import tableStyles from '@core/styles/table.module.css'
-import { exportJsonToExcel } from '@/libs/excelHelper'
+import { useEffect, useMemo, useState } from "react";
+import Autocomplete from "@mui/material/Autocomplete";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
+import CardHeader from "@mui/material/CardHeader";
+import CircularProgress from "@mui/material/CircularProgress";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import Tab from "@mui/material/Tab";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Tabs from "@mui/material/Tabs";
+import Typography from "@mui/material/Typography";
+import { useSession } from "next-auth/react";
+import { toast } from "react-toastify";
+import CustomTextField from "@core/components/mui/TextField";
+import tableStyles from "@core/styles/table.module.css";
+
+const emptyForm = { code: "", name: "", date: new Date().toISOString().slice(0, 10), quantity: 1, location: "", person: "", note: "" };
+const columns = {
+  import: ["Mã", "Tên", "Ngày nhập", "Số lượng", "Vị trí", "Người nhập", "Ghi chú"],
+  export: ["Mã", "Tên", "Ngày xuất", "Số lượng", "Vị trí", "Người xuất", "Ghi chú"],
+  stock: ["Mã", "Tên", "Ngày nhập", "Số lượng", "Vị trí", "Người nhập", "Ghi chú"],
+};
+const formatDate = (value) => value ? new Intl.DateTimeFormat("vi-VN").format(new Date(`${value}T00:00:00`)) : "—";
+
+function AssetTable({ rows, type }) {
+  return (
+    <TableContainer>
+      <Table className={tableStyles.table}>
+        <TableHead><TableRow>{columns[type].map((label) => <TableCell key={label}>{label}</TableCell>)}</TableRow></TableHead>
+        <TableBody>
+          {rows.length ? rows.map((row) => (
+            <TableRow key={row.id || row.code} hover>
+              <TableCell><Typography color="primary.main" fontWeight={600}>{row.code}</Typography></TableCell>
+              <TableCell>{row.name}</TableCell><TableCell>{formatDate(row.date)}</TableCell>
+              <TableCell>{row.quantity}</TableCell><TableCell>{row.location}</TableCell>
+              <TableCell>{row.person}</TableCell><TableCell>{row.note || "—"}</TableCell>
+            </TableRow>
+          )) : <TableRow><TableCell colSpan={7} align="center"><Typography color="text.secondary" py={5}>Chưa có dữ liệu</Typography></TableCell></TableRow>}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+}
+
+function TransactionDialog({ open, type, imports, currentName, onClose, onSaved }) {
+  const [form, setForm] = useState(emptyForm);
+  const [saving, setSaving] = useState(false);
+  useEffect(() => { if (open) setForm({ ...emptyForm, person: currentName || "" }); }, [open, currentName]);
+  const selectImport = (code) => {
+    const item = imports.find((entry) => entry.code === code);
+    setForm((value) => ({ ...value, code, name: item?.name || "", location: item?.location || "" }));
+  };
+  const assetOptions = [...new Map(imports.map((item) => [item.code, item])).values()];
+  const submit = async () => {
+    setSaving(true);
+    try {
+      const response = await fetch("/api/assets", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...form, type }) });
+      const result = await response.json();
+      if (!response.ok) return toast.error(result.error || "Không thể lưu giao dịch");
+      toast.success(type === "import" ? "Đã ghi nhận nhập tài sản" : "Đã ghi nhận xuất tài sản");
+      onSaved(); onClose();
+    } catch { toast.error("Không thể kết nối máy chủ"); } finally { setSaving(false); }
+  };
+  return (
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+      <DialogTitle>{type === "import" ? "Nhập tài sản" : "Xuất tài sản"}</DialogTitle>
+      <DialogContent dividers><Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 3, pt: 1 }}>
+        {type === "export" ? <Autocomplete
+          options={assetOptions}
+          value={assetOptions.find((item) => item.code === form.code) || null}
+          onChange={(_, item) => selectImport(item?.code || "")}
+          getOptionLabel={(item) => `${item.code} — ${item.name}`}
+          isOptionEqualToValue={(option, value) => option.code === value.code}
+          filterOptions={(options, state) => {
+            const query = state.inputValue.trim().toLowerCase();
+            return options.filter((item) => `${item.code} ${item.name}`.toLowerCase().includes(query));
+          }}
+          noOptionsText="Không tìm thấy tài sản phù hợp"
+          renderInput={(params) => <CustomTextField {...params} label="Tìm tài sản *" placeholder="Nhập mã hoặc tên tài sản" />}
+        /> : <CustomTextField label="Mã tài sản *" value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} />}
+        <CustomTextField label="Tên tài sản *" value={form.name} disabled={type === "export"} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+        <CustomTextField type="date" label={type === "import" ? "Ngày nhập *" : "Ngày xuất *"} value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} slotProps={{ inputLabel: { shrink: true } }} />
+        <CustomTextField type="number" label="Số lượng *" value={form.quantity} onChange={(e) => setForm({ ...form, quantity: e.target.value })} inputProps={{ min: 1 }} />
+        <CustomTextField label="Vị trí *" value={form.location} disabled={type === "export"} onChange={(e) => setForm({ ...form, location: e.target.value })} />
+        <CustomTextField label={type === "import" ? "Người nhập *" : "Người xuất *"} value={form.person} onChange={(e) => setForm({ ...form, person: e.target.value })} />
+        <CustomTextField sx={{ gridColumn: { sm: "1 / -1" } }} multiline minRows={3} label="Ghi chú" value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} />
+      </Box></DialogContent>
+      <DialogActions><Button color="secondary" onClick={onClose}>Hủy bỏ</Button><Button variant="contained" disabled={saving} onClick={submit}>{saving ? "Đang lưu..." : type === "import" ? "Xác nhận nhập" : "Xác nhận xuất"}</Button></DialogActions>
+    </Dialog>
+  );
+}
 
 export default function AssetsPage() {
-  const sampleAssets = [
-    { code: 'DEV-MAC-01', name: 'MacBook Pro M2 16GB', category: 'Laptop', user: 'Trịnh Phúc Lương (HDK181)', status: 'in_use', serial: 'C02G1234MD6R', date: '01/09/2026' },
-    { code: 'DEV-MNTR-02', name: 'Màn hình Dell Ultrasharp 27 inch', category: 'Màn hình', user: 'Trịnh Phúc Lương (HDK181)', status: 'in_use', serial: 'CN-098765-12345', date: '02/09/2026' },
-    { code: 'DEV-PC-01', name: 'Workstation AP Testing', category: 'Máy tính bàn', user: 'Trần Văn B (XBS102)', status: 'in_use', serial: 'WS-AP-2026-003', date: '03/09/2026' },
-    { code: 'DEV-MOUSE-01', name: 'Chuột Logitech MX Master 3S', category: 'Phụ kiện', user: '—', status: 'available', serial: 'LOGI-MX3S-889', date: '—' }
-  ]
-
-  const handleExportExcel = () => {
-    const exportData = sampleAssets.map(a => ({
-      'Mã tài sản': a.code,
-      'Tên thiết bị': a.name,
-      'Loại': a.category,
-      'Người sử dụng': a.user,
-      'Trạng thái': a.status === 'in_use' ? 'Đang sử dụng' : 'Trong kho',
-      'Số Serial': a.serial,
-      'Ngày bàn giao': a.date
-    }))
-    exportJsonToExcel(exportData, 'danh_sach_tai_san.xlsx')
-  }
-
-  return (
-    <Grid container spacing={6}>
-      <Grid size={{ xs: 12 }}>
-        <Card>
-          <CardHeader
-            title={
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Avatar variant='rounded' sx={{ bgcolor: 'rgba(255, 159, 67, 0.12)', color: 'warning.main' }}>
-                  <i className='tabler-package text-2xl' />
-                </Avatar>
-                <Box>
-                  <Typography variant='h5' fontWeight={600}>Quản Lý Tài Sản & Thiết Bị Cá Nhân</Typography>
-                  <Typography variant='caption' color='text.secondary'>
-                    Theo dõi việc cấp phát máy móc, màn hình và phụ kiện làm việc của từng nhân sự
-                  </Typography>
-                </Box>
-              </Box>
-            }
-            action={
-              <Box sx={{ display: 'flex', gap: 2 }}>
-                <Button
-                  variant='tonal'
-                  color='secondary'
-                  startIcon={<i className='tabler-file-spreadsheet' />}
-                  onClick={handleExportExcel}
-                >
-                  Xuất Excel
-                </Button>
-                <Button variant='contained' color='primary' startIcon={<i className='tabler-plus' />}>
-                  Cấp phát mới
-                </Button>
-              </Box>
-            }
-          />
-          <Divider />
-          <TableContainer>
-            <Table className={tableStyles.table}>
-              <TableHead>
-                <TableRow>
-                  <TableCell>MÃ TÀI SẢN</TableCell>
-                  <TableCell>TÊN THIẾT BỊ</TableCell>
-                  <TableCell>PHÂN LOẠI</TableCell>
-                  <TableCell>NGƯỜI ĐƯỢC CẤP</TableCell>
-                  <TableCell align='center'>TRẠNG THÁI</TableCell>
-                  <TableCell>SỐ SERIAL</TableCell>
-                  <TableCell>NGÀY BÀN GIAO</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {sampleAssets.map((asset) => (
-                  <TableRow key={asset.code} hover>
-                    <TableCell><Typography fontWeight={600} color='primary.main'>{asset.code}</Typography></TableCell>
-                    <TableCell><Typography fontWeight={500}>{asset.name}</Typography></TableCell>
-                    <TableCell><Chip size='small' label={asset.category} variant='tonal' /></TableCell>
-                    <TableCell><Typography variant='body2'>{asset.user}</Typography></TableCell>
-                    <TableCell align='center'>
-                      <Chip
-                        size='small'
-                        label={asset.status === 'in_use' ? 'Đang sử dụng' : 'Trong kho'}
-                        color={asset.status === 'in_use' ? 'success' : 'secondary'}
-                        variant='tonal'
-                      />
-                    </TableCell>
-                    <TableCell><Typography variant='caption'>{asset.serial}</Typography></TableCell>
-                    <TableCell><Typography variant='caption'>{asset.date}</Typography></TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Card>
-      </Grid>
-    </Grid>
-  )
+  const { data: session, status } = useSession();
+  const [data, setData] = useState({ imports: [], exports: [] });
+  const [tab, setTab] = useState("import"); const [dialog, setDialog] = useState(null); const [loading, setLoading] = useState(true);
+  const loadData = async () => { setLoading(true); try { const response = await fetch("/api/assets"); const result = await response.json(); if (response.ok) setData(result); else toast.error(result.error); } finally { setLoading(false); } };
+  useEffect(() => { if (status === "authenticated") loadData(); }, [status]);
+  const stock = useMemo(() => {
+    const rows = new Map();
+    data.imports.forEach((item) => { const current = rows.get(item.code); rows.set(item.code, current ? { ...current, quantity: current.quantity + item.quantity } : { ...item }); });
+    data.exports.forEach((item) => { const current = rows.get(item.code); if (current) rows.set(item.code, { ...current, quantity: current.quantity - item.quantity }); });
+    return [...rows.values()];
+  }, [data]);
+  if (status === "loading" || loading) return <Box display="flex" justifyContent="center" py={12}><CircularProgress /></Box>;
+  return <Card>
+    <CardHeader title="Quản lý tài sản" subheader="Theo dõi hoạt động nhập, xuất và số lượng tồn kho" action={<Box display="flex" gap={2}><Button variant="tonal" startIcon={<i className="tabler-package-import" />} onClick={() => setDialog("import")}>Nhập tài sản</Button><Button variant="contained" startIcon={<i className="tabler-package-export" />} onClick={() => setDialog("export")}>Xuất tài sản</Button></Box>} />
+    <Tabs value={tab} onChange={(_, value) => setTab(value)} sx={{ px: 5, mt: 2 }}><Tab value="import" label={`Nhập kho (${data.imports.length})`} /><Tab value="export" label={`Xuất kho (${data.exports.length})`} /><Tab value="stock" label={`Tồn kho (${stock.length})`} /></Tabs>
+    <AssetTable type={tab} rows={tab === "import" ? data.imports : tab === "export" ? data.exports : stock} />
+    <TransactionDialog open={Boolean(dialog)} type={dialog || "import"} imports={data.imports} currentName={session?.user?.name} onClose={() => setDialog(null)} onSaved={loadData} />
+  </Card>;
 }

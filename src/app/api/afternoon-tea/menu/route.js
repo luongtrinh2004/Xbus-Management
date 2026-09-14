@@ -43,7 +43,7 @@ export async function POST(req) {
         user.email?.toLowerCase() === token.email?.toLowerCase(),
     );
     if (
-      token.role !== "admin" &&
+      !["admin", "assistant"].includes(token.role) &&
       invitation.createdBy !== token.id &&
       invitation.createdBy !== currentUser?.id
     )

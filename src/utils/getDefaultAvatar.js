@@ -6,6 +6,7 @@ export function getDefaultAvatar(role, gender) {
   const isAdmin = role === 'admin'
   const isFemale = gender === 'female'
 
+  if (role === 'assistant') return '/images/avatars/assistant.png'
   if (isAdmin && isFemale) return '/images/avatars/female-admin.png'
   if (isAdmin) return '/images/avatars/male-admin.png'
   if (isFemale) return '/images/avatars/female-user.png'

@@ -101,7 +101,7 @@ export async function GET(req) {
         users.find((user) => user.id === invitation.createdBy)?.name ||
         "Không xác định",
       canManage:
-        token?.role === "admin" ||
+        ["admin", "assistant"].includes(token?.role) ||
         invitation.createdBy === token?.id ||
         invitation.createdBy === currentUser?.id,
     })),
@@ -129,7 +129,7 @@ export async function POST(req) {
   const body = await req.json();
   const invitationType =
     body.type === "happy-hour" ? "happy-hour" : "afternoon-tea";
-  if (invitationType === "happy-hour" && token.role !== "admin") {
+  if (invitationType === "happy-hour" && !["admin", "assistant"].includes(token.role)) {
     return NextResponse.json(
       { error: "Chỉ Admin có quyền tạo Happy Hour" },
       { status: 403 },
@@ -193,7 +193,7 @@ export async function PATCH(req) {
   } = body;
   const data = getAfternoonTea();
   if (action === "menu") {
-    if (token?.role !== "admin")
+    if (!["admin", "assistant"].includes(token?.role))
       return NextResponse.json(
         { error: "Chỉ Admin có quyền cập nhật menu" },
         { status: 403 },
@@ -220,7 +220,7 @@ export async function PATCH(req) {
         user.email?.toLowerCase() === token?.email?.toLowerCase(),
     );
     const targetUserId =
-      token?.role === "admin" && userId ? userId : currentUser?.id || token?.id;
+      ["admin", "assistant"].includes(token?.role) && userId ? userId : currentUser?.id || token?.id;
     invitation.orders = invitation.orders || [];
     const existing = invitation.orders.findIndex(
       (item) => item.userId === targetUserId,
@@ -313,7 +313,7 @@ export async function PATCH(req) {
         user.email?.toLowerCase() === token?.email?.toLowerCase(),
     );
     if (
-      token?.role !== "admin" &&
+      !["admin", "assistant"].includes(token?.role) &&
       invitation.createdBy !== token?.id &&
       invitation.createdBy !== currentUser?.id
     )
@@ -340,7 +340,7 @@ export async function PATCH(req) {
         user.email?.toLowerCase() === token?.email?.toLowerCase(),
     );
     if (
-      token?.role !== "admin" &&
+      !["admin", "assistant"].includes(token?.role) &&
       invitation.createdBy !== token?.id &&
       invitation.createdBy !== currentUser?.id
     ) {
