@@ -53,6 +53,7 @@ const EditUserDialog = ({
     typeId: "",
     categoryId: "category_official",
     status: "able",
+    birthday: "",
     avatarUrl: "",
     schedulingPoints: 0,
   });
@@ -82,6 +83,7 @@ const EditUserDialog = ({
         typeId: updatingUser.typeId || "",
         categoryId: updatingUser.categoryId || "category_official",
         status: updatingUser.status || "able",
+        birthday: updatingUser.birthday || "",
         avatarUrl: updatingUser.avatarUrl || "",
         schedulingPoints: updatingUser.schedulingPoints || 0,
       });
@@ -301,7 +303,9 @@ const EditUserDialog = ({
               autoComplete="off"
               label="Email"
               value={userData.email}
-              onChange={(e) => setUserData({ ...userData, email: e.target.value })}
+              onChange={(e) =>
+                setUserData({ ...userData, email: e.target.value })
+              }
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 4 }}>
@@ -452,6 +456,18 @@ const EditUserDialog = ({
               <MenuItem value="able">Đang hoạt động</MenuItem>
               <MenuItem value="disabled">Vô hiệu hóa</MenuItem>
             </CustomTextField>
+          </Grid>
+          <Grid size={{ xs: 12, sm: 4 }}>
+            <CustomTextField
+              fullWidth
+              type="date"
+              label="Ngày sinh"
+              value={userData.birthday}
+              onChange={(e) =>
+                setUserData({ ...userData, birthday: e.target.value })
+              }
+              slotProps={{ inputLabel: { shrink: true } }}
+            />
           </Grid>
         </Grid>
       </DialogContent>

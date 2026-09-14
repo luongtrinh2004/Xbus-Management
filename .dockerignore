@@ -4,3 +4,11 @@ coverage
 npm-debug.log
 yarn-error.log
 .env
+.env.*
+!.env.example
+.git
+.github
+.DS_Store
+*.xlsx
+*.docx
+Xbus-Management

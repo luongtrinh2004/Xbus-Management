@@ -32,6 +32,7 @@ import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import { resolveAvatar } from "@/utils/getDefaultAvatar";
 import { toast } from "react-toastify";
+import ConfirmDialog from "@components/ConfirmDialog";
 import {
   downloadShopOrdersPdf,
   downloadAllShopsPdf,
@@ -97,6 +98,7 @@ export default function AfternoonTeaPage() {
     unit: "hộp",
     note: "",
   });
+  const [confirmation, setConfirmation] = useState(null);
 
   const formatInvitationTime = (value) =>
     value ? new Date(value).toLocaleString("vi-VN") : "";
@@ -176,7 +178,6 @@ export default function AfternoonTeaPage() {
   };
 
   const removeInvitation = async (id) => {
-    if (!confirm("Bạn có chắc chắn muốn xóa lời mời trà chiều này?")) return;
     const response = await fetch("/api/afternoon-tea", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -302,8 +303,6 @@ export default function AfternoonTeaPage() {
   };
 
   const handleDeleteFoodItem = async (invitationId, foodItemId) => {
-    if (!confirm("Bạn có chắc chắn muốn xóa món ăn này khỏi danh sách?"))
-      return;
     const res = await fetch("/api/afternoon-tea", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -493,7 +492,15 @@ export default function AfternoonTeaPage() {
                           size="small"
                           variant="tonal"
                           color="error"
-                          onClick={() => removeInvitation(activeInvitation.id)}
+                          onClick={() =>
+                            setConfirmation({
+                              title: "Xác nhận xóa lời mời",
+                              message:
+                                "Bạn có chắc muốn xóa lời mời trà chiều này?",
+                              action: () =>
+                                removeInvitation(activeInvitation.id),
+                            })
+                          }
                         >
                           Xóa lời mời
                         </Button>
@@ -1486,10 +1493,15 @@ export default function AfternoonTeaPage() {
                                       size="small"
                                       color="error"
                                       onClick={() =>
-                                        handleDeleteFoodItem(
-                                          activeInvitation.id,
-                                          item.id,
-                                        )
+                                        setConfirmation({
+                                          title: "Xác nhận xóa món ăn",
+                                          message: `Bạn có chắc muốn xóa ${item.name} khỏi danh sách?`,
+                                          action: () =>
+                                            handleDeleteFoodItem(
+                                              activeInvitation.id,
+                                              item.id,
+                                            ),
+                                        })
                                       }
                                     >
                                       <i className="tabler-trash" />
@@ -1849,6 +1861,18 @@ export default function AfternoonTeaPage() {
           </Button>
         </DialogActions>
       </Dialog>
+      <ConfirmDialog
+        open={Boolean(confirmation)}
+        title={confirmation?.title}
+        message={confirmation?.message}
+        confirmText="Xóa"
+        onClose={() => setConfirmation(null)}
+        onConfirm={async () => {
+          const action = confirmation?.action;
+          setConfirmation(null);
+          await action?.();
+        }}
+      />
     </>
   );
 }

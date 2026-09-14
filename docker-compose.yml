@@ -1,22 +1,26 @@
-version: '3.8'
-
 services:
-  admin-dolphin:
+  xbus-office:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: admin-dolphin
+    container_name: xbus-office
     ports:
-      - "3001:3001"
+      - "127.0.0.1:3001:3000"
     env_file:
       - .env
     volumes:
-      # Mount thư mục uploads trên host -> vào container
-      - /home/stackops/dolphin/admin/public/uploads:/app/public/uploads
-    networks:
-      - server_backend
-    restart: unless-stopped   # container sẽ tự restart khi crash/reboot
+      - xbus_data:/app/src/data/json
+      - xbus_avatars:/app/public/images/avatars
+      - xbus_tea_images:/app/public/images/afternoon-tea
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3000/login"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
 
-networks:
-  server_backend:
-    external: true
+volumes:
+  xbus_data:
+  xbus_avatars:
+  xbus_tea_images:

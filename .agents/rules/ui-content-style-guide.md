@@ -14,15 +14,16 @@
 
 ## 2. Tiêu Đề & Nhãn (Titles & Labels)
 
-| ❌ Không dùng | ✅ Dùng |
-|---|---|
-| Thống kê nhân sự role User (bao gồm cả nhân sự Nữ) | Thống kê lượt lấy nước |
-| Danh sách user có gender = female | Danh sách nhân sự nữ |
-| Bấm vào bất kỳ nhân sự nào để xem lịch sử đi lấy nước | *(bỏ, dùng tooltip hoặc hover effect)* |
-| Random tất cả tuần | Phân công tự động |
-| Set lịch | Thiết lập lịch |
+| ❌ Không dùng                                         | ✅ Dùng                                |
+| ----------------------------------------------------- | -------------------------------------- |
+| Thống kê nhân sự role User (bao gồm cả nhân sự Nữ)    | Thống kê lượt lấy nước                 |
+| Danh sách user có gender = female                     | Danh sách nhân sự nữ                   |
+| Bấm vào bất kỳ nhân sự nào để xem lịch sử đi lấy nước | _(bỏ, dùng tooltip hoặc hover effect)_ |
+| Random tất cả tuần                                    | Phân công tự động                      |
+| Set lịch                                              | Thiết lập lịch                         |
 
 **Quy tắc đặt tên:**
+
 - Dùng danh từ cụm rõ nghĩa: `Lịch phân công`, `Thống kê lượt lấy nước`, `Lịch sử hoạt động`
 - Tránh viết tắt kỹ thuật: không dùng `ID`, `UID`, `role`, `gender`, `status` trực tiếp trong UI text
 
@@ -38,13 +39,14 @@
 
 ## 4. Hướng Dẫn Tương Tác (Action Hints)
 
-| ❌ Không dùng | ✅ Dùng |
-|---|---|
-| Bấm vào bất kỳ nhân sự nào để xem... | *(dùng cursor: pointer + tooltip)* |
-| Click để mở modal | *(hành vi rõ ràng qua UI design)* |
-| Nhấn để random | Phân công ngẫu nhiên |
+| ❌ Không dùng                        | ✅ Dùng                            |
+| ------------------------------------ | ---------------------------------- |
+| Bấm vào bất kỳ nhân sự nào để xem... | _(dùng cursor: pointer + tooltip)_ |
+| Click để mở modal                    | _(hành vi rõ ràng qua UI design)_  |
+| Nhấn để random                       | Phân công ngẫu nhiên               |
 
 **Quy tắc:**
+
 - Hành vi tương tác nên được truyền qua **visual cue** (hover, icon, cursor) chứ không qua text trong tiêu đề.
 - Nếu bắt buộc dùng text hướng dẫn, đặt ở dưới component (dạng `helper text`) với font nhỏ hơn, màu muted.
 
@@ -52,13 +54,14 @@
 
 ## 5. Thông Báo & Toast (Notifications)
 
-| ❌ Không dùng | ✅ Dùng |
-|---|---|
-| Lưu thành công! | Đã lưu lịch phân công |
+| ❌ Không dùng        | ✅ Dùng                                  |
+| -------------------- | ---------------------------------------- |
+| Lưu thành công!      | Đã lưu lịch phân công                    |
 | Error khi fetch data | Không thể tải dữ liệu. Vui lòng thử lại. |
-| Xóa user thành công | Đã xóa nhân sự khỏi hệ thống |
+| Xóa user thành công  | Đã xóa nhân sự khỏi hệ thống             |
 
 **Quy tắc:**
+
 - Toast thành công: `Đã [hành động] [đối tượng]` — rõ đối tượng bị tác động
 - Toast lỗi: `Không thể [hành động]. [Lý do hoặc gợi ý]` — tránh để người dùng đoán
 
@@ -66,25 +69,26 @@
 
 ## 6. Trạng Thái Rỗng (Empty States)
 
-| ❌ Không dùng | ✅ Dùng |
-|---|---|
-| Không có data | Chưa có dữ liệu |
+| ❌ Không dùng  | ✅ Dùng                        |
+| -------------- | ------------------------------ |
+| Không có data  | Chưa có dữ liệu                |
 | No users found | Không tìm thấy nhân sự phù hợp |
-| Empty | Danh sách trống |
+| Empty          | Danh sách trống                |
 
 ---
 
 ## 7. Nút Bấm (Buttons & CTAs)
 
-| ❌ Không dùng | ✅ Dùng |
-|---|---|
-| Submit | Lưu / Xác nhận |
-| Delete | Xóa nhân sự |
-| Random | Phân công ngẫu nhiên |
-| OK | Đồng ý |
-| Cancel | Hủy bỏ |
+| ❌ Không dùng | ✅ Dùng              |
+| ------------- | -------------------- |
+| Submit        | Lưu / Xác nhận       |
+| Delete        | Xóa nhân sự          |
+| Random        | Phân công ngẫu nhiên |
+| OK            | Đồng ý               |
+| Cancel        | Hủy bỏ               |
 
 **Quy tắc:**
+
 - Nút hành động chính: động từ + danh từ rõ đối tượng: `Thêm nhân sự`, `Lưu lịch`, `Xác nhận xóa`
 - Nút phụ: `Hủy bỏ`, `Quay lại`, `Đóng`
 
@@ -96,16 +100,22 @@
 
 ---
 
-## 9. Từ Ngữ Nên Dùng & Tránh
+## 9. Tìm Kiếm Nhân Sự
 
-| Thay vì | Dùng |
-|---|---|
-| User / Users | Nhân sự |
-| Admin | Quản trị viên |
-| Role | Vai trò |
-| Status | Trạng thái |
-| Gender | Giới tính |
-| Dashboard | Trang tổng quan |
-| Log / History | Lịch sử hoạt động |
-| Random | Ngẫu nhiên / Phân công tự động |
-| Schedule | Lịch phân công |
+- Mọi trường chọn nhân sự phải cho phép tìm theo **tên, email hoặc mã nhân sự**.
+- Kết quả hiển thị avatar, họ tên, mã nhân sự và email để tránh chọn nhầm.
+- Dùng cùng một mẫu ô tìm kiếm có biểu tượng kính lúp và trạng thái rỗng `Không tìm thấy nhân sự phù hợp`.
+
+## 10. Từ Ngữ Nên Dùng & Tránh
+
+| Thay vì       | Dùng                           |
+| ------------- | ------------------------------ |
+| User / Users  | Nhân sự                        |
+| Admin         | Quản trị viên                  |
+| Role          | Vai trò                        |
+| Status        | Trạng thái                     |
+| Gender        | Giới tính                      |
+| Dashboard     | Trang tổng quan                |
+| Log / History | Lịch sử hoạt động              |
+| Random        | Ngẫu nhiên / Phân công tự động |
+| Schedule      | Lịch phân công                 |

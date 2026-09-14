@@ -16,7 +16,7 @@
       "schedulingPoints": 0,
       "waterTripCount": 0,
       "createdAt": "2026-09-12T09:11:51.678Z",
-      "updatedAt": "2026-09-13T17:27:59.129Z",
+      "updatedAt": "2026-09-14T11:37:02.801Z",
       "activatedAt": "2026-09-12T16:31:13.787Z",
       "activatedBy": "usr_admin_001",
       "password": "$2a$10$4wP1mBO2kvODVfp8bTzOM.pPFepWpP5zywjHJ1yeumhzXwRcp/QA."
@@ -35,12 +35,13 @@
       "categoryId": "category_official",
       "status": "able",
       "password": "$2a$10$J9X2U71d2ZUAa1EvMykvWO37jEGJnJOJWZ5yRE8fYEpzGCM8YwkHu",
-      "schedulingPoints": 0,
+      "schedulingPoints": -1,
       "waterTripCount": 0,
       "createdAt": "2026-09-01T08:00:00.000Z",
-      "updatedAt": "2026-09-13T17:53:57.533Z",
+      "updatedAt": "2026-09-14T11:27:11.530Z",
       "activatedAt": "2026-09-01T08:00:00.000Z",
-      "activatedBy": "system"
+      "activatedBy": "system",
+      "birthday": "2004-06-04"
     },
     {
       "id": "usr_001",
@@ -96,10 +97,10 @@
       "typeId": "type_web_app",
       "categoryId": "category_official",
       "status": "able",
-      "schedulingPoints": 1,
+      "schedulingPoints": 0,
       "waterTripCount": 1,
       "createdAt": "2026-09-12T08:00:00.000Z",
-      "updatedAt": "2026-09-13T18:22:50.877Z",
+      "updatedAt": "2026-09-14T11:12:53.231Z",
       "activatedAt": "2026-09-12T08:00:00.000Z",
       "activatedBy": "usr_admin_001"
     },
@@ -182,7 +183,9 @@
       "createdAt": "2026-09-12T08:00:00.000Z",
       "updatedAt": "2026-09-14T04:58:25.831Z",
       "activatedAt": "2026-09-12T08:00:00.000Z",
-      "activatedBy": "usr_admin_001"
+      "activatedBy": "usr_admin_001",
+       "password": "$2a$10$4wP1mBO2kvODVfp8bTzOM.pPFepWpP5zywjHJ1yeumhzXwRcp/QA."
+
     },
     {
       "id": "usr_008",
@@ -298,10 +301,10 @@
       "typeId": "type_ap",
       "categoryId": "category_official",
       "status": "able",
-      "schedulingPoints": 0,
+      "schedulingPoints": -1,
       "waterTripCount": 0,
       "createdAt": "2026-09-12T08:00:00.000Z",
-      "updatedAt": "2026-09-12T08:00:00.000Z",
+      "updatedAt": "2026-09-14T11:38:12.060Z",
       "activatedAt": "2026-09-12T08:00:00.000Z",
       "activatedBy": "usr_admin_001"
     },
@@ -451,7 +454,7 @@
       "name": "Nguyễn Thanh Hải",
       "email": "hai.nt@phenikaa-x.com",
       "code": "HĐK076",
-      "avatarUrl": "",
+      "avatarUrl": "/images/avatars/HĐK076-1789378368431.webp",
       "gender": "female",
       "phone": "",
       "role": "user",
@@ -461,7 +464,7 @@
       "schedulingPoints": 0,
       "waterTripCount": 0,
       "createdAt": "2026-09-12T08:00:00.000Z",
-      "updatedAt": "2026-09-12T09:26:41.249Z",
+      "updatedAt": "2026-09-14T09:32:51.782Z",
       "activatedAt": "2026-09-12T08:00:00.000Z",
       "activatedBy": "usr_admin_001"
     },

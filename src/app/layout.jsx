@@ -18,8 +18,8 @@ import PageTitleUpdater from '@/components/PageTitleUpdater'
 
 export const metadata = {
   title: {
-    template: 'PheniCar - %s',
-    default: 'PheniCar'
+    template: 'Xbus Office - %s',
+    default: 'Xbus Office'
   }
 }
 

@@ -26,15 +26,15 @@ const PageTitleUpdater = () => {
         const label = findLabel(verticalMenuData, pathname)
 
         if (label) {
-            document.title = `PheniCar - ${label}`
+            document.title = `Xbus Office - ${label}`
         } else {
             // Handle special cases or default
             if (pathname === '/login') {
-                document.title = 'PheniCar - Đăng nhập'
+                document.title = 'Xbus Office - Đăng nhập'
             } else if (pathname === '/401') {
-                document.title = 'PheniCar - Không có quyền'
+                document.title = 'Xbus Office - Không có quyền'
             } else {
-                document.title = 'PheniCar'
+                document.title = 'Xbus Office'
             }
         }
     }, [pathname])

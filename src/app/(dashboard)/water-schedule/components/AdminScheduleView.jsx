@@ -123,7 +123,7 @@ export default function AdminScheduleView({ month, setMonth, year, setYear, sche
   const changeMonth = (delta) => { const next = new Date(year, month - 1 + delta, 1); setMonth(next.getMonth() + 1); setYear(next.getFullYear()); };
   const iconButtonSx = { width: 25, height: 25, borderRadius: 1 };
 
-  return <>Kéo nhân sự vào ngày phân công bê nước
+  return <>
 
     <Card>
       <CardHeader title={<Box sx={{ display: "flex", alignItems: "center", gap: 2 }}><Avatar variant="rounded" sx={{ bgcolor: "rgba(0,186,209,.12)", color: "info.main" }}><i className="tabler-calendar-month" /></Avatar><Box><Typography variant="h5" fontWeight={700}>Quản lý lịch bê nước</Typography><Typography variant="body2" color="text.secondary">Kéo nhân sự vào ngày làm việc để phân công lúc 14:00</Typography></Box></Box>} action={<Box sx={{ display: "flex", alignItems: "center", gap: 1 }}><Button variant="tonal" color="error" startIcon={<i className="tabler-user-off" />} onClick={() => setExemptOpen(true)}>Danh sách miễn bê nước</Button><IconButton onClick={() => changeMonth(-1)}><i className="tabler-chevron-left" /></IconButton><Button variant="tonal" sx={{ minWidth: 150 }}>Tháng {pad(month)}/{year}</Button><IconButton onClick={() => changeMonth(1)}><i className="tabler-chevron-right" /></IconButton></Box>} />

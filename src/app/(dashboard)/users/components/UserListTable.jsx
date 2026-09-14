@@ -53,6 +53,11 @@ const genderNameMap = {
 };
 
 const columnHelper = createColumnHelper();
+const formatBirthday = (birthday) => {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(birthday || "")) return "—";
+
+  return new Date(`${birthday}T00:00:00`).toLocaleDateString("vi-VN");
+};
 
 const UserListTable = ({
   tableData,
@@ -274,26 +279,39 @@ const UserListTable = ({
               />
             }
             label={
-              row.original.role === "admin" ? "Quản trị viên" : row.original.role === "assistant" ? "Trợ lý" : "Nhân viên"
+              row.original.role === "admin"
+                ? "Quản trị viên"
+                : row.original.role === "assistant"
+                  ? "Trợ lý"
+                  : "Nhân viên"
             }
-            color={row.original.role === "admin" ? "error" : row.original.role === "assistant" ? "warning" : "secondary"}
+            color={
+              row.original.role === "admin"
+                ? "error"
+                : row.original.role === "assistant"
+                  ? "warning"
+                  : "secondary"
+            }
             variant="tonal"
           />
         ),
       }),
-      columnHelper.accessor("status", {
-        header: "Trạng thái",
-        cell: ({ row }) => {
-          const isAble = row.original.status === "able";
-          return (
-            <Chip
-              size="small"
-              label={isAble ? "Hoạt động" : "Chờ duyệt"}
-              color={isAble ? "success" : "warning"}
-              variant="tonal"
-            />
-          );
-        },
+      columnHelper.accessor("birthday", {
+        header: "Ngày sinh",
+        cell: ({ row }) => (
+          <Typography variant="body2">
+            {formatBirthday(row.original.birthday)}
+          </Typography>
+        ),
+      }),
+      columnHelper.accessor("schedulingPoints", {
+        header: "Điểm rèn luyện",
+        meta: { sortable: true },
+        cell: ({ row }) => (
+          <Typography variant="body2" fontWeight={600}>
+            {Number(row.original.schedulingPoints) || 0} điểm
+          </Typography>
+        ),
       }),
       columnHelper.accessor("action", {
         header: isAdmin ? "Thao tác" : "",
@@ -480,12 +498,45 @@ const UserListTable = ({
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
                     <th key={header.id}>
-                      {header.isPlaceholder ? null : header.column.columnDef.meta?.sortable ? (
-                        <Box component="button" type="button" onClick={() => onSort?.(header.column.id)} sx={{ border: 0, p: 0, bgcolor: "transparent", color: "inherit", font: "inherit", display: "flex", alignItems: "center", gap: 1, cursor: "pointer", textTransform: "uppercase" }}>
-                          {flexRender(header.column.columnDef.header, header.getContext())}
-                          <i className={sortBy === header.column.id ? (sortOrder === "asc" ? "tabler-chevron-up" : "tabler-chevron-down") : "tabler-selector"} />
+                      {header.isPlaceholder ? null : header.column.columnDef
+                          .meta?.sortable ? (
+                        <Box
+                          component="button"
+                          type="button"
+                          onClick={() => onSort?.(header.column.id)}
+                          sx={{
+                            border: 0,
+                            p: 0,
+                            bgcolor: "transparent",
+                            color: "inherit",
+                            font: "inherit",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 1,
+                            cursor: "pointer",
+                            textTransform: "uppercase",
+                          }}
+                        >
+                          {flexRender(
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
+                          <i
+                            className={
+                              sortBy === header.column.id
+                                ? sortOrder === "asc"
+                                  ? "tabler-chevron-up"
+                                  : "tabler-chevron-down"
+                                : "tabler-selector"
+                            }
+                          />
                         </Box>
-                      ) : flexRender(header.column.columnDef.header, header.getContext())}
+                      ) : (
+                        flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )
+                      )}
                     </th>
                   ))}
                 </tr>

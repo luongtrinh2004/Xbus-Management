@@ -10,29 +10,33 @@
           "userId": "usr_001",
           "paid": true,
           "amount": 100000,
-          "paidAt": "2026-09-05T09:30:00.000Z",
-          "updatedAt": "2026-09-05T09:30:00.000Z"
+          "paidAt": "2026-09-14T14:36:22.659Z",
+          "updatedAt": "2026-09-14T14:36:22.659Z",
+          "approvedBy": "usr_admin_001"
         },
         {
           "userId": "usr_002",
           "paid": true,
           "amount": 50000,
-          "paidAt": "2026-09-06T14:20:00.000Z",
-          "updatedAt": "2026-09-06T14:20:00.000Z"
+          "paidAt": "2026-09-14T14:36:23.646Z",
+          "updatedAt": "2026-09-14T14:36:23.646Z",
+          "approvedBy": "usr_admin_001"
         },
         {
           "userId": "usr_003",
           "paid": true,
           "amount": 50000,
-          "paidAt": "2026-09-06T15:00:00.000Z",
-          "updatedAt": "2026-09-06T15:00:00.000Z"
+          "paidAt": "2026-09-14T14:36:24.860Z",
+          "updatedAt": "2026-09-14T14:36:24.860Z",
+          "approvedBy": "usr_admin_001"
         },
         {
           "userId": "usr_004",
-          "paid": false,
-          "amount": 0,
-          "paidAt": null,
-          "updatedAt": null
+          "paid": true,
+          "amount": 50000,
+          "paidAt": "2026-09-14T14:36:27.199Z",
+          "updatedAt": "2026-09-14T14:36:27.199Z",
+          "approvedBy": "usr_admin_001"
         },
         {
           "userId": "usr_005",
@@ -40,9 +44,70 @@
           "amount": 100000,
           "paidAt": "2026-09-07T10:00:00.000Z",
           "updatedAt": "2026-09-07T10:00:00.000Z"
+        },
+        {
+          "userId": "usr_admin_001",
+          "paid": true,
+          "amount": 50000,
+          "paidAt": "2026-09-14T14:34:29.519Z",
+          "updatedAt": "2026-09-14T14:34:29.519Z",
+          "approvedBy": "usr_admin_001"
+        },
+        {
+          "userId": "usr_1789204311678",
+          "paid": true,
+          "amount": 50000,
+          "paidAt": "2026-09-14T14:34:30.998Z",
+          "updatedAt": "2026-09-14T14:34:30.998Z",
+          "approvedBy": "usr_admin_001"
+        },
+        {
+          "userId": "usr_006",
+          "paid": true,
+          "amount": 50000,
+          "paidAt": "2026-09-14T14:36:29.613Z",
+          "updatedAt": "2026-09-14T14:36:29.613Z",
+          "approvedBy": "usr_admin_001"
+        },
+        {
+          "userId": "usr_007",
+          "paid": true,
+          "amount": 50000,
+          "paidAt": "2026-09-14T14:36:30.678Z",
+          "updatedAt": "2026-09-14T14:36:30.678Z",
+          "approvedBy": "usr_admin_001"
+        },
+        {
+          "userId": "usr_008",
+          "paid": true,
+          "amount": 50000,
+          "paidAt": "2026-09-14T14:36:31.300Z",
+          "updatedAt": "2026-09-14T14:36:31.300Z",
+          "approvedBy": "usr_admin_001"
+        },
+        {
+          "userId": "usr_009",
+          "paid": true,
+          "amount": 50000,
+          "paidAt": "2026-09-14T14:36:32.309Z",
+          "updatedAt": "2026-09-14T14:36:32.309Z",
+          "approvedBy": "usr_admin_001"
         }
       ],
       "expenses": [
+        {
+          "id": "exp_1789383255708",
+          "title": "Ăn uống",
+          "category": "food_drink",
+          "amount": 156320,
+          "note": "gà rán",
+          "userId": "",
+          "userName": "",
+          "spentAt": "2026-09-14T05:00:00.000Z",
+          "createdBy": "usr_admin_001",
+          "createdByName": "Quản trị viên Hệ thống",
+          "createdAt": "2026-09-14T10:54:15.708Z"
+        },
         {
           "id": "exp_001",
           "title": "Mua nước đóng chai",
@@ -55,7 +120,73 @@
       ],
       "createdBy": "usr_admin_001",
       "createdAt": "2026-09-01T08:00:00.000Z",
-      "updatedAt": "2026-09-08T10:00:00.000Z"
+      "updatedAt": "2026-09-14T14:36:32.309Z",
+      "incomes": [
+        {
+          "id": "inc_1789385892060",
+          "title": "Phạt áo",
+          "category": "shirt_penalty",
+          "amount": 50000,
+          "note": "",
+          "userId": "usr_013",
+          "userName": "Phan Thành Nam",
+          "receivedAt": "2026-09-14T05:00:00.000Z",
+          "createdBy": "usr_admin_001",
+          "createdByName": "Quản trị viên Hệ thống",
+          "createdAt": "2026-09-14T11:38:12.060Z"
+        },
+        {
+          "id": "inc_1789385231530",
+          "title": "Phạt giải trình công",
+          "category": "explanation_penalty",
+          "amount": 2323423,
+          "note": "",
+          "userId": "usr_admin_001",
+          "userName": "Quản trị viên Hệ thống",
+          "receivedAt": "2026-09-14T05:00:00.000Z",
+          "createdBy": "usr_admin_001",
+          "createdByName": "Quản trị viên Hệ thống",
+          "createdAt": "2026-09-14T11:27:11.530Z"
+        },
+        {
+          "id": "inc_1789384385780",
+          "title": "Happy Hour",
+          "category": "happy_hour",
+          "amount": 334234,
+          "note": "",
+          "userId": "",
+          "userName": "",
+          "receivedAt": "2026-09-14T05:00:00.000Z",
+          "createdBy": "usr_admin_001",
+          "createdByName": "Quản trị viên Hệ thống",
+          "createdAt": "2026-09-14T11:13:05.780Z"
+        },
+        {
+          "id": "inc_1789381421085",
+          "title": "Phạt áo",
+          "category": "shirt_penalty",
+          "amount": 222222,
+          "note": "2",
+          "receivedAt": "2026-09-14T05:00:00.000Z",
+          "createdBy": "usr_admin_001",
+          "createdByName": "Quản trị viên Hệ thống",
+          "createdAt": "2026-09-14T10:23:41.085Z",
+          "userId": "usr_003",
+          "userName": "Hoàng Duy Lộc",
+          "updatedAt": "2026-09-14T11:12:53.231Z"
+        },
+        {
+          "id": "inc_1789381410242",
+          "title": "dfd",
+          "category": "explanation_penalty",
+          "amount": 32333,
+          "note": "fff",
+          "receivedAt": "2026-09-14T05:00:00.000Z",
+          "createdBy": "usr_admin_001",
+          "createdByName": "Quản trị viên Hệ thống",
+          "createdAt": "2026-09-14T10:23:30.242Z"
+        }
+      ]
     }
   ]
 }

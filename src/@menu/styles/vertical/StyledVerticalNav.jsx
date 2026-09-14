@@ -1,8 +1,12 @@
 // Third-party Imports
-import styled from '@emotion/styled'
+import styled from "@emotion/styled";
 
 // Util Imports
-import { horizontalNavClasses, menuClasses, verticalNavClasses } from '../../utils/menuClasses'
+import {
+  horizontalNavClasses,
+  menuClasses,
+  verticalNavClasses,
+} from "../../utils/menuClasses";
 
 const StyledVerticalNav = styled.aside`
   ${({ scrollWithContent }) =>
@@ -15,7 +19,8 @@ const StyledVerticalNav = styled.aside`
   z-index: 9;
 
   /* Transition */
-  transition-property: inline-size, min-inline-size, margin-inline-start, inset-inline-start;
+  transition-property: inline-size, min-inline-size, margin-inline-start,
+    inset-inline-start;
   transition-duration: ${({ transitionDuration }) => `${transitionDuration}ms`};
   transition-timing-function: ease-in-out;
 
@@ -25,6 +30,10 @@ const StyledVerticalNav = styled.aside`
   &.${verticalNavClasses.collapsed} {
     inline-size: ${({ collapsedWidth }) => `${collapsedWidth}px`};
     min-inline-size: ${({ collapsedWidth }) => `${collapsedWidth}px`};
+  }
+  &.${verticalNavClasses.collapsed}.${verticalNavClasses.hovered} {
+    inline-size: ${({ width }) => `${width}px`};
+    min-inline-size: ${({ width }) => `${width}px`};
   }
 
   &.${verticalNavClasses.collapsing}, &.${verticalNavClasses.expanding} {
@@ -62,6 +71,6 @@ const StyledVerticalNav = styled.aside`
 
   /* User Styles */
   ${({ customStyles }) => customStyles}
-`
+`;
 
-export default StyledVerticalNav
+export default StyledVerticalNav;

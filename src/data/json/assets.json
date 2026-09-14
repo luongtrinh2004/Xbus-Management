@@ -1,9 +1,62 @@
 {
   "imports": [
-    { "id": "import_001", "code": "DEV-MAC-01", "name": "MacBook Pro M2 16GB", "date": "2026-09-01", "quantity": 1, "location": "Phòng ban", "person": "Dữ liệu ban đầu", "note": "Máy cấp cho DEV Web/App", "createdAt": "2026-09-01T08:00:00.000Z" },
-    { "id": "import_002", "code": "DEV-MNTR-02", "name": "Màn hình Dell Ultrasharp 27 inch", "date": "2026-09-02", "quantity": 1, "location": "Phòng ban", "person": "Dữ liệu ban đầu", "note": "Màn hình mở rộng", "createdAt": "2026-09-02T08:00:00.000Z" },
-    { "id": "import_003", "code": "DEV-PC-01", "name": "Workstation AP Testing", "date": "2026-09-03", "quantity": 1, "location": "Phòng ban", "person": "Dữ liệu ban đầu", "note": "Phục vụ mô phỏng và chạy AP", "createdAt": "2026-09-03T08:00:00.000Z" },
-    { "id": "import_004", "code": "DEV-MOUSE-01", "name": "Chuột Logitech MX Master 3S", "date": "2026-09-01", "quantity": 1, "location": "Phòng ban", "person": "Dữ liệu ban đầu", "note": "Trong kho phòng ban", "createdAt": "2026-09-01T08:00:00.000Z" }
+    {
+      "id": "import_001",
+      "code": "DEV-MAC-01",
+      "name": "MacBook Pro M2 16GB",
+      "date": "2026-09-01",
+      "quantity": 33,
+      "location": "Phòng ban",
+      "person": "Dữ liệu ban đầu",
+      "note": "Máy cấp cho DEV Web/App",
+      "createdAt": "2026-09-01T08:00:00.000Z",
+      "updatedAt": "2026-09-14T14:12:56.390Z"
+    },
+    {
+      "id": "import_002",
+      "code": "DEV-MNTR-02",
+      "name": "Màn hình Dell Ultrasharp 27 inch",
+      "date": "2026-09-02",
+      "quantity": 1,
+      "location": "Phòng ban",
+      "person": "Dữ liệu ban đầu",
+      "note": "Màn hình mở rộng",
+      "createdAt": "2026-09-02T08:00:00.000Z"
+    },
+    {
+      "id": "import_003",
+      "code": "DEV-PC-01",
+      "name": "Workstation AP Testing",
+      "date": "2026-09-03",
+      "quantity": 1,
+      "location": "Phòng ban",
+      "person": "Dữ liệu ban đầu",
+      "note": "Phục vụ mô phỏng và chạy AP",
+      "createdAt": "2026-09-03T08:00:00.000Z"
+    },
+    {
+      "id": "import_004",
+      "code": "DEV-MOUSE-01",
+      "name": "Chuột Logitech MX Master 3S",
+      "date": "2026-09-01",
+      "quantity": 1,
+      "location": "Phòng ban",
+      "person": "Dữ liệu ban đầu",
+      "note": "Trong kho phòng ban",
+      "createdAt": "2026-09-01T08:00:00.000Z"
+    }
   ],
-  "exports": []
+  "exports": [
+    {
+      "id": "export_1789395216394_f0gd",
+      "code": "DEV-MAC-01",
+      "name": "MacBook Pro M2 16GB",
+      "date": "2026-09-14",
+      "quantity": 12,
+      "location": "Phòng ban",
+      "person": "Quản trị viên Hệ thống",
+      "note": "",
+      "createdAt": "2026-09-14T14:13:36.394Z"
+    }
+  ]
 }
