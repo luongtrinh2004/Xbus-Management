@@ -111,11 +111,7 @@ export async function POST(req) {
     if (updatedSchedule) {
       const currentSchedules = getWaterSchedules();
       const index = currentSchedules.findIndex(
-        (item) =>
-          item.id === updatedSchedule.id ||
-          (item.month === month &&
-            item.year === year &&
-            item.weekIndex === updatedSchedule.weekIndex),
+        (item) => item.id === updatedSchedule.id,
       );
       const savedSchedule = {
         ...updatedSchedule,

@@ -138,7 +138,7 @@ export async function downloadShopOrdersPdf({
       <!-- Header -->
       <div style="border-bottom: 2px solid #7367f0; padding-bottom: 16px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end;">
         <div>
-          <img src="/images/logos/logo-light.png" alt="Xbus" style="width: 185px; height: auto; display: block; margin-bottom: 8px;" />
+          <img src="/images/logos/logo-light.svg" alt="Xbus" style="width: 185px; height: auto; display: block; margin-bottom: 8px;" />
           <h1 style="margin: 6px 0 0 0; font-size: 22px; color: #2f3349; font-weight: 700;">
             ĐƠN ĐẶT TRÀ CHIỀU
           </h1>

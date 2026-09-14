@@ -10,15 +10,17 @@ import CardContent from "@mui/material/CardContent";
 import Chip from "@mui/material/Chip";
 import CircularProgress from "@mui/material/CircularProgress";
 import Divider from "@mui/material/Divider";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
 import Grid from "@mui/material/Grid2";
-import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
-import LinearProgress from "@mui/material/LinearProgress";
 import MenuItem from "@mui/material/MenuItem";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
+import Slider from "@mui/material/Slider";
 import TextField from "@mui/material/TextField";
-import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import { resolveAvatar } from "@/utils/getDefaultAvatar";
 
@@ -85,15 +87,15 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [cropOpen, setCropOpen] = useState(false);
+  const [cropSource, setCropSource] = useState("");
+  const [cropImageSize, setCropImageSize] = useState({ width: 1, height: 1 });
+  const [crop, setCrop] = useState({ zoom: 1, x: 0, y: 0 });
   const fileInputRef = useRef(null);
   const [snack, setSnack] = useState({ open: false, msg: "", severity: "success" });
 
   // Form state
-  const [form, setForm] = useState({ name: "", phone: "", gender: "" });
-  const [pwForm, setPwForm] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
-  const [showCurrentPw, setShowCurrentPw] = useState(false);
-  const [showNewPw, setShowNewPw] = useState(false);
-  const [pwError, setPwError] = useState("");
+  const [form, setForm] = useState({ name: "", phone: "", gender: "", birthday: "" });
 
   const showSnack = (msg, severity = "success") => setSnack({ open: true, msg, severity });
 
@@ -104,7 +106,7 @@ export default function ProfilePage() {
       if (!res.ok) throw new Error();
       const data = await res.json();
       setProfile(data);
-      setForm({ name: data.name || "", phone: data.phone || "", gender: data.gender || "" });
+      setForm({ name: data.name || "", phone: data.phone || "", gender: data.gender || "", birthday: data.birthday || "" });
     } catch {
       showSnack("Không thể tải thông tin cá nhân", "error");
     } finally {
@@ -136,54 +138,61 @@ export default function ProfilePage() {
     }
   };
 
-  const handleChangePw = async () => {
-    setPwError("");
-    if (pwForm.newPassword !== pwForm.confirmPassword) {
-      setPwError("Mật khẩu xác nhận không khớp");
-      return;
-    }
-    if (pwForm.newPassword.length < 6) {
-      setPwError("Mật khẩu mới cần ít nhất 6 ký tự");
-      return;
-    }
+  const handleAvatarFile = (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    if (!file.type.startsWith("image/")) return showSnack("Vui lòng chọn một tệp ảnh", "error");
+    if (file.size > 5 * 1024 * 1024) return showSnack("Ảnh không được vượt quá 5 MB", "error");
+    const reader = new FileReader();
+    reader.onload = () => {
+      const image = new Image();
+      image.onload = () => {
+        setCropImageSize({ width: image.naturalWidth, height: image.naturalHeight });
+        setCrop({ zoom: 1, x: 0, y: 0 });
+        setCropSource(String(reader.result));
+        setCropOpen(true);
+      };
+      image.src = String(reader.result);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleSaveAvatar = async () => {
     try {
-      setSaving(true);
-      const res = await fetch("/api/profile", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ currentPassword: pwForm.currentPassword, newPassword: pwForm.newPassword }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Lỗi đổi mật khẩu");
-      setPwForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
-      showSnack("Đổi mật khẩu thành công!");
-    } catch (err) {
-      setPwError(err.message || "Lỗi hệ thống");
+      setUploadingAvatar(true);
+      const image = new Image();
+      image.src = cropSource;
+      await image.decode();
+      const size = 512;
+      const canvas = document.createElement("canvas");
+      canvas.width = size;
+      canvas.height = size;
+      const context = canvas.getContext("2d");
+      const scale = Math.max(size / image.naturalWidth, size / image.naturalHeight) * crop.zoom;
+      const width = image.naturalWidth * scale;
+      const height = image.naturalHeight * scale;
+      const x = (size - width) / 2 + (crop.x / 100) * Math.max(0, (width - size) / 2);
+      const y = (size - height) / 2 + (crop.y / 100) * Math.max(0, (height - size) / 2);
+      context.drawImage(image, x, y, width, height);
+      const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.9));
+      if (!blob) throw new Error("Không thể xử lý ảnh");
+      const payload = new FormData();
+      payload.append("avatar", blob, "avatar.jpg");
+      const response = await fetch(`/api/users/${profile.id}/avatar`, { method: "POST", body: payload });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Không thể cập nhật ảnh đại diện");
+      setProfile((current) => ({ ...current, avatarUrl: data.avatarUrl }));
+      await updateSession({ image: data.avatarUrl });
+      setCropOpen(false);
+      showSnack("Đã cập nhật ảnh đại diện");
+    } catch (error) {
+      showSnack(error.message || "Không thể cập nhật ảnh đại diện", "error");
     } finally {
-      setSaving(false);
+      setUploadingAvatar(false);
     }
   };
 
-  const handleAvatarUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    try {
-      setUploadingAvatar(true);
-      const fd = new FormData();
-      fd.append("avatar", file);
-      const res = await fetch(`/api/users/${profile.id}/avatar`, { method: "POST", body: fd });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Lỗi upload");
-      setProfile((prev) => ({ ...prev, avatarUrl: data.avatarUrl }));
-      await updateSession({ image: data.avatarUrl });
-      showSnack("Cập nhật ảnh đại diện thành công!");
-    } catch (err) {
-      showSnack(err.message || "Lỗi upload ảnh", "error");
-    } finally {
-      setUploadingAvatar(false);
-      e.target.value = "";
-    }
-  };
 
   if (loading) {
     return (
@@ -228,8 +237,14 @@ export default function ProfilePage() {
         <Box sx={{ position: "absolute", bottom: -60, right: 80, width: 160, height: 160, bgcolor: "rgba(255,255,255,0.05)", borderRadius: "50%" }} />
 
         <Box sx={{ display: "flex", alignItems: { xs: "flex-start", sm: "center" }, gap: 3, flexWrap: "wrap", position: "relative", zIndex: 1 }}>
-          {/* Avatar with upload */}
-          <Box sx={{ position: "relative", flexShrink: 0 }}>
+          <Box
+            role="button"
+            tabIndex={0}
+            aria-label="Thay đổi ảnh đại diện"
+            onClick={() => fileInputRef.current?.click()}
+            onKeyDown={(event) => event.key === "Enter" && fileInputRef.current?.click()}
+            sx={{ flexShrink: 0, position: "relative", cursor: "pointer", borderRadius: "50%", "&:hover .avatar-overlay, &:focus-visible .avatar-overlay": { opacity: 1 } }}
+          >
             <Avatar
               src={avatarSrc}
               alt={profile.name}
@@ -244,27 +259,11 @@ export default function ProfilePage() {
             >
               {profile.name?.[0]}
             </Avatar>
-            <Tooltip title="Đổi ảnh đại diện">
-              <IconButton
-                size="small"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={uploadingAvatar}
-                sx={{
-                  position: "absolute",
-                  bottom: 0,
-                  right: 0,
-                  bgcolor: "white",
-                  color: "primary.main",
-                  width: 28,
-                  height: 28,
-                  boxShadow: 2,
-                  "&:hover": { bgcolor: "grey.100" },
-                }}
-              >
-                {uploadingAvatar ? <CircularProgress size={14} /> : <i className="tabler-camera text-[14px]" />}
-              </IconButton>
-            </Tooltip>
-            <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" style={{ display: "none" }} onChange={handleAvatarUpload} />
+            <Box className="avatar-overlay" sx={{ position: "absolute", inset: 4, borderRadius: "50%", bgcolor: "rgba(15,23,42,.58)", color: "white", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", opacity: 0, transition: "opacity .2s" }}>
+              <i className="tabler-camera text-xl" />
+              <Typography variant="caption" color="inherit">Đổi ảnh</Typography>
+            </Box>
+            <input ref={fileInputRef} hidden type="file" accept="image/jpeg,image/png,image/webp" onChange={handleAvatarFile} />
           </Box>
 
           <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -371,7 +370,7 @@ export default function ProfilePage() {
           </Card>
         </Grid>
 
-        {/* RIGHT: Form chỉnh sửa + đổi mật khẩu */}
+        {/* RIGHT: Form chỉnh sửa thông tin cá nhân */}
         <Grid size={{ xs: 12, md: 8 }}>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 4 }}>
             {/* Card 1: Chỉnh sửa thông tin */}
@@ -383,7 +382,7 @@ export default function ProfilePage() {
                   </Box>
                   <Box>
                     <Typography variant="subtitle1" fontWeight={700}>Thông tin cá nhân</Typography>
-                    <Typography variant="caption" color="text.secondary">Cập nhật họ tên, số điện thoại và giới tính</Typography>
+                    <Typography variant="caption" color="text.secondary">Cập nhật họ tên, ngày sinh và thông tin liên hệ</Typography>
                   </Box>
                 </Box>
 
@@ -440,6 +439,23 @@ export default function ProfilePage() {
                       <MenuItem value="unspecified">Không tiết lộ</MenuItem>
                     </TextField>
                   </Grid>
+                  <Grid size={{ xs: 12, sm: 6 }}>
+                    <TextField
+                      label="Ngày sinh"
+                      type="date"
+                      value={form.birthday}
+                      onChange={(e) => setForm((p) => ({ ...p, birthday: e.target.value }))}
+                      fullWidth
+                      slotProps={{ inputLabel: { shrink: true } }}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <i className="tabler-cake text-textSecondary" />
+                          </InputAdornment>
+                        ),
+                      }}
+                    />
+                  </Grid>
                 </Grid>
 
                 <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}>
@@ -457,156 +473,41 @@ export default function ProfilePage() {
               </CardContent>
             </Card>
 
-            {/* Card 2: Đổi mật khẩu */}
-            <Card sx={{ border: "1px solid", borderColor: "divider", boxShadow: "none" }}>
-              <CardContent sx={{ p: 3 }}>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 3 }}>
-                  <Box sx={{ width: 32, height: 32, borderRadius: "8px", bgcolor: "rgba(255,159,67,0.12)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <i className="tabler-lock text-warning text-lg" />
-                  </Box>
-                  <Box>
-                    <Typography variant="subtitle1" fontWeight={700}>Đổi mật khẩu</Typography>
-                    <Typography variant="caption" color="text.secondary">Mật khẩu mới phải có ít nhất 6 ký tự</Typography>
-                  </Box>
-                </Box>
-
-                <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
-                  <TextField
-                    label="Mật khẩu hiện tại"
-                    type={showCurrentPw ? "text" : "password"}
-                    value={pwForm.currentPassword}
-                    onChange={(e) => setPwForm((p) => ({ ...p, currentPassword: e.target.value }))}
-                    fullWidth
-                    InputProps={{
-                      startAdornment: <InputAdornment position="start"><i className="tabler-lock text-textSecondary" /></InputAdornment>,
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton size="small" onClick={() => setShowCurrentPw((v) => !v)}>
-                            <i className={`${showCurrentPw ? "tabler-eye-off" : "tabler-eye"} text-textSecondary`} />
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                  <Grid container spacing={2}>
-                    <Grid size={{ xs: 12, sm: 6 }}>
-                      <TextField
-                        label="Mật khẩu mới"
-                        type={showNewPw ? "text" : "password"}
-                        value={pwForm.newPassword}
-                        onChange={(e) => setPwForm((p) => ({ ...p, newPassword: e.target.value }))}
-                        fullWidth
-                        InputProps={{
-                          startAdornment: <InputAdornment position="start"><i className="tabler-lock-open text-textSecondary" /></InputAdornment>,
-                          endAdornment: (
-                            <InputAdornment position="end">
-                              <IconButton size="small" onClick={() => setShowNewPw((v) => !v)}>
-                                <i className={`${showNewPw ? "tabler-eye-off" : "tabler-eye"} text-textSecondary`} />
-                              </IconButton>
-                            </InputAdornment>
-                          ),
-                        }}
-                      />
-                    </Grid>
-                    <Grid size={{ xs: 12, sm: 6 }}>
-                      <TextField
-                        label="Xác nhận mật khẩu mới"
-                        type="password"
-                        value={pwForm.confirmPassword}
-                        onChange={(e) => setPwForm((p) => ({ ...p, confirmPassword: e.target.value }))}
-                        fullWidth
-                        error={!!pwError && pwForm.confirmPassword !== pwForm.newPassword}
-                        InputProps={{
-                          startAdornment: <InputAdornment position="start"><i className="tabler-lock-check text-textSecondary" /></InputAdornment>,
-                        }}
-                      />
-                    </Grid>
-                  </Grid>
-
-                  {/* Strength bar */}
-                  {pwForm.newPassword.length > 0 && (
-                    <Box>
-                      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.5 }}>
-                        <Typography variant="caption" color="text.secondary">Độ mạnh mật khẩu</Typography>
-                        <Typography variant="caption" fontWeight={600} color={
-                          pwForm.newPassword.length >= 12 ? "success.main" :
-                          pwForm.newPassword.length >= 8 ? "warning.main" : "error.main"
-                        }>
-                          {pwForm.newPassword.length >= 12 ? "Mạnh" : pwForm.newPassword.length >= 8 ? "Trung bình" : "Yếu"}
-                        </Typography>
-                      </Box>
-                      <LinearProgress
-                        variant="determinate"
-                        value={Math.min(100, (pwForm.newPassword.length / 12) * 100)}
-                        color={pwForm.newPassword.length >= 12 ? "success" : pwForm.newPassword.length >= 8 ? "warning" : "error"}
-                        sx={{ borderRadius: 4, height: 6 }}
-                      />
-                    </Box>
-                  )}
-
-                  {pwError && (
-                    <Alert severity="error" sx={{ borderRadius: 2 }}>{pwError}</Alert>
-                  )}
-                </Box>
-
-                <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}>
-                  <Button
-                    variant="contained"
-                    color="warning"
-                    startIcon={saving ? <CircularProgress size={16} color="inherit" /> : <i className="tabler-lock-square-rounded" />}
-                    onClick={handleChangePw}
-                    disabled={saving || !pwForm.currentPassword || !pwForm.newPassword || !pwForm.confirmPassword}
-                    sx={{ px: 4, borderRadius: 2 }}
-                  >
-                    {saving ? "Đang xử lý..." : "Đổi mật khẩu"}
-                  </Button>
-                </Box>
-              </CardContent>
-            </Card>
-
-            {/* Card 3: Upload avatar hướng dẫn */}
-            <Card
-              sx={{
-                border: "1px dashed",
-                borderColor: "primary.main",
-                boxShadow: "none",
-                cursor: "pointer",
-                transition: "all 0.2s",
-                "&:hover": { bgcolor: "rgba(115,103,240,0.04)", transform: "translateY(-1px)" },
-              }}
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <CardContent sx={{ p: 3, textAlign: "center" }}>
-                <Box
-                  sx={{
-                    width: 56,
-                    height: 56,
-                    borderRadius: "16px",
-                    bgcolor: "rgba(115,103,240,0.1)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    mx: "auto",
-                    mb: 1.5,
-                  }}
-                >
-                  {uploadingAvatar ? (
-                    <CircularProgress size={24} />
-                  ) : (
-                    <i className="tabler-photo-up text-primary text-2xl" />
-                  )}
-                </Box>
-                <Typography variant="subtitle2" fontWeight={700} color="primary.main">
-                  {uploadingAvatar ? "Đang tải ảnh..." : "Tải ảnh đại diện mới"}
-                </Typography>
-                <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.5 }}>
-                  Hỗ trợ JPG, PNG, WebP · Tối đa 5MB
-                </Typography>
-              </CardContent>
-            </Card>
           </Box>
         </Grid>
       </Grid>
+
+      <Dialog open={cropOpen} onClose={() => !uploadingAvatar && setCropOpen(false)} fullWidth maxWidth="xs">
+        <DialogTitle sx={{ pb: 1 }}>Căn chỉnh ảnh đại diện</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Thu phóng và di chuyển ảnh để chọn vùng hiển thị phù hợp.
+          </Typography>
+          <Box sx={{ width: 280, height: 280, maxWidth: "100%", mx: "auto", overflow: "hidden", borderRadius: "50%", bgcolor: "action.hover", position: "relative", boxShadow: "inset 0 0 0 2px rgba(115,103,240,.45)" }}>
+            {cropSource && (() => {
+              const previewSize = 280;
+              const baseScale = Math.max(previewSize / cropImageSize.width, previewSize / cropImageSize.height);
+              const width = cropImageSize.width * baseScale * crop.zoom;
+              const height = cropImageSize.height * baseScale * crop.zoom;
+              return <Box component="img" src={cropSource} alt="Xem trước ảnh đại diện" sx={{ position: "absolute", width, height, maxWidth: "none", left: (previewSize - width) / 2 + (crop.x / 100) * Math.max(0, (width - previewSize) / 2), top: (previewSize - height) / 2 + (crop.y / 100) * Math.max(0, (height - previewSize) / 2), userSelect: "none" }} />;
+            })()}
+          </Box>
+          <Box sx={{ mt: 3 }}>
+            <Typography variant="caption" color="text.secondary">Thu phóng</Typography>
+            <Slider value={crop.zoom} min={1} max={3} step={0.05} onChange={(_, value) => setCrop((current) => ({ ...current, zoom: value }))} aria-label="Thu phóng ảnh" />
+            <Typography variant="caption" color="text.secondary">Vị trí ngang</Typography>
+            <Slider value={crop.x} min={-100} max={100} onChange={(_, value) => setCrop((current) => ({ ...current, x: value }))} aria-label="Vị trí ngang" />
+            <Typography variant="caption" color="text.secondary">Vị trí dọc</Typography>
+            <Slider value={crop.y} min={-100} max={100} onChange={(_, value) => setCrop((current) => ({ ...current, y: value }))} aria-label="Vị trí dọc" />
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button onClick={() => setCropOpen(false)} disabled={uploadingAvatar}>Hủy</Button>
+          <Button variant="contained" onClick={handleSaveAvatar} disabled={uploadingAvatar} startIcon={uploadingAvatar ? <CircularProgress size={16} color="inherit" /> : <i className="tabler-check" />}>
+            {uploadingAvatar ? "Đang lưu..." : "Lưu ảnh"}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Snackbar
         open={snack.open}

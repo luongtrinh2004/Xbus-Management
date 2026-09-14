@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import { getUsers, saveUsers, appendAuditLog } from "@/libs/jsonRepository";
-import bcrypt from "bcryptjs";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -25,6 +24,12 @@ export async function PATCH(req, { params }) {
     }
 
     const oldUser = users[index];
+    if (body.email) {
+      body.email = String(body.email).trim().toLowerCase();
+      if (users.some((user) => user.id !== id && user.email?.toLowerCase() === body.email)) {
+        return NextResponse.json({ error: "Email đã tồn tại trong hệ thống" }, { status: 409 });
+      }
+    }
     const hasPointChange =
       Object.prototype.hasOwnProperty.call(body, "schedulingPoints") &&
       body.schedulingPoints !== oldUser.schedulingPoints;
@@ -45,15 +50,9 @@ export async function PATCH(req, { params }) {
         );
       }
     }
-    if (body.password) {
-      if (typeof body.password !== "string" || body.password.length < 6) {
-        return NextResponse.json(
-          { error: "Mật khẩu mới cần có ít nhất 6 ký tự" },
-          { status: 400 },
-        );
-      }
-      body.password = await bcrypt.hash(body.password, 10);
-    }
+    delete body.password;
+    delete body.currentPassword;
+    delete body.newPassword;
     const updatedUser = {
       ...oldUser,
       ...body,

@@ -36,6 +36,7 @@ const actionLabels = {
   EXPORT_ASSET: "Xuất tài sản",
   UPDATE_EXTRACURRICULAR_POINTS: "Cập nhật điểm rèn luyện",
   CANCEL_SCHEDULE: "Hủy lịch",
+  DELETE_SCHEDULE: "Xóa lịch",
   ACTIVATE_USER: "Kích hoạt nhân sự",
   CREATE_TYPE: "Thêm bộ phận",
 };

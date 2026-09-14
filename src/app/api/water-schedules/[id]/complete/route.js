@@ -36,13 +36,6 @@ export async function POST(req, { params }) {
 
     const schedule = allSchedules[scheduleIndex];
 
-    if (!schedule.savedAt) {
-      return NextResponse.json(
-        { error: "Cần lưu lịch tuần trước khi xác nhận hoàn thành" },
-        { status: 400 },
-      );
-    }
-
     if (schedule.status === "completed") {
       return NextResponse.json(
         { error: "Lịch này đã được xác nhận hoàn thành trước đó" },
@@ -92,12 +85,12 @@ export async function POST(req, { params }) {
       action: "COMPLETE_SCHEDULE",
       targetType: "water_schedules",
       targetId: id,
-      details: `Xác nhận hoàn thành lịch tuần ${schedule.weekIndex} (${schedule.date}), cộng 1 điểm cho ${rewardedUserNames.length} người: ${rewardedUserNames.join(", ")}`,
+      details: `Xác nhận hoàn thành lịch ngày ${schedule.date}, cộng 1 điểm cho ${rewardedUserNames.length} người: ${rewardedUserNames.join(", ")}`,
     });
 
     return NextResponse.json({
       success: true,
-      message: `Đã hoàn thành lịch tuần ${schedule.weekIndex} và cộng 1 điểm cho ${rewardedUserNames.length} nhân sự`,
+      message: `Đã hoàn thành lịch ngày ${schedule.date} và cộng 1 điểm cho ${rewardedUserNames.length} nhân sự`,
       schedule,
     });
   } catch (error) {

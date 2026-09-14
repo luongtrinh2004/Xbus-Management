@@ -55,7 +55,6 @@ const EditUserDialog = ({
     status: "able",
     avatarUrl: "",
     schedulingPoints: 0,
-    password: "",
   });
   const [departments, setDepartments] = useState([]);
   const [avatarPreview, setAvatarPreview] = useState("");
@@ -85,7 +84,6 @@ const EditUserDialog = ({
         status: updatingUser.status || "able",
         avatarUrl: updatingUser.avatarUrl || "",
         schedulingPoints: updatingUser.schedulingPoints || 0,
-        password: "",
       });
       setAvatarPreview(resolveAvatar(updatingUser));
     }
@@ -158,11 +156,6 @@ const EditUserDialog = ({
     }
 
     const { id, ...payload } = userData;
-    if (payload.password && payload.password.length < 6) {
-      toast.error("Mật khẩu mới cần có ít nhất 6 ký tự");
-      return;
-    }
-    if (!payload.password) delete payload.password;
     const previousUser = updatingUser;
     const optimisticUser = { ...updatingUser, ...userData };
     onUserUpdated?.(optimisticUser, previousUser);
@@ -308,23 +301,7 @@ const EditUserDialog = ({
               autoComplete="off"
               label="Email"
               value={userData.email}
-              disabled
-              helperText="Email không thể thay đổi"
-            />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 4 }}>
-            <CustomTextField
-              fullWidth
-              type="password"
-              name="staff_password_edit"
-              autoComplete="new-password"
-              label="Mật khẩu mới"
-              value={userData.password}
-              placeholder="Không nhập nếu không đổi"
-              helperText="Tối thiểu 6 ký tự"
-              onChange={(e) =>
-                setUserData({ ...userData, password: e.target.value })
-              }
+              onChange={(e) => setUserData({ ...userData, email: e.target.value })}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 4 }}>

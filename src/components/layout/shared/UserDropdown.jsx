@@ -77,7 +77,7 @@ const UserDropdown = ({ alert = false }) => {
 
     try {
       // Sign out from the app
-      await signOut({ callbackUrl: process.env.NEXT_PUBLIC_APP_URL });
+      await signOut({ callbackUrl: "/login", redirect: true });
     } catch (error) {
       console.error(error);
     }

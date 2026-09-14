@@ -158,6 +158,7 @@ const Page = () => {
           <PendingUsersTable
             tableData={pendingList}
             onUserUpdated={handleUserUpdated}
+            onRefresh={handleRefreshAll}
           />
         </Grid>
       )}

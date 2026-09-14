@@ -56,7 +56,7 @@ export async function POST(req, { params }) {
     if (user.avatarUrl && user.avatarUrl.startsWith('/images/avatars/') && user.code) {
       const oldFileName = path.basename(user.avatarUrl)
       // Chỉ xóa nếu là file tên theo mã NV (không xóa file default)
-      const defaultFiles = ['male-admin.png', 'female-admin.png', 'male-user.png', 'female-user.png']
+      const defaultFiles = ['male-admin.png', 'female-admin.png', 'male-user.png', 'female-user.png', 'assistant.png']
       if (!defaultFiles.includes(oldFileName)) {
         const oldPath = path.join(AVATARS_DIR, oldFileName)
         if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath)
@@ -66,7 +66,7 @@ export async function POST(req, { params }) {
     // Lưu file mới với tên = mã nhân viên
     const ext = file.type === 'image/webp' ? 'webp' : file.type === 'image/png' ? 'png' : 'jpg'
     const code = user.code || user.id
-    const fileName = `${code}.${ext}`
+    const fileName = `${code}-${Date.now()}.${ext}`
     const filePath = path.join(AVATARS_DIR, fileName)
 
     const buffer = Buffer.from(bytes)

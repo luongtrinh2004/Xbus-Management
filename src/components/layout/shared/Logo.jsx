@@ -43,7 +43,7 @@ const Logo = () => {
     return () => m?.removeEventListener?.('change', apply)
   }, [mode])
 
-  const logoSrc = isDark ? '/images/logos/logo-dark.png' : '/images/logos/logo-light.png'
+  const logoSrc = isDark ? '/images/logos/logo-dark.svg' : '/images/logos/logo-light.svg'
   const logoWidth = isCollapsed ? 40 : 200
   const logoHeight = Math.round((logoWidth * 150) / 1237)
 

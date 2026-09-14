@@ -6,6 +6,13 @@ import GoogleProvider from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
 import { getSettings, getUsers, saveUsers } from "@/libs/jsonRepository";
 
+const normalizeEmail = (value) => String(value || "").trim().toLowerCase();
+const companyEmailKey = (value) => {
+  const email = normalizeEmail(value);
+  const [local, domain] = email.split("@");
+  return domain === "phenikaa-x.com" ? `${local.replaceAll(".", "")}@${domain}` : email;
+};
+
 export const authOptions = {
   providers: [
     CredentialProvider({
@@ -69,22 +76,40 @@ export const authOptions = {
     async signIn({ user, account }) {
       if (account?.provider !== "google" || !user.email) return true;
 
-      const email = user.email.trim().toLowerCase();
+      const email = normalizeEmail(user.email);
       const settings = getSettings();
       const domain = email.split("@")[1];
       if (!domain || !(settings.companyEmailDomains || []).includes(domain))
         return false;
 
       const users = getUsers();
-      if (!users.some((item) => item.email?.toLowerCase() === email)) {
+      const matches = users.filter((item) => companyEmailKey(item.email) === companyEmailKey(email));
+      if (matches.length) {
+        const existing = [...matches].sort((a, b) =>
+          Number(b.status === "able") - Number(a.status === "able") ||
+          Number(Boolean(b.code || b.password)) - Number(Boolean(a.code || a.password)) ||
+          new Date(a.createdAt || 0) - new Date(b.createdAt || 0),
+        )[0];
+        existing.email = email;
+        existing.googleId = user.id || existing.googleId || "";
+        existing.updatedAt = new Date().toISOString();
+        existing.avatarUrl = existing.avatarUrl?.startsWith("http") ? "" : existing.avatarUrl || "";
+        const mergedUsers = users.filter((item) =>
+          item.id === existing.id ||
+          companyEmailKey(item.email) !== companyEmailKey(email) ||
+          item.status === "able" || item.code || item.password,
+        );
+        saveUsers(mergedUsers);
+      } else {
         users.unshift({
           id: `usr_${Date.now()}`,
           googleId: user.id || "",
           name: user.name || "",
           email,
           code: "",
-          avatarUrl: user.image || "",
+          avatarUrl: "",
           gender: "unspecified",
+          birthday: "",
           phone: "",
           role: settings.defaultRole || "user",
           typeId: "",
@@ -109,8 +134,20 @@ export const authOptions = {
         token.id = storedUser?.id || user.id;
         token.role = storedUser?.role || user.role || "user";
         token.gender = storedUser?.gender || user.gender || "unspecified";
-        token.avatar =
-          storedUser?.avatarUrl || user.avatar || user.image || null;
+        token.status = storedUser?.status || "disabled";
+        token.avatar = storedUser?.avatarUrl || null;
+      }
+      if (token.email) {
+        const currentUser = getUsers().find(
+          (item) => normalizeEmail(item.email) === normalizeEmail(token.email),
+        );
+        if (currentUser) {
+          token.id = currentUser.id;
+          token.role = currentUser.role || "user";
+          token.gender = currentUser.gender || "unspecified";
+          token.status = currentUser.status || "disabled";
+          token.avatar = currentUser.avatarUrl || null;
+        }
       }
       return token;
     },
@@ -119,6 +156,7 @@ export const authOptions = {
         session.user.id = token.id;
         session.user.role = token.role;
         session.user.gender = token.gender;
+        session.user.status = token.status;
         session.user.avatar = token.avatar;
       }
       return session;

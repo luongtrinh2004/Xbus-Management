@@ -140,6 +140,7 @@ export async function POST(req) {
       code: body.code || `XBS${Math.floor(100 + Math.random() * 900)}`,
       avatarUrl: body.avatarUrl || '',
       gender: body.gender || 'unspecified',
+      birthday: body.birthday || '',
       phone: body.phone || '',
       role: body.role || 'user',
       typeId: body.typeId || 'type_web_app',

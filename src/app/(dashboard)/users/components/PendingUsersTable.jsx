@@ -8,6 +8,8 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Chip from "@mui/material/Chip";
 import Button from "@mui/material/Button";
+import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
 import Avatar from "@mui/material/Avatar";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -50,8 +52,10 @@ const genderOptions = [
   { value: "unspecified", label: "Chưa xác định" },
 ];
 
-export default function PendingUsersTable({ tableData, onUserUpdated }) {
+export default function PendingUsersTable({ tableData, onUserUpdated, onRefresh }) {
   const [activateOpen, setActivateOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [formData, setFormData] = useState({});
 
@@ -91,6 +95,24 @@ export default function PendingUsersTable({ tableData, onUserUpdated }) {
     } catch (err) {
       onUserUpdated?.(selectedUser, optimisticUser);
       toast.error("Lỗi kết nối");
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!selectedUser) return;
+    setDeleting(true);
+    try {
+      const response = await fetch(`/api/users/${selectedUser.id}`, { method: "DELETE" });
+      const result = await response.json();
+      if (!response.ok) return toast.error(result.error || "Không thể xóa tài khoản");
+      toast.success(`Đã xóa tài khoản ${selectedUser.email}`);
+      setDeleteOpen(false);
+      setSelectedUser(null);
+      onRefresh?.();
+    } catch {
+      toast.error("Không thể kết nối máy chủ");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -152,17 +174,10 @@ export default function PendingUsersTable({ tableData, onUserUpdated }) {
     }),
     columnHelper.accessor("action", {
       header: "Thao tác",
-      cell: ({ row }) => (
-        <Button
-          size="small"
-          variant="contained"
-          color="success"
-          startIcon={<i className="tabler-user-check text-sm" />}
-          onClick={() => openActivateDialog(row.original)}
-        >
-          Thiết lập & Kích hoạt
-        </Button>
-      ),
+      cell: ({ row }) => <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+        <Button size="small" variant="contained" color="success" startIcon={<i className="tabler-user-check text-sm" />} onClick={() => openActivateDialog(row.original)}>Thiết lập & Kích hoạt</Button>
+        <Tooltip title="Xóa tài khoản chờ kích hoạt"><IconButton size="small" color="error" onClick={() => { setSelectedUser(row.original); setDeleteOpen(true); }}><i className="tabler-trash" /></IconButton></Tooltip>
+      </Box>,
     }),
   ];
 
@@ -383,6 +398,17 @@ export default function PendingUsersTable({ tableData, onUserUpdated }) {
           >
             Kích hoạt tài khoản
           </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={deleteOpen} onClose={() => !deleting && setDeleteOpen(false)} fullWidth maxWidth="xs">
+        <DialogTitle>Xóa tài khoản chờ kích hoạt?</DialogTitle>
+        <DialogContent dividers>
+          <Typography>Bạn có chắc muốn xóa tài khoản <strong>{selectedUser?.email}</strong> khỏi hệ thống?</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button color="secondary" disabled={deleting} onClick={() => setDeleteOpen(false)}>Hủy bỏ</Button>
+          <Button color="error" variant="contained" disabled={deleting} onClick={handleDelete}>{deleting ? "Đang xóa..." : "Xác nhận xóa"}</Button>
         </DialogActions>
       </Dialog>
     </>

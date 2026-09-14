@@ -47,6 +47,10 @@ export async function middleware(req: NextRequest) {
   if (publicRoutes.includes(pathname)) {
     // Nếu đã đăng nhập rồi mà vẫn vào /login -> chuyển về /home
     if (token && pathname === "/login") {
+      url.pathname = token.status === "disabled" ? "/pending-approval" : "/home";
+      return NextResponse.redirect(url);
+    }
+    if (token && pathname === "/pending-approval" && token.status !== "disabled") {
       url.pathname = "/home";
       return NextResponse.redirect(url);
     }
@@ -57,6 +61,11 @@ export async function middleware(req: NextRequest) {
   // 2. Nếu chưa đăng nhập mà truy cập trang bảo vệ -> chuyển hướng về /login
   if (!token) {
     url.pathname = "/login";
+    return NextResponse.redirect(url);
+  }
+
+  if (token.status === "disabled") {
+    url.pathname = "/pending-approval";
     return NextResponse.redirect(url);
   }
 

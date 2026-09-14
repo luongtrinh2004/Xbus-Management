@@ -75,7 +75,7 @@ export default function CompleteScheduleModal({ open, onClose, schedule, onSucce
           Xác Nhận Hoàn Thành Bê Nước
         </Typography>
         <Typography variant='body2' color='text.secondary' component='span' display='block'>
-          Tuần {schedule?.weekIndex} · Ngày {schedule?.date} ({schedule?.time || '09:00'})
+          Ngày {schedule?.date} · {schedule?.time || '09:00'}
         </Typography>
       </DialogTitle>
 
