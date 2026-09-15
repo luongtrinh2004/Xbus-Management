@@ -10,6 +10,7 @@
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx}\"",
+    "db:import-json": "node scripts/import-json-to-mysql.mjs",
     "build:icons": "tsx src/assets/iconify-icons/bundle-icons-css.mjs",
     "postinstall": "node -e \"if (process.env.SKIP_POSTINSTALL !== 'true') { require('child_process').execSync('npm run build:icons', {stdio: 'inherit'}); }\""
   },
@@ -31,8 +32,10 @@
     "classnames": "2.5.1",
     "html2canvas": "^1.4.1",
     "jspdf": "^4.2.1",
+    "mysql2": "^3.24.4",
     "next": "^15.5.25",
     "next-auth": "^4.24.15",
+    "nodemailer": "^7.0.13",
     "qrcode": "^1.5.4",
     "react": "18.3.1",
     "react-apexcharts": "^1.7.0",
