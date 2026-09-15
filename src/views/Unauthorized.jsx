@@ -13,20 +13,38 @@ export default function Unauthorized() {
         display: "grid",
         placeItems: "center",
         textAlign: "center",
+        bgcolor: "action.hover",
         p: 4,
       }}
     >
-      <Box>
-        <Typography variant="h1" color="error.main">
-          401
+      <Box
+        sx={{
+          width: "min(100%, 460px)",
+          borderRadius: 3,
+          bgcolor: "background.paper",
+          boxShadow: 3,
+          p: { xs: 4, sm: 6 },
+        }}
+      >
+        <Typography variant="h4" fontWeight={700}>
+          Truy Cập Bị Từ Chối
         </Typography>
-        <Typography variant="h4" mt={2}>
-          Bạn không có quyền truy cập
+        <Typography color="text.secondary" mt={2}>
+          Bạn không phải người thuộc công ty, chạy ngay đi nếu không thì:
         </Typography>
-        <Typography color="text.secondary" mt={1} mb={4}>
-          Vui lòng quay lại trang phù hợp với quyền tài khoản của bạn.
-        </Typography>
-        <Button component={Link} href="/home" variant="contained">
+        <Box
+          component="img"
+          src="/images/background/access-deny.webp"
+          alt="Truy cập bị từ chối"
+          sx={{
+            display: "block",
+            width: "min(100%, 280px)",
+            height: "auto",
+            mx: "auto",
+            my: 3,
+          }}
+        />
+        <Button component={Link} href="/home" variant="contained" fullWidth>
           Về trang chủ
         </Button>
       </Box>
