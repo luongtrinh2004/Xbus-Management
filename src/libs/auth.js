@@ -70,6 +70,7 @@ export const authOptions = {
 
   pages: {
     signIn: "/login",
+    error: "/401",
   },
 
   callbacks: {
