@@ -17,6 +17,7 @@ import LinearProgress from "@mui/material/LinearProgress";
 import Typography from "@mui/material/Typography";
 import { useSession } from "next-auth/react";
 import { resolveAvatar } from "@/utils/getDefaultAvatar";
+import { formatVietnamDate } from "@/libs/dateTime";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
@@ -246,14 +247,18 @@ export default function HomePage() {
       .map((user) => {
         const [, month, day] = user.birthday.split("-").map(Number);
         let nextBirthday = new Date(today.getFullYear(), month - 1, day);
-        if (nextBirthday < today) nextBirthday = new Date(today.getFullYear() + 1, month - 1, day);
+        if (nextBirthday < today)
+          nextBirthday = new Date(today.getFullYear() + 1, month - 1, day);
         return {
           ...user,
           nextBirthday,
           daysUntil: Math.round((nextBirthday - today) / 86400000),
         };
       })
-      .sort((a, b) => a.nextBirthday - b.nextBirthday || a.name.localeCompare(b.name, "vi"))
+      .sort(
+        (a, b) =>
+          a.nextBirthday - b.nextBirthday || a.name.localeCompare(b.name, "vi"),
+      )
       .slice(0, 5);
   }, [activeUsers]);
   const fundEvents = useMemo(
@@ -515,21 +520,60 @@ export default function HomePage() {
 
       <Grid size={{ xs: 12 }}>
         <Card>
-          <CardHeader title={<SectionTitle icon="tabler-cake">Sinh Nhật Thành Viên Sắp Tới</SectionTitle>} />
+          <CardHeader
+            title={
+              <SectionTitle icon="tabler-cake">
+                Sinh Nhật Thành Viên Sắp Tới
+              </SectionTitle>
+            }
+          />
           <Divider />
           <CardContent>
             {upcomingBirthdays.length ? (
               <Grid container spacing={2}>
                 {upcomingBirthdays.map((user) => (
                   <Grid key={user.id} size={{ xs: 12, sm: 6, lg: 2.4 }}>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, p: 1.5, height: "100%", border: "1px solid", borderColor: "divider", borderRadius: 2.5 }}>
-                      <Avatar src={resolveAvatar(user)} alt={user.name} sx={{ width: 44, height: 44 }}>{user.name?.[0]}</Avatar>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1.5,
+                        p: 1.5,
+                        height: "100%",
+                        border: "1px solid",
+                        borderColor: "divider",
+                        borderRadius: 2.5,
+                      }}
+                    >
+                      <Avatar
+                        src={resolveAvatar(user)}
+                        alt={user.name}
+                        sx={{ width: 44, height: 44 }}
+                      >
+                        {user.name?.[0]}
+                      </Avatar>
                       <Box sx={{ minWidth: 0, flex: 1 }}>
-                        <Typography variant="body2" fontWeight={700} noWrap>{user.name}</Typography>
-                        <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>
-                          {new Date(`${user.birthday}T00:00:00`).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" })}
+                        <Typography variant="body2" fontWeight={700} noWrap>
+                          {user.name}
                         </Typography>
-                        <Chip size="small" variant="tonal" color={user.daysUntil === 0 ? "success" : "primary"} label={user.daysUntil === 0 ? "Hôm nay" : `Còn ${user.daysUntil} ngày`} sx={{ mt: 0.75 }} />
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{ display: "block" }}
+                        >
+                          {formatVietnamDate(user.birthday)}
+                        </Typography>
+                        <Chip
+                          size="small"
+                          variant="tonal"
+                          color={user.daysUntil === 0 ? "success" : "primary"}
+                          label={
+                            user.daysUntil === 0
+                              ? "Hôm nay"
+                              : `Còn ${user.daysUntil} ngày`
+                          }
+                          sx={{ mt: 0.75 }}
+                        />
                       </Box>
                     </Box>
                   </Grid>
@@ -538,7 +582,9 @@ export default function HomePage() {
             ) : (
               <Box sx={{ py: 4, textAlign: "center" }}>
                 <i className="tabler-cake-off text-3xl text-textSecondary" />
-                <Typography color="text.secondary" sx={{ mt: 1 }}>Chưa có thông tin sinh nhật</Typography>
+                <Typography color="text.secondary" sx={{ mt: 1 }}>
+                  Chưa có thông tin sinh nhật
+                </Typography>
               </Box>
             )}
           </CardContent>

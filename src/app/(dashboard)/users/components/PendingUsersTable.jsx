@@ -29,6 +29,7 @@ import CustomAvatar from "@core/components/mui/Avatar";
 import tableStyles from "@core/styles/table.module.css";
 import { getInitials } from "@/utils/getInitials";
 import { resolveAvatar } from "@/utils/getDefaultAvatar";
+import { formatVietnamDate } from "@/libs/dateTime";
 
 const columnHelper = createColumnHelper();
 
@@ -52,7 +53,11 @@ const genderOptions = [
   { value: "unspecified", label: "Chưa xác định" },
 ];
 
-export default function PendingUsersTable({ tableData, onUserUpdated, onRefresh }) {
+export default function PendingUsersTable({
+  tableData,
+  onUserUpdated,
+  onRefresh,
+}) {
   const [activateOpen, setActivateOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -75,6 +80,10 @@ export default function PendingUsersTable({ tableData, onUserUpdated, onRefresh 
 
   const handleActivate = async () => {
     if (!selectedUser) return;
+    if (!formData.code?.trim()) {
+      toast.error("Mã nhân sự là bắt buộc trước khi kích hoạt");
+      return;
+    }
     const optimisticUser = { ...selectedUser, ...formData, status: "able" };
     onUserUpdated?.(optimisticUser, selectedUser);
     setActivateOpen(false);
@@ -102,9 +111,12 @@ export default function PendingUsersTable({ tableData, onUserUpdated, onRefresh 
     if (!selectedUser) return;
     setDeleting(true);
     try {
-      const response = await fetch(`/api/users/${selectedUser.id}`, { method: "DELETE" });
+      const response = await fetch(`/api/users/${selectedUser.id}`, {
+        method: "DELETE",
+      });
       const result = await response.json();
-      if (!response.ok) return toast.error(result.error || "Không thể xóa tài khoản");
+      if (!response.ok)
+        return toast.error(result.error || "Không thể xóa tài khoản");
       toast.success(`Đã xóa tài khoản ${selectedUser.email}`);
       setDeleteOpen(false);
       setSelectedUser(null);
@@ -156,7 +168,7 @@ export default function PendingUsersTable({ tableData, onUserUpdated, onRefresh 
       cell: ({ row }) => (
         <Typography variant="body2">
           {row.original.createdAt
-            ? new Date(row.original.createdAt).toLocaleDateString("vi-VN")
+            ? formatVietnamDate(row.original.createdAt)
             : "—"}
         </Typography>
       ),
@@ -174,10 +186,31 @@ export default function PendingUsersTable({ tableData, onUserUpdated, onRefresh 
     }),
     columnHelper.accessor("action", {
       header: "Thao tác",
-      cell: ({ row }) => <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        <Button size="small" variant="contained" color="success" startIcon={<i className="tabler-user-check text-sm" />} onClick={() => openActivateDialog(row.original)}>Thiết lập & Kích hoạt</Button>
-        <Tooltip title="Xóa tài khoản chờ kích hoạt"><IconButton size="small" color="error" onClick={() => { setSelectedUser(row.original); setDeleteOpen(true); }}><i className="tabler-trash" /></IconButton></Tooltip>
-      </Box>,
+      cell: ({ row }) => (
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Button
+            size="small"
+            variant="contained"
+            color="success"
+            startIcon={<i className="tabler-user-check text-sm" />}
+            onClick={() => openActivateDialog(row.original)}
+          >
+            Thiết lập & Kích hoạt
+          </Button>
+          <Tooltip title="Xóa tài khoản chờ kích hoạt">
+            <IconButton
+              size="small"
+              color="error"
+              onClick={() => {
+                setSelectedUser(row.original);
+                setDeleteOpen(true);
+              }}
+            >
+              <i className="tabler-trash" />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      ),
     }),
   ];
 
@@ -295,12 +328,13 @@ export default function PendingUsersTable({ tableData, onUserUpdated, onRefresh 
             <Grid size={{ xs: 12, sm: 6 }}>
               <CustomTextField
                 fullWidth
-                label="Mã nhân sự"
+                label="Mã nhân sự *"
                 value={formData.code || ""}
                 onChange={(e) =>
                   setFormData({ ...formData, code: e.target.value })
                 }
                 placeholder="VD: PNKX001"
+                required
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
@@ -401,14 +435,35 @@ export default function PendingUsersTable({ tableData, onUserUpdated, onRefresh 
         </DialogActions>
       </Dialog>
 
-      <Dialog open={deleteOpen} onClose={() => !deleting && setDeleteOpen(false)} fullWidth maxWidth="xs">
+      <Dialog
+        open={deleteOpen}
+        onClose={() => !deleting && setDeleteOpen(false)}
+        fullWidth
+        maxWidth="xs"
+      >
         <DialogTitle>Xóa tài khoản chờ kích hoạt?</DialogTitle>
         <DialogContent dividers>
-          <Typography>Bạn có chắc muốn xóa tài khoản <strong>{selectedUser?.email}</strong> khỏi hệ thống?</Typography>
+          <Typography>
+            Bạn có chắc muốn xóa tài khoản{" "}
+            <strong>{selectedUser?.email}</strong> khỏi hệ thống?
+          </Typography>
         </DialogContent>
         <DialogActions>
-          <Button color="secondary" disabled={deleting} onClick={() => setDeleteOpen(false)}>Hủy bỏ</Button>
-          <Button color="error" variant="contained" disabled={deleting} onClick={handleDelete}>{deleting ? "Đang xóa..." : "Xác nhận xóa"}</Button>
+          <Button
+            color="secondary"
+            disabled={deleting}
+            onClick={() => setDeleteOpen(false)}
+          >
+            Hủy bỏ
+          </Button>
+          <Button
+            color="error"
+            variant="contained"
+            disabled={deleting}
+            onClick={handleDelete}
+          >
+            {deleting ? "Đang xóa..." : "Xác nhận xóa"}
+          </Button>
         </DialogActions>
       </Dialog>
     </>

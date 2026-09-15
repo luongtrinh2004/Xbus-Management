@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
-import { getUsers, saveUsers } from "@/libs/jsonRepository";
+import { getUsers, saveUsers } from "@/libs/dataRepository";
 import path from "path";
 import fs from "fs";
 
@@ -14,13 +14,24 @@ const DEFAULT_AVATAR_FILES = new Set([
   "female-user.png",
   "assistant.png",
 ]);
+const isSafeStaffCode = (value) =>
+  /^[\p{L}\p{N}_-]+$/u.test(String(value || ""));
+const avatarRoot = path.resolve(AVATARS_DIR);
 
 const getAvatarFilePath = (avatarUrl) => {
   if (!avatarUrl?.startsWith("/images/avatars/")) return null;
-  const fileName = path.basename(avatarUrl.split("?")[0]);
-  return DEFAULT_AVATAR_FILES.has(fileName)
-    ? null
-    : path.join(AVATARS_DIR, fileName);
+  let relativePath;
+  try {
+    relativePath = decodeURIComponent(
+      avatarUrl.split("?")[0].replace("/images/avatars/", ""),
+    );
+  } catch {
+    return null;
+  }
+  const fileName = path.basename(relativePath);
+  if (DEFAULT_AVATAR_FILES.has(fileName)) return null;
+  const filePath = path.resolve(AVATARS_DIR, relativePath);
+  return filePath.startsWith(`${avatarRoot}${path.sep}`) ? filePath : null;
 };
 
 export async function POST(req, { params }) {
@@ -31,7 +42,7 @@ export async function POST(req, { params }) {
     }
 
     const { id } = params;
-    const users = getUsers();
+    const users = await getUsers();
     const user = users.find((u) => u.id === id);
 
     if (!user) {
@@ -82,27 +93,36 @@ export async function POST(req, { params }) {
       fs.mkdirSync(AVATARS_DIR, { recursive: true });
     }
 
-    // Có mã nhân sự thì dùng mã làm tên file; chưa có mã thì giữ nguyên tên file tải lên.
+    const staffCode = String(user.code || "")
+      .trim()
+      .toUpperCase();
+    if (!isSafeStaffCode(staffCode)) {
+      return NextResponse.json(
+        {
+          error: "Cần có mã nhân sự hợp lệ trước khi tải ảnh đại diện lên",
+        },
+        { status: 400 },
+      );
+    }
+
+    // Mỗi mã nhân sự có đúng một thư mục và một ảnh đại diện trong thư mục đó.
     const ext =
       file.type === "image/webp"
         ? "webp"
         : file.type === "image/png"
           ? "png"
           : "jpg";
-    const fileName = user.code
-      ? `${user.code}.${ext}`
-      : path.basename(file.name || `avatar.${ext}`);
-    if (DEFAULT_AVATAR_FILES.has(fileName)) {
-      return NextResponse.json(
-        { error: "Tên ảnh trùng với ảnh mặc định của hệ thống" },
-        { status: 400 },
-      );
-    }
+    const fileName = `${staffCode}.${ext}`;
+    const userAvatarDir = path.join(AVATARS_DIR, staffCode);
 
-    // Xóa avatar cũ nếu là file custom (không phải default)
+    // Xóa avatar cũ (kể cả cấu trúc tên-file cũ), sau đó xóa toàn bộ nội dung
+    // thư mục của mã để bảo đảm chỉ còn đúng một ảnh mới.
     const oldPath = getAvatarFilePath(user.avatarUrl);
     if (oldPath && fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
-    const filePath = path.join(AVATARS_DIR, fileName);
+    if (fs.existsSync(userAvatarDir))
+      fs.rmSync(userAvatarDir, { recursive: true, force: true });
+    fs.mkdirSync(userAvatarDir, { recursive: true });
+    const filePath = path.join(userAvatarDir, fileName);
 
     const buffer = Buffer.from(bytes);
     fs.writeFileSync(filePath, buffer);
@@ -114,13 +134,13 @@ export async function POST(req, { params }) {
     }
 
     // Cập nhật avatarUrl trong user record
-    const avatarUrl = `/images/avatars/${fileName}`;
+    const avatarUrl = `/images/avatars/${encodeURIComponent(staffCode)}/${encodeURIComponent(fileName)}`;
     const updatedUsers = users.map((u) =>
       u.id === id
         ? { ...u, avatarUrl, updatedAt: new Date().toISOString() }
         : u,
     );
-    saveUsers(updatedUsers);
+    await saveUsers(updatedUsers);
 
     // Filename luôn mới; query timestamp cũng tránh CDN/browser trả lại ảnh cũ.
     return NextResponse.json({
@@ -140,29 +160,30 @@ export async function DELETE(req, { params }) {
       return NextResponse.json({ error: "Chưa xác thực" }, { status: 401 });
 
     const { id } = params;
-    const users = getUsers();
+    const users = await getUsers();
     const user = users.find((u) => u.id === id);
     if (!user)
       return NextResponse.json(
         { error: "Không tìm thấy nhân sự" },
         { status: 404 },
       );
-    if (token.role !== "admin" && token.id !== id) {
+    if (token.role !== "admin") {
       return NextResponse.json(
-        { error: "Không có quyền thực hiện" },
-        { status: 403 },
-      );
-    }
-    if (!["admin", "assistant"].includes(user.role)) {
-      return NextResponse.json(
-        { error: "Chỉ có thể xóa ảnh của quản trị viên hoặc trợ lý" },
+        { error: "Chỉ quản trị viên có quyền xóa ảnh đại diện" },
         { status: 403 },
       );
     }
 
     const filePath = getAvatarFilePath(user.avatarUrl);
     if (filePath && fs.existsSync(filePath)) fs.unlinkSync(filePath);
-    saveUsers(
+    const avatarDir = filePath && path.dirname(filePath);
+    if (
+      avatarDir &&
+      path.dirname(avatarDir) === avatarRoot &&
+      fs.existsSync(avatarDir)
+    )
+      fs.rmSync(avatarDir, { recursive: true, force: true });
+    await saveUsers(
       users.map((u) =>
         u.id === id
           ? { ...u, avatarUrl: "", updatedAt: new Date().toISOString() }

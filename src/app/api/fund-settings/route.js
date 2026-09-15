@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
-import { getSettings, saveSettings } from "@/libs/jsonRepository";
+import { getSettings, saveSettings } from "@/libs/dataRepository";
 
 const secret = process.env.NEXTAUTH_SECRET;
 const defaults = {
@@ -19,7 +19,7 @@ const normalize = (amounts) =>
   );
 
 export async function GET() {
-  const settings = getSettings();
+  const settings = await getSettings();
   return NextResponse.json({
     minimumAmounts: normalize(settings.fundMinimumAmounts),
   });
@@ -46,8 +46,8 @@ export async function PATCH(req) {
         { status: 400 },
       );
     }
-    const settings = getSettings();
-    saveSettings({ ...settings, fundMinimumAmounts: minimumAmounts });
+    const settings = await getSettings();
+    await saveSettings({ ...settings, fundMinimumAmounts: minimumAmounts });
     return NextResponse.json({ minimumAmounts });
   } catch {
     return NextResponse.json(

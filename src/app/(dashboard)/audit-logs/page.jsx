@@ -24,6 +24,7 @@ import { toast } from "react-toastify";
 import { exportJsonToExcel } from "@/libs/excelHelper";
 import tableStyles from "@core/styles/table.module.css";
 import TablePaginationComponent from "@components/TablePaginationComponent";
+import { formatVietnamDateTime } from "@/libs/dateTime";
 
 const actionLabels = {
   CREATE_USER: "Thêm nhân sự",
@@ -59,13 +60,7 @@ const targetLabels = {
   AFTERNOON_TEA: "Trà chiều",
 };
 const roleLabel = (role) => (role === "assistant" ? "Trợ lý" : "Quản trị viên");
-const formatTime = (value) =>
-  value
-    ? new Intl.DateTimeFormat("vi-VN", {
-        dateStyle: "short",
-        timeStyle: "medium",
-      }).format(new Date(value))
-    : "—";
+const formatTime = formatVietnamDateTime;
 
 export default function AuditLogsPage() {
   const [logs, setLogs] = useState([]);

@@ -6,7 +6,7 @@ import {
   getUsers,
   saveUsers,
   appendAuditLog,
-} from "@/libs/jsonRepository";
+} from "@/libs/dataRepository";
 
 const secret = process.env.NEXTAUTH_SECRET;
 const fundLabels = {
@@ -19,6 +19,9 @@ const fundLabels = {
   support: "Hỗ trợ thành viên",
   other: "Khác",
 };
+// Ngày nhập trong form là ngày nghiệp vụ Việt Nam, không phải ngày UTC.
+const businessDateToIso = (date, fallback) =>
+  date ? new Date(`${date}T12:00:00+07:00`).toISOString() : fallback;
 
 const buildFundResponse = (fund, allFunds) => {
   const memberIncome = (fund.members || []).reduce(
@@ -58,7 +61,7 @@ export async function GET(req) {
     const month = searchParams.get("month") || null;
     const year = searchParams.get("year") || null;
 
-    const allFunds = getFunds();
+    const allFunds = await getFunds();
 
     // Lấy quỹ hiện tại (mới nhất hoặc theo tháng/năm)
     let fund = null;
@@ -121,7 +124,7 @@ export async function POST(req) {
       );
     }
 
-    const funds = getFunds();
+    const funds = await getFunds();
     const fundIndex = funds.findIndex(
       (item) => item.month === month && item.year === year,
     );
@@ -136,7 +139,7 @@ export async function POST(req) {
       ["explanation_penalty", "shirt_penalty"].includes(body.category);
     const needsPerson =
       body.kind === "income" && body.category !== "happy_hour";
-    const users = getUsers();
+    const users = await getUsers();
     const relatedUser = needsPerson
       ? users.find((user) => user.id === body.userId)
       : null;
@@ -156,9 +159,10 @@ export async function POST(req) {
       note: body.note?.trim() || "",
       userId: relatedUser?.id || "",
       userName: relatedUser?.name || "",
-      [body.kind === "income" ? "receivedAt" : "spentAt"]: body.date
-        ? new Date(`${body.date}T12:00:00`).toISOString()
-        : now,
+      [body.kind === "income" ? "receivedAt" : "spentAt"]: businessDateToIso(
+        body.date,
+        now,
+      ),
       createdBy: token.id,
       createdByName: token.name || token.email,
       createdAt: now,
@@ -176,7 +180,7 @@ export async function POST(req) {
           schedulingPoints: (users[userIndex].schedulingPoints || 0) - 1,
           updatedAt: now,
         };
-        saveUsers(users);
+        await saveUsers(users);
       }
     } else {
       funds[fundIndex].expenses = [
@@ -185,8 +189,8 @@ export async function POST(req) {
       ];
     }
     funds[fundIndex].updatedAt = now;
-    saveFunds(funds);
-    appendAuditLog({
+    await saveFunds(funds);
+    await appendAuditLog({
       adminId: token.id,
       adminName: token.name || token.email,
       adminEmail: token.email,
@@ -215,7 +219,7 @@ async function changeTransaction(req, removing) {
         { status: 403 },
       );
     const body = await req.json();
-    const funds = getFunds();
+    const funds = await getFunds();
     const fundIndex = funds.findIndex(
       (item) =>
         item.month === Number(body.month) && item.year === Number(body.year),
@@ -226,7 +230,7 @@ async function changeTransaction(req, removing) {
         { status: 404 },
       );
     if (body.kind === "member") {
-      const user = getUsers().find((item) => item.id === body.userId);
+      const user = (await getUsers()).find((item) => item.id === body.userId);
       if (!user)
         return NextResponse.json(
           { error: "Không tìm thấy nhân sự" },
@@ -250,8 +254,8 @@ async function changeTransaction(req, removing) {
       else members.push(payment);
       funds[fundIndex].members = members;
       funds[fundIndex].updatedAt = now;
-      saveFunds(funds);
-      appendAuditLog({
+      await saveFunds(funds);
+      await appendAuditLog({
         adminId: token.id,
         adminName: token.name || token.email,
         adminEmail: token.email,
@@ -273,7 +277,7 @@ async function changeTransaction(req, removing) {
         { status: 404 },
       );
     const previous = items[index];
-    const users = getUsers();
+    const users = await getUsers();
     const penalties = ["explanation_penalty", "shirt_penalty"];
     const adjust = (id, delta) => {
       const userIndex = users.findIndex((user) => user.id === id);
@@ -306,9 +310,10 @@ async function changeTransaction(req, removing) {
         note: body.note?.trim() || "",
         userId: person?.id || "",
         userName: person?.name || "",
-        [body.kind === "income" ? "receivedAt" : "spentAt"]: new Date(
-          `${body.date}T12:00:00`,
-        ).toISOString(),
+        [body.kind === "income" ? "receivedAt" : "spentAt"]: businessDateToIso(
+          body.date,
+          previous.receivedAt || previous.spentAt,
+        ),
         updatedAt: new Date().toISOString(),
       };
       if (body.kind === "income" && penalties.includes(body.category))
@@ -316,9 +321,9 @@ async function changeTransaction(req, removing) {
     }
     funds[fundIndex][key] = items;
     funds[fundIndex].updatedAt = new Date().toISOString();
-    saveFunds(funds);
-    saveUsers(users);
-    appendAuditLog({
+    await saveFunds(funds);
+    await saveUsers(users);
+    await appendAuditLog({
       adminId: token.id,
       adminName: token.name || token.email,
       adminEmail: token.email,

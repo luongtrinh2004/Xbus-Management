@@ -4,12 +4,12 @@ import {
   getWaterExemptions,
   getUsers,
   saveWaterExemptions,
-} from "@/libs/jsonRepository";
+} from "@/libs/dataRepository";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
 export async function GET() {
-  return NextResponse.json({ userIds: getWaterExemptions() });
+  return NextResponse.json({ userIds: await getWaterExemptions() });
 }
 
 export async function PATCH(req) {
@@ -22,11 +22,11 @@ export async function PATCH(req) {
   }
   const { userIds = [] } = await req.json();
   const eligibleIds = new Set(
-    getUsers()
+    (await getUsers())
       .filter((user) => user.status === "able" && user.role === "user")
       .map((user) => user.id),
   );
   const normalized = [...new Set(userIds)].filter((id) => eligibleIds.has(id));
-  saveWaterExemptions(normalized);
+  await saveWaterExemptions(normalized);
   return NextResponse.json({ userIds: normalized });
 }

@@ -7,7 +7,7 @@ import {
   getSettings,
   getUsers,
   saveFunds,
-} from "@/libs/jsonRepository";
+} from "@/libs/dataRepository";
 
 const secret = process.env.NEXTAUTH_SECRET;
 const defaults = {
@@ -22,8 +22,8 @@ const configured = () =>
       process.env.PAYOS_API_KEY &&
       process.env.PAYOS_CHECKSUM_KEY,
   );
-const getMinimum = (categoryId) =>
-  Number(getSettings().fundMinimumAmounts?.[categoryId]) ||
+const getMinimum = (settings, categoryId) =>
+  Number(settings.fundMinimumAmounts?.[categoryId]) ||
   defaults[categoryId] ||
   100000;
 const payOS = () =>
@@ -47,7 +47,7 @@ export async function POST(req) {
     );
   try {
     const { month, year, amount } = await req.json();
-    const funds = getFunds();
+    const funds = await getFunds();
     const fundIndex = funds.findIndex(
       (fund) => fund.month === Number(month) && fund.year === Number(year),
     );
@@ -56,7 +56,7 @@ export async function POST(req) {
         { error: "Không tìm thấy kỳ quỹ" },
         { status: 404 },
       );
-    const users = getUsers();
+    const users = await getUsers();
     const user = users.find((item) => item.id === token.id);
     if (!user || user.status !== "able")
       return NextResponse.json(
@@ -64,7 +64,7 @@ export async function POST(req) {
         { status: 403 },
       );
     const contribution = Number(amount);
-    const minimum = getMinimum(user.categoryId);
+    const minimum = getMinimum(await getSettings(), user.categoryId);
     if (!Number.isInteger(contribution) || contribution < minimum)
       return NextResponse.json(
         {
@@ -119,7 +119,7 @@ export async function POST(req) {
     if (index >= 0) members[index] = record;
     else members.push(record);
     funds[fundIndex].members = members;
-    saveFunds(funds);
+    await saveFunds(funds);
     return NextResponse.json(
       {
         orderCode,
@@ -144,7 +144,7 @@ export async function GET(req) {
   if (!token?.id)
     return NextResponse.json({ error: "Chưa xác thực" }, { status: 401 });
   const orderCode = Number(req.nextUrl.searchParams.get("orderCode"));
-  for (const fund of getFunds()) {
+  for (const fund of await getFunds()) {
     const payment = (fund.members || []).find(
       (item) => item.orderCode === orderCode,
     );

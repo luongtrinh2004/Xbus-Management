@@ -4,7 +4,7 @@ import {
   appendAuditLog,
   getWaterSchedules,
   saveWaterSchedules,
-} from "@/libs/jsonRepository";
+} from "@/libs/dataRepository";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -12,21 +12,30 @@ export async function DELETE(req, { params }) {
   try {
     const token = await getToken({ req, secret });
     if (!["admin", "assistant"].includes(token?.role)) {
-      return NextResponse.json({ error: "Không có quyền xóa lịch" }, { status: 403 });
+      return NextResponse.json(
+        { error: "Không có quyền xóa lịch" },
+        { status: 403 },
+      );
     }
 
     const { id } = await params;
-    const schedules = getWaterSchedules();
+    const schedules = await getWaterSchedules();
     const schedule = schedules.find((item) => item.id === id);
     if (!schedule) {
-      return NextResponse.json({ error: "Không tìm thấy lịch" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Không tìm thấy lịch" },
+        { status: 404 },
+      );
     }
     if (schedule.status === "completed") {
-      return NextResponse.json({ error: "Không thể xóa lịch đã hoàn thành" }, { status: 409 });
+      return NextResponse.json(
+        { error: "Không thể xóa lịch đã hoàn thành" },
+        { status: 409 },
+      );
     }
 
-    saveWaterSchedules(schedules.filter((item) => item.id !== id));
-    appendAuditLog({
+    await saveWaterSchedules(schedules.filter((item) => item.id !== id));
+    await appendAuditLog({
       adminId: token.id,
       adminName: token.name || "Người dùng",
       adminEmail: token.email || "",

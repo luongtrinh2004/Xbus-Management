@@ -1,9 +1,14 @@
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
-import { getUsers, saveUsers, appendAuditLog } from "@/libs/jsonRepository";
+import { getUsers, saveUsers, appendAuditLog } from "@/libs/dataRepository";
 import { generateExcelBuffer } from "@/libs/excelHelper";
+import { formatVietnamDate } from "@/libs/dateTime";
 
 const secret = process.env.NEXTAUTH_SECRET;
+const normalizeStaffCode = (value) =>
+  String(value || "")
+    .trim()
+    .toUpperCase();
 
 export async function GET(req) {
   try {
@@ -20,7 +25,7 @@ export async function GET(req) {
     const sortBy = searchParams.get("sortBy") || "";
     const sortOrder = searchParams.get("sortOrder") === "desc" ? -1 : 1;
 
-    let users = getUsers();
+    let users = await getUsers();
 
     // Lọc theo role
     if (role) {
@@ -122,9 +127,7 @@ export async function GET(req) {
             : "Chờ kích hoạt / Vô hiệu hóa",
         "Điểm bê nước": u.schedulingPoints || 0,
         "Số lượt bê nước": u.waterTripCount || 0,
-        "Ngày tạo": u.createdAt
-          ? new Date(u.createdAt).toLocaleDateString("vi-VN")
-          : "",
+        "Ngày tạo": formatVietnamDate(u.createdAt),
       }));
 
       const buffer = generateExcelBuffer(exportData, "Danh sách nhân sự");
@@ -169,19 +172,35 @@ export async function POST(req) {
     }
     const body = await req.json();
 
-    if (!body.email || !body.name) {
+    if (!body.email || !body.name || !normalizeStaffCode(body.code)) {
       return NextResponse.json(
-        { error: "Tên và Email là bắt buộc" },
+        { error: "Tên, email và mã nhân sự là bắt buộc" },
         { status: 400 },
       );
     }
 
-    const users = getUsers();
+    const users = await getUsers();
+    const code = normalizeStaffCode(body.code);
+    if (!/^[\p{L}\p{N}_-]+$/u.test(code)) {
+      return NextResponse.json(
+        {
+          error:
+            "Mã nhân sự chỉ gồm chữ cái, số, dấu gạch ngang hoặc gạch dưới",
+        },
+        { status: 400 },
+      );
+    }
 
     // Kiểm tra trùng email
     if (users.some((u) => u.email.toLowerCase() === body.email.toLowerCase())) {
       return NextResponse.json(
         { error: "Email đã tồn tại trong hệ thống" },
+        { status: 409 },
+      );
+    }
+    if (users.some((u) => normalizeStaffCode(u.code) === code)) {
+      return NextResponse.json(
+        { error: "Mã nhân sự đã được sử dụng" },
         { status: 409 },
       );
     }
@@ -191,7 +210,7 @@ export async function POST(req) {
       googleId: body.googleId || "",
       name: body.name,
       email: body.email.toLowerCase(),
-      code: body.code || `XBS${Math.floor(100 + Math.random() * 900)}`,
+      code,
       avatarUrl: body.avatarUrl || "",
       gender: body.gender || "unspecified",
       birthday: body.birthday || "",
@@ -209,10 +228,10 @@ export async function POST(req) {
     };
 
     users.unshift(newUser);
-    saveUsers(users);
+    await saveUsers(users);
 
     // Ghi audit log
-    appendAuditLog({
+    await appendAuditLog({
       adminId: token?.id || "admin",
       adminName: token?.name || "Admin",
       adminEmail: token?.email || "admin@phenikaa-x.com",

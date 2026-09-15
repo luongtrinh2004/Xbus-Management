@@ -37,12 +37,17 @@ import { toast } from "react-toastify";
 import ConfirmDialog from "@components/ConfirmDialog";
 import DataTableToolbar from "@components/DataTableToolbar";
 import TablePaginationComponent from "@components/TablePaginationComponent";
+import {
+  formatVietnamDate,
+  formatVietnamDateTime,
+  toVietnamDateKey,
+} from "@/libs/dateTime";
 
 const money = (value) =>
   `${new Intl.NumberFormat("vi-VN").format(value || 0)} đ`;
 const moneyInput = (value) =>
   value ? `${new Intl.NumberFormat("vi-VN").format(Number(value))} VNĐ` : "";
-const localDate = () => new Date().toLocaleDateString("en-CA");
+const localDate = () => toVietnamDateKey();
 const departments = {
   type_web_app: "Web/App",
   type_ap: "AP",
@@ -194,18 +199,24 @@ export default function FundPage() {
 
   const members = useMemo(
     () =>
-      users.map((user) => {
-        const payment = (fund?.members || []).find(
-          (item) => item.userId === user.id,
-        );
-        return {
-          ...user,
-          paid: Boolean(payment?.paid),
-          amount: payment?.amount || 0,
-          paidAt: payment?.paidAt,
-        };
-      }),
-    [users, fund],
+      users
+        .map((user) => {
+          const payment = (fund?.members || []).find(
+            (item) => item.userId === user.id,
+          );
+          return {
+            ...user,
+            paid: Boolean(payment?.paid),
+            amount: payment?.amount || 0,
+            paidAt: payment?.paidAt,
+          };
+        })
+        .sort((a, b) => {
+          const rank = (member) =>
+            member.id === session?.user?.id ? 0 : member.paid ? 1 : 2;
+          return rank(a) - rank(b) || a.name.localeCompare(b.name, "vi");
+        }),
+    [users, fund, session?.user?.id],
   );
 
   const incomeTotals = useMemo(() => {
@@ -250,8 +261,8 @@ export default function FundPage() {
   const visibleIncomeRows = useMemo(
     () =>
       filteredIncomeRows.filter((item) => {
-        const date = new Date(item.receivedAt || item.createdAt);
-        return `${item.userName} ${item.note} ${item.title} ${date.toLocaleDateString("vi-VN")} ${date.toLocaleDateString("en-CA")}`
+        const date = item.receivedAt || item.createdAt;
+        return `${item.userName} ${item.note} ${item.title} ${formatVietnamDate(date)} ${toVietnamDateKey(date)}`
           .toLowerCase()
           .includes(incomeSearch.toLowerCase().trim());
       }),
@@ -260,8 +271,8 @@ export default function FundPage() {
   const visibleExpenseRows = useMemo(
     () =>
       (fund?.expenses || []).filter((item) => {
-        const date = new Date(item.spentAt || item.createdAt);
-        return `${item.note} ${item.createdByName} ${item.title} ${date.toLocaleDateString("vi-VN")} ${date.toLocaleDateString("en-CA")}`
+        const date = item.spentAt || item.createdAt;
+        return `${item.note} ${item.createdByName} ${item.title} ${formatVietnamDate(date)} ${toVietnamDateKey(date)}`
           .toLowerCase()
           .includes(expenseSearch.toLowerCase().trim());
       }),
@@ -284,9 +295,7 @@ export default function FundPage() {
     setForm({
       category: item.category || "other",
       amount: String(item.amount || ""),
-      date: new Date(
-        item.receivedAt || item.spentAt || item.createdAt,
-      ).toLocaleDateString("en-CA"),
+      date: toVietnamDateKey(item.receivedAt || item.spentAt || item.createdAt),
       note: item.note || "",
       userId: item.userId || "",
     });
@@ -655,9 +664,9 @@ export default function FundPage() {
                               <TableCell>
                                 {item.locked
                                   ? `Tháng ${period}`
-                                  : new Date(
+                                  : formatVietnamDate(
                                       item.receivedAt || item.createdAt,
-                                    ).toLocaleDateString("vi-VN")}
+                                    )}
                               </TableCell>
                               <TableCell align="right">
                                 <Typography
@@ -815,9 +824,9 @@ export default function FundPage() {
                             <TableCell>{item.note || "—"}</TableCell>
                             <TableCell>{item.createdByName || "—"}</TableCell>
                             <TableCell>
-                              {new Date(
+                              {formatVietnamDate(
                                 item.spentAt || item.createdAt,
-                              ).toLocaleDateString("vi-VN")}
+                              )}
                             </TableCell>
                             <TableCell align="right">
                               <Typography color="error.main" fontWeight={700}>
@@ -955,111 +964,144 @@ export default function FundPage() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {members.map((member) => (
-                    <TableRow key={member.id} hover>
-                      <TableCell>
-                        <Typography fontWeight={600}>
-                          {member.code || "—"}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Box
-                          sx={{
-                            display: "flex",
-                            gap: 1.5,
-                            alignItems: "center",
-                          }}
-                        >
-                          <Avatar
-                            src={resolveAvatar(member)}
-                            sx={{ width: 32, height: 32 }}
-                          />
-                          <Box>
-                            <Typography variant="body2" fontWeight={600}>
-                              {member.name}
-                            </Typography>
-                            <Typography
-                              variant="caption"
-                              color="text.secondary"
-                            >
-                              {member.email}
-                            </Typography>
-                          </Box>
-                        </Box>
-                      </TableCell>
-                      <TableCell align="center">
-                        <Chip
-                          size="small"
-                          variant="tonal"
-                          label={departments[member.typeId] || "Chưa gán"}
-                        />
-                      </TableCell>
-                      <TableCell align="center">
-                        {categories[member.categoryId] || "—"}
-                      </TableCell>
-                      <TableCell align="center">
-                        <Chip
-                          size="small"
-                          variant="tonal"
-                          color={member.paid ? "success" : "secondary"}
-                          label={member.paid ? "Đã đóng" : "Chưa đóng"}
-                        />
-                      </TableCell>
-                      <TableCell align="center">
-                        <Typography
-                          fontWeight={700}
-                          color={member.paid ? "text.primary" : "text.disabled"}
-                        >
-                          {money(member.amount)}
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="center">
-                        {member.paidAt
-                          ? new Date(member.paidAt).toLocaleString("vi-VN")
-                          : "—"}
-                      </TableCell>
-                      {canManage && (
-                        <TableCell align="center">
-                          {!member.paid ? (
-                            <IconButton
-                              color="success"
-                              size="small"
-                              aria-label={`Xác nhận ${member.name} đã đóng quỹ`}
-                              onClick={() => updateMemberPayment(member, true)}
-                            >
-                              <i className="tabler-circle-check" />
-                            </IconButton>
-                          ) : (
-                            <IconButton
-                              color="error"
-                              size="small"
-                              aria-label={`Hủy duyệt đóng quỹ của ${member.name}`}
-                              onClick={() => setCancelPaymentTarget(member)}
-                            >
-                              <i className="tabler-circle-x" />
-                            </IconButton>
-                          )}
+                  {members.map((member) => {
+                    const isCurrentUser = member.id === session?.user?.id;
+                    return (
+                      <TableRow
+                        key={member.id}
+                        hover
+                        sx={{
+                          bgcolor: isCurrentUser
+                            ? "rgba(115, 103, 240, 0.04)"
+                            : "inherit",
+                        }}
+                      >
+                        <TableCell>
+                          <Typography fontWeight={600}>
+                            {member.code || "—"}
+                          </Typography>
                         </TableCell>
-                      )}
-                      <TableCell align="center">
-                        {member.id === session?.user?.id && !member.paid ? (
-                          <Button
-                            size="small"
-                            variant="contained"
-                            onClick={() => {
-                              setPaymentMember(member);
-                              setPaymentAmount(String(minimumFor(member)));
-                              setPaymentData(null);
+                        <TableCell>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              gap: 1.5,
+                              alignItems: "center",
                             }}
                           >
-                            Đóng quỹ
-                          </Button>
-                        ) : (
-                          "—"
+                            <Avatar
+                              src={resolveAvatar(member)}
+                              sx={{ width: 32, height: 32 }}
+                            />
+                            <Box>
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  alignItems: "baseline",
+                                  gap: 0.75,
+                                }}
+                              >
+                                <Typography variant="body2" fontWeight={600}>
+                                  {member.name}
+                                </Typography>
+                                {isCurrentUser && (
+                                  <Typography
+                                    variant="caption"
+                                    color="primary.main"
+                                    fontWeight={600}
+                                    sx={{ whiteSpace: "nowrap" }}
+                                  >
+                                    (Bạn)
+                                  </Typography>
+                                )}
+                              </Box>
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                              >
+                                {member.email}
+                              </Typography>
+                            </Box>
+                          </Box>
+                        </TableCell>
+                        <TableCell align="center">
+                          <Chip
+                            size="small"
+                            variant="tonal"
+                            label={departments[member.typeId] || "Chưa gán"}
+                          />
+                        </TableCell>
+                        <TableCell align="center">
+                          {categories[member.categoryId] || "—"}
+                        </TableCell>
+                        <TableCell align="center">
+                          <Chip
+                            size="small"
+                            variant="tonal"
+                            color={member.paid ? "success" : "secondary"}
+                            label={member.paid ? "Đã đóng" : "Chưa đóng"}
+                          />
+                        </TableCell>
+                        <TableCell align="center">
+                          <Typography
+                            fontWeight={700}
+                            color={
+                              member.paid ? "text.primary" : "text.disabled"
+                            }
+                          >
+                            {money(member.amount)}
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="center">
+                          {member.paidAt
+                            ? formatVietnamDateTime(member.paidAt)
+                            : "—"}
+                        </TableCell>
+                        {canManage && (
+                          <TableCell align="center">
+                            {!member.paid ? (
+                              <IconButton
+                                color="success"
+                                size="small"
+                                aria-label={`Xác nhận ${member.name} đã đóng quỹ`}
+                                onClick={() =>
+                                  updateMemberPayment(member, true)
+                                }
+                              >
+                                <i className="tabler-circle-check" />
+                              </IconButton>
+                            ) : (
+                              <IconButton
+                                color="error"
+                                size="small"
+                                aria-label={`Hủy duyệt đóng quỹ của ${member.name}`}
+                                onClick={() => setCancelPaymentTarget(member)}
+                              >
+                                <i className="tabler-circle-x" />
+                              </IconButton>
+                            )}
+                          </TableCell>
                         )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                        <TableCell align="center">
+                          {member.id === session?.user?.id && !member.paid ? (
+                            <Button
+                              size="small"
+                              variant="contained"
+                              onClick={() => {
+                                setPaymentMember(member);
+                                setPaymentAmount(String(minimumFor(member)));
+                                setPaymentData(null);
+                              }}
+                            >
+                              Đóng quỹ
+                            </Button>
+                          ) : (
+                            "—"
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </TableContainer>

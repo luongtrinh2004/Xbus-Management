@@ -6,8 +6,9 @@ import {
   getUsers,
   getWaterExemptions,
   appendAuditLog,
-} from "@/libs/jsonRepository";
+} from "@/libs/dataRepository";
 import { getWeeksOfMonth, getEligibleWaterUsers } from "@/libs/waterScheduler";
+import { toVietnamDateKey } from "@/libs/dateTime";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -15,19 +16,22 @@ export async function GET(req) {
   try {
     const token = await getToken({ req, secret });
     const searchParams = req.nextUrl.searchParams;
+    const [currentYear, currentMonth] = toVietnamDateKey()
+      .split("-")
+      .map(Number);
     const month = searchParams.get("month")
       ? parseInt(searchParams.get("month"), 10)
-      : 9;
+      : currentMonth;
     const year = searchParams.get("year")
       ? parseInt(searchParams.get("year"), 10)
-      : 2026;
+      : currentYear;
     const status = searchParams.get("status") || "";
     const myScheduleOnly = searchParams.get("mySchedule") === "true";
 
-    const allSchedules = getWaterSchedules();
-    const allUsers = getUsers();
+    const allSchedules = await getWaterSchedules();
+    const allUsers = await getUsers();
     const eligibleUsers = getEligibleWaterUsers(allUsers);
-    const exemptUserIds = getWaterExemptions();
+    const exemptUserIds = await getWaterExemptions();
 
     // Lọc theo tháng và năm
     let result = allSchedules.filter(
@@ -71,8 +75,12 @@ export async function GET(req) {
       year,
       schedules: result,
       weeksMeta,
-      eligibleUsers: ["admin", "assistant"].includes(token?.role) ? eligibleUsers : [],
-      exemptUserIds: ["admin", "assistant"].includes(token?.role) ? exemptUserIds : [],
+      eligibleUsers: ["admin", "assistant"].includes(token?.role)
+        ? eligibleUsers
+        : [],
+      exemptUserIds: ["admin", "assistant"].includes(token?.role)
+        ? exemptUserIds
+        : [],
       currentUser: currentUser
         ? {
             id: currentUser.id,
@@ -109,7 +117,7 @@ export async function POST(req) {
     } = body;
 
     if (updatedSchedule) {
-      const currentSchedules = getWaterSchedules();
+      const currentSchedules = await getWaterSchedules();
       const index = currentSchedules.findIndex(
         (item) => item.id === updatedSchedule.id,
       );
@@ -123,7 +131,7 @@ export async function POST(req) {
       };
       if (index >= 0) currentSchedules[index] = savedSchedule;
       else currentSchedules.push(savedSchedule);
-      saveWaterSchedules(currentSchedules);
+      await saveWaterSchedules(currentSchedules);
       return NextResponse.json({ success: true, schedules: [savedSchedule] });
     }
 
@@ -134,7 +142,7 @@ export async function POST(req) {
       );
     }
 
-    const currentSchedules = getWaterSchedules();
+    const currentSchedules = await getWaterSchedules();
 
     // Cập nhật hoặc thêm mới các lịch cho tháng này
     // Giữ nguyên các lịch của các tháng khác
@@ -148,10 +156,10 @@ export async function POST(req) {
     );
     const mergedSchedules = [...otherSchedules, ...savedSchedules];
 
-    saveWaterSchedules(mergedSchedules);
+    await saveWaterSchedules(mergedSchedules);
 
     // Ghi nhật ký audit
-    appendAuditLog({
+    await appendAuditLog({
       adminId: token.id || "usr_admin_001",
       adminName: token.name || "Quản trị viên",
       adminEmail: token.email || "admin@phenikaa-x.com",

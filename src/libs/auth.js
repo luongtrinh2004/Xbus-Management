@@ -4,13 +4,18 @@
 import CredentialProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
-import { getSettings, getUsers, saveUsers } from "@/libs/jsonRepository";
+import { getSettings, getUsers, saveUsers } from "@/libs/dataRepository";
 
-const normalizeEmail = (value) => String(value || "").trim().toLowerCase();
+const normalizeEmail = (value) =>
+  String(value || "")
+    .trim()
+    .toLowerCase();
 const companyEmailKey = (value) => {
   const email = normalizeEmail(value);
   const [local, domain] = email.split("@");
-  return domain === "phenikaa-x.com" ? `${local.replaceAll(".", "")}@${domain}` : email;
+  return domain === "phenikaa-x.com"
+    ? `${local.replaceAll(".", "")}@${domain}`
+    : email;
 };
 
 export const authOptions = {
@@ -32,7 +37,7 @@ export const authOptions = {
           throw new Error("Email và mật khẩu là bắt buộc");
         }
 
-        const jsonUser = getUsers().find(
+        const jsonUser = (await getUsers()).find(
           (u) => u.email?.toLowerCase() === email,
         );
         if (jsonUser?.password) {
@@ -78,29 +83,38 @@ export const authOptions = {
       if (account?.provider !== "google" || !user.email) return true;
 
       const email = normalizeEmail(user.email);
-      const settings = getSettings();
+      const settings = await getSettings();
       const domain = email.split("@")[1];
       if (!domain || !(settings.companyEmailDomains || []).includes(domain))
         return false;
 
-      const users = getUsers();
-      const matches = users.filter((item) => companyEmailKey(item.email) === companyEmailKey(email));
+      const users = await getUsers();
+      const matches = users.filter(
+        (item) => companyEmailKey(item.email) === companyEmailKey(email),
+      );
       if (matches.length) {
-        const existing = [...matches].sort((a, b) =>
-          Number(b.status === "able") - Number(a.status === "able") ||
-          Number(Boolean(b.code || b.password)) - Number(Boolean(a.code || a.password)) ||
-          new Date(a.createdAt || 0) - new Date(b.createdAt || 0),
+        const existing = [...matches].sort(
+          (a, b) =>
+            Number(b.status === "able") - Number(a.status === "able") ||
+            Number(Boolean(b.code || b.password)) -
+              Number(Boolean(a.code || a.password)) ||
+            new Date(a.createdAt || 0) - new Date(b.createdAt || 0),
         )[0];
         existing.email = email;
         existing.googleId = user.id || existing.googleId || "";
         existing.updatedAt = new Date().toISOString();
-        existing.avatarUrl = existing.avatarUrl?.startsWith("http") ? "" : existing.avatarUrl || "";
-        const mergedUsers = users.filter((item) =>
-          item.id === existing.id ||
-          companyEmailKey(item.email) !== companyEmailKey(email) ||
-          item.status === "able" || item.code || item.password,
+        existing.avatarUrl = existing.avatarUrl?.startsWith("http")
+          ? ""
+          : existing.avatarUrl || "";
+        const mergedUsers = users.filter(
+          (item) =>
+            item.id === existing.id ||
+            companyEmailKey(item.email) !== companyEmailKey(email) ||
+            item.status === "able" ||
+            item.code ||
+            item.password,
         );
-        saveUsers(mergedUsers);
+        await saveUsers(mergedUsers);
       } else {
         users.unshift({
           id: `usr_${Date.now()}`,
@@ -115,7 +129,9 @@ export const authOptions = {
           role: settings.defaultRole || "user",
           typeId: "",
           categoryId: "",
-          status: settings.defaultUserStatus || "disabled",
+          // Tài khoản Google mới luôn cần admin cấp mã nhân sự rồi kích hoạt.
+          // Không lấy defaultUserStatus ở đây để tránh tự động thành tài khoản dùng được.
+          status: "disabled",
           schedulingPoints: 0,
           waterTripCount: 0,
           createdAt: new Date().toISOString(),
@@ -123,13 +139,13 @@ export const authOptions = {
           activatedAt: null,
           activatedBy: null,
         });
-        saveUsers(users);
+        await saveUsers(users);
       }
       return true;
     },
     async jwt({ token, user }) {
       if (user) {
-        const storedUser = getUsers().find(
+        const storedUser = (await getUsers()).find(
           (item) => item.email?.toLowerCase() === user.email?.toLowerCase(),
         );
         token.id = storedUser?.id || user.id;
@@ -139,7 +155,7 @@ export const authOptions = {
         token.avatar = storedUser?.avatarUrl || null;
       }
       if (token.email) {
-        const currentUser = getUsers().find(
+        const currentUser = (await getUsers()).find(
           (item) => normalizeEmail(item.email) === normalizeEmail(token.email),
         );
         if (currentUser) {
