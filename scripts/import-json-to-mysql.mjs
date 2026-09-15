@@ -9,7 +9,7 @@ const json = (name) =>
   );
 const url =
   process.env.DATABASE_URL || "mysql://xbus:123456@127.0.0.1:3306/xbus";
-const db = await mysql.createConnection(url);
+const db = await mysql.createConnection({ uri: url, timezone: "+07:00" });
 const iso = (value) => (value ? new Date(value) : null);
 const upsert = async (sql, values) =>
   db.execute(
@@ -148,7 +148,7 @@ try {
   const schedules = json("water-schedules.json").schedules || [];
   for (const item of schedules) {
     await upsert(
-      "INSERT INTO water_schedules (id,year,month,week_index,schedule_date,schedule_time,required_people,status,note,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE status=VALUES(status),note=VALUES(note),updated_at=VALUES(updated_at)",
+      "INSERT INTO water_schedules (id,year,month,week_index,schedule_date,schedule_time,required_people,status,note,metadata,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE schedule_date=VALUES(schedule_date),schedule_time=VALUES(schedule_time),status=VALUES(status),note=VALUES(note),metadata=VALUES(metadata),updated_at=VALUES(updated_at)",
       [
         item.id,
         item.year || 0,
@@ -159,6 +159,27 @@ try {
         item.requiredPeople || 0,
         item.status || "pending",
         item.note || null,
+        JSON.stringify(
+          Object.fromEntries(
+            Object.entries(item).filter(
+              ([key]) =>
+                ![
+                  "id",
+                  "year",
+                  "month",
+                  "weekIndex",
+                  "date",
+                  "time",
+                  "requiredPeople",
+                  "status",
+                  "note",
+                  "participants",
+                  "createdAt",
+                  "updatedAt",
+                ].includes(key),
+            ),
+          ),
+        ),
         iso(item.createdAt),
         iso(item.updatedAt),
       ],
@@ -193,6 +214,10 @@ try {
   await upsert(
     "INSERT INTO app_settings (setting_key,setting_value,updated_at) VALUES (?,?,?) ON DUPLICATE KEY UPDATE setting_value=VALUES(setting_value),updated_at=VALUES(updated_at)",
     ["global", JSON.stringify(json("settings.json")), new Date()],
+  );
+  await upsert(
+    "INSERT INTO app_documents (document_key,document_value,updated_at) VALUES (?,?,?) ON DUPLICATE KEY UPDATE document_value=VALUES(document_value),updated_at=VALUES(updated_at)",
+    ["afternoon-tea", JSON.stringify(json("afternoon-tea.json")), new Date()],
   );
   await db.commit();
   for (const table of [

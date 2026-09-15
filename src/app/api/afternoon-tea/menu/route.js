@@ -6,7 +6,8 @@ import {
   getAfternoonTea,
   getUsers,
   saveAfternoonTea,
-} from "@/libs/jsonRepository";
+} from "@/libs/dataRepository";
+import { toVietnamDateKey } from "@/libs/dateTime";
 
 const secret = process.env.NEXTAUTH_SECRET;
 const imageTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
@@ -25,7 +26,7 @@ export async function POST(req) {
     const invitationId = String(form.get("invitationId") || "");
     const shop = String(form.get("shop") || "").trim();
     const file = form.get("image");
-    const data = getAfternoonTea();
+    const data = await getAfternoonTea();
     const invitation = data.invitations.find(
       (item) => item.id === invitationId,
     );
@@ -37,7 +38,7 @@ export async function POST(req) {
         { error: "Không tìm thấy lời mời" },
         { status: 404 },
       );
-    const currentUser = getUsers().find(
+    const currentUser = (await getUsers()).find(
       (user) =>
         user.id === token.id ||
         user.email?.toLowerCase() === token.email?.toLowerCase(),
@@ -74,7 +75,7 @@ export async function POST(req) {
     const scheduledDate = invitation.scheduledAt
       ? new Date(invitation.scheduledAt)
       : new Date();
-    const dateFolder = scheduledDate.toISOString().slice(0, 10);
+    const dateFolder = toVietnamDateKey(scheduledDate);
     const shopFolder = safeSegment(shop);
     const fileName = `menu-${Date.now()}.${file.type.split("/")[1]}`;
     const relativeDir = path.posix.join(
@@ -103,7 +104,7 @@ export async function POST(req) {
       uploadedBy: token.id,
       uploadedAt: new Date().toISOString(),
     });
-    saveAfternoonTea(data);
+    await saveAfternoonTea(data);
     return NextResponse.json({ invitation });
   } catch (error) {
     console.error("[AfternoonTea Menu]", error);

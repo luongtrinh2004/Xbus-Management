@@ -29,6 +29,7 @@ import EditUserDialog from "./EditUserDialog";
 import TableFilters from "./TableFilters";
 import { getInitials } from "@/utils/getInitials";
 import { resolveAvatar } from "@/utils/getDefaultAvatar";
+import { formatVietnamDate } from "@/libs/dateTime";
 import tableStyles from "@core/styles/table.module.css";
 
 const typeNameMap = {
@@ -55,7 +56,7 @@ const columnHelper = createColumnHelper();
 const formatBirthday = (birthday) => {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(birthday || "")) return "—";
 
-  return new Date(`${birthday}T00:00:00`).toLocaleDateString("vi-VN");
+  return formatVietnamDate(birthday);
 };
 
 const UserListTable = ({

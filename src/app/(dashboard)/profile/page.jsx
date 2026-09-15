@@ -22,6 +22,7 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { resolveAvatar } from "@/utils/getDefaultAvatar";
 import { toast } from "react-toastify";
+import { formatVietnamDate, formatVietnamDateTime } from "@/libs/dateTime";
 
 const CATEGORY_LABEL = {
   category_official: "Chính thức",
@@ -255,20 +256,10 @@ export default function ProfilePage() {
 
   const avatarSrc = resolveAvatar(profile);
   const joinDate = profile.activatedAt
-    ? new Date(profile.activatedAt).toLocaleDateString("vi-VN", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      })
+    ? formatVietnamDate(profile.activatedAt)
     : null;
   const lastUpdate = profile.updatedAt
-    ? new Date(profile.updatedAt).toLocaleDateString("vi-VN", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      })
+    ? formatVietnamDateTime(profile.updatedAt)
     : null;
 
   return (

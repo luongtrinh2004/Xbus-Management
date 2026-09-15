@@ -30,11 +30,12 @@ import tableStyles from "@core/styles/table.module.css";
 import ConfirmDialog from "@components/ConfirmDialog";
 import DataTableToolbar from "@components/DataTableToolbar";
 import TablePaginationComponent from "@components/TablePaginationComponent";
+import { formatVietnamDate, toVietnamDateKey } from "@/libs/dateTime";
 
 const emptyForm = {
   code: "",
   name: "",
-  date: new Date().toISOString().slice(0, 10),
+  date: toVietnamDateKey(),
   quantity: 1,
   location: "",
   person: "",
@@ -69,10 +70,7 @@ const columns = {
     "Ghi chú",
   ],
 };
-const formatDate = (value) =>
-  value
-    ? new Intl.DateTimeFormat("vi-VN").format(new Date(`${value}T00:00:00`))
-    : "—";
+const formatDate = formatVietnamDate;
 
 const normalizeSearchText = (value) =>
   String(value || "")

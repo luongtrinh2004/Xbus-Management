@@ -2,13 +2,13 @@ import { NextResponse } from "next/server";
 
 import bcrypt from "bcryptjs";
 
-import { getUsers } from "@/libs/jsonRepository";
+import { getUsers } from "@/libs/dataRepository";
 
 export async function POST(req) {
   try {
     const { email, password } = await req.json();
 
-    const user = getUsers().find(
+    const user = (await getUsers()).find(
       (item) => item.email?.toLowerCase() === email?.trim().toLowerCase(),
     );
 

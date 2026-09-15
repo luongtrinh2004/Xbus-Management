@@ -7,13 +7,19 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Typography from "@mui/material/Typography";
 import AdminScheduleView from "./components/AdminScheduleView";
 import UserScheduleView from "./components/UserScheduleView";
+import { toVietnamDateKey } from "@/libs/dateTime";
+
+const currentVietnamPeriod = () => {
+  const [year, month] = toVietnamDateKey().split("-").map(Number);
+  return { month, year };
+};
 
 export default function WaterSchedulePage() {
   const { data: session, status } = useSession();
   const isAdmin = ["admin", "assistant"].includes(session?.user?.role);
 
-  const [month, setMonth] = useState(9);
-  const [year, setYear] = useState(2026);
+  const [month, setMonth] = useState(() => currentVietnamPeriod().month);
+  const [year, setYear] = useState(() => currentVietnamPeriod().year);
   const [schedules, setSchedules] = useState([]);
   const [weeksMeta, setWeeksMeta] = useState([]);
   const [eligibleUsers, setEligibleUsers] = useState([]);

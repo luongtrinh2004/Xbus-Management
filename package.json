@@ -11,6 +11,7 @@
     "lint:fix": "next lint --fix",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx}\"",
     "db:import-json": "node scripts/import-json-to-mysql.mjs",
+    "db:migrate": "node scripts/migrate-mysql.mjs",
     "build:icons": "tsx src/assets/iconify-icons/bundle-icons-css.mjs",
     "postinstall": "node -e \"if (process.env.SKIP_POSTINSTALL !== 'true') { require('child_process').execSync('npm run build:icons', {stdio: 'inherit'}); }\""
   },

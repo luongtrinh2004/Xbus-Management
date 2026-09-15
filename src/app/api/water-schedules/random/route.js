@@ -4,7 +4,7 @@ import {
   getUsers,
   getWaterSchedules,
   getWaterExemptions,
-} from "@/libs/jsonRepository";
+} from "@/libs/dataRepository";
 import {
   getEligibleWaterUsers,
   selectFairParticipants,
@@ -33,8 +33,8 @@ export async function POST(req) {
       currentDraft = [],
     } = body;
 
-    const allUsers = getUsers();
-    const exemptUserIds = getWaterExemptions();
+    const allUsers = await getUsers();
+    const exemptUserIds = await getWaterExemptions();
     const eligibleUsers = getEligibleWaterUsers(allUsers).filter(
       (user) => !exemptUserIds.includes(user.id),
     );
@@ -46,7 +46,7 @@ export async function POST(req) {
       );
     }
 
-    const allSchedules = getWaterSchedules();
+    const allSchedules = await getWaterSchedules();
     const weeksMeta = getWeeksOfMonth(year, month);
 
     if (mode === "single_week") {

@@ -34,6 +34,11 @@ import { resolveAvatar } from "@/utils/getDefaultAvatar";
 import { toast } from "react-toastify";
 import ConfirmDialog from "@components/ConfirmDialog";
 import {
+  formatVietnamDateTime,
+  toVietnamDateKey,
+  toVietnamDateTimeLocal,
+} from "@/libs/dateTime";
+import {
   downloadShopOrdersPdf,
   downloadAllShopsPdf,
   downloadFoodItemsPdf,
@@ -41,16 +46,7 @@ import {
 
 const FOOD_CATEGORIES = ["Hoa quả", "Đồ chiên rán", "Khác"];
 const FOOD_UNITS = ["hộp", "cái", "suất"];
-const vietnamDateKey = (value = new Date()) => {
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Ho_Chi_Minh",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(new Date(value));
-  const get = (type) => parts.find((part) => part.type === type)?.value;
-  return `${get("year")}-${get("month")}-${get("day")}`;
-};
+const vietnamDateKey = (value = new Date()) => toVietnamDateKey(value);
 
 export default function AfternoonTeaPage() {
   const { data: session } = useSession();
@@ -101,7 +97,7 @@ export default function AfternoonTeaPage() {
   const [confirmation, setConfirmation] = useState(null);
 
   const formatInvitationTime = (value) =>
-    value ? new Date(value).toLocaleString("vi-VN") : "";
+    value ? formatVietnamDateTime(value) : "";
 
   const load = () =>
     fetch("/api/afternoon-tea")
@@ -344,8 +340,7 @@ export default function AfternoonTeaPage() {
   );
   const isOrderClosed = Boolean(
     activeInvitation?.scheduledAt &&
-      new Date(activeInvitation.scheduledAt).toDateString() !==
-        new Date().toDateString() &&
+      vietnamDateKey(activeInvitation.scheduledAt) !== todayKey &&
       new Date(activeInvitation.scheduledAt) < new Date(),
   );
 
@@ -477,11 +472,9 @@ export default function AfternoonTeaPage() {
                             setEditingId(activeInvitation.id);
                             setForm({
                               title: activeInvitation.title,
-                              scheduledAt: activeInvitation.scheduledAt
-                                ? new Date(activeInvitation.scheduledAt)
-                                    .toISOString()
-                                    .slice(0, 16)
-                                : "",
+                              scheduledAt: toVietnamDateTimeLocal(
+                                activeInvitation.scheduledAt,
+                              ),
                               note: activeInvitation.note || "",
                             });
                           }}

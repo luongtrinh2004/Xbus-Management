@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { PayOS } from "@payos/node";
-import { getFunds, saveFunds, appendAuditLog } from "@/libs/jsonRepository";
+import { getFunds, saveFunds, appendAuditLog } from "@/libs/dataRepository";
 
 const payOS = () =>
   new PayOS({
@@ -18,7 +18,7 @@ export async function POST(req) {
       );
     const webhookData = await payOS().webhooks.verify(await req.json());
     const orderCode = Number(webhookData.orderCode);
-    const funds = getFunds();
+    const funds = await getFunds();
     for (const fund of funds) {
       const index = (fund.members || []).findIndex(
         (item) => item.orderCode === orderCode,
@@ -41,8 +41,8 @@ export async function POST(req) {
         updatedAt: now,
       };
       fund.updatedAt = now;
-      saveFunds(funds);
-      appendAuditLog({
+      await saveFunds(funds);
+      await appendAuditLog({
         adminId: "payos",
         adminName: "PayOS",
         adminEmail: "system@payos.vn",

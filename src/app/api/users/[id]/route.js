@@ -1,19 +1,70 @@
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
-import { getUsers, saveUsers, appendAuditLog } from "@/libs/jsonRepository";
+import { getUsers, saveUsers, appendAuditLog } from "@/libs/dataRepository";
+import fs from "fs";
+import path from "path";
 
 const secret = process.env.NEXTAUTH_SECRET;
+const normalizeStaffCode = (value) =>
+  String(value || "")
+    .trim()
+    .toUpperCase();
+const AVATARS_DIR = path.join(process.cwd(), "public", "images", "avatars");
+const DEFAULT_AVATAR_FILES = new Set([
+  "male-admin.png",
+  "female-admin.png",
+  "male-user.png",
+  "female-user.png",
+  "assistant.png",
+]);
+
+const moveAvatarToStaffCode = (avatarUrl, previousCode, nextCode) => {
+  if (!avatarUrl?.startsWith("/images/avatars/") || previousCode === nextCode)
+    return avatarUrl;
+  let relativePath;
+  try {
+    relativePath = decodeURIComponent(
+      avatarUrl.split("?")[0].replace("/images/avatars/", ""),
+    );
+  } catch {
+    return avatarUrl;
+  }
+  const fileName = path.basename(relativePath);
+  if (DEFAULT_AVATAR_FILES.has(fileName)) return avatarUrl;
+
+  const sourcePath = path.resolve(AVATARS_DIR, relativePath);
+  const avatarRoot = path.resolve(AVATARS_DIR);
+  if (
+    !sourcePath.startsWith(`${avatarRoot}${path.sep}`) ||
+    !fs.existsSync(sourcePath)
+  )
+    return avatarUrl;
+
+  const extension = path.extname(fileName) || ".jpg";
+  const targetDir = path.join(AVATARS_DIR, nextCode);
+  const targetPath = path.join(targetDir, `${nextCode}${extension}`);
+  fs.rmSync(targetDir, { recursive: true, force: true });
+  fs.mkdirSync(targetDir, { recursive: true });
+  fs.renameSync(sourcePath, targetPath);
+  const sourceDir = path.dirname(sourcePath);
+  if (path.dirname(sourceDir) === avatarRoot && fs.existsSync(sourceDir))
+    fs.rmSync(sourceDir, { recursive: true, force: true });
+  return `/images/avatars/${encodeURIComponent(nextCode)}/${encodeURIComponent(`${nextCode}${extension}`)}`;
+};
 
 export async function PATCH(req, { params }) {
   try {
     const token = await getToken({ req, secret });
     if (token?.role !== "admin") {
-      return NextResponse.json({ error: "Chỉ quản trị viên có quyền cập nhật nhân sự" }, { status: 403 });
+      return NextResponse.json(
+        { error: "Chỉ quản trị viên có quyền cập nhật nhân sự" },
+        { status: 403 },
+      );
     }
     const { id } = await params;
     const body = await req.json();
 
-    const users = getUsers();
+    const users = await getUsers();
     const index = users.findIndex((u) => u.id === id);
 
     if (index === -1) {
@@ -24,12 +75,45 @@ export async function PATCH(req, { params }) {
     }
 
     const oldUser = users[index];
-    if (body.email) {
-      body.email = String(body.email).trim().toLowerCase();
-      if (users.some((user) => user.id !== id && user.email?.toLowerCase() === body.email)) {
-        return NextResponse.json({ error: "Email đã tồn tại trong hệ thống" }, { status: 409 });
+    if (Object.prototype.hasOwnProperty.call(body, "code")) {
+      body.code = normalizeStaffCode(body.code);
+      if (body.code && !/^[\p{L}\p{N}_-]+$/u.test(body.code)) {
+        return NextResponse.json(
+          {
+            error:
+              "Mã nhân sự chỉ gồm chữ cái, số, dấu gạch ngang hoặc gạch dưới",
+          },
+          { status: 400 },
+        );
+      }
+      if (
+        body.code &&
+        users.some(
+          (user) =>
+            user.id !== id && normalizeStaffCode(user.code) === body.code,
+        )
+      ) {
+        return NextResponse.json(
+          { error: "Mã nhân sự đã được sử dụng" },
+          { status: 409 },
+        );
       }
     }
+    if (
+      Object.prototype.hasOwnProperty.call(body, "email") &&
+      String(body.email || "")
+        .trim()
+        .toLowerCase() !==
+        String(oldUser.email || "")
+          .trim()
+          .toLowerCase()
+    ) {
+      return NextResponse.json(
+        { error: "Email công ty không được phép thay đổi" },
+        { status: 400 },
+      );
+    }
+    delete body.email;
     const hasPointChange =
       Object.prototype.hasOwnProperty.call(body, "schedulingPoints") &&
       body.schedulingPoints !== oldUser.schedulingPoints;
@@ -59,16 +143,33 @@ export async function PATCH(req, { params }) {
       updatedAt: new Date().toISOString(),
     };
 
+    if (
+      updatedUser.status === "able" &&
+      !normalizeStaffCode(updatedUser.code)
+    ) {
+      return NextResponse.json(
+        { error: "Phải nhập mã nhân sự trước khi kích hoạt tài khoản" },
+        { status: 400 },
+      );
+    }
+    if (updatedUser.code !== normalizeStaffCode(oldUser.code)) {
+      updatedUser.avatarUrl = moveAvatarToStaffCode(
+        oldUser.avatarUrl,
+        normalizeStaffCode(oldUser.code),
+        updatedUser.code,
+      );
+    }
+
     // Nếu kích hoạt
-    if (body.status === "able" && oldUser.status !== "able") {
+    if (updatedUser.status === "able" && oldUser.status !== "able") {
       updatedUser.activatedAt = new Date().toISOString();
       updatedUser.activatedBy = token?.id || "admin";
     }
 
     users[index] = updatedUser;
-    saveUsers(users);
+    await saveUsers(users);
 
-    appendAuditLog({
+    await appendAuditLog({
       adminId: token?.id || "admin",
       adminName: token?.name || "Admin",
       adminEmail: token?.email || "admin@phenikaa-x.com",
@@ -91,11 +192,14 @@ export async function DELETE(req, { params }) {
   try {
     const token = await getToken({ req, secret });
     if (token?.role !== "admin") {
-      return NextResponse.json({ error: "Chỉ quản trị viên có quyền xóa nhân sự" }, { status: 403 });
+      return NextResponse.json(
+        { error: "Chỉ quản trị viên có quyền xóa nhân sự" },
+        { status: 403 },
+      );
     }
     const { id } = await params;
 
-    const users = getUsers();
+    const users = await getUsers();
     const userToDelete = users.find((u) => u.id === id);
 
     if (!userToDelete) {
@@ -106,9 +210,9 @@ export async function DELETE(req, { params }) {
     }
 
     const filteredUsers = users.filter((u) => u.id !== id);
-    saveUsers(filteredUsers);
+    await saveUsers(filteredUsers);
 
-    appendAuditLog({
+    await appendAuditLog({
       adminId: token?.id || "admin",
       adminName: token?.name || "Admin",
       adminEmail: token?.email || "admin@phenikaa-x.com",

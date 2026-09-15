@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
-import { appendAuditLog, getAssets, saveAssets } from "@/libs/jsonRepository";
+import { appendAuditLog, getAssets, saveAssets } from "@/libs/dataRepository";
 
 const secret = process.env.NEXTAUTH_SECRET;
 const canManageAssets = (token) =>
@@ -17,7 +17,7 @@ export async function GET(req) {
       { error: "Không có quyền truy cập" },
       { status: 403 },
     );
-  return NextResponse.json(normalizeData(getAssets()));
+  return NextResponse.json(normalizeData(await getAssets()));
 }
 
 export async function POST(req) {
@@ -29,7 +29,7 @@ export async function POST(req) {
         { status: 403 },
       );
     const body = await req.json();
-    const data = normalizeData(getAssets());
+    const data = normalizeData(await getAssets());
     const type = body.type === "export" ? "export" : "import";
     const quantity = Number(body.quantity);
     const normalizedCode = body.code?.trim().toUpperCase();
@@ -84,8 +84,8 @@ export async function POST(req) {
       createdAt: new Date().toISOString(),
     };
     data[type === "export" ? "exports" : "imports"].unshift(record);
-    saveAssets(data);
-    appendAuditLog({
+    await saveAssets(data);
+    await appendAuditLog({
       adminId: token.id,
       adminName: token.name || "Người dùng",
       adminEmail: token.email || "",
@@ -114,7 +114,7 @@ export async function PATCH(req) {
       );
 
     const body = await req.json();
-    const data = normalizeData(getAssets());
+    const data = normalizeData(await getAssets());
     const type = body.type === "export" ? "export" : "import";
     const collection = type === "export" ? data.exports : data.imports;
     const index = collection.findIndex((item) => item.id === body.id);
@@ -192,8 +192,8 @@ export async function PATCH(req) {
         { status: 400 },
       );
 
-    saveAssets(data);
-    appendAuditLog({
+    await saveAssets(data);
+    await appendAuditLog({
       adminId: token.id,
       adminName: token.name || "Người dùng",
       adminEmail: token.email || "",
@@ -222,7 +222,7 @@ export async function DELETE(req) {
       );
 
     const body = await req.json();
-    const data = normalizeData(getAssets());
+    const data = normalizeData(await getAssets());
     const type = body.type === "export" ? "export" : "import";
     const collection = type === "export" ? data.exports : data.imports;
     const index = collection.findIndex((item) => item.id === body.id);
@@ -250,8 +250,8 @@ export async function DELETE(req) {
       );
 
     collection.splice(index, 1);
-    saveAssets(data);
-    appendAuditLog({
+    await saveAssets(data);
+    await appendAuditLog({
       adminId: token.id,
       adminName: token.name || "Người dùng",
       adminEmail: token.email || "",

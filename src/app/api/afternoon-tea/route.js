@@ -7,7 +7,7 @@ import {
   getUsers,
   saveAfternoonTea,
   saveUsers,
-} from "@/libs/jsonRepository";
+} from "@/libs/dataRepository";
 
 const secret = process.env.NEXTAUTH_SECRET;
 const vietnamDate = (value = new Date()) =>
@@ -22,6 +22,10 @@ const vietnamDate = (value = new Date()) =>
       if (part.type !== "literal") result[part.type] = part.value;
       return result;
     }, {});
+const vietnamDateKey = (value) => {
+  const date = vietnamDate(value);
+  return `${date.year}-${date.month}-${date.day}`;
+};
 const isInvitationClosed = (scheduledAt) => {
   const invitation = vietnamDate(scheduledAt);
   const today = vietnamDate();
@@ -37,8 +41,8 @@ const menuDateFolder = (scheduledAt) => {
 
 export async function GET(req) {
   const token = await getToken({ req, secret });
-  const data = getAfternoonTea();
-  const users = getUsers();
+  const data = await getAfternoonTea();
+  const users = await getUsers();
   const currentUser = users.find(
     (user) =>
       user.id === token?.id ||
@@ -51,7 +55,7 @@ export async function GET(req) {
     (invitation) => !isInvitationClosed(invitation.scheduledAt),
   );
   if (expiredInvitations.length > 0) {
-    const users = getUsers();
+    const users = await getUsers();
     expiredInvitations.forEach((invitation) => {
       const creatorIndex = users.findIndex(
         (user) => user.id === invitation.createdBy,
@@ -62,9 +66,9 @@ export async function GET(req) {
         users[creatorIndex].updatedAt = new Date().toISOString();
       }
     });
-    saveUsers(users);
+    await saveUsers(users);
     data.invitations = activeInvitations;
-    saveAfternoonTea(data);
+    await saveAfternoonTea(data);
   }
   const menuRoot = path.resolve(
     process.cwd(),
@@ -129,26 +133,27 @@ export async function POST(req) {
   const body = await req.json();
   const invitationType =
     body.type === "happy-hour" ? "happy-hour" : "afternoon-tea";
-  if (invitationType === "happy-hour" && !["admin", "assistant"].includes(token.role)) {
+  if (
+    invitationType === "happy-hour" &&
+    !["admin", "assistant"].includes(token.role)
+  ) {
     return NextResponse.json(
       { error: "Chỉ Admin có quyền tạo Happy Hour" },
       { status: 403 },
     );
   }
-  const data = getAfternoonTea();
-  const creator = getUsers().find(
+  const data = await getAfternoonTea();
+  const creator = (await getUsers()).find(
     (user) =>
       user.id === token.id ||
       user.email?.toLowerCase() === token.email?.toLowerCase(),
   );
   const scheduledAt = body.scheduledAt || new Date().toISOString();
-  const invitationDate = new Date(scheduledAt).toISOString().slice(0, 10);
+  const invitationDate = vietnamDateKey(scheduledAt);
   if (
     data.invitations.some(
       (item) =>
-        item.scheduledAt &&
-        new Date(item.scheduledAt).toISOString().slice(0, 10) ===
-          invitationDate,
+        item.scheduledAt && vietnamDateKey(item.scheduledAt) === invitationDate,
     )
   ) {
     return NextResponse.json(
@@ -175,7 +180,7 @@ export async function POST(req) {
     menus: [],
   };
   data.invitations.unshift(invitation);
-  saveAfternoonTea(data);
+  await saveAfternoonTea(data);
   return NextResponse.json(invitation, { status: 201 });
 }
 
@@ -191,7 +196,7 @@ export async function PATCH(req) {
     foodItem,
     foodItemId,
   } = body;
-  const data = getAfternoonTea();
+  const data = await getAfternoonTea();
   if (action === "menu") {
     if (!["admin", "assistant"].includes(token?.role))
       return NextResponse.json(
@@ -214,13 +219,15 @@ export async function PATCH(req) {
         { status: 409 },
       );
     }
-    const currentUser = getUsers().find(
+    const currentUser = (await getUsers()).find(
       (user) =>
         user.id === token?.id ||
         user.email?.toLowerCase() === token?.email?.toLowerCase(),
     );
     const targetUserId =
-      ["admin", "assistant"].includes(token?.role) && userId ? userId : currentUser?.id || token?.id;
+      ["admin", "assistant"].includes(token?.role) && userId
+        ? userId
+        : currentUser?.id || token?.id;
     invitation.orders = invitation.orders || [];
     const existing = invitation.orders.findIndex(
       (item) => item.userId === targetUserId,
@@ -307,7 +314,7 @@ export async function PATCH(req) {
         { error: "Không tìm thấy lời mời" },
         { status: 404 },
       );
-    const currentUser = getUsers().find(
+    const currentUser = (await getUsers()).find(
       (user) =>
         user.id === token?.id ||
         user.email?.toLowerCase() === token?.email?.toLowerCase(),
@@ -334,7 +341,7 @@ export async function PATCH(req) {
         { error: "Không tìm thấy lời mời" },
         { status: 404 },
       );
-    const currentUser = getUsers().find(
+    const currentUser = (await getUsers()).find(
       (user) =>
         user.id === token?.id ||
         user.email?.toLowerCase() === token?.email?.toLowerCase(),
@@ -353,6 +360,6 @@ export async function PATCH(req) {
       (item) => item.id !== invitationId,
     );
   }
-  saveAfternoonTea(data);
+  await saveAfternoonTea(data);
   return NextResponse.json(data);
 }

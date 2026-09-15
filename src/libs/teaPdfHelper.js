@@ -1,5 +1,10 @@
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
+import {
+  formatVietnamDate,
+  formatVietnamDateTime,
+  toVietnamDateKey,
+} from "./dateTime";
 
 /**
  * Tạo một container ẩn để render HTML chuẩn cho việc chụp ảnh PDF
@@ -73,14 +78,7 @@ async function renderElementToPdf(container, fileName) {
  * Định dạng ngày giờ thân thiện tiếng Việt
  */
 function formatDateTime(isoString) {
-  if (!isoString) return new Date().toLocaleDateString("vi-VN");
-  const d = new Date(isoString);
-  const hours = String(d.getHours()).padStart(2, "0");
-  const minutes = String(d.getMinutes()).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const year = d.getFullYear();
-  return `${hours}:${minutes} ngày ${day}/${month}/${year}`;
+  return formatVietnamDateTime(isoString || new Date());
 }
 
 /**
@@ -110,9 +108,7 @@ export async function downloadShopOrdersPdf({
     .replace(/[^a-zA-Z0-9_-]+/g, "_")
     .replace(/^_+|_+$/g, "");
 
-  const dateStr = new Date(invitation?.scheduledAt || Date.now())
-    .toISOString()
-    .slice(0, 10);
+  const dateStr = toVietnamDateKey(invitation?.scheduledAt || Date.now());
   const fileName = `Tra_Chieu_${safeShopFile}_${dateStr}.pdf`;
 
   const rowsHtml = shopOrders.length
@@ -184,7 +180,7 @@ export async function downloadShopOrdersPdf({
       <!-- Footer Note -->
       <div style="margin-top: 32px; padding-top: 14px; border-top: 1px dashed #dcdfe6; font-size: 12px; color: #909399; display: flex; justify-content: space-between;">
         <span>Xbus Management System</span>
-        <span>Xuất tự động ngày ${new Date().toLocaleDateString("vi-VN")}</span>
+        <span>Xuất tự động ngày ${formatVietnamDate(new Date())}</span>
       </div>
     </div>
   `;
@@ -233,9 +229,7 @@ export async function downloadAllShopsPdf({
  */
 export async function downloadFoodItemsPdf({ invitation, foodItems = [] }) {
   const scheduledText = formatDateTime(invitation?.scheduledAt);
-  const dateStr = new Date(invitation?.scheduledAt || Date.now())
-    .toISOString()
-    .slice(0, 10);
+  const dateStr = toVietnamDateKey(invitation?.scheduledAt || Date.now());
   const fileName = `Mon_An_Tra_Chieu_${dateStr}.pdf`;
 
   const categoryColorMap = {
@@ -356,7 +350,7 @@ export async function downloadFoodItemsPdf({ invitation, foodItems = [] }) {
       <!-- Footer Note -->
       <div style="margin-top: 32px; padding-top: 14px; border-top: 1px dashed #dcdfe6; font-size: 12px; color: #909399; display: flex; justify-content: space-between;">
         <span>Xbus Management System</span>
-        <span>Xuất tự động ngày ${new Date().toLocaleDateString("vi-VN")}</span>
+        <span>Xuất tự động ngày ${formatVietnamDate(new Date())}</span>
       </div>
     </div>
   `;

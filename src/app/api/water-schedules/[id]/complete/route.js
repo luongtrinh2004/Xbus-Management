@@ -4,9 +4,9 @@ import {
   getWaterSchedules,
   saveWaterSchedules,
   getUsers,
-  saveUsers,
+  incrementWaterStats,
   appendAuditLog,
-} from "@/libs/jsonRepository";
+} from "@/libs/dataRepository";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -24,7 +24,7 @@ export async function POST(req, { params }) {
     const body = await req.json();
     const { completedUserIds = [] } = body;
 
-    const allSchedules = getWaterSchedules();
+    const allSchedules = await getWaterSchedules();
     const scheduleIndex = allSchedules.findIndex((s) => s.id === id);
 
     if (scheduleIndex === -1) {
@@ -60,25 +60,20 @@ export async function POST(req, { params }) {
     schedule.updatedAt = new Date().toISOString();
 
     allSchedules[scheduleIndex] = schedule;
-    saveWaterSchedules(allSchedules);
+    await saveWaterSchedules(allSchedules);
 
     // Cộng điểm (+1) và lượt (+1) cho từng người thực sự tham gia trong users.json
-    const allUsers = getUsers();
+    const allUsers = await getUsers();
     const rewardedUserNames = [];
 
     allUsers.forEach((u) => {
-      if (completedUserIds.includes(u.id)) {
-        u.schedulingPoints = (u.schedulingPoints || 0) + 1;
-        u.waterTripCount = (u.waterTripCount || 0) + 1;
-        u.updatedAt = new Date().toISOString();
+      if (completedUserIds.includes(u.id))
         rewardedUserNames.push(u.name || u.code);
-      }
     });
-
-    saveUsers(allUsers);
+    await incrementWaterStats(completedUserIds);
 
     // Ghi nhật ký hoạt động
-    appendAuditLog({
+    await appendAuditLog({
       adminId: token.id || "usr_admin_001",
       adminName: token.name || "Quản trị viên",
       adminEmail: token.email || "admin@phenikaa-x.com",

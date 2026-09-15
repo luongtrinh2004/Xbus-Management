@@ -6,7 +6,7 @@ import {
   getUsers,
   saveFunds,
   appendAuditLog,
-} from "@/libs/jsonRepository";
+} from "@/libs/dataRepository";
 
 const secret = process.env.NEXTAUTH_SECRET;
 const nowDate = () =>
@@ -28,7 +28,7 @@ export async function PATCH(req) {
     reminderDaysBefore,
     emailReminderEnabled,
   } = await req.json();
-  const funds = getFunds();
+  const funds = await getFunds();
   const fund = funds.find(
     (item) => item.month === Number(month) && item.year === Number(year),
   );
@@ -47,7 +47,7 @@ export async function PATCH(req) {
   ];
   fund.emailReminderEnabled = Boolean(emailReminderEnabled);
   fund.reminderLogs ||= [];
-  saveFunds(funds);
+  await saveFunds(funds);
   return NextResponse.json(fund);
 }
 
@@ -59,11 +59,11 @@ export async function POST(req) {
       { status: 403 },
     );
   const { month, year, userId } = await req.json();
-  const funds = getFunds();
+  const funds = await getFunds();
   const fund = funds.find(
     (item) => item.month === Number(month) && item.year === Number(year),
   );
-  const user = getUsers().find((item) => item.id === userId);
+  const user = (await getUsers()).find((item) => item.id === userId);
   if (
     !fund ||
     !user ||
@@ -101,8 +101,8 @@ export async function POST(req) {
     trigger: "manual",
     deadline: fund.paymentDeadline || null,
   });
-  saveFunds(funds);
-  appendAuditLog({
+  await saveFunds(funds);
+  await appendAuditLog({
     adminId: token.id,
     adminName: token.name,
     adminEmail: token.email,

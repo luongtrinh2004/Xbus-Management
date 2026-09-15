@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { useSession } from "next-auth/react";
 import Grid from "@mui/material/Grid2";
 import Dialog from "@mui/material/Dialog";
 import Button from "@mui/material/Button";
@@ -41,6 +42,8 @@ const EditUserDialog = ({
   setData,
   onUserUpdated,
 }) => {
+  const { data: session } = useSession();
+  const canDeleteAvatar = session?.user?.role === "admin";
   const [userData, setUserData] = useState({
     id: "",
     name: "",
@@ -179,8 +182,8 @@ const EditUserDialog = ({
   };
 
   const handleSave = async () => {
-    if (!userData.name || !userData.email) {
-      toast.error("Họ tên và email không được để trống");
+    if (!userData.name || !userData.email || !userData.code?.trim()) {
+      toast.error("Họ tên, email và mã nhân sự không được để trống");
       return;
     }
 
@@ -300,19 +303,18 @@ const EditUserDialog = ({
                 <Typography variant="caption" color="text.secondary">
                   Bấm vào ảnh để thay đổi. Hỗ trợ JPG, PNG, WebP (tối đa 5MB).
                 </Typography>
-                {["admin", "assistant"].includes(userData.role) &&
-                  userData.avatarUrl && (
-                    <Button
-                      size="small"
-                      color="error"
-                      variant="text"
-                      onClick={handleDeleteAvatar}
-                      disabled={uploadingAvatar}
-                      sx={{ display: "block", mt: 0.5, px: 0 }}
-                    >
-                      Xóa ảnh đại diện
-                    </Button>
-                  )}
+                {canDeleteAvatar && userData.avatarUrl && (
+                  <Button
+                    size="small"
+                    color="error"
+                    variant="text"
+                    onClick={handleDeleteAvatar}
+                    disabled={uploadingAvatar}
+                    sx={{ display: "block", mt: 0.5, px: 0 }}
+                  >
+                    Xóa ảnh đại diện
+                  </Button>
+                )}
               </Box>
               <input
                 ref={fileInputRef}
@@ -342,20 +344,19 @@ const EditUserDialog = ({
               autoComplete="off"
               label="Email"
               value={userData.email}
-              onChange={(e) =>
-                setUserData({ ...userData, email: e.target.value })
-              }
+              disabled
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 4 }}>
             <CustomTextField
               fullWidth
-              label="Mã nhân sự"
+              label="Mã nhân sự *"
               value={userData.code}
               onChange={(e) =>
                 setUserData({ ...userData, code: e.target.value })
               }
               placeholder="HDK181"
+              required
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 4 }}>
