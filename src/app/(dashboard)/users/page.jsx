@@ -18,6 +18,7 @@ const Page = () => {
   const [role, setRole] = useState("");
   const [type, setType] = useState("");
   const [category, setCategory] = useState("");
+  const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [sortBy, setSortBy] = useState("");
@@ -25,12 +26,13 @@ const Page = () => {
 
   // Fetch active users (chỉ status = 'able')
   const fetchUsers = async ({ queryKey }) => {
-    const [_key, { role, type, category, page, limit, sortBy, sortOrder }] = queryKey;
+    const [_key, { role, type, category, search, page, limit, sortBy, sortOrder }] = queryKey;
     const queryParams = new URLSearchParams({
       status: "able",
       ...(role && { role }),
       ...(type && { type }),
       ...(category && { category }),
+      ...(search && { search }),
       page: page.toString(),
       limit: limit.toString(),
       ...(sortBy && { sortBy, sortOrder }),
@@ -41,7 +43,7 @@ const Page = () => {
   };
 
   const { data, isLoading, refetch } = useQuery({
-    queryKey: ["users", { role, type, category, page, limit, sortBy, sortOrder }],
+    queryKey: ["users", { role, type, category, search, page, limit, sortBy, sortOrder }],
     queryFn: fetchUsers,
     placeholderData: (previousData) => previousData,
     staleTime: 10000,
@@ -134,6 +136,11 @@ const Page = () => {
           setType={setType}
           category={category}
           setCategory={setCategory}
+          globalFilter={search}
+          setGlobalFilter={(value) => {
+            setSearch(value);
+            setPage(1);
+          }}
           page={page}
           setPage={setPage}
           limit={limit}

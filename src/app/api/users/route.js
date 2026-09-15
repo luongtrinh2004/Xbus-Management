@@ -42,13 +42,15 @@ export async function GET(req) {
       users = users.filter((u) => u.categoryId === category);
     }
 
-    // Lọc tìm kiếm theo tên, email, hoặc code
+    // Lọc toàn bộ danh sách trước khi phân trang để kết quả không bị giới hạn
+    // trong trang hiện tại.
     if (search) {
       users = users.filter(
         (u) =>
           (u.name && u.name.toLowerCase().includes(search)) ||
           (u.email && u.email.toLowerCase().includes(search)) ||
-          (u.code && u.code.toLowerCase().includes(search)),
+          (u.code && u.code.toLowerCase().includes(search)) ||
+          (u.phone && u.phone.toLowerCase().includes(search)),
       );
     }
 
