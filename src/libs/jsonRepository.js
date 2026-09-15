@@ -86,6 +86,12 @@ export function getSettings() {
     companyEmailDomains: ["phenikaa-x.com"],
     defaultRole: "user",
     defaultUserStatus: "disabled",
+    fundMinimumAmounts: {
+      category_official: 150000,
+      category_probation: 150000,
+      category_intern: 100000,
+      category_collaborator: 100000,
+    },
   });
 }
 

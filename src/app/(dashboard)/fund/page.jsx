@@ -35,6 +35,8 @@ import { exportJsonToExcel } from "@/libs/excelHelper";
 import { resolveAvatar } from "@/utils/getDefaultAvatar";
 import { toast } from "react-toastify";
 import ConfirmDialog from "@components/ConfirmDialog";
+import DataTableToolbar from "@components/DataTableToolbar";
+import TablePaginationComponent from "@components/TablePaginationComponent";
 
 const money = (value) =>
   `${new Intl.NumberFormat("vi-VN").format(value || 0)} đ`;
@@ -60,7 +62,7 @@ const incomeTypes = [
     "warning",
   ],
   ["shirt_penalty", "Phạt áo", "tabler-shirt", "error"],
-  ["monthly_fund", "Quỹ từng tháng", "tabler-calendar-dollar", "success"],
+  ["monthly_fund", "Quỹ tháng này", "tabler-calendar-dollar", "success"],
   ["happy_hour", "Happy Hour", "tabler-confetti", "primary"],
   ["other", "Thu khác", "tabler-cash-banknote", "info"],
 ];
@@ -87,6 +89,22 @@ export default function FundPage() {
   const [saving, setSaving] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [cancelPaymentTarget, setCancelPaymentTarget] = useState(null);
+  const [minimumAmounts, setMinimumAmounts] = useState({
+    category_official: 150000,
+    category_probation: 150000,
+    category_intern: 100000,
+    category_collaborator: 100000,
+  });
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [paymentMember, setPaymentMember] = useState(null);
+  const [paymentAmount, setPaymentAmount] = useState("");
+  const [paymentData, setPaymentData] = useState(null);
+  const [incomeSearch, setIncomeSearch] = useState("");
+  const [incomePage, setIncomePage] = useState(1);
+  const [incomeLimit, setIncomeLimit] = useState(10);
+  const [expenseSearch, setExpenseSearch] = useState("");
+  const [expensePage, setExpensePage] = useState(1);
+  const [expenseLimit, setExpenseLimit] = useState(10);
   const [form, setForm] = useState({
     category: "explanation_penalty",
     amount: "",
@@ -119,11 +137,60 @@ export default function FundPage() {
     Promise.all([
       loadFund(""),
       fetch("/api/users?limit=200").then((r) => r.json()),
+      fetch("/api/fund-settings").then((r) => r.json()),
     ])
-      .then(([, data]) => setUsers(data.data || []))
+      .then(([, data, settings]) => {
+        setUsers(data.data || []);
+        setMinimumAmounts(settings.minimumAmounts || minimumAmounts);
+      })
       .catch((error) => toast.error(error.message))
       .finally(() => setLoading(false));
   }, []);
+
+  const minimumFor = (member) =>
+    Number(minimumAmounts[member.categoryId]) || 100000;
+  const saveMinimumAmounts = async () => {
+    const response = await fetch("/api/fund-settings", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ minimumAmounts }),
+    });
+    const data = await response.json();
+    if (!response.ok)
+      return toast.error(data.error || "Không thể lưu mức đóng");
+    setMinimumAmounts(data.minimumAmounts);
+    setSettingsOpen(false);
+    toast.success("Đã cập nhật mức đóng tối thiểu");
+  };
+  const createPayment = async () => {
+    const [month, year] = period.split("/").map(Number);
+    const response = await fetch("/api/fund-payments", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ month, year, amount: Number(paymentAmount) }),
+    });
+    const data = await response.json();
+    if (!response.ok)
+      return toast.error(data.error || "Không thể tạo thanh toán");
+    setPaymentData(data);
+  };
+
+  useEffect(() => {
+    if (!paymentData?.orderCode) return undefined;
+    const timer = setInterval(async () => {
+      const response = await fetch(
+        `/api/fund-payments?orderCode=${paymentData.orderCode}`,
+      );
+      const data = await response.json();
+      if (data.paid) {
+        await loadFund(period);
+        toast.success("PayOS đã xác nhận bạn đóng quỹ");
+        setPaymentData(null);
+        setPaymentMember(null);
+      }
+    }, 4000);
+    return () => clearInterval(timer);
+  }, [paymentData, period]);
 
   const members = useMemo(
     () =>
@@ -153,29 +220,25 @@ export default function FundPage() {
   const incomeRows = useMemo(
     () =>
       [
-        ...(fund?.memberIncome
-          ? [
-              {
-                id: "monthly-fund-total",
-                category: "monthly_fund",
-                userName: "—",
-                amount: fund.memberIncome,
-                receivedAt: new Date(
-                  fund.year,
-                  fund.month - 1,
-                  1,
-                ).toISOString(),
-                locked: true,
-              },
-            ]
-          : []),
+        ...(fund?.members || [])
+          .filter((member) => member.paid)
+          .map((member) => ({
+            id: `monthly-fund-${member.userId}`,
+            category: "monthly_fund",
+            userId: member.userId,
+            userName:
+              users.find((user) => user.id === member.userId)?.name || "—",
+            amount: member.amount || 0,
+            receivedAt: member.paidAt,
+            locked: true,
+          })),
         ...(fund?.incomes || []),
       ].sort(
         (a, b) =>
-          new Date(b.receivedAt || b.createdAt) -
-          new Date(a.receivedAt || a.createdAt),
+          new Date(a.receivedAt || a.createdAt) -
+          new Date(b.receivedAt || b.createdAt),
       ),
-    [members, fund],
+    [fund, users],
   );
   const filteredIncomeRows = useMemo(
     () =>
@@ -183,6 +246,26 @@ export default function FundPage() {
         ? incomeRows
         : incomeRows.filter((item) => item.category === incomeFilter),
     [incomeFilter, incomeRows],
+  );
+  const visibleIncomeRows = useMemo(
+    () =>
+      filteredIncomeRows.filter((item) => {
+        const date = new Date(item.receivedAt || item.createdAt);
+        return `${item.userName} ${item.note} ${item.title} ${date.toLocaleDateString("vi-VN")} ${date.toLocaleDateString("en-CA")}`
+          .toLowerCase()
+          .includes(incomeSearch.toLowerCase().trim());
+      }),
+    [filteredIncomeRows, incomeSearch],
+  );
+  const visibleExpenseRows = useMemo(
+    () =>
+      (fund?.expenses || []).filter((item) => {
+        const date = new Date(item.spentAt || item.createdAt);
+        return `${item.note} ${item.createdByName} ${item.title} ${date.toLocaleDateString("vi-VN")} ${date.toLocaleDateString("en-CA")}`
+          .toLowerCase()
+          .includes(expenseSearch.toLowerCase().trim());
+      }),
+    [fund, expenseSearch],
   );
 
   const openDialog = (kind) => {
@@ -350,26 +433,37 @@ export default function FundPage() {
             </Box>
           }
           action={
-            <CustomTextField
-              select
-              size="small"
-              label="Kỳ theo dõi"
-              value={period}
-              onChange={async (event) => {
-                setPeriod(event.target.value);
-                await loadFund(event.target.value);
-              }}
-              sx={{ minWidth: 180 }}
-            >
-              {(fund?.availablePeriods || []).map((item) => {
-                const value = `${String(item.month).padStart(2, "0")}/${item.year}`;
-                return (
-                  <MenuItem key={value} value={value}>
-                    Tháng {value}
-                  </MenuItem>
-                );
-              })}
-            </CustomTextField>
+            <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+              {canManage && (
+                <Button
+                  size="small"
+                  variant="tonal"
+                  onClick={() => setSettingsOpen(true)}
+                >
+                  Mức đóng tối thiểu
+                </Button>
+              )}
+              <CustomTextField
+                select
+                size="small"
+                label="Kỳ theo dõi"
+                value={period}
+                onChange={async (event) => {
+                  setPeriod(event.target.value);
+                  await loadFund(event.target.value);
+                }}
+                sx={{ minWidth: 180 }}
+              >
+                {(fund?.availablePeriods || []).map((item) => {
+                  const value = `${String(item.month).padStart(2, "0")}/${item.year}`;
+                  return (
+                    <MenuItem key={value} value={value}>
+                      Tháng {value}
+                    </MenuItem>
+                  );
+                })}
+              </CustomTextField>
+            </Box>
           }
         />
       </Card>
@@ -495,9 +589,19 @@ export default function FundPage() {
                       </Grid>
                     ))}
                   </Grid>
-                  <Typography variant="subtitle2" mt={3} mb={1}>
-                    Bảng nguồn thu
-                  </Typography>
+                  <DataTableToolbar
+                    search={incomeSearch}
+                    onSearchChange={(value) => {
+                      setIncomeSearch(value);
+                      setIncomePage(1);
+                    }}
+                    limit={incomeLimit}
+                    onLimitChange={(value) => {
+                      setIncomeLimit(value);
+                      setIncomePage(1);
+                    }}
+                    placeholder="Tìm người nộp, nội dung hoặc ngày thu..."
+                  />
                   <TableContainer
                     sx={{
                       border: "1px solid",
@@ -508,7 +612,9 @@ export default function FundPage() {
                     <Table size="small">
                       <TableHead>
                         <TableRow>
-                          <TableCell>LOẠI THU</TableCell>
+                          {incomeFilter === "all" && (
+                            <TableCell>LOẠI THU</TableCell>
+                          )}
                           <TableCell>NGƯỜI NỘP</TableCell>
                           <TableCell>GHI CHÚ</TableCell>
                           <TableCell>NGÀY THU</TableCell>
@@ -517,74 +623,92 @@ export default function FundPage() {
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {filteredIncomeRows.map((item) => (
-                          <TableRow key={item.id} hover>
-                            <TableCell>
-                              <Chip
-                                size="small"
-                                variant="tonal"
-                                color={
-                                  incomeTypes.find(
-                                    ([key]) => key === item.category,
-                                  )?.[3] || "info"
-                                }
-                                label={
-                                  incomeTypes.find(
-                                    ([key]) => key === item.category,
-                                  )?.[1] || "Thu khác"
-                                }
-                              />
-                            </TableCell>
-                            <TableCell>{item.userName || "Công ty"}</TableCell>
-                            <TableCell>{item.note || "—"}</TableCell>
-                            <TableCell>
-                              {item.locked
-                                ? `Tháng ${period}`
-                                : new Date(
-                                    item.receivedAt || item.createdAt,
-                                  ).toLocaleDateString("vi-VN")}
-                            </TableCell>
-                            <TableCell align="right">
-                              <Typography color="success.main" fontWeight={700}>
-                                +{money(item.amount)}
-                              </Typography>
-                            </TableCell>
-                            <TableCell align="center">
-                              {item.locked || !canManage ? (
-                                "—"
-                              ) : (
-                                <Box
-                                  sx={{
-                                    display: "flex",
-                                    justifyContent: "center",
-                                  }}
-                                >
-                                  <IconButton
+                        {visibleIncomeRows
+                          .slice(
+                            (incomePage - 1) * incomeLimit,
+                            incomePage * incomeLimit,
+                          )
+                          .map((item) => (
+                            <TableRow key={item.id} hover>
+                              {incomeFilter === "all" && (
+                                <TableCell>
+                                  <Chip
                                     size="small"
-                                    color="primary"
-                                    onClick={() =>
-                                      editTransaction("income", item)
+                                    variant="tonal"
+                                    color={
+                                      incomeTypes.find(
+                                        ([key]) => key === item.category,
+                                      )?.[3] || "info"
                                     }
-                                  >
-                                    <i className="tabler-edit" />
-                                  </IconButton>
-                                  <IconButton
-                                    size="small"
-                                    color="error"
-                                    onClick={() =>
-                                      setDeleteTarget({ kind: "income", item })
+                                    label={
+                                      incomeTypes.find(
+                                        ([key]) => key === item.category,
+                                      )?.[1] || "Thu khác"
                                     }
-                                  >
-                                    <i className="tabler-trash" />
-                                  </IconButton>
-                                </Box>
+                                  />
+                                </TableCell>
                               )}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                        {!filteredIncomeRows.length && (
+                              <TableCell>
+                                {item.userName || "Công ty"}
+                              </TableCell>
+                              <TableCell>{item.note || "—"}</TableCell>
+                              <TableCell>
+                                {item.locked
+                                  ? `Tháng ${period}`
+                                  : new Date(
+                                      item.receivedAt || item.createdAt,
+                                    ).toLocaleDateString("vi-VN")}
+                              </TableCell>
+                              <TableCell align="right">
+                                <Typography
+                                  color="success.main"
+                                  fontWeight={700}
+                                >
+                                  +{money(item.amount)}
+                                </Typography>
+                              </TableCell>
+                              <TableCell align="center">
+                                {item.locked || !canManage ? (
+                                  "—"
+                                ) : (
+                                  <Box
+                                    sx={{
+                                      display: "flex",
+                                      justifyContent: "center",
+                                    }}
+                                  >
+                                    <IconButton
+                                      size="small"
+                                      color="primary"
+                                      onClick={() =>
+                                        editTransaction("income", item)
+                                      }
+                                    >
+                                      <i className="tabler-edit" />
+                                    </IconButton>
+                                    <IconButton
+                                      size="small"
+                                      color="error"
+                                      onClick={() =>
+                                        setDeleteTarget({
+                                          kind: "income",
+                                          item,
+                                        })
+                                      }
+                                    >
+                                      <i className="tabler-trash" />
+                                    </IconButton>
+                                  </Box>
+                                )}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        {!visibleIncomeRows.length && (
                           <TableRow>
-                            <TableCell colSpan={6} align="center">
+                            <TableCell
+                              colSpan={incomeFilter === "all" ? 6 : 5}
+                              align="center"
+                            >
                               <Typography color="text.secondary" py={4}>
                                 Chưa có nguồn thu trong kỳ
                               </Typography>
@@ -594,6 +718,12 @@ export default function FundPage() {
                       </TableBody>
                     </Table>
                   </TableContainer>
+                  <TablePaginationComponent
+                    page={incomePage}
+                    total={visibleIncomeRows.length}
+                    limit={incomeLimit}
+                    onPageChange={(_, nextPage) => setIncomePage(nextPage + 1)}
+                  />
                 </CardContent>
               </Card>
             )}
@@ -636,6 +766,20 @@ export default function FundPage() {
                   }
                 />
                 <Divider />
+                <DataTableToolbar
+                  search={expenseSearch}
+                  onSearchChange={(value) => {
+                    setExpenseSearch(value);
+                    setExpensePage(1);
+                  }}
+                  limit={expenseLimit}
+                  onLimitChange={(value) => {
+                    setExpenseLimit(value);
+                    setExpensePage(1);
+                  }}
+                  placeholder="Tìm nội dung, người thực hiện hoặc ngày chi..."
+                />
+                <Divider />
                 <TableContainer>
                   <Table size="small">
                     <TableHead>
@@ -649,66 +793,71 @@ export default function FundPage() {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {(fund?.expenses || []).map((item) => (
-                        <TableRow key={item.id} hover>
-                          <TableCell>
-                            <Chip
-                              size="small"
-                              variant="tonal"
-                              color="error"
-                              label={
-                                expenseTypes.find(
-                                  ([key]) => key === item.category,
-                                )?.[1] || "Chi khác"
-                              }
-                            />
-                          </TableCell>
-                          <TableCell>{item.note || "—"}</TableCell>
-                          <TableCell>{item.createdByName || "—"}</TableCell>
-                          <TableCell>
-                            {new Date(
-                              item.spentAt || item.createdAt,
-                            ).toLocaleDateString("vi-VN")}
-                          </TableCell>
-                          <TableCell align="right">
-                            <Typography color="error.main" fontWeight={700}>
-                              −{money(item.amount)}
-                            </Typography>
-                          </TableCell>
-                          <TableCell align="center">
-                            {canManage ? (
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  justifyContent: "center",
-                                }}
-                              >
-                                <IconButton
-                                  size="small"
-                                  color="primary"
-                                  onClick={() =>
-                                    editTransaction("expense", item)
-                                  }
+                      {visibleExpenseRows
+                        .slice(
+                          (expensePage - 1) * expenseLimit,
+                          expensePage * expenseLimit,
+                        )
+                        .map((item) => (
+                          <TableRow key={item.id} hover>
+                            <TableCell>
+                              <Chip
+                                size="small"
+                                variant="tonal"
+                                color="error"
+                                label={
+                                  expenseTypes.find(
+                                    ([key]) => key === item.category,
+                                  )?.[1] || "Chi khác"
+                                }
+                              />
+                            </TableCell>
+                            <TableCell>{item.note || "—"}</TableCell>
+                            <TableCell>{item.createdByName || "—"}</TableCell>
+                            <TableCell>
+                              {new Date(
+                                item.spentAt || item.createdAt,
+                              ).toLocaleDateString("vi-VN")}
+                            </TableCell>
+                            <TableCell align="right">
+                              <Typography color="error.main" fontWeight={700}>
+                                −{money(item.amount)}
+                              </Typography>
+                            </TableCell>
+                            <TableCell align="center">
+                              {canManage ? (
+                                <Box
+                                  sx={{
+                                    display: "flex",
+                                    justifyContent: "center",
+                                  }}
                                 >
-                                  <i className="tabler-edit" />
-                                </IconButton>
-                                <IconButton
-                                  size="small"
-                                  color="error"
-                                  onClick={() =>
-                                    setDeleteTarget({ kind: "expense", item })
-                                  }
-                                >
-                                  <i className="tabler-trash" />
-                                </IconButton>
-                              </Box>
-                            ) : (
-                              "—"
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                      {!(fund?.expenses || []).length && (
+                                  <IconButton
+                                    size="small"
+                                    color="primary"
+                                    onClick={() =>
+                                      editTransaction("expense", item)
+                                    }
+                                  >
+                                    <i className="tabler-edit" />
+                                  </IconButton>
+                                  <IconButton
+                                    size="small"
+                                    color="error"
+                                    onClick={() =>
+                                      setDeleteTarget({ kind: "expense", item })
+                                    }
+                                  >
+                                    <i className="tabler-trash" />
+                                  </IconButton>
+                                </Box>
+                              ) : (
+                                "—"
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      {!visibleExpenseRows.length && (
                         <TableRow>
                           <TableCell colSpan={6} align="center">
                             <Typography color="text.secondary" py={4}>
@@ -720,6 +869,12 @@ export default function FundPage() {
                     </TableBody>
                   </Table>
                 </TableContainer>
+                <TablePaginationComponent
+                  page={expensePage}
+                  total={visibleExpenseRows.length}
+                  limit={expenseLimit}
+                  onPageChange={(_, nextPage) => setExpensePage(nextPage + 1)}
+                />
               </Card>
             )}
           </Grid>
@@ -790,12 +945,13 @@ export default function FundPage() {
                   <TableRow>
                     <TableCell>MÃ</TableCell>
                     <TableCell>NHÂN SỰ</TableCell>
-                    <TableCell>BỘ PHẬN</TableCell>
-                    <TableCell>HÌNH THỨC</TableCell>
+                    <TableCell align="center">BỘ PHẬN</TableCell>
+                    <TableCell align="center">HÌNH THỨC</TableCell>
                     <TableCell align="center">TRẠNG THÁI</TableCell>
-                    <TableCell align="right">SỐ TIỀN</TableCell>
-                    <TableCell>THỜI GIAN ĐÓNG</TableCell>
+                    <TableCell align="center">SỐ TIỀN</TableCell>
+                    <TableCell align="center">THỜI GIAN ĐÓNG</TableCell>
                     {canManage && <TableCell align="center">DUYỆT</TableCell>}
+                    <TableCell align="center">THAO TÁC</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -831,14 +987,14 @@ export default function FundPage() {
                           </Box>
                         </Box>
                       </TableCell>
-                      <TableCell>
+                      <TableCell align="center">
                         <Chip
                           size="small"
                           variant="tonal"
                           label={departments[member.typeId] || "Chưa gán"}
                         />
                       </TableCell>
-                      <TableCell>
+                      <TableCell align="center">
                         {categories[member.categoryId] || "—"}
                       </TableCell>
                       <TableCell align="center">
@@ -849,7 +1005,7 @@ export default function FundPage() {
                           label={member.paid ? "Đã đóng" : "Chưa đóng"}
                         />
                       </TableCell>
-                      <TableCell align="right">
+                      <TableCell align="center">
                         <Typography
                           fontWeight={700}
                           color={member.paid ? "text.primary" : "text.disabled"}
@@ -857,7 +1013,7 @@ export default function FundPage() {
                           {money(member.amount)}
                         </Typography>
                       </TableCell>
-                      <TableCell>
+                      <TableCell align="center">
                         {member.paidAt
                           ? new Date(member.paidAt).toLocaleString("vi-VN")
                           : "—"}
@@ -885,6 +1041,23 @@ export default function FundPage() {
                           )}
                         </TableCell>
                       )}
+                      <TableCell align="center">
+                        {member.id === session?.user?.id && !member.paid ? (
+                          <Button
+                            size="small"
+                            variant="contained"
+                            onClick={() => {
+                              setPaymentMember(member);
+                              setPaymentAmount(String(minimumFor(member)));
+                              setPaymentData(null);
+                            }}
+                          >
+                            Đóng quỹ
+                          </Button>
+                        ) : (
+                          "—"
+                        )}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -1073,6 +1246,120 @@ export default function FundPage() {
           deleteTransaction(deleteTarget.kind, deleteTarget.item)
         }
       />
+      <Dialog
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle>Mức đóng quỹ tối thiểu</DialogTitle>
+        <DialogContent sx={{ pt: 3 }}>
+          <Grid container spacing={3}>
+            {Object.entries(categories).map(([key, label]) => (
+              <Grid key={key} size={{ xs: 12, sm: 6 }}>
+                <Typography variant="body2" fontWeight={600} mb={1}>
+                  {label}
+                </Typography>
+                <CustomTextField
+                  fullWidth
+                  size="small"
+                  value={moneyInput(minimumAmounts[key])}
+                  onChange={(e) =>
+                    setMinimumAmounts((value) => ({
+                      ...value,
+                      [key]: Number(e.target.value.replace(/\D/g, "")),
+                    }))
+                  }
+                />
+              </Grid>
+            ))}
+          </Grid>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setSettingsOpen(false)}>Hủy</Button>
+          <Button variant="contained" onClick={saveMinimumAmounts}>
+            Lưu thay đổi
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={Boolean(paymentMember)}
+        onClose={() => !paymentData && setPaymentMember(null)}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle>Đóng quỹ phòng</DialogTitle>
+        <DialogContent>
+          <Grid container spacing={3} sx={{ pt: 1 }}>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <Typography color="text.secondary" mb={2}>
+                Mức tối thiểu: {money(minimumFor(paymentMember || {}))}
+              </Typography>
+              <CustomTextField
+                fullWidth
+                label="Số tiền đóng"
+                value={moneyInput(paymentAmount)}
+                disabled={Boolean(paymentData)}
+                onChange={(e) =>
+                  setPaymentAmount(e.target.value.replace(/\D/g, ""))
+                }
+                helperText={`Tối thiểu ${money(minimumFor(paymentMember || {}))}`}
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <Box
+                sx={{
+                  minHeight: 220,
+                  display: "grid",
+                  placeItems: "center",
+                  border: "1px dashed",
+                  borderColor: "divider",
+                  borderRadius: 2,
+                }}
+              >
+                {paymentData?.qrDataUrl ? (
+                  <Box
+                    component="img"
+                    src={paymentData.qrDataUrl}
+                    alt="Mã QR PayOS"
+                    sx={{ width: 220 }}
+                  />
+                ) : (
+                  <Typography color="text.secondary" align="center">
+                    Chọn số tiền rồi tạo mã QR để thanh toán
+                  </Typography>
+                )}
+              </Box>
+            </Grid>
+          </Grid>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => setPaymentMember(null)}
+            disabled={Boolean(paymentData)}
+          >
+            Hủy
+          </Button>
+          {paymentData?.checkoutUrl ? (
+            <Button
+              component="a"
+              href={paymentData.checkoutUrl}
+              target="_blank"
+              variant="tonal"
+            >
+              Mở trang PayOS
+            </Button>
+          ) : (
+            <Button
+              variant="contained"
+              onClick={createPayment}
+              disabled={Number(paymentAmount) < minimumFor(paymentMember || {})}
+            >
+              Tạo mã QR
+            </Button>
+          )}
+        </DialogActions>
+      </Dialog>
       <ConfirmDialog
         open={Boolean(cancelPaymentTarget)}
         title="Xác nhận hủy duyệt đóng quỹ"

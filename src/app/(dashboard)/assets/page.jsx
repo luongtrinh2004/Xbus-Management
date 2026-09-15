@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Autocomplete from "@mui/material/Autocomplete";
+import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
@@ -11,6 +12,7 @@ import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
+import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import Tab from "@mui/material/Tab";
 import Table from "@mui/material/Table";
@@ -26,6 +28,8 @@ import { toast } from "react-toastify";
 import CustomTextField from "@core/components/mui/TextField";
 import tableStyles from "@core/styles/table.module.css";
 import ConfirmDialog from "@components/ConfirmDialog";
+import DataTableToolbar from "@components/DataTableToolbar";
+import TablePaginationComponent from "@components/TablePaginationComponent";
 
 const emptyForm = {
   code: "",
@@ -435,6 +439,9 @@ export default function AssetsPage() {
   const [editingItem, setEditingItem] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [limit, setLimit] = useState(10);
+  const [page, setPage] = useState(1);
   const loadData = async () => {
     setLoading(true);
     try {
@@ -487,6 +494,18 @@ export default function AssetsPage() {
     });
     return [...rows.values()];
   }, [data]);
+  const activeRows =
+    tab === "import" ? data.imports : tab === "export" ? data.exports : stock;
+  const filteredRows = useMemo(
+    () =>
+      activeRows.filter((row) =>
+        normalizeSearchText(
+          `${row.code} ${row.name} ${row.location} ${row.person} ${row.note}`,
+        ).includes(normalizeSearchText(search)),
+      ),
+    [activeRows, search],
+  );
+  const pagedRows = filteredRows.slice((page - 1) * limit, page * limit);
   if (status === "loading" || loading)
     return (
       <Box display="flex" justifyContent="center" py={12}>
@@ -494,89 +513,125 @@ export default function AssetsPage() {
       </Box>
     );
   return (
-    <Card>
-      <CardHeader
-        title="Quản lý tài sản"
-        subheader="Theo dõi hoạt động nhập, xuất và số lượng tồn kho"
-        action={
-          canManage ? (
-            <Box display="flex" gap={2}>
-              <Button
-                variant="tonal"
-                startIcon={<i className="tabler-package-import" />}
-                onClick={() => {
-                  setEditingItem(null);
-                  setDialog("import");
-                }}
+    <Box>
+      <Card sx={{ mb: 4 }}>
+        <CardHeader
+          sx={{ alignItems: "center", "& .MuiCardHeader-action": { m: 0 } }}
+          title={
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              <Avatar
+                variant="rounded"
+                sx={{ bgcolor: "rgba(32,146,236,.12)", color: "primary.main" }}
               >
-                Nhập tài sản
-              </Button>
-              <Button
-                variant="contained"
-                startIcon={<i className="tabler-package-export" />}
-                onClick={() => {
-                  setEditingItem(null);
-                  setDialog("export");
-                }}
-              >
-                Xuất tài sản
-              </Button>
+                <i className="tabler-package" />
+              </Avatar>
+              <Box>
+                <Typography variant="h5" fontWeight={700}>
+                  Quản lý tài sản
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Theo dõi hoạt động nhập, xuất và số lượng tồn kho
+                </Typography>
+              </Box>
             </Box>
-          ) : null
-        }
-      />
-      <Tabs
-        value={tab}
-        onChange={(_, value) => setTab(value)}
-        sx={{ px: 5, mt: 2 }}
-      >
-        <Tab value="import" label={`Nhập kho (${data.imports.length})`} />
-        <Tab value="export" label={`Xuất kho (${data.exports.length})`} />
-        <Tab value="stock" label={`Tồn kho (${stock.length})`} />
-      </Tabs>
-      <AssetTable
-        type={tab}
-        rows={
-          tab === "import"
-            ? data.imports
-            : tab === "export"
-              ? data.exports
-              : stock
-        }
-        canManage={canManage}
-        onEdit={(type, item) => {
-          setEditingItem(item);
-          setDialog(type);
-        }}
-        onDelete={(type, item) => setDeleteTarget({ type, item })}
-      />
-      <TransactionDialog
-        open={Boolean(dialog)}
-        type={dialog || "import"}
-        imports={data.imports}
-        exports={data.exports}
-        editingItem={editingItem}
-        currentName={session?.user?.name}
-        onClose={() => {
-          setDialog(null);
-          setEditingItem(null);
-        }}
-        onSaved={loadData}
-      />
-      <ConfirmDialog
-        open={Boolean(deleteTarget)}
-        title="Xác nhận xóa phiếu tài sản"
-        message={
-          deleteTarget
-            ? `Bạn có chắc muốn xóa phiếu ${deleteTarget.type === "import" ? "nhập" : "xuất"} ${deleteTarget.item.code}?`
-            : ""
-        }
-        confirmText="Xóa phiếu"
-        onClose={() => setDeleteTarget(null)}
-        onConfirm={() =>
-          deleteTransaction(deleteTarget.type, deleteTarget.item)
-        }
-      />
-    </Card>
+          }
+          action={
+            canManage ? (
+              <Box display="flex" gap={2}>
+                <Button
+                  variant="tonal"
+                  startIcon={<i className="tabler-package-import" />}
+                  onClick={() => {
+                    setEditingItem(null);
+                    setDialog("import");
+                  }}
+                >
+                  Nhập tài sản
+                </Button>
+                <Button
+                  variant="contained"
+                  startIcon={<i className="tabler-package-export" />}
+                  onClick={() => {
+                    setEditingItem(null);
+                    setDialog("export");
+                  }}
+                >
+                  Xuất tài sản
+                </Button>
+              </Box>
+            ) : null
+          }
+        />
+      </Card>
+      <Card>
+        <DataTableToolbar
+          search={search}
+          onSearchChange={(value) => {
+            setSearch(value);
+            setPage(1);
+          }}
+          limit={limit}
+          onLimitChange={(value) => {
+            setLimit(value);
+            setPage(1);
+          }}
+          placeholder="Tìm mã, tên, vị trí, người thực hiện..."
+        />
+        <Divider />
+        <Tabs
+          value={tab}
+          onChange={(_, value) => setTab(value)}
+          sx={{ px: 5, mt: 2 }}
+        >
+          <Tab value="import" label={`Nhập kho (${data.imports.length})`} />
+          <Tab value="export" label={`Xuất kho (${data.exports.length})`} />
+          <Tab value="stock" label={`Tồn kho (${stock.length})`} />
+        </Tabs>
+        <AssetTable
+          type={tab}
+          rows={pagedRows}
+          canManage={canManage}
+          onEdit={(type, item) => {
+            setEditingItem(item);
+            setDialog(type);
+          }}
+          onDelete={(type, item) => setDeleteTarget({ type, item })}
+        />
+        <TablePaginationComponent
+          page={page}
+          total={filteredRows.length}
+          limit={limit}
+          onPageChange={(_, nextPage) => setPage(nextPage + 1)}
+        />
+        <Divider />
+        <TransactionDialog
+          open={Boolean(dialog)}
+          type={dialog || "import"}
+          imports={data.imports}
+          exports={data.exports}
+          editingItem={editingItem}
+          currentName={session?.user?.name}
+          onClose={() => {
+            setDialog(null);
+            setEditingItem(null);
+          }}
+          onSaved={loadData}
+        />
+        <ConfirmDialog
+          open={Boolean(deleteTarget)}
+          title="Xác nhận xóa phiếu tài sản"
+          message={
+            deleteTarget
+              ? `Bạn có chắc muốn xóa phiếu ${deleteTarget.type === "import" ? "nhập" : "xuất"} ${deleteTarget.item.code}?`
+              : ""
+          }
+          confirmText="Xóa phiếu"
+          onClose={() => setDeleteTarget(null)}
+          onConfirm={() =>
+            deleteTransaction(deleteTarget.type, deleteTarget.item)
+          }
+        />
+      </Card>
+    </Box>
   );
 }

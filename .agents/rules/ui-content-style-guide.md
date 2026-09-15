@@ -52,7 +52,15 @@
 
 ---
 
-## 5. Thông Báo & Toast (Notifications)
+## 5. Modal & Form
+
+- Modal sử dụng cấu trúc thống nhất: `DialogTitle`, `DialogContent dividers`, `DialogActions`.
+- Không đặt nhãn dài trực tiếp trong viền input khi modal có layout dày hoặc nhiều cột; dùng `Typography` làm nhãn ở phía trên input để tránh chữ bị cắt hoặc chồng lên viền.
+- Input trong modal ưu tiên `CustomTextField` với `size="small"`; khoảng cách giữa các trường tối thiểu `spacing={3}`.
+- Nút hủy dùng `variant="tonal" color="secondary"`; nút lưu/xác nhận dùng `variant="contained" color="primary"`.
+- Không sử dụng nút đóng `X` góc phải nếu modal đã có thao tác Hủy/Đóng rõ ràng ở footer.
+
+## 6. Thông Báo & Toast (Notifications)
 
 | ❌ Không dùng        | ✅ Dùng                                  |
 | -------------------- | ---------------------------------------- |
@@ -67,7 +75,7 @@
 
 ---
 
-## 6. Trạng Thái Rỗng (Empty States)
+## 7. Trạng Thái Rỗng (Empty States)
 
 | ❌ Không dùng  | ✅ Dùng                        |
 | -------------- | ------------------------------ |
