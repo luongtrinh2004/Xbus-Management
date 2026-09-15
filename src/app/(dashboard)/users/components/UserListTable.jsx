@@ -72,6 +72,8 @@ const UserListTable = ({
   setType,
   category,
   setCategory,
+  globalFilter,
+  setGlobalFilter,
   fetchUsers,
   onUserUpdated,
   isLoading,
@@ -83,7 +85,6 @@ const UserListTable = ({
   const isAdmin = session?.user?.role === "admin";
   const [addUserOpen, setAddUserOpen] = useState(false);
   const [data, setData] = useState(tableData || []);
-  const [globalFilter, setGlobalFilter] = useState("");
   const [openDelete, setOpenDelete] = useState(false);
   const [openUpdate, setOpenUpdate] = useState(false);
   const [choosingId, setChoosingId] = useState("");
@@ -398,11 +399,20 @@ const UserListTable = ({
         {/* Bộ lọc Filter */}
         <TableFilters
           role={role}
-          setRole={setRole}
+          setRole={(value) => {
+            setRole(value);
+            setPage(1);
+          }}
           type={type}
-          setType={setType}
+          setType={(value) => {
+            setType(value);
+            setPage(1);
+          }}
           category={category}
-          setCategory={setCategory}
+          setCategory={(value) => {
+            setCategory(value);
+            setPage(1);
+          }}
         />
         <Divider />
 
