@@ -1,6 +1,18 @@
 {
   "auditLogs": [
     {
+      "id": "log_1789456927617_znnd",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "UPDATE_USER",
+      "targetType": "USER",
+      "targetId": "usr_1789204311678",
+      "details": "Cập nhật thông tin nhân sự Nhân viên hệ thống (HDK111): name, email, code, phone, gender, role, typeId, categoryId, status, birthday, avatarUrl, schedulingPoints",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-15T07:22:07.617Z"
+    },
+    {
       "id": "log_1789396592310_7w7z",
       "adminId": "usr_admin_001",
       "adminName": "Quản trị viên Hệ thống",

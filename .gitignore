@@ -10,6 +10,18 @@ yarn-debug.log*
 yarn-error.log*
 *.log
 
+# Runtime data and uploaded files (persisted through Docker volumes)
+src/data/json/
+public/images/afternoon-tea/
+public/images/avatars/*
+
+# Default avatar assets are part of the UI.
+!public/images/avatars/assistant.png
+!public/images/avatars/female-admin.png
+!public/images/avatars/female-user.png
+!public/images/avatars/male-admin.png
+!public/images/avatars/male-user.png
+
 
 
 # Environment variables

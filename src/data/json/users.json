@@ -16,10 +16,11 @@
       "schedulingPoints": 0,
       "waterTripCount": 0,
       "createdAt": "2026-09-12T09:11:51.678Z",
-      "updatedAt": "2026-09-14T11:37:02.801Z",
+      "updatedAt": "2026-09-15T07:22:07.615Z",
       "activatedAt": "2026-09-12T16:31:13.787Z",
       "activatedBy": "usr_admin_001",
-      "password": "$2a$10$4wP1mBO2kvODVfp8bTzOM.pPFepWpP5zywjHJ1yeumhzXwRcp/QA."
+      "password": "$2a$10$4wP1mBO2kvODVfp8bTzOM.pPFepWpP5zywjHJ1yeumhzXwRcp/QA.",
+      "birthday": ""
     },
     {
       "id": "usr_admin_001",
@@ -184,8 +185,7 @@
       "updatedAt": "2026-09-14T04:58:25.831Z",
       "activatedAt": "2026-09-12T08:00:00.000Z",
       "activatedBy": "usr_admin_001",
-       "password": "$2a$10$4wP1mBO2kvODVfp8bTzOM.pPFepWpP5zywjHJ1yeumhzXwRcp/QA."
-
+      "password": "$2a$10$4wP1mBO2kvODVfp8bTzOM.pPFepWpP5zywjHJ1yeumhzXwRcp/QA."
     },
     {
       "id": "usr_008",

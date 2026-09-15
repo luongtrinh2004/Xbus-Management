@@ -16,7 +16,6 @@ import CircularProgress from "@mui/material/CircularProgress";
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import { toast } from "react-toastify";
-import DialogCloseButton from "./DialogCloseButton";
 import CustomTextField from "@core/components/mui/TextField";
 import { resolveAvatar } from "@/utils/getDefaultAvatar";
 
@@ -128,9 +127,9 @@ const EditUserDialog = ({
         body: form,
       });
       const result = await res.json();
-      if (res.ok) {
+      if (res.ok && result.avatarUrl) {
         setUserData((prev) => ({ ...prev, avatarUrl: result.avatarUrl }));
-        setAvatarPreview(result.avatarUrl);
+        setAvatarPreview(result.previewUrl || result.avatarUrl);
         setData((prev) =>
           (prev || []).map((u) =>
             u.id === userData.id ? { ...u, avatarUrl: result.avatarUrl } : u,
@@ -148,6 +147,34 @@ const EditUserDialog = ({
     } finally {
       setUploadingAvatar(false);
       e.target.value = "";
+    }
+  };
+
+  const handleDeleteAvatar = async () => {
+    if (!userData.avatarUrl || uploadingAvatar) return;
+
+    setUploadingAvatar(true);
+    try {
+      const res = await fetch(`/api/users/${userData.id}/avatar`, {
+        method: "DELETE",
+      });
+      const result = await res.json();
+      if (!res.ok)
+        throw new Error(result.error || "Không thể xóa ảnh đại diện");
+
+      const updatedUser = { ...userData, avatarUrl: "" };
+      setUserData(updatedUser);
+      setAvatarPreview(resolveAvatar(updatedUser));
+      setData((prev) =>
+        (prev || []).map((u) =>
+          u.id === userData.id ? { ...u, avatarUrl: "" } : u,
+        ),
+      );
+      toast.success("Đã xóa ảnh đại diện");
+    } catch (error) {
+      toast.error(error.message || "Không thể xóa ảnh đại diện");
+    } finally {
+      setUploadingAvatar(false);
     }
   };
 
@@ -198,7 +225,6 @@ const EditUserDialog = ({
 
   return (
     <Dialog open={openUpdate} onClose={handleClose} fullWidth maxWidth="md">
-      <DialogCloseButton onClick={handleClose} />
       <DialogTitle component="div">
         <Typography
           variant="h5"
@@ -274,6 +300,19 @@ const EditUserDialog = ({
                 <Typography variant="caption" color="text.secondary">
                   Bấm vào ảnh để thay đổi. Hỗ trợ JPG, PNG, WebP (tối đa 5MB).
                 </Typography>
+                {["admin", "assistant"].includes(userData.role) &&
+                  userData.avatarUrl && (
+                    <Button
+                      size="small"
+                      color="error"
+                      variant="text"
+                      onClick={handleDeleteAvatar}
+                      disabled={uploadingAvatar}
+                      sx={{ display: "block", mt: 0.5, px: 0 }}
+                    >
+                      Xóa ảnh đại diện
+                    </Button>
+                  )}
               </Box>
               <input
                 ref={fileInputRef}

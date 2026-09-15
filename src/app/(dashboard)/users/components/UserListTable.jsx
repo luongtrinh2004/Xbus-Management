@@ -23,7 +23,6 @@ import { useSession } from "next-auth/react";
 
 import TablePaginationComponent from "@components/TablePaginationComponent";
 import AddUserDrawer from "./AddUserDrawer";
-import DialogsConfirmation from "./DialogsConfirmation";
 import CustomTextField from "@core/components/mui/TextField";
 import CustomAvatar from "@core/components/mui/Avatar";
 import EditUserDialog from "./EditUserDialog";
@@ -85,9 +84,7 @@ const UserListTable = ({
   const isAdmin = session?.user?.role === "admin";
   const [addUserOpen, setAddUserOpen] = useState(false);
   const [data, setData] = useState(tableData || []);
-  const [openDelete, setOpenDelete] = useState(false);
   const [openUpdate, setOpenUpdate] = useState(false);
-  const [choosingId, setChoosingId] = useState("");
   const [updatingUser, setUpdatingUser] = useState(null);
   const [departments, setDepartments] = useState([]);
 
@@ -155,26 +152,6 @@ const UserListTable = ({
     } catch (err) {
       onUserUpdated?.(user, optimisticUser);
       setData((prev) => (prev || []).map((u) => (u.id === user.id ? user : u)));
-      console.error(err);
-      toast.error("Lỗi kết nối");
-    }
-  };
-
-  // Xóa tài khoản
-  const handleDeleteUser = async (id) => {
-    try {
-      const response = await fetch(`/api/users/${id}`, {
-        method: "DELETE",
-      });
-      const result = await response.json();
-      if (response.ok) {
-        toast.success(result.message || "Xóa thành công");
-        setData((prev) => (prev || []).filter((u) => u.id !== id));
-        if (fetchUsers) fetchUsers();
-      } else {
-        toast.error(result.error || "Xóa thất bại");
-      }
-    } catch (err) {
       console.error(err);
       toast.error("Lỗi kết nối");
     }
@@ -344,18 +321,6 @@ const UserListTable = ({
                   }}
                 >
                   <i className="tabler-edit" />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Xóa">
-                <IconButton
-                  size="small"
-                  color="error"
-                  onClick={() => {
-                    setChoosingId(row.original.id);
-                    setOpenDelete(true);
-                  }}
-                >
-                  <i className="tabler-trash" />
                 </IconButton>
               </Tooltip>
             </Box>
@@ -603,14 +568,6 @@ const UserListTable = ({
         setUpdatingUser={setUpdatingUser}
         setData={setData}
         onUserUpdated={onUserUpdated}
-      />
-
-      {/* Confirmation Dialog khi xóa */}
-      <DialogsConfirmation
-        open={openDelete}
-        setOpen={setOpenDelete}
-        choosingId={choosingId}
-        handleDelete={handleDeleteUser}
       />
     </>
   );
