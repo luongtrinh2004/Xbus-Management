@@ -134,7 +134,10 @@ export async function POST(req, { params }) {
     }
 
     // Cập nhật avatarUrl trong user record
-    const avatarUrl = `/images/avatars/${encodeURIComponent(staffCode)}/${encodeURIComponent(fileName)}`;
+    const avatarPath = `/images/avatars/${encodeURIComponent(staffCode)}/${encodeURIComponent(fileName)}`;
+    // File được ghi đè theo mã nhân sự để thư mục luôn gọn, còn version trong
+    // URL buộc browser/CDN tải ảnh mới thay vì dùng bản đã cache.
+    const avatarUrl = `${avatarPath}?v=${Date.now()}`;
     const updatedUsers = users.map((u) =>
       u.id === id
         ? { ...u, avatarUrl, updatedAt: new Date().toISOString() }
@@ -142,10 +145,11 @@ export async function POST(req, { params }) {
     );
     await saveUsers(updatedUsers);
 
-    // Filename luôn mới; query timestamp cũng tránh CDN/browser trả lại ảnh cũ.
+    // avatarUrl đã có version và được lưu vào nguồn dữ liệu để mọi màn hình,
+    // kể cả session sau khi đăng nhập lại, đều nhận đúng ảnh mới nhất.
     return NextResponse.json({
       avatarUrl,
-      previewUrl: `${avatarUrl}?v=${Date.now()}`,
+      previewUrl: avatarUrl,
     });
   } catch (error) {
     console.error("[API Avatar] POST error:", error);

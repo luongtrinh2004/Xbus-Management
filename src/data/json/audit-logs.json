@@ -1,6 +1,30 @@
 {
   "auditLogs": [
     {
+      "id": "log_1789526060784_wbuu",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "UPDATE_USER",
+      "targetType": "USER",
+      "targetId": "usr_1789204311678",
+      "details": "Cập nhật thông tin nhân sự Nhân viên hệ thống (HDK111): name, code, phone, gender, role, typeId, categoryId, status, birthday, avatarUrl, schedulingPoints",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-16T02:34:20.784Z"
+    },
+    {
+      "id": "log_1789525999365_g686",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "UPDATE_USER",
+      "targetType": "USER",
+      "targetId": "usr_1789204311678",
+      "details": "Cập nhật thông tin nhân sự Nhân viên hệ thống (HDK111): name, code, phone, gender, role, typeId, categoryId, status, birthday, avatarUrl, schedulingPoints",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-16T02:33:19.365Z"
+    },
+    {
       "id": "log_1789456927617_znnd",
       "adminId": "usr_admin_001",
       "adminName": "Quản trị viên Hệ thống",
