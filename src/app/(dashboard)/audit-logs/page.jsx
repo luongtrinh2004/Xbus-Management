@@ -48,6 +48,10 @@ const actionLabels = {
   DELETE_FUND_TRANSACTION: "Xóa giao dịch quỹ",
   APPROVE_FUND_PAYMENT: "Duyệt đóng quỹ tháng",
   CANCEL_FUND_PAYMENT: "Hủy duyệt đóng quỹ tháng",
+  PAYOS_FUND_PAYMENT: "Đóng quỹ trực tuyến",
+  CANCEL_FUND_OBLIGATION: "Hủy nghĩa vụ đóng quỹ",
+  RESTORE_FUND_OBLIGATION: "Khôi phục nghĩa vụ đóng quỹ",
+  UPDATE_FUND_SETTINGS: "Cài đặt mức đóng quỹ",
 };
 const actionLabel = (action) =>
   actionLabels[action] || "Thao tác hệ thống chưa phân loại";
@@ -59,7 +63,9 @@ const targetLabels = {
   FUND: "Quỹ phòng",
   AFTERNOON_TEA: "Trà chiều",
 };
-const roleLabel = (role) => (role === "assistant" ? "Trợ lý" : "Quản trị viên");
+const roleLabel = (role) =>
+  ({ admin: "Quản trị viên", assistant: "Trợ lý", user: "Nhân viên" })[role] ||
+  "Chưa xác định";
 const formatTime = formatVietnamDateTime;
 
 export default function AuditLogsPage() {
@@ -113,7 +119,7 @@ export default function AuditLogsPage() {
                 Lịch sử hoạt động
               </Typography>
               <Typography variant="caption" color="text.secondary">
-                Theo dõi thao tác của Quản trị viên và Trợ lý
+                Theo dõi thao tác quản lý và hoạt động đóng quỹ của thành viên
               </Typography>
             </Box>
           </Box>
@@ -166,7 +172,11 @@ export default function AuditLogsPage() {
                         size="small"
                         label={roleLabel(log.actorRole)}
                         color={
-                          log.actorRole === "assistant" ? "warning" : "error"
+                          log.actorRole === "assistant"
+                            ? "warning"
+                            : log.actorRole === "admin"
+                              ? "error"
+                              : "secondary"
                         }
                         variant="tonal"
                       />

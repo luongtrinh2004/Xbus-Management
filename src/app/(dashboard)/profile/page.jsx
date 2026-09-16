@@ -1,4 +1,5 @@
 "use client";
+import VietnameseDateField from "@/components/VietnameseDateField";
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
@@ -703,7 +704,7 @@ export default function ProfilePage() {
                     </TextField>
                   </Grid>
                   <Grid size={{ xs: 12, sm: 6 }}>
-                    <TextField
+                    <VietnameseDateField
                       label="Ngày sinh"
                       type="date"
                       value={form.birthday}

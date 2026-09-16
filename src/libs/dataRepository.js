@@ -1,4 +1,5 @@
 import * as json from "./jsonRepository.js";
+import { applyFundBalances } from "./fundRules.js";
 import { getMysqlPool, isMysqlEnabled } from "./mysql.js";
 
 const mysqlEnabled = () => isMysqlEnabled();
@@ -11,6 +12,13 @@ const toDateOnly = (value) => {
   if (/^\d{4}-\d{2}-\d{2}/.test(text)) return text.slice(0, 10);
   const date = new Date(text);
   return Number.isNaN(date.getTime()) ? "" : date.toISOString().slice(0, 10);
+};
+const toMysqlDateTime = (value, fallback = null) => {
+  if (!value) return fallback;
+  if (value instanceof Date)
+    return Number.isNaN(value.getTime()) ? fallback : value;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? fallback : date;
 };
 const defaultSettings = {
   companyEmailDomains: ["phenikaa-x.com"],
@@ -271,80 +279,123 @@ export async function saveSettings(settings) {
 }
 
 export async function getFunds() {
-  if (!mysqlEnabled()) return json.getFunds();
-  const [[periods], [payments], [transactions], [users]] = await Promise.all([
-    query("SELECT * FROM fund_periods ORDER BY year DESC, month DESC"),
-    query("SELECT * FROM fund_member_payments"),
-    query("SELECT * FROM fund_transactions ORDER BY occurred_at DESC"),
-    query("SELECT id,name FROM users"),
-  ]);
+  if (!mysqlEnabled()) return applyFundBalances(json.getFunds());
+  const [[periods], [payments], [transactions], [users], [metadataRows]] =
+    await Promise.all([
+      query("SELECT * FROM fund_periods ORDER BY year DESC, month DESC"),
+      query("SELECT * FROM fund_member_payments"),
+      query("SELECT * FROM fund_transactions ORDER BY occurred_at DESC"),
+      query("SELECT id,name FROM users"),
+      query(
+        "SELECT document_key,document_value FROM app_documents WHERE document_key LIKE 'fund-meta:%'",
+      ),
+    ]);
+  const metadata = new Map(
+    metadataRows.map((row) => [
+      row.document_key.slice(10),
+      asJson(row.document_value, {}),
+    ]),
+  );
   const names = new Map(users.map((item) => [item.id, item.name]));
-  return periods.map((fund) => ({
-    id: fund.id,
-    year: Number(fund.year),
-    month: Number(fund.month),
-    openingBalance: Number(fund.opening_balance || 0),
-    paymentDeadline: toDateOnly(fund.payment_deadline) || null,
-    reminderDaysBefore: asJson(fund.reminder_days_before, []),
-    emailReminderEnabled: Boolean(fund.email_reminder_enabled),
-    updatedAt: toIso(fund.updated_at),
-    members: payments
-      .filter((item) => item.fund_period_id === fund.id)
-      .map((item) => ({
-        userId: item.user_id,
-        paid: Boolean(item.paid),
-        amount: Number(item.amount || 0),
-        paidAt: toIso(item.paid_at),
-        paymentStatus: item.payment_status || undefined,
-        orderCode: item.order_code ? Number(item.order_code) : undefined,
-        paymentLinkId: item.payment_link_id || undefined,
-        checkoutUrl: item.checkout_url || undefined,
-        paymentReference: item.payment_reference || undefined,
-        approvedBy: item.approved_by || undefined,
-        updatedAt: toIso(item.updated_at),
-      })),
-    incomes: transactions
-      .filter(
-        (item) => item.fund_period_id === fund.id && item.kind === "income",
-      )
-      .map((item) => ({
-        id: item.id,
-        title: item.title,
-        category: item.category,
-        amount: Number(item.amount),
-        note: item.note || "",
-        userId: item.user_id || "",
-        userName: names.get(item.user_id) || "",
-        receivedAt: toIso(item.occurred_at),
-        createdBy: item.created_by || "",
-        createdAt: toIso(item.created_at),
-        updatedAt: toIso(item.updated_at),
-      })),
-    expenses: transactions
-      .filter(
-        (item) => item.fund_period_id === fund.id && item.kind === "expense",
-      )
-      .map((item) => ({
-        id: item.id,
-        title: item.title,
-        category: item.category,
-        amount: Number(item.amount),
-        note: item.note || "",
-        userId: item.user_id || "",
-        userName: names.get(item.user_id) || "",
-        spentAt: toIso(item.occurred_at),
-        createdBy: item.created_by || "",
-        createdAt: toIso(item.created_at),
-        updatedAt: toIso(item.updated_at),
-      })),
-  }));
+  return applyFundBalances(
+    periods.map((fund) => ({
+      id: fund.id,
+      contributionSnapshot: metadata.get(fund.id)?.contributionSnapshot,
+      year: Number(fund.year),
+      month: Number(fund.month),
+      openingBalance: Number(fund.opening_balance || 0),
+      paymentDeadline: toDateOnly(fund.payment_deadline) || null,
+      reminderDaysBefore: asJson(fund.reminder_days_before, []),
+      emailReminderEnabled: Boolean(fund.email_reminder_enabled),
+      updatedAt: toIso(fund.updated_at),
+      members: payments
+        .filter((item) => item.fund_period_id === fund.id)
+        .map((item) => ({
+          userId: item.user_id,
+          ...(metadata.get(fund.id)?.members?.[item.user_id] || {}),
+          paid: Boolean(item.paid),
+          amount: Number(item.amount || 0),
+          paidAt: toIso(item.paid_at),
+          paymentStatus: item.payment_status || undefined,
+          orderCode: item.order_code ? Number(item.order_code) : undefined,
+          paymentLinkId: item.payment_link_id || undefined,
+          checkoutUrl: item.checkout_url || undefined,
+          paymentReference: item.payment_reference || undefined,
+          approvedBy: item.approved_by || undefined,
+          updatedAt: toIso(item.updated_at),
+        })),
+      incomes: transactions
+        .filter(
+          (item) => item.fund_period_id === fund.id && item.kind === "income",
+        )
+        .map((item) => ({
+          id: item.id,
+          title: item.title,
+          category: item.category,
+          amount: Number(item.amount),
+          note: item.note || "",
+          userId: item.user_id || "",
+          userName: names.get(item.user_id) || "",
+          receivedAt: toIso(item.occurred_at),
+          createdBy: item.created_by || "",
+          createdAt: toIso(item.created_at),
+          updatedAt: toIso(item.updated_at),
+        })),
+      expenses: transactions
+        .filter(
+          (item) => item.fund_period_id === fund.id && item.kind === "expense",
+        )
+        .map((item) => ({
+          id: item.id,
+          title: item.title,
+          category: item.category,
+          amount: Number(item.amount),
+          note: item.note || "",
+          userId: item.user_id || "",
+          userName: names.get(item.user_id) || "",
+          spentAt: toIso(item.occurred_at),
+          createdBy: item.created_by || "",
+          createdAt: toIso(item.created_at),
+          updatedAt: toIso(item.updated_at),
+        })),
+    })),
+  );
 }
 export async function saveFunds(funds) {
+  applyFundBalances(funds);
   if (!mysqlEnabled()) return json.saveFunds(funds);
   const connection = await getMysqlPool().getConnection();
   try {
     await connection.beginTransaction();
     for (const fund of funds) {
+      const memberMetadata = Object.fromEntries(
+        (fund.members || []).map((item) => [
+          item.userId,
+          {
+            requiredAmount: item.requiredAmount,
+            baseAmount: item.baseAmount,
+            rosterHidden: item.rosterHidden,
+            voluntarySurplus: item.voluntarySurplus,
+            categoryId: item.categoryId,
+            memberName: item.memberName,
+            obligationCancelled: item.obligationCancelled || false,
+            cancellationReason: item.cancellationReason || "",
+            cancelledAt: item.cancelledAt,
+            cancelledBy: item.cancelledBy,
+          },
+        ]),
+      );
+      await connection.execute(
+        "INSERT INTO app_documents (document_key,document_value,updated_at) VALUES (?,?,?) ON DUPLICATE KEY UPDATE document_value=VALUES(document_value),updated_at=VALUES(updated_at)",
+        [
+          `fund-meta:${fund.id}`,
+          JSON.stringify({
+            contributionSnapshot: fund.contributionSnapshot,
+            members: memberMetadata,
+          }),
+          new Date(),
+        ],
+      );
       await connection.execute(
         "INSERT INTO fund_periods (id,year,month,opening_balance,payment_deadline,reminder_days_before,email_reminder_enabled,updated_at) VALUES (?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE opening_balance=VALUES(opening_balance),payment_deadline=VALUES(payment_deadline),reminder_days_before=VALUES(reminder_days_before),email_reminder_enabled=VALUES(email_reminder_enabled),updated_at=VALUES(updated_at)",
         [
@@ -400,7 +451,10 @@ export async function saveFunds(funds) {
               Number(item.amount || 0),
               item.note || null,
               item.userId || null,
-              item.receivedAt || item.spentAt || item.createdAt || new Date(),
+              toMysqlDateTime(
+                item.receivedAt || item.spentAt || item.createdAt,
+                new Date(),
+              ),
               item.createdBy || null,
               item.createdAt ? new Date(item.createdAt) : new Date(),
               item.updatedAt ? new Date(item.updatedAt) : null,

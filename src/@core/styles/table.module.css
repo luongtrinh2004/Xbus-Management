@@ -4,25 +4,43 @@
   font-size: 0.8125rem;
   white-space: nowrap;
 
+  /* HTML align attribute (legacy) */
   [align='right'] > * {
     text-align: end;
   }
   [align='center'] > * {
     text-align: center;
   }
+  /* MUI TableCell uses inline style="text-align: ..." not HTML attr */
+  th[style*='text-align: center'],
+  td[style*='text-align: center'] {
+    text-align: center;
+    > * {
+      text-align: center;
+    }
+  }
+  th[style*='text-align: right'],
+  td[style*='text-align: right'] {
+    text-align: end;
+    > * {
+      text-align: end;
+    }
+  }
 
   thead {
     text-transform: uppercase;
     color: var(--mui-palette-text-primary);
     border-block-start: 1px solid var(--border-color);
-
     th {
       font-weight: 500;
       font-size: 0.8125rem;
       letter-spacing: 0.2px;
       line-height: 1.8462;
-      text-align: start;
       block-size: 56px;
+      /* Default non-centered headers to start */
+      &:not([style*='text-align']) {
+        text-align: start;
+      }
       &:not(:first-of-type):not(:last-of-type) {
         padding-block: 0.5rem;
         padding-inline: 1rem;

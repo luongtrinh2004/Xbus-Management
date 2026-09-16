@@ -67,7 +67,10 @@ export async function POST(req) {
   if (
     !fund ||
     !user ||
-    (fund.members || []).some((item) => item.userId === userId && item.paid)
+    (fund.members || []).some(
+      (item) =>
+        item.userId === userId && (item.paid || item.obligationCancelled),
+    )
   )
     return NextResponse.json(
       { error: "Không thể gửi nhắc cho nhân sự này" },

@@ -67,6 +67,33 @@ try {
   const funds = json("funds.json").funds || [];
   for (const fund of funds) {
     await upsert(
+      "INSERT INTO app_documents (document_key,document_value,updated_at) VALUES (?,?,?) ON DUPLICATE KEY UPDATE document_value=VALUES(document_value),updated_at=VALUES(updated_at)",
+      [
+        `fund-meta:${fund.id}`,
+        JSON.stringify({
+          contributionSnapshot: fund.contributionSnapshot,
+          members: Object.fromEntries(
+            (fund.members || []).map((item) => [
+              item.userId,
+              {
+                requiredAmount: item.requiredAmount,
+                baseAmount: item.baseAmount,
+                rosterHidden: item.rosterHidden,
+                voluntarySurplus: item.voluntarySurplus,
+                categoryId: item.categoryId,
+                memberName: item.memberName,
+                obligationCancelled: item.obligationCancelled || false,
+                cancellationReason: item.cancellationReason || "",
+                cancelledAt: item.cancelledAt,
+                cancelledBy: item.cancelledBy,
+              },
+            ]),
+          ),
+        }),
+        new Date(),
+      ],
+    );
+    await upsert(
       "INSERT INTO fund_periods (id,year,month,opening_balance,payment_deadline,reminder_days_before,email_reminder_enabled,updated_at) VALUES (?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE opening_balance=VALUES(opening_balance),updated_at=VALUES(updated_at)",
       [
         fund.id,

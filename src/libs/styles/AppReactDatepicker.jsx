@@ -5,7 +5,9 @@ import Box from '@mui/material/Box'
 import { styled } from '@mui/material/styles'
 
 // Third-party Imports
-import ReactDatePickerComponent from 'react-datepicker'
+import ReactDatePickerComponent, { registerLocale } from 'react-datepicker'
+import { vi } from 'date-fns/locale/vi'
+registerLocale('vi', vi)
 
 // Styles
 import 'react-datepicker/dist/react-datepicker.css'
@@ -520,6 +522,16 @@ const AppReactDatepicker = props => {
   return (
     <StyledReactDatePicker {...boxProps}>
       <ReactDatePickerComponent
+        locale='vi'
+        dateFormat='dd/MM/yyyy'
+        calendarStartDay={1}
+        timeCaption='Giờ'
+        timeFormat='HH:mm'
+        previousMonthAriaLabel='Tháng trước'
+        nextMonthAriaLabel='Tháng sau'
+        previousYearAriaLabel='Năm trước'
+        nextYearAriaLabel='Năm sau'
+        todayButton='Hôm nay'
         popperPlacement='bottom-start'
         selected={toSafeDate(selected)}
         startDate={toSafeDate(startDate)}

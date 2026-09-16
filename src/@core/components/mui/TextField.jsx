@@ -6,6 +6,7 @@ import { forwardRef } from 'react'
 // MUI Imports
 import { styled } from '@mui/material/styles'
 import TextField from '@mui/material/TextField'
+import VietnameseDateField from '@/components/VietnameseDateField'
 
 const TextFieldStyled = styled(TextField)(({ theme }) => ({
   '& .MuiInputLabel-root': {
@@ -243,6 +244,7 @@ const TextFieldStyled = styled(TextField)(({ theme }) => ({
 
 const CustomTextField = forwardRef((props, ref) => {
   const { size = 'small', slotProps, ...rest } = props
+  if (['date', 'month'].includes(props.type)) return <VietnameseDateField {...props} component={TextFieldStyled} size={size} />
 
   return (
     <TextFieldStyled

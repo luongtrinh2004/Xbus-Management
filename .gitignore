@@ -32,6 +32,7 @@ public/images/avatars/*
 
 .env.test.local
 .env.production.local
+.deploy.env
 
 # OS & Editor
 .DS_Store

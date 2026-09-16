@@ -3,34 +3,31 @@ import { getToken } from "next-auth/jwt";
 import QRCode from "qrcode";
 import { PayOS } from "@payos/node";
 import {
+  appendAuditLog,
   getFunds,
   getSettings,
   getUsers,
   saveFunds,
 } from "@/libs/dataRepository";
+import {
+  snapshotFund,
+  periodKey,
+  currentFundPeriod,
+  minimumOnlinePaymentAmount,
+} from "@/libs/fundRules";
 
 const secret = process.env.NEXTAUTH_SECRET;
-const defaults = {
-  category_official: 150000,
-  category_probation: 150000,
-  category_intern: 100000,
-  category_collaborator: 100000,
-};
 const configured = () =>
   Boolean(
-    process.env.PAYOS_CLIENT_ID &&
-      process.env.PAYOS_API_KEY &&
-      process.env.PAYOS_CHECKSUM_KEY,
+    (process.env.PAYOS_CLIENT_ID || process.env.CLIENT_ID) &&
+      (process.env.PAYOS_API_KEY || process.env.API_KEY) &&
+      (process.env.PAYOS_CHECKSUM_KEY || process.env.CHECKSUM_KEY),
   );
-const getMinimum = (settings, categoryId) =>
-  Number(settings.fundMinimumAmounts?.[categoryId]) ||
-  defaults[categoryId] ||
-  100000;
 const payOS = () =>
   new PayOS({
-    clientId: process.env.PAYOS_CLIENT_ID,
-    apiKey: process.env.PAYOS_API_KEY,
-    checksumKey: process.env.PAYOS_CHECKSUM_KEY,
+    clientId: process.env.PAYOS_CLIENT_ID || process.env.CLIENT_ID,
+    apiKey: process.env.PAYOS_API_KEY || process.env.API_KEY,
+    checksumKey: process.env.PAYOS_CHECKSUM_KEY || process.env.CHECKSUM_KEY,
   });
 
 export async function POST(req) {
@@ -47,6 +44,14 @@ export async function POST(req) {
     );
   try {
     const { month, year, amount } = await req.json();
+    if (
+      periodKey({ month: Number(month), year: Number(year) }) >
+      periodKey(currentFundPeriod())
+    )
+      return NextResponse.json(
+        { error: "Chưa đến kỳ đóng quỹ. Không thể thanh toán trước." },
+        { status: 403 },
+      );
     const funds = await getFunds();
     const fundIndex = funds.findIndex(
       (fund) => fund.month === Number(month) && fund.year === Number(year),
@@ -64,17 +69,25 @@ export async function POST(req) {
         { status: 403 },
       );
     const contribution = Number(amount);
-    const minimum = getMinimum(await getSettings(), user.categoryId);
-    if (!Number.isInteger(contribution) || contribution < minimum)
+    snapshotFund(funds[fundIndex], users, await getSettings());
+    if (
+      !Number.isSafeInteger(contribution) ||
+      contribution < minimumOnlinePaymentAmount
+    )
       return NextResponse.json(
         {
-          error: `Số tiền đóng tối thiểu là ${minimum.toLocaleString("vi-VN")} VNĐ`,
+          error: `Số tiền đóng phải từ ${minimumOnlinePaymentAmount.toLocaleString("vi-VN")} đồng`,
         },
         { status: 400 },
       );
     const existing = (funds[fundIndex].members || []).find(
       (item) => item.userId === user.id,
     );
+    if (!existing || existing.obligationCancelled)
+      return NextResponse.json(
+        { error: "Nghĩa vụ đóng quỹ không còn hiệu lực" },
+        { status: 409 },
+      );
     if (existing?.paid)
       return NextResponse.json(
         { error: "Bạn đã đóng quỹ trong kỳ này" },
@@ -98,7 +111,7 @@ export async function POST(req) {
           price: contribution,
         },
       ],
-      returnUrl: `${appUrl}/fund?section=members`,
+      returnUrl: `${appUrl}/fund?section=members&orderCode=${orderCode}`,
       cancelUrl: `${appUrl}/fund?section=members`,
     });
     const qrDataUrl = payment.qrCode
@@ -106,6 +119,7 @@ export async function POST(req) {
       : null;
     const members = funds[fundIndex].members || [];
     const record = {
+      ...existing,
       userId: user.id,
       paid: false,
       amount: contribution,
@@ -125,6 +139,7 @@ export async function POST(req) {
         orderCode,
         amount: contribution,
         qrDataUrl,
+        accountName: payment.accountName,
         checkoutUrl: payment.checkoutUrl,
         status: "PENDING",
       },
@@ -132,10 +147,11 @@ export async function POST(req) {
     );
   } catch (error) {
     console.error("[Fund payment] create:", error);
-    return NextResponse.json(
-      { error: "Không thể tạo yêu cầu thanh toán PayOS" },
-      { status: 502 },
-    );
+    const payOSError =
+      typeof error?.desc === "string" && error.desc.trim()
+        ? `PayOS: ${error.desc.trim()}`
+        : "Không thể tạo yêu cầu thanh toán PayOS";
+    return NextResponse.json({ error: payOSError }, { status: 502 });
   }
 }
 
@@ -144,11 +160,18 @@ export async function GET(req) {
   if (!token?.id)
     return NextResponse.json({ error: "Chưa xác thực" }, { status: 401 });
   const orderCode = Number(req.nextUrl.searchParams.get("orderCode"));
-  for (const fund of await getFunds()) {
-    const payment = (fund.members || []).find(
-      (item) => item.orderCode === orderCode,
+  if (!Number.isSafeInteger(orderCode) || orderCode <= 0)
+    return NextResponse.json(
+      { error: "Mã đơn thanh toán không hợp lệ" },
+      { status: 400 },
     );
-    if (payment) {
+  const funds = await getFunds();
+  for (const fund of funds) {
+    const paymentIndex = (fund.members || []).findIndex(
+      (item) => Number(item.orderCode) === orderCode,
+    );
+    if (paymentIndex >= 0) {
+      const payment = fund.members[paymentIndex];
       if (
         payment.userId !== token.id &&
         !["admin", "assistant"].includes(token.role)
@@ -157,9 +180,63 @@ export async function GET(req) {
           { error: "Không có quyền xem giao dịch" },
           { status: 403 },
         );
+
+      if (!payment.paid && configured()) {
+        try {
+          const remotePayment = await payOS().paymentRequests.get(orderCode);
+          const remoteStatus = remotePayment.status || "PENDING";
+
+          if (
+            remoteStatus === "PAID" &&
+            Number(remotePayment.amountPaid) >= Number(payment.amount)
+          ) {
+            const now = new Date().toISOString();
+            const transactions = remotePayment.transactions || [];
+            const latestTransaction = transactions.at(-1);
+            fund.members[paymentIndex] = {
+              ...payment,
+              paid: true,
+              paymentStatus: "PAID",
+              paidAt: latestTransaction?.transactionDateTime || now,
+              paymentReference: latestTransaction?.reference || "",
+              updatedAt: now,
+            };
+            fund.updatedAt = now;
+            await saveFunds(funds);
+            const payer = (await getUsers()).find(
+              (user) => user.id === payment.userId,
+            );
+            await appendAuditLog({
+              adminId: payment.userId,
+              adminName: payer?.name || payment.memberName || "Nhân sự",
+              adminEmail: payer?.email || "",
+              action: "PAYOS_FUND_PAYMENT",
+              targetType: "FUND",
+              targetId: fund.id,
+              details: `${payer?.name || payment.memberName || "Nhân sự"} đã đóng ${Number(payment.amount).toLocaleString("vi-VN")} đồng quỹ tháng ${fund.month}/${fund.year}, mã đơn ${orderCode}`,
+            });
+            return NextResponse.json({ status: "PAID", paid: true });
+          }
+
+          if (payment.paymentStatus !== remoteStatus) {
+            fund.members[paymentIndex] = {
+              ...payment,
+              paymentStatus: remoteStatus,
+              updatedAt: new Date().toISOString(),
+            };
+            await saveFunds(funds);
+          }
+        } catch (error) {
+          console.error("[Fund payment] reconcile:", error);
+        }
+      }
+
+      const currentPayment = fund.members[paymentIndex];
       return NextResponse.json({
-        status: payment.paymentStatus || (payment.paid ? "PAID" : "PENDING"),
-        paid: Boolean(payment.paid),
+        status:
+          currentPayment.paymentStatus ||
+          (currentPayment.paid ? "PAID" : "PENDING"),
+        paid: Boolean(currentPayment.paid),
       });
     }
   }

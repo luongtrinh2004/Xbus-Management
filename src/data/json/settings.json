@@ -5,5 +5,25 @@
   ],
   "defaultRole": "user",
   "defaultUserStatus": "disabled",
-  "defaultWaterParticipants": 5
+  "defaultWaterParticipants": 5,
+  "fundMinimumAmounts": {
+    "category_official": 150000,
+    "category_probation": 150000,
+    "category_intern": 100000,
+    "category_collaborator": 100000
+  },
+  "fundContributionRules": [],
+  "fundContributionWindow": {
+    "amounts": {
+      "category_official": 150000,
+      "category_probation": 150000,
+      "category_intern": 100000,
+      "category_collaborator": 100000
+    },
+    "startPeriod": "2026-08",
+    "endPeriod": "2026-11"
+  },
+  "fundVoluntarySurplusUserIds": [
+    "usr_003"
+  ]
 }

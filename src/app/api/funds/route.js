@@ -4,9 +4,16 @@ import {
   getFunds,
   saveFunds,
   getUsers,
+  getSettings,
   saveUsers,
   appendAuditLog,
 } from "@/libs/dataRepository";
+import {
+  currentFundPeriod,
+  periodKey,
+  snapshotFund,
+  fundPaymentStatus,
+} from "@/libs/fundRules";
 
 const secret = process.env.NEXTAUTH_SECRET;
 const fundLabels = {
@@ -40,16 +47,20 @@ const buildFundResponse = (fund, allFunds) => {
 
   return {
     ...fund,
-    members: fund.members || [],
+    members: (fund.members || []).filter((m) => !m.rosterHidden),
+    isFuture: periodKey(fund) > periodKey(currentFundPeriod()),
     incomes: fund.incomes || [],
     expenses: fund.expenses || [],
     memberIncome,
     totalIncome,
     totalExpense,
     balance: (fund.openingBalance || 0) + totalIncome - totalExpense,
-    paidCount: (fund.members || []).filter((member) => member.paid).length,
+    paidCount: (fund.members || []).filter((member) =>
+      ["paid", "overpaid"].includes(fundPaymentStatus(member).key),
+    ).length,
     totalMembers: (fund.members || []).length,
     availablePeriods: allFunds
+      .filter((item) => periodKey(item) <= periodKey(currentFundPeriod()))
       .map((item) => ({ month: item.month, year: item.year }))
       .sort((a, b) => b.year - a.year || b.month - a.month),
   };
@@ -57,11 +68,67 @@ const buildFundResponse = (fund, allFunds) => {
 
 export async function GET(req) {
   try {
+    const token = await getToken({ req, secret });
+    if (!token?.id)
+      return NextResponse.json({ error: "Chưa xác thực" }, { status: 401 });
     const searchParams = req.nextUrl.searchParams;
     const month = searchParams.get("month") || null;
     const year = searchParams.get("year") || null;
 
     const allFunds = await getFunds();
+    const current = currentFundPeriod();
+    const users = await getUsers();
+    const settings = await getSettings();
+    const selected =
+      month && year ? { month: Number(month), year: Number(year) } : current;
+    if (
+      !Number.isInteger(selected.month) ||
+      selected.month < 1 ||
+      selected.month > 12 ||
+      !Number.isInteger(selected.year) ||
+      selected.year < 2000 ||
+      selected.year > 2100
+    )
+      return NextResponse.json({ error: "Kỳ không hợp lệ" }, { status: 400 });
+    let changed = false;
+    if (
+      !allFunds.some(
+        (f) => f.month === current.month && f.year === current.year,
+      )
+    ) {
+      const previous = allFunds
+        .filter((f) => periodKey(f) < periodKey(current))
+        .sort((a, b) => periodKey(b).localeCompare(periodKey(a)))[0];
+      allFunds.push({
+        id: `fund_${current.year}_${current.month}`,
+        ...current,
+        openingBalance: previous
+          ? buildFundResponse(previous, allFunds).balance
+          : 0,
+        members: [],
+        incomes: [],
+        expenses: [],
+      });
+      changed = true;
+    }
+    if (
+      !allFunds.some(
+        (f) => f.month === selected.month && f.year === selected.year,
+      )
+    ) {
+      allFunds.push({
+        id: `fund_${selected.year}_${selected.month}`,
+        ...selected,
+        openingBalance: 0,
+        members: [],
+        incomes: [],
+        expenses: [],
+      });
+      changed = true;
+    }
+    for (const item of allFunds)
+      changed = snapshotFund(item, users, settings) || changed;
+    if (changed) await saveFunds(allFunds);
 
     // Lấy quỹ hiện tại (mới nhất hoặc theo tháng/năm)
     let fund = null;
@@ -71,10 +138,9 @@ export async function GET(req) {
       );
     } else {
       // Lấy quỹ mới nhất
-      fund = allFunds.sort((a, b) => {
-        if (a.year !== b.year) return b.year - a.year;
-        return b.month - a.month;
-      })[0];
+      fund = allFunds.find(
+        (f) => f.month === current.month && f.year === current.year,
+      );
     }
 
     if (!fund) {
@@ -237,15 +303,65 @@ async function changeTransaction(req, removing) {
           { status: 404 },
         );
       const now = new Date().toISOString();
+      snapshotFund(funds[fundIndex], await getUsers(), await getSettings());
+      const currentMember = funds[fundIndex].members.find(
+        (m) => m.userId === user.id,
+      );
+      if (body.obligationCancelled !== undefined) {
+        const cancelled = body.obligationCancelled === true;
+        const reason = String(body.cancellationReason || "").trim();
+        if (cancelled && !reason)
+          return NextResponse.json(
+            { error: "Vui lòng nhập lý do hủy nghĩa vụ đóng quỹ" },
+            { status: 400 },
+          );
+        if (!currentMember)
+          return NextResponse.json(
+            { error: "Nhân sự không thuộc kỳ quỹ này" },
+            { status: 400 },
+          );
+        Object.assign(currentMember, {
+          obligationCancelled: cancelled,
+          cancellationReason: cancelled ? reason : "",
+          cancelledAt: cancelled ? now : null,
+          cancelledBy: cancelled ? token.id : null,
+        });
+        await saveFunds(funds);
+        await appendAuditLog({
+          adminId: token.id,
+          adminName: token.name,
+          adminEmail: token.email,
+          action: cancelled
+            ? "CANCEL_FUND_OBLIGATION"
+            : "RESTORE_FUND_OBLIGATION",
+          targetType: "FUND",
+          targetId: funds[fundIndex].id,
+          details: `${cancelled ? "Hủy" : "Khôi phục"} nghĩa vụ đóng quỹ của ${user.name} tháng ${body.month}/${body.year}${cancelled ? `: ${reason}` : ""}. Các khoản tiền đã thu được giữ nguyên.`,
+        });
+        return NextResponse.json(buildFundResponse(funds[fundIndex], funds));
+      }
+      if (currentMember?.obligationCancelled)
+        return NextResponse.json(
+          { error: "Nghĩa vụ đóng quỹ đã hủy. Khôi phục trước khi chỉnh sửa." },
+          { status: 409 },
+        );
       const paid = body.paid !== false;
+      const amount = Number(body.amount);
+      if (paid && (!Number.isInteger(amount) || amount <= 0)) {
+        return NextResponse.json(
+          { error: "Vui lòng nhập số tiền đã đóng hợp lệ" },
+          { status: 400 },
+        );
+      }
       const members = funds[fundIndex].members || [];
       const memberIndex = members.findIndex(
         (item) => item.userId === body.userId,
       );
       const payment = {
+        ...currentMember,
         userId: user.id,
         paid,
-        amount: paid ? Number(body.amount) || 50000 : 0,
+        amount: paid ? amount : 0,
         paidAt: paid ? now : null,
         updatedAt: now,
         approvedBy: token.id,

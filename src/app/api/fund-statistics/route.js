@@ -1,0 +1,38 @@
+import { NextResponse } from "next/server";
+import { getToken } from "next-auth/jwt";
+import { getFunds, getUsers } from "@/libs/dataRepository";
+import { aggregateFundContributions } from "@/libs/fundStatistics";
+import { currentFundPeriod, periodKey } from "@/libs/fundRules";
+export async function GET(req) {
+  if (!(await getToken({ req, secret: process.env.NEXTAUTH_SECRET }))?.id)
+    return NextResponse.json({ error: "Chưa xác thực" }, { status: 401 });
+  const from = req.nextUrl.searchParams.get("from");
+  const to = req.nextUrl.searchParams.get("to");
+  const valid = (value) => /^\d{4}-(0[1-9]|1[0-2])$/.test(value || "");
+  if (
+    !valid(from) ||
+    !valid(to) ||
+    from > to ||
+    to > periodKey(currentFundPeriod())
+  )
+    return NextResponse.json(
+      {
+        error:
+          "Vui lòng chọn khoảng tháng hợp lệ, không vượt quá tháng hiện tại",
+      },
+      { status: 400 },
+    );
+  try {
+    const [funds, users] = await Promise.all([getFunds(), getUsers()]);
+    return NextResponse.json({
+      members: aggregateFundContributions(funds, users, from, to),
+      from,
+      to,
+    });
+  } catch {
+    return NextResponse.json(
+      { error: "Không thể tải thống kê đóng quỹ" },
+      { status: 500 },
+    );
+  }
+}
