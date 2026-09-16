@@ -79,7 +79,7 @@ export async function POST(req) {
     const shopFolder = safeSegment(shop);
     const fileName = `menu-${Date.now()}.${file.type.split("/")[1]}`;
     const relativeDir = path.posix.join(
-      "/images/afternoon-tea",
+      "/api/media/afternoon-tea",
       dateFolder,
       shopFolder,
     );

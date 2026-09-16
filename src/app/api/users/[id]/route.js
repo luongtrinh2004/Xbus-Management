@@ -19,12 +19,13 @@ const DEFAULT_AVATAR_FILES = new Set([
 ]);
 
 const moveAvatarToStaffCode = (avatarUrl, previousCode, nextCode) => {
-  if (!avatarUrl?.startsWith("/images/avatars/") || previousCode === nextCode)
-    return avatarUrl;
+  const prefixes = ["/images/avatars/", "/api/media/avatars/"];
+  const prefix = prefixes.find((item) => avatarUrl?.startsWith(item));
+  if (!prefix || previousCode === nextCode) return avatarUrl;
   let relativePath;
   try {
     relativePath = decodeURIComponent(
-      avatarUrl.split("?")[0].replace("/images/avatars/", ""),
+      avatarUrl.split("?")[0].replace(prefix, ""),
     );
   } catch {
     return avatarUrl;
@@ -49,7 +50,7 @@ const moveAvatarToStaffCode = (avatarUrl, previousCode, nextCode) => {
   const sourceDir = path.dirname(sourcePath);
   if (path.dirname(sourceDir) === avatarRoot && fs.existsSync(sourceDir))
     fs.rmSync(sourceDir, { recursive: true, force: true });
-  return `/images/avatars/${encodeURIComponent(nextCode)}/${encodeURIComponent(`${nextCode}${extension}`)}`;
+  return `/api/media/avatars/${encodeURIComponent(nextCode)}/${encodeURIComponent(`${nextCode}${extension}`)}?v=${Date.now()}`;
 };
 
 export async function PATCH(req, { params }) {

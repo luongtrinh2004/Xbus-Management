@@ -19,11 +19,13 @@ const isSafeStaffCode = (value) =>
 const avatarRoot = path.resolve(AVATARS_DIR);
 
 const getAvatarFilePath = (avatarUrl) => {
-  if (!avatarUrl?.startsWith("/images/avatars/")) return null;
+  const prefixes = ["/images/avatars/", "/api/media/avatars/"];
+  const prefix = prefixes.find((item) => avatarUrl?.startsWith(item));
+  if (!prefix) return null;
   let relativePath;
   try {
     relativePath = decodeURIComponent(
-      avatarUrl.split("?")[0].replace("/images/avatars/", ""),
+      avatarUrl.split("?")[0].replace(prefix, ""),
     );
   } catch {
     return null;
@@ -134,7 +136,7 @@ export async function POST(req, { params }) {
     }
 
     // Cập nhật avatarUrl trong user record
-    const avatarPath = `/images/avatars/${encodeURIComponent(staffCode)}/${encodeURIComponent(fileName)}`;
+    const avatarPath = `/api/media/avatars/${encodeURIComponent(staffCode)}/${encodeURIComponent(fileName)}`;
     // File được ghi đè theo mã nhân sự để thư mục luôn gọn, còn version trong
     // URL buộc browser/CDN tải ảnh mới thay vì dùng bản đã cache.
     const avatarUrl = `${avatarPath}?v=${Date.now()}`;
