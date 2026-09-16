@@ -1,5 +1,6 @@
 services:
   xbus-office:
+    image: ${XBUS_IMAGE:-luongtrinh462004/xbus-office:latest}
     build:
       context: .
       dockerfile: Dockerfile
