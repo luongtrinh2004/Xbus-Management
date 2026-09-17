@@ -31,7 +31,7 @@
   margin: 0;
   border-width: 0;
   border-style: solid;
-  border-color: theme('borderColor.DEFAULT', currentColor);
+  border-color: theme("borderColor.DEFAULT", currentColor);
 }
 
 html {
@@ -121,12 +121,12 @@ ul:not([class]) {
   }
 }
 
-:where([class^='tabler-']) {
+:where([class^="tabler-"]) {
   font-size: 1.5rem;
 }
 
 /* Fix width issue for the input-otp component */
-input[autocomplete='one-time-code'][data-input-otp='true'] {
+input[autocomplete="one-time-code"][data-input-otp="true"] {
   inline-size: 100% !important;
 }
 
@@ -261,7 +261,7 @@ code {
 
 /* Optional: Add a small circle inside the pin for a more detailed look */
 .map-pin2::after {
-  content: '';
+  content: "";
   position: absolute;
   width: 12px;
   height: 12px;
@@ -271,4 +271,224 @@ code {
   left: 50%;
   transform: translate(-50%, -50%);
   /* Centers the circle within the pin */
+}
+
+/* ========================================================
+   Theme Toggle Button (Light / Dark Mode)
+   ======================================================== */
+.theme-toggle {
+  position: relative;
+  width: 68px;
+  height: 27px;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  border-radius: 9999px;
+  overflow: hidden;
+  display: inline-flex;
+  flex-shrink: 0;
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 24%),
+    inset 0 1px 1px rgb(255 255 255 / 30%);
+  transition: transform 180ms ease;
+}
+
+.theme-toggle:hover {
+  transform: scale(1.04);
+}
+
+.theme-toggle:active {
+  transform: scale(0.97);
+}
+
+.theme-toggle:focus-visible {
+  outline: 2px solid var(--mui-palette-primary-main, #0080ff);
+  outline-offset: 3px;
+}
+
+.theme-toggle__sky,
+.theme-toggle__cloud,
+.theme-toggle__stars,
+.theme-toggle__orb {
+  position: absolute;
+  pointer-events: none;
+}
+
+.theme-toggle__sky {
+  inset: 0;
+  background: linear-gradient(135deg, #25a9ff 0%, #0078ed 100%);
+  transition: background 650ms ease;
+}
+
+.theme-toggle__cloud {
+  width: 35px;
+  height: 13px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 28%);
+  transition:
+    transform 680ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 380ms ease;
+}
+
+.theme-toggle__cloud::before,
+.theme-toggle__cloud::after {
+  position: absolute;
+  content: "";
+  border-radius: 50%;
+  background: inherit;
+}
+
+.theme-toggle__cloud::before {
+  width: 17px;
+  height: 17px;
+  left: 7px;
+  bottom: 3px;
+}
+
+.theme-toggle__cloud::after {
+  width: 12px;
+  height: 12px;
+  right: 6px;
+  bottom: 2px;
+}
+
+.theme-toggle__cloud--back {
+  top: 4px;
+  right: -14px;
+  transform: translateX(0) scale(0.72);
+}
+
+.theme-toggle__cloud--front {
+  bottom: -5px;
+  right: 3px;
+  transform: translateX(0) scale(0.9);
+}
+
+.theme-toggle__stars {
+  inset: 0;
+  opacity: 0;
+  transform: translateX(12px);
+  transition:
+    opacity 260ms ease 160ms,
+    transform 650ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.theme-toggle__stars i {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 3px #fff;
+}
+
+.theme-toggle__stars i:nth-child(1) {
+  top: 6px;
+  left: 20px;
+}
+.theme-toggle__stars i:nth-child(2) {
+  top: 15px;
+  left: 34px;
+  transform: scale(0.65);
+}
+.theme-toggle__stars i:nth-child(3) {
+  top: 5px;
+  left: 48px;
+  transform: scale(0.75);
+}
+.theme-toggle__stars i:nth-child(4) {
+  top: 19px;
+  left: 57px;
+  transform: scale(0.55);
+}
+
+.theme-toggle__orb {
+  z-index: 1;
+  top: 3px;
+  left: 4px;
+  width: 21px;
+  height: 21px;
+  overflow: hidden;
+  border-radius: 50%;
+  background: #ffe66a;
+  box-shadow:
+    1px 2px 3px rgb(0 0 0 / 25%),
+    inset -2px -2px 2px rgb(190 136 0 / 28%),
+    inset 2px 2px 2px rgb(255 255 255 / 55%);
+  transition:
+    transform 700ms cubic-bezier(0.22, 1, 0.36, 1),
+    background 450ms ease,
+    box-shadow 450ms ease;
+}
+
+.theme-toggle__crater {
+  position: absolute;
+  display: block;
+  border-radius: 50%;
+  background: #9ba1ad;
+  opacity: 0;
+  transform: scale(0);
+  transition:
+    opacity 180ms ease 210ms,
+    transform 410ms cubic-bezier(0.34, 1.56, 0.64, 1) 180ms;
+}
+
+.theme-toggle__crater--one {
+  top: 4px;
+  left: 5px;
+  width: 4px;
+  height: 4px;
+}
+.theme-toggle__crater--two {
+  top: 10px;
+  right: 3px;
+  width: 6px;
+  height: 6px;
+}
+.theme-toggle__crater--three {
+  bottom: 2px;
+  left: 6px;
+  width: 7px;
+  height: 5px;
+}
+
+.theme-toggle.dark .theme-toggle__sky {
+  background: linear-gradient(135deg, #30384f 0%, #121625 100%);
+}
+
+.theme-toggle.dark .theme-toggle__orb {
+  transform: translateX(39px) rotate(18deg);
+  background: #d6d9df;
+  box-shadow:
+    1px 2px 3px rgb(0 0 0 / 35%),
+    inset -2px -2px 2px rgb(109 116 132 / 30%),
+    inset 2px 2px 2px rgb(255 255 255 / 68%);
+}
+
+.theme-toggle.dark .theme-toggle__crater {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.theme-toggle.dark .theme-toggle__cloud--back {
+  opacity: 0;
+  transform: translateX(-28px) scale(0.72);
+}
+
+.theme-toggle.dark .theme-toggle__cloud--front {
+  opacity: 0;
+  transform: translateX(-38px) scale(0.9);
+}
+
+.theme-toggle.dark .theme-toggle__stars {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-toggle,
+  .theme-toggle * {
+    transition-duration: 0.01ms !important;
+  }
 }
