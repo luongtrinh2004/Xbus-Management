@@ -3,7 +3,9 @@ import { getToken } from "next-auth/jwt";
 import {
   appendAuditLog,
   getSettings,
+  getWaterSchedules,
   getUsers,
+  saveUsers,
   getWaterExemptions,
   saveSettings,
 } from "@/libs/dataRepository";
@@ -15,10 +17,11 @@ const normalizeOffset = (value) =>
   Math.max(-52, Math.min(52, Number(value) || 0));
 
 const loadWeek = async (weekOffset) => {
-  const [users, exemptUserIds, settings] = await Promise.all([
+  const [users, exemptUserIds, settings, waterSchedules] = await Promise.all([
     getUsers(),
     getWaterExemptions(),
     getSettings(),
+    getWaterSchedules(),
   ]);
   const overrides = settings.trashScheduleOverrides || {};
   return {
@@ -31,6 +34,7 @@ const loadWeek = async (weekOffset) => {
       toVietnamDateKey(),
       weekOffset,
       overrides,
+      waterSchedules,
     ),
   };
 };
@@ -55,6 +59,53 @@ export async function PATCH(req) {
     );
 
   const body = await req.json();
+  if (body.action === "complete") {
+    const current = await loadWeek(normalizeOffset(body.weekOffset));
+    const schedule = current.schedules.find(
+      (item) => item.dateKey === body.dateKey,
+    );
+    const targetUserId = schedule?.userId || body.userId;
+    if (!targetUserId)
+      return NextResponse.json(
+        { error: "Không tìm thấy lịch đổ rác" },
+        { status: 404 },
+      );
+    const completions = {
+      ...(current.settings.trashScheduleCompletions || {}),
+    };
+    if (!completions[body.dateKey]) {
+      const userIndex = current.users.findIndex(
+        (user) => user.id === targetUserId,
+      );
+      if (userIndex >= 0) {
+        current.users[userIndex].schedulingPoints =
+          (current.users[userIndex].schedulingPoints || 0) + 1;
+        current.users[userIndex].updatedAt = new Date().toISOString();
+        await saveUsers(current.users);
+      }
+      completions[body.dateKey] = {
+        userId: targetUserId,
+        completedAt: new Date().toISOString(),
+      };
+      await saveSettings({
+        ...current.settings,
+        trashScheduleCompletions: completions,
+      });
+    }
+    return NextResponse.json({ success: true, completed: true });
+  }
+  if (body.action === "assign") {
+    const current = await loadWeek(normalizeOffset(body.weekOffset));
+    const overrides = {
+      ...(current.settings.trashScheduleOverrides || {}),
+      [body.dateKey]: body.userId || null,
+    };
+    await saveSettings({
+      ...current.settings,
+      trashScheduleOverrides: overrides,
+    });
+    return NextResponse.json({ success: true });
+  }
   const weekOffset = normalizeOffset(body.weekOffset);
   const current = await loadWeek(weekOffset);
   const index = current.schedules.findIndex(

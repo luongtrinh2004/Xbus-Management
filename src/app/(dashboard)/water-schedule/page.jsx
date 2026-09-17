@@ -7,7 +7,6 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Typography from "@mui/material/Typography";
 import AdminScheduleView from "./components/AdminScheduleView";
 import UserScheduleView from "./components/UserScheduleView";
-import TrashScheduleCard from "./components/TrashScheduleCard";
 import { toVietnamDateKey } from "@/libs/dateTime";
 
 const currentVietnamPeriod = () => {
@@ -25,6 +24,7 @@ export default function WaterSchedulePage() {
   const [weeksMeta, setWeeksMeta] = useState([]);
   const [eligibleUsers, setEligibleUsers] = useState([]);
   const [exemptUserIds, setExemptUserIds] = useState([]);
+  const [trashSchedules, setTrashSchedules] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -40,6 +40,7 @@ export default function WaterSchedulePage() {
         setWeeksMeta(data.weeksMeta || []);
         setEligibleUsers(data.eligibleUsers || []);
         setExemptUserIds(data.exemptUserIds || []);
+        setTrashSchedules(data.trashSchedules || []);
         setCurrentUser(data.currentUser || null);
       }
     } catch (err) {
@@ -85,9 +86,9 @@ export default function WaterSchedulePage() {
           weeksMeta={weeksMeta}
           eligibleUsers={eligibleUsers}
           exemptUserIds={exemptUserIds}
+          trashSchedules={trashSchedules}
           onRefresh={loadData}
         />
-        <TrashScheduleCard canManage />
       </Box>
     );
   }
@@ -98,7 +99,6 @@ export default function WaterSchedulePage() {
         schedules={schedules}
         currentUser={currentUser || session?.user}
       />
-      <TrashScheduleCard />
     </Box>
   );
 }

@@ -166,7 +166,8 @@ export function fundPaymentStatus(member) {
   return { key: "paid", label: "Đã đóng", color: "success", rank: 2 };
 }
 
-// Rates are frozen per period; actual payments and prior corrections determine the running balance.
+// Chỉ khoản đóng thiếu được chuyển thành nghĩa vụ của kỳ sau. Đóng thừa là tự nguyện
+// trong đúng kỳ đó và không làm giảm mức đóng của các kỳ kế tiếp.
 export function applyFundBalances(funds) {
   const balances = new Map();
   for (const fund of [...funds].sort((a, b) =>
@@ -183,13 +184,12 @@ export function applyFundBalances(funds) {
       member.requiredAmount =
         member.obligationCancelled || member.rosterHidden
           ? 0
-          : Math.max(0, base - member.carryIn);
+          : base + member.carryIn;
       const actual = member.paid ? Number(member.amount) || 0 : 0;
-      member.difference = actual - member.requiredAmount;
-      const balance = member.carryIn + actual - base;
-      member.carryOut = member.voluntarySurplus
-        ? Math.min(0, balance)
-        : balance;
+      const underpaid =
+        member.paid && actual > 0 && actual < member.requiredAmount;
+      member.difference = underpaid ? actual - member.requiredAmount : 0;
+      member.carryOut = underpaid ? member.requiredAmount - actual : 0;
       balances.set(member.userId, member.carryOut);
     }
   }

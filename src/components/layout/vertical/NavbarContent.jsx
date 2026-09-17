@@ -5,6 +5,7 @@ import classnames from "classnames";
 
 // Component Imports
 import NavToggle from "./NavToggle";
+import HeaderAnnouncements from "./HeaderAnnouncements";
 import ModeDropdown from "@components/layout/shared/ModeDropdown";
 import UserDropdown from "@components/layout/shared/UserDropdown";
 
@@ -19,10 +20,11 @@ const NavbarContent = () => {
         "flex items-center justify-between gap-4 is-full",
       )}
     >
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 shrink-0">
         <NavToggle />
         <ModeDropdown />
       </div>
+      <HeaderAnnouncements />
       <div className="flex items-center gap-2">
         <UserDropdown />
       </div>

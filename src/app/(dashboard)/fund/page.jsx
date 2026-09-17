@@ -1856,6 +1856,7 @@ export default function FundPage() {
                           ? "action.hover"
                           : "background.paper",
                       transition: "all 0.15s ease",
+                      lineHeight: 1,
                       "&:hover": {
                         borderColor:
                           Boolean(paymentData) || creatingPayment
@@ -1886,10 +1887,13 @@ export default function FundPage() {
                           fontSize: "1.15rem",
                           fontWeight: 600,
                           padding: 0,
+                          lineHeight: 1.2,
+                          height: "1.2em",
                           width: `${Math.max(1, (paymentThousands || "").length) * 1.15 + 0.3}ch`,
                           textAlign: "right",
                         },
                       }}
+                      sx={{ display: "flex", alignItems: "center" }}
                     />
                     <Typography
                       component="span"
@@ -1935,7 +1939,8 @@ export default function FundPage() {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    p: 1.5,
+                    p: 0,
+                    minHeight: 192,
                   }}
                 >
                   <Box
@@ -1953,10 +1958,10 @@ export default function FundPage() {
                     alt="Trạng thái số tiền đóng quỹ"
                     sx={{
                       width: "100%",
-                      height: "auto",
-                      maxHeight: 180,
-                      objectFit: "contain",
-                      borderRadius: 1,
+                      height: "100%",
+                      minHeight: 192,
+                      objectFit: "cover",
+                      borderRadius: 0,
                       display: "block",
                       transition: "all 0.2s ease-in-out",
                     }}

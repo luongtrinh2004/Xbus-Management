@@ -22,3 +22,17 @@ export function aggregateFundContributions(funds, users, from, to) {
     (a, b) => b.amount - a.amount || a.name.localeCompare(b.name, "vi"),
   );
 }
+
+export function personalFundContributions(funds, userId, year) {
+  const months = Array.from({ length: 12 }, (_, index) => ({
+    month: index + 1,
+    amount: 0,
+  }));
+  for (const fund of funds) {
+    if (Number(fund.year) !== Number(year)) continue;
+    const member = (fund.members || []).find((item) => item.userId === userId);
+    if (member?.paid)
+      months[fund.month - 1].amount = Number(member.amount) || 0;
+  }
+  return months;
+}

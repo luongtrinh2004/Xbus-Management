@@ -19,7 +19,7 @@ const verticalMenuData = [
     roles: ["user", "assistant", "admin"],
   },
   {
-    label: "Quỹ phòng",
+    label: "Tài chính",
     icon: "tabler-wallet",
     roles: ["user", "assistant", "admin"],
     children: [
@@ -34,7 +34,7 @@ const verticalMenuData = [
         roles: ["user", "assistant", "admin"],
       },
       {
-        label: "Danh sách đóng quỹ ",
+        label: "Quỹ phòng",
         href: "/fund?section=members",
         roles: ["user", "assistant", "admin"],
       },

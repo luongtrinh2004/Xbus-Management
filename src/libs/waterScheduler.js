@@ -1,6 +1,6 @@
 /**
  * Thư viện hỗ trợ tính toán lịch tuần và thuật toán phân công bê nước công bằng
- * Tuân thủ theo Phần 2: Quản lý lịch bê nước (Flow tài liệu Xbus)
+ * Tuân thủ theo Phần 2: Quản lý lịch bê nước và đổ rác (Flow tài liệu Xbus)
  */
 
 /**
@@ -38,15 +38,12 @@ export function getTrashSchedules(
   currentDateKey,
   weekOffset = 0,
   overrides = {},
+  waterSchedules = [],
 ) {
   const exemptSet = new Set(exemptUserIds);
   const participants = users
     .filter((user) => exemptSet.has(user.id) && user.status === "able")
-    .sort((a, b) =>
-      String(a.name || "").localeCompare(String(b.name || ""), "vi", {
-        sensitivity: "base",
-      }),
-    );
+    .sort((a, b) => (a.schedulingPoints || 0) - (b.schedulingPoints || 0));
   if (!participants.length) return [];
 
   const [currentYear, currentMonth, currentDay] = String(currentDateKey)
@@ -69,14 +66,43 @@ export function getTrashSchedules(
       const workingDaysFromAnchor =
         Math.floor((date.getTime() - rotationAnchor) / (dayMs * 7)) * 5 +
         workday;
+      const recentWaterUserIds = new Set(
+        waterSchedules
+          .filter((schedule) => {
+            const [d, m, y] = String(schedule.date || "")
+              .split("/")
+              .map(Number);
+            const scheduledAt = Date.UTC(y, m - 1, d);
+            return (
+              Number.isFinite(scheduledAt) &&
+              Math.abs(scheduledAt - date.getTime()) <= 21 * dayMs
+            );
+          })
+          .flatMap((schedule) =>
+            (schedule.participants || []).map(
+              (person) => person.userId || person,
+            ),
+          ),
+      );
+      const prioritized = [...participants].sort(
+        (a, b) =>
+          Number(recentWaterUserIds.has(a.id)) -
+            Number(recentWaterUserIds.has(b.id)) ||
+          (a.schedulingPoints || 0) - (b.schedulingPoints || 0),
+      );
       const defaultPerson =
-        participants[
-          ((workingDaysFromAnchor % participants.length) +
-            participants.length) %
-            participants.length
+        prioritized[
+          ((workingDaysFromAnchor % prioritized.length) + prioritized.length) %
+            prioritized.length
         ];
       const dateKey = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}-${String(date.getUTCDate()).padStart(2, "0")}`;
-      const person = usersById.get(overrides[dateKey]) || defaultPerson;
+      const hasOverride = Object.prototype.hasOwnProperty.call(
+        overrides,
+        dateKey,
+      );
+      const person = hasOverride
+        ? usersById.get(overrides[dateKey]) || null
+        : defaultPerson;
       const year = date.getUTCFullYear();
       const month = date.getUTCMonth() + 1;
       const day = date.getUTCDate();
@@ -86,12 +112,12 @@ export function getTrashSchedules(
         dateKey,
         weekday: workday + 1,
         weekIndex,
-        userId: person.id,
-        name: person.name,
-        code: person.code,
-        avatarUrl: person.avatarUrl || "",
-        role: person.role,
-        gender: person.gender,
+        userId: person?.id || "",
+        name: person?.name || "",
+        code: person?.code || "",
+        avatarUrl: person?.avatarUrl || "",
+        role: person?.role || "",
+        gender: person?.gender || "",
       });
     }
   }

@@ -2,7 +2,7 @@
 
 // React Imports
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 // Next Imports
 
@@ -41,12 +41,11 @@ const BadgeContentSpan = styled("span")({
   boxShadow: "0 0 0 2px var(--mui-palette-background-paper)",
 });
 
-const UserDropdown = ({ alert = false }) => {
-  const { data, status } = useSession();
+const UserDropdown = () => {
+  const { data } = useSession();
 
   // States
   const [open, setOpen] = useState(false);
-  const [points, setPoints] = useState(0);
 
   // Refs
   const anchorRef = useRef(null);
@@ -89,31 +88,8 @@ const UserDropdown = ({ alert = false }) => {
     gender: data?.user?.gender,
   });
 
-  useEffect(() => {
-    if (!data?.user?.id) return;
-    fetch("/api/users?limit=200")
-      .then((response) => response.json())
-      .then((result) => {
-        const currentUser = (result.data || []).find(
-          (user) => user.id === data.user.id,
-        );
-        setPoints(currentUser?.schedulingPoints || 0);
-      })
-      .catch(() => {});
-  }, [data?.user?.id]);
-
   return (
     <>
-      <div
-        className={
-          alert
-            ? "hidden sm:flex items-center gap-1 rounded-md bg-white/20 px-2.5 py-1.5 text-sm font-semibold text-white"
-            : "hidden sm:flex items-center gap-1 rounded-md bg-[rgba(115,103,240,0.10)] px-2.5 py-1.5 text-sm font-semibold text-[var(--mui-palette-primary-main)]"
-        }
-      >
-        <i className="tabler-award text-base" />
-        {points} điểm
-      </div>
       <Badge
         ref={anchorRef}
         overlap="circular"

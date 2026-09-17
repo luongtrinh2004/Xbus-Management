@@ -84,6 +84,18 @@ docker compose logs -f --tail=200 xbus-office
 
 Ứng dụng bind vào `127.0.0.1:3001`; reverse proxy đưa dịch vụ ra HTTPS.
 
+Khi `.env` đặt `DATA_SOURCE=mysql`, áp dụng migration ngay sau khi MySQL và ứng dụng đã chạy. Bước này đồng bộ schema với phiên bản code đang deploy (ví dụ cột `water_schedules.metadata`):
+
+```bash
+docker compose exec -T xbus-office npm run db:migrate
+```
+
+Chỉ khi chuyển dữ liệu lần đầu từ JSON sang MySQL mới chạy thêm:
+
+```bash
+docker compose exec -T xbus-office npm run db:import-json
+```
+
 ### 3. Nginx
 
 ```nginx

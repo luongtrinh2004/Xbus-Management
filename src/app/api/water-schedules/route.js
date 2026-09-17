@@ -5,6 +5,7 @@ import {
   saveWaterSchedules,
   getUsers,
   getWaterExemptions,
+  getSettings,
   appendAuditLog,
 } from "@/libs/dataRepository";
 import {
@@ -38,11 +39,25 @@ export async function GET(req) {
     const allUsers = await getUsers();
     const eligibleUsers = getEligibleWaterUsers(allUsers);
     const exemptUserIds = await getWaterExemptions();
-    const trashSchedules = getTrashSchedules(
-      allUsers,
-      exemptUserIds,
-      toVietnamDateKey(),
-    );
+    const settings = await getSettings();
+    const trashSchedules = Array.from({ length: 25 }, (_, index) => index - 12)
+      .flatMap((weekOffset) =>
+        getTrashSchedules(
+          allUsers,
+          exemptUserIds,
+          toVietnamDateKey(),
+          weekOffset,
+          settings.trashScheduleOverrides || {},
+          allSchedules,
+        ),
+      )
+      .filter((item) =>
+        item.dateKey.startsWith(`${year}-${String(month).padStart(2, "0")}`),
+      )
+      .map((item) => ({
+        ...item,
+        completed: Boolean(settings.trashScheduleCompletions?.[item.dateKey]),
+      }));
 
     // Lọc theo tháng và năm
     let result = allSchedules.filter(

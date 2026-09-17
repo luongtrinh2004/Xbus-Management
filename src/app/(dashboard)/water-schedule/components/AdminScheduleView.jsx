@@ -56,6 +56,7 @@ export default function AdminScheduleView({
   schedules = [],
   eligibleUsers = [],
   exemptUserIds = [],
+  trashSchedules = [],
   onRefresh,
 }) {
   const [search, setSearch] = useState("");
@@ -66,12 +67,18 @@ export default function AdminScheduleView({
   const [exemptIds, setExemptIds] = useState(exemptUserIds);
   const [exemptSearch, setExemptSearch] = useState("");
   const [waterScheduleOpen, setWaterScheduleOpen] = useState(true);
+  const [trashEdit, setTrashEdit] = useState(null);
+  const [trashAssignee, setTrashAssignee] = useState("");
   useEffect(() => setExemptIds(exemptUserIds), [exemptUserIds]);
 
   const weeks = useMemo(() => getWorkWeeks(year, month), [year, month]);
   const byDate = useMemo(
     () => new Map(schedules.map((item) => [item.date, item])),
     [schedules],
+  );
+  const trashByDate = useMemo(
+    () => new Map(trashSchedules.map((item) => [item.date, item])),
+    [trashSchedules],
   );
   const assignableUsers = useMemo(
     () => eligibleUsers.filter((user) => !exemptIds.includes(user.id)),
@@ -176,10 +183,13 @@ export default function AdminScheduleView({
     );
   };
 
-  const randomSchedule = async (date) => {
+  const randomFullSchedule = async (date) => {
+    const [d, m, y] = date.split("/");
+    const dateKey = `${y}-${pad(m)}-${pad(d)}`;
     const schedule = byDate.get(date) || makeSchedule(date);
-    setBusyId(schedule.id);
+    setBusyId(date);
     try {
+      // 1. Phân công ngẫu nhiên bê nước: từ nhóm không miễn, xét điểm rèn luyện thấp nhất
       const fixedParticipants = (schedule.participants || []).slice(0, 5);
       const response = await fetch("/api/water-schedules/random", {
         method: "POST",
@@ -194,11 +204,79 @@ export default function AdminScheduleView({
       });
       const result = await response.json();
       if (!response.ok)
-        return toast.error(result.error || "Không thể phân công ngẫu nhiên");
+        return toast.error(result.error || "Không thể phân công ngẫu nhiên bê nước");
+
       await saveSchedule(
         { ...schedule, participants: result.participants || fixedParticipants },
-        `Đã giữ ${fixedParticipants.length} người đã chọn và phân công ${Math.max(0, 5 - fixedParticipants.length)} vị trí còn lại`,
+        "Đã phân công ngẫu nhiên bê nước",
       );
+
+      // 2. Phân công ngẫu nhiên đổ rác: từ nhóm trong danh sách miễn, xét điểm thấp nhất
+      let trashCandidates = eligibleUsers.filter(
+        (user) => exemptIds.includes(user.id) && user.status === "able",
+      );
+      if (!trashCandidates.length) {
+        trashCandidates = eligibleUsers.filter((user) => user.status === "able");
+      }
+      if (trashCandidates.length > 0) {
+        const minPoints = Math.min(
+          ...trashCandidates.map((user) => Number(user.schedulingPoints) || 0),
+        );
+        const pool = trashCandidates.filter(
+          (user) => (Number(user.schedulingPoints) || 0) === minPoints,
+        );
+        const selected = pool[Math.floor(Math.random() * pool.length)];
+        if (selected) {
+          await fetch("/api/water-schedules/trash", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              action: "assign",
+              dateKey,
+              userId: selected.id,
+              weekOffset: 0,
+            }),
+          });
+        }
+      }
+
+      toast.success(`Đã phân công ngẫu nhiên cả bê nước và đổ rác ngày ${date}`);
+      await onRefresh?.();
+    } catch {
+      toast.error("Không thể phân công ngẫu nhiên");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const deleteFullSchedule = async (date, schedule, trash) => {
+    const [d, m, y] = date.split("/");
+    const dateKey = `${y}-${pad(m)}-${pad(d)}`;
+    setBusyId(date);
+    try {
+      const promises = [];
+      if (schedule?.id) {
+        promises.push(
+          fetch(`/api/water-schedules/${schedule.id}`, { method: "DELETE" }),
+        );
+      }
+      promises.push(
+        fetch("/api/water-schedules/trash", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "assign",
+            dateKey,
+            userId: "",
+            weekOffset: 0,
+          }),
+        }),
+      );
+      await Promise.all(promises);
+      toast.success(`Đã xóa toàn bộ lịch bê nước và đổ rác ngày ${date}`);
+      await onRefresh?.();
+    } catch {
+      toast.error("Không thể xóa lịch");
     } finally {
       setBusyId(null);
     }
@@ -242,6 +320,41 @@ export default function AdminScheduleView({
     setYear(next.getFullYear());
   };
   const iconButtonSx = { width: 25, height: 25, borderRadius: 1 };
+  const completeTrash = async (trash) => {
+    const response = await fetch("/api/water-schedules/trash", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "complete",
+        dateKey: trash.dateKey,
+        userId: trash.userId,
+        weekOffset: 0,
+      }),
+    });
+    const result = await response.json();
+    if (!response.ok)
+      return toast.error(result.error || "Không thể xác nhận đổ rác");
+    toast.success("Đã xác nhận đổ rác (+1 điểm)");
+  };
+  const assignTrash = async (userId = trashAssignee) => {
+    if (!trashEdit) return;
+    const response = await fetch("/api/water-schedules/trash", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "assign",
+        dateKey: trashEdit.dateKey,
+        userId,
+        weekOffset: 0,
+      }),
+    });
+    const result = await response.json();
+    if (!response.ok)
+      return toast.error(result.error || "Không thể đổi người đổ rác");
+    setTrashEdit(null);
+    toast.success("Đã chỉ định người đổ rác");
+    onRefresh?.();
+  };
 
   return (
     <>
@@ -257,10 +370,11 @@ export default function AdminScheduleView({
               </Avatar>
               <Box>
                 <Typography variant="h5" fontWeight={700}>
-                  Quản lý lịch bê nước
+                  Quản lý lịch bê nước và đổ rác
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Kéo nhân sự vào ngày làm việc để phân công lúc 14:00
+                  Nhân sự lưu ý thực hiện bê nước vào đầu giờ sáng/chiều và đi
+                  đổ rác trước khi ra về.
                 </Typography>
               </Box>
             </Box>
@@ -421,7 +535,14 @@ export default function AdminScheduleView({
                 {weeks.flatMap((week, rowIndex) =>
                   week.map((cell, columnIndex) => {
                     const schedule = cell ? byDate.get(cell.date) : null;
-                    const completed = schedule?.status === "completed";
+                    const trash = cell ? trashByDate.get(cell.date) : null;
+                    const completed =
+                      schedule?.status === "completed" || Boolean(trash?.completed);
+                    const hasWater = Boolean(
+                      schedule && (schedule.participants || []).length > 0,
+                    );
+                    const hasTrash = Boolean(trash && (trash.userId || trash.name));
+                    const hasAnySchedule = hasWater || hasTrash;
                     const color = statusColor[schedule?.status] || "primary";
                     return (
                       <Box
@@ -445,6 +566,8 @@ export default function AdminScheduleView({
                         sx={{
                           minHeight: 190,
                           p: 1.25,
+                          display: "flex",
+                          flexDirection: "column",
                           bgcolor: !cell
                             ? "action.hover"
                             : dragOverDate === cell.date
@@ -465,104 +588,205 @@ export default function AdminScheduleView({
                               sx={{
                                 display: "flex",
                                 alignItems: "center",
-                                gap: 0.35,
+                                gap: 0.5,
                                 mb: 1,
                               }}
                             >
                               <Typography
                                 variant="body2"
                                 fontWeight={800}
-                                sx={{ mr: "auto" }}
                               >
                                 {cell.day}
                               </Typography>
-                              <IconButton
-                                title="Phân công ngẫu nhiên"
-                                color="primary"
-                                size="small"
-                                disabled={completed || busyId === schedule?.id}
-                                onClick={() => randomSchedule(cell.date)}
-                                sx={iconButtonSx}
-                              >
-                                <i className="tabler-arrows-shuffle text-sm" />
-                              </IconButton>
-                              {schedule && !completed && (
-                                <IconButton
-                                  title="Xác nhận hoàn thành"
-                                  color="success"
-                                  size="small"
-                                  onClick={() => setCompleteSchedule(schedule)}
-                                  sx={iconButtonSx}
-                                >
-                                  <i className="tabler-check text-sm" />
-                                </IconButton>
-                              )}
-                              {schedule && !completed && (
-                                <IconButton
-                                  title="Xóa lịch"
-                                  color="error"
-                                  size="small"
-                                  disabled={busyId === schedule.id}
-                                  onClick={() => deleteSchedule(schedule)}
-                                  sx={iconButtonSx}
-                                >
-                                  <i className="tabler-trash text-sm" />
-                                </IconButton>
-                              )}
-                            </Box>
-                            {schedule && (
-                              <Box
-                                sx={{
-                                  p: 1,
-                                  borderRadius: 1.5,
-                                  bgcolor: `${color}.lighter`,
-                                  borderLeft: "3px solid",
-                                  borderColor: `${color}.main`,
-                                }}
-                              >
+                              {completed && (
                                 <Typography
                                   variant="caption"
                                   fontWeight={700}
-                                  color={`${color}.main`}
+                                  sx={{ color: "#28C76F", ml: 0.5 }}
                                 >
-                                  14:00 ·{" "}
-                                  {completed ? "Hoàn thành" : "Đã xếp lịch"}
+                                  Hoàn thành
                                 </Typography>
-                                {(schedule.participants || []).map((person) => (
-                                  <Box
-                                    key={person.userId || person}
-                                    sx={{
-                                      display: "flex",
-                                      alignItems: "center",
-                                      gap: 0.25,
-                                      minWidth: 0,
-                                    }}
+                              )}
+                              <Box sx={{ ml: "auto" }} />
+                              {!completed && (
+                                <>
+                                  <IconButton
+                                    title="Phân công ngẫu nhiên cả bê nước và đổ rác"
+                                    color="primary"
+                                    size="small"
+                                    disabled={busyId === cell.date}
+                                    onClick={() => randomFullSchedule(cell.date)}
+                                    sx={iconButtonSx}
                                   >
-                                    <Typography
-                                      variant="caption"
-                                      noWrap
-                                      sx={{ flex: 1 }}
+                                    <i className="tabler-arrows-shuffle text-sm" />
+                                  </IconButton>
+                                  {hasAnySchedule && (
+                                    <IconButton
+                                      title="Xác nhận hoàn thành"
+                                      color="success"
+                                      size="small"
+                                      onClick={() =>
+                                        setCompleteSchedule({
+                                          ...(schedule || makeSchedule(cell.date)),
+                                          trash,
+                                          date: cell.date,
+                                        })
+                                      }
+                                      sx={iconButtonSx}
                                     >
-                                      • {person.name || person}
-                                    </Typography>
-                                    {!completed && (
-                                      <IconButton
-                                        title="Đưa ra khỏi lịch"
-                                        size="small"
-                                        color="secondary"
-                                        onClick={() =>
-                                          removeUser(
-                                            schedule,
-                                            person.userId || person,
-                                          )
-                                        }
-                                        sx={{ width: 20, height: 20 }}
+                                      <i className="tabler-check text-sm" />
+                                    </IconButton>
+                                  )}
+                                  {hasAnySchedule && (
+                                    <IconButton
+                                      title="Xóa toàn bộ lịch"
+                                      color="error"
+                                      size="small"
+                                      disabled={busyId === cell.date}
+                                      onClick={() =>
+                                        deleteFullSchedule(cell.date, schedule, trash)
+                                      }
+                                      sx={iconButtonSx}
+                                    >
+                                      <i className="tabler-trash text-sm" />
+                                    </IconButton>
+                                  )}
+                                </>
+                              )}
+                            </Box>
+                            {hasWater && (
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  gap: 0.75,
+                                  alignItems: "stretch",
+                                }}
+                              >
+                                <i
+                                  className="tabler-droplet text-sm"
+                                  style={{
+                                    color: completed ? "#28C76F" : "#00BAD1",
+                                    marginTop: 5,
+                                  }}
+                                />
+                                <Box
+                                  sx={{
+                                    flex: 1,
+                                    minWidth: 0,
+                                    px: 0.75,
+                                    py: 0.5,
+                                    borderRadius: 1.5,
+                                    bgcolor: `${color}.lighter`,
+                                    borderLeft: "3px solid",
+                                    borderColor: `${color}.main`,
+                                    pl: 0.75,
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    gap: 0.25,
+                                  }}
+                                >
+                                  {(schedule.participants || []).map(
+                                    (person) => (
+                                      <Box
+                                        key={person.userId || person}
+                                        sx={{
+                                          display: "flex",
+                                          alignItems: "center",
+                                          gap: 0.5,
+                                          minWidth: 0,
+                                        }}
                                       >
-                                        <i className="tabler-arrow-left text-xs" />
-                                      </IconButton>
-                                    )}
-                                  </Box>
-                                ))}
+                                        <Typography
+                                          variant="caption"
+                                          noWrap
+                                          sx={{ flex: 1, minWidth: 0 }}
+                                        >
+                                          • {person.name || person}
+                                        </Typography>
+                                        {!completed && (
+                                          <IconButton
+                                            title="Đưa ra khỏi lịch"
+                                            size="small"
+                                            color="secondary"
+                                            onClick={() =>
+                                              removeUser(
+                                                schedule,
+                                                person.userId || person,
+                                              )
+                                            }
+                                            sx={iconButtonSx}
+                                          >
+                                            <i className="tabler-arrow-left text-xs" />
+                                          </IconButton>
+                                        )}
+                                      </Box>
+                                    ),
+                                  )}
+                                </Box>
+                              </Box>
+                            )}
+                            {hasTrash && (
+                              <Box
+                                sx={{
+                                  mt: "auto",
+                                  pt: 1.25,
+                                  display: "flex",
+                                  alignItems: "stretch",
+                                  gap: 0.75,
+                                }}
+                              >
+                                <i
+                                  className="tabler-trash text-sm"
+                                  style={{
+                                    color: trash.completed
+                                      ? "#28C76F"
+                                      : "#FF9F43",
+                                    marginTop: 5,
+                                  }}
+                                />
+                                <Box
+                                  sx={{
+                                    flex: 1,
+                                    minWidth: 0,
+                                    px: 0.75,
+                                    py: 0.5,
+                                    borderRadius: 1.5,
+                                    bgcolor: trash.completed
+                                      ? "success.lighter"
+                                      : "warning.lighter",
+                                    borderLeft: "3px solid",
+                                    borderColor: trash.completed
+                                      ? "success.main"
+                                      : "warning.main",
+                                    pl: 0.75,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 0.5,
+                                  }}
+                                >
+                                  <Typography
+                                    variant="caption"
+                                    fontWeight={700}
+                                    noWrap
+                                    sx={{ flex: 1 }}
+                                  >
+                                    {trash.name}
+                                  </Typography>
+                                  {!completed && (
+                                    <IconButton
+                                      title="Đổi người đổ rác"
+                                      size="small"
+                                      color="warning"
+                                      sx={iconButtonSx}
+                                      onClick={() => {
+                                        setTrashEdit(trash);
+                                        setTrashAssignee(trash.userId || "");
+                                      }}
+                                    >
+                                      <i className="tabler-user-edit text-sm" />
+                                    </IconButton>
+                                  )}
+                                </Box>
                               </Box>
                             )}
                           </>
@@ -655,13 +879,95 @@ export default function AdminScheduleView({
           </Button>
         </DialogActions>
       </Dialog>
+      <Dialog
+        open={Boolean(trashEdit)}
+        onClose={() => setTrashEdit(null)}
+        fullWidth
+        maxWidth="xs"
+      >
+        <DialogTitle>Chỉ định người đổ rác</DialogTitle>
+        <DialogContent dividers>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ flex: 1 }}>
+              Người đang được xếp:{" "}
+              <strong>
+                {trashAssignee
+                  ? eligibleUsers.find((user) => user.id === trashAssignee)
+                      ?.name || trashEdit?.name
+                  : "Chưa có"}
+              </strong>
+            </Typography>
+            {trashAssignee && (
+              <IconButton
+                size="small"
+                color="error"
+                title="Xóa người đang được xếp"
+                onClick={() => setTrashAssignee("")}
+              >
+                <i className="tabler-user-x" />
+              </IconButton>
+            )}
+          </Box>
+          {eligibleUsers
+            .filter((user) => exemptIds.includes(user.id))
+            .sort(
+              (a, b) => (a.schedulingPoints || 0) - (b.schedulingPoints || 0),
+            )
+            .map((user) => (
+              <Box
+                key={user.id}
+                onClick={() => setTrashAssignee(user.id)}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1.25,
+                  p: 1,
+                  cursor: "pointer",
+                  borderRadius: 1,
+                  bgcolor:
+                    trashAssignee === user.id
+                      ? "action.selected"
+                      : "transparent",
+                  "&:hover": { bgcolor: "action.hover" },
+                }}
+              >
+                <Avatar
+                  src={resolveAvatar(user)}
+                  sx={{ width: 30, height: 30 }}
+                />
+                <Typography variant="body2" fontWeight={600}>
+                  {user.name}
+                </Typography>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ ml: "auto" }}
+                >
+                  {user.schedulingPoints || 0} điểm
+                </Typography>
+              </Box>
+            ))}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setTrashEdit(null)}>Hủy</Button>
+          <Button variant="contained" onClick={() => assignTrash()}>
+            Lưu
+          </Button>
+        </DialogActions>
+      </Dialog>
       <CompleteScheduleModal
         open={Boolean(completeSchedule)}
         schedule={completeSchedule}
         onClose={() => setCompleteSchedule(null)}
-        onSuccess={() => {
+        onSuccess={async () => {
+          if (
+            completeSchedule?.trash?.userId &&
+            !completeSchedule.trash.completed
+          ) {
+            await completeTrash(completeSchedule.trash);
+          }
           setCompleteSchedule(null);
-          onRefresh?.();
+          await onRefresh?.();
         }}
       />
     </>
