@@ -39,6 +39,13 @@ const AddUserDrawer = (props) => {
     typeId: "",
     categoryId: "category_official",
     status: "able",
+    birthday: "",
+    citizenId: "",
+    citizenIssuedDate: "",
+    address: "",
+    position: "",
+    jiraAccount: "",
+    joinedDate: "",
   });
 
   useEffect(() => {
@@ -59,6 +66,13 @@ const AddUserDrawer = (props) => {
       typeId: "",
       categoryId: "category_official",
       status: "able",
+      birthday: "",
+      citizenId: "",
+      citizenIssuedDate: "",
+      address: "",
+      position: "",
+      jiraAccount: "",
+      joinedDate: "",
     });
   };
 
@@ -166,6 +180,39 @@ const AddUserDrawer = (props) => {
           value={formData.phone}
           onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
         />
+
+        {[
+          ["citizenId", "Số CCCD", "text"],
+          ["citizenIssuedDate", "Ngày cấp CCCD", "date"],
+          ["birthday", "Ngày sinh", "date"],
+          ["joinedDate", "Ngày tham gia", "date"],
+          ["position", "Chức vụ", "text"],
+          ["jiraAccount", "Tài khoản Jira", "text"],
+          ["address", "Địa chỉ", "text"],
+        ].map(([field, label, type]) => (
+          <CustomTextField
+            key={field}
+            fullWidth
+            type={type}
+            label={label}
+            value={formData[field]}
+            inputProps={
+              field === "citizenId" ? { inputMode: "numeric" } : undefined
+            }
+            slotProps={
+              type === "date" ? { inputLabel: { shrink: true } } : undefined
+            }
+            onChange={(event) =>
+              setFormData({
+                ...formData,
+                [field]:
+                  field === "citizenId"
+                    ? event.target.value.replace(/\D/g, "")
+                    : event.target.value,
+              })
+            }
+          />
+        ))}
 
         <CustomTextField
           select

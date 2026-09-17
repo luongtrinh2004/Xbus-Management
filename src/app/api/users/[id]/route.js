@@ -1,6 +1,13 @@
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
-import { getUsers, saveUsers, appendAuditLog } from "@/libs/dataRepository";
+import {
+  getUsers,
+  saveUsers,
+  appendAuditLog,
+  getFunds,
+  getWaterSchedules,
+  getAssets,
+} from "@/libs/dataRepository";
 import fs from "fs";
 import path from "path";
 
@@ -76,6 +83,60 @@ export async function PATCH(req, { params }) {
     }
 
     const oldUser = users[index];
+    if (body.phone && !/^(\+84|0)\d{9,10}$/.test(body.phone))
+      return NextResponse.json(
+        { error: "Số điện thoại không hợp lệ" },
+        { status: 400 },
+      );
+    if (body.citizenId && !/^\d{9,12}$/.test(body.citizenId))
+      return NextResponse.json(
+        { error: "CCCD phải gồm 9 đến 12 chữ số" },
+        { status: 400 },
+      );
+    if (
+      body.citizenId &&
+      users.some((user) => user.id !== id && user.citizenId === body.citizenId)
+    )
+      return NextResponse.json(
+        { error: "Số CCCD đã được sử dụng" },
+        { status: 409 },
+      );
+    const currentDate = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Ho_Chi_Minh",
+    }).format(new Date());
+    if (
+      [body.birthday, body.citizenIssuedDate, body.joinedDate].some(
+        (date) => date && date > currentDate,
+      )
+    )
+      return NextResponse.json(
+        { error: "Ngày hồ sơ không được lớn hơn ngày hiện tại" },
+        { status: 400 },
+      );
+    if (body.status && body.status !== "able" && oldUser.status === "able") {
+      const today = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Asia/Ho_Chi_Minh",
+      }).format(new Date());
+      const futureSchedule = (await getWaterSchedules()).find(
+        (schedule) =>
+          String(schedule.date || "")
+            .split("/")
+            .reverse()
+            .join("-") >= today &&
+          schedule.status !== "completed" &&
+          (schedule.participants || []).some(
+            (participant) => participant.userId === id,
+          ),
+      );
+      if (futureSchedule)
+        return NextResponse.json(
+          {
+            error:
+              "Nhân sự đang có lịch phân công trong tương lai. Vui lòng phân công lại trước khi ngừng hoạt động.",
+          },
+          { status: 409 },
+        );
+    }
     if (Object.prototype.hasOwnProperty.call(body, "code")) {
       body.code = normalizeStaffCode(body.code);
       if (body.code && !/^[\p{L}\p{N}_-]+$/u.test(body.code)) {
@@ -209,6 +270,38 @@ export async function DELETE(req, { params }) {
         { status: 404 },
       );
     }
+
+    const [funds, schedules, assets] = await Promise.all([
+      getFunds(),
+      getWaterSchedules(),
+      getAssets(),
+    ]);
+    const hasFundHistory = funds.some(
+      (fund) =>
+        fund.members?.some((member) => member.userId === id) ||
+        [...(fund.incomes || []), ...(fund.expenses || [])].some(
+          (item) => item.userId === id,
+        ),
+    );
+    const hasWaterHistory = schedules.some((schedule) =>
+      schedule.participants?.some((participant) => participant.userId === id),
+    );
+    const hasAssetHistory = [
+      ...(assets.imports || []),
+      ...(assets.exports || []),
+    ].some(
+      (item) =>
+        item.userId === id ||
+        String(item.person || "").trim() === String(userToDelete.name).trim(),
+    );
+    if (hasFundHistory || hasWaterHistory || hasAssetHistory)
+      return NextResponse.json(
+        {
+          error:
+            "Nhân sự đã có dữ liệu nghiệp vụ. Hãy chuyển sang trạng thái ngừng hoạt động thay vì xóa.",
+        },
+        { status: 409 },
+      );
 
     const filteredUsers = users.filter((u) => u.id !== id);
     await saveUsers(filteredUsers);

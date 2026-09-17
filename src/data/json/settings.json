@@ -12,18 +12,72 @@
     "category_intern": 100000,
     "category_collaborator": 100000
   },
-  "fundContributionRules": [],
-  "fundContributionWindow": {
-    "amounts": {
-      "category_official": 150000,
-      "category_probation": 150000,
-      "category_intern": 100000,
-      "category_collaborator": 100000
+  "fundContributionRules": [
+    {
+      "id": "legacy-category_official",
+      "categoryId": "category_official",
+      "amount": 150000,
+      "startPeriod": "2026-11",
+      "endPeriod": "2026-12",
+      "note": "",
+      "createdAt": "2026-09-17T01:33:03.723Z",
+      "updatedAt": "2026-09-17T01:33:03.723Z"
     },
-    "startPeriod": "2026-08",
-    "endPeriod": "2026-11"
-  },
+    {
+      "id": "legacy-category_probation",
+      "categoryId": "category_probation",
+      "amount": 150000,
+      "startPeriod": "2026-08",
+      "endPeriod": "2026-11",
+      "note": "",
+      "createdAt": null,
+      "updatedAt": null
+    },
+    {
+      "id": "legacy-category_intern",
+      "categoryId": "category_intern",
+      "amount": 100000,
+      "startPeriod": "2026-08",
+      "endPeriod": "2026-11",
+      "note": "",
+      "createdAt": null,
+      "updatedAt": null
+    },
+    {
+      "id": "legacy-category_collaborator",
+      "categoryId": "category_collaborator",
+      "amount": 100000,
+      "startPeriod": "2026-08",
+      "endPeriod": "2026-11",
+      "note": "",
+      "createdAt": null,
+      "updatedAt": null
+    }
+  ],
+  "fundContributionWindow": null,
   "fundVoluntarySurplusUserIds": [
     "usr_003"
-  ]
+  ],
+  "fundContributionRuleHistory": [
+    {
+      "id": "fund-rule-history-1789608783723",
+      "categoryId": "category_official",
+      "amount": 150000,
+      "startPeriod": "2026-08",
+      "endPeriod": "2026-11",
+      "note": "",
+      "createdAt": null,
+      "updatedAt": null,
+      "sourceRuleId": "legacy-category_official",
+      "historyAction": "updated",
+      "archivedAt": "2026-09-17T01:33:03.723Z"
+    }
+  ],
+  "trashScheduleOverrides": {
+    "2026-09-14": "usr_021",
+    "2026-09-15": "usr_007",
+    "2026-09-16": "usr_026",
+    "2026-09-17": "usr_admin_001",
+    "2026-09-18": "usr_001"
+  }
 }

@@ -157,12 +157,14 @@ try {
   for (const type of ["imports", "exports"])
     for (const item of assets[type] || [])
       await upsert(
-        "INSERT INTO asset_transactions (id,type,asset_code,name,transaction_date,quantity,location,person,note,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE quantity=VALUES(quantity),updated_at=VALUES(updated_at)",
+        "INSERT INTO asset_transactions (id,type,asset_code,name,asset_type,description,transaction_date,quantity,location,person,note,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE name=VALUES(name),asset_type=VALUES(asset_type),description=VALUES(description),transaction_date=VALUES(transaction_date),quantity=VALUES(quantity),location=VALUES(location),person=VALUES(person),note=VALUES(note),updated_at=VALUES(updated_at)",
         [
           item.id,
           type === "imports" ? "import" : "export",
           item.code,
           item.name,
+          item.category || null,
+          item.description || null,
           item.date,
           Number(item.quantity || 0),
           item.location || null,

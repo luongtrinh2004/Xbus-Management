@@ -5,6 +5,7 @@ import {
   getUsers,
   saveWaterExemptions,
 } from "@/libs/dataRepository";
+import { getEligibleWaterUsers } from "@/libs/waterScheduler";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -22,9 +23,7 @@ export async function PATCH(req) {
   }
   const { userIds = [] } = await req.json();
   const eligibleIds = new Set(
-    (await getUsers())
-      .filter((user) => user.status === "able" && user.role === "user")
-      .map((user) => user.id),
+    getEligibleWaterUsers(await getUsers()).map((user) => user.id),
   );
   const normalized = [...new Set(userIds)].filter((id) => eligibleIds.has(id));
   await saveWaterExemptions(normalized);

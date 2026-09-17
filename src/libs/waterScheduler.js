@@ -20,10 +20,82 @@ const toLocalDateKey = (date) =>
 
 /**
  * Lấy danh sách nhân sự đủ điều kiện bê nước
- * Điều kiện mục 2.3: role = 'user', gender = 'male', status = 'able'
+ * Admin và Trợ lý được xem như nhân sự thường. Chỉ danh sách miễn mới loại
+ * một người khỏi việc phân công.
  */
 export function getEligibleWaterUsers(users = []) {
-  return users.filter((u) => u.role === "user" && u.status === "able");
+  return users.filter(
+    (user) =>
+      ["user", "assistant", "admin"].includes(user.role) &&
+      user.status === "able",
+  );
+}
+
+/** Lịch đổ rác cho 5 ngày làm việc của tuần hiện tại và tuần kế tiếp. */
+export function getTrashSchedules(
+  users = [],
+  exemptUserIds = [],
+  currentDateKey,
+  weekOffset = 0,
+  overrides = {},
+) {
+  const exemptSet = new Set(exemptUserIds);
+  const participants = users
+    .filter((user) => exemptSet.has(user.id) && user.status === "able")
+    .sort((a, b) =>
+      String(a.name || "").localeCompare(String(b.name || ""), "vi", {
+        sensitivity: "base",
+      }),
+    );
+  if (!participants.length) return [];
+
+  const [currentYear, currentMonth, currentDay] = String(currentDateKey)
+    .split("-")
+    .map(Number);
+  const today = new Date(Date.UTC(currentYear, currentMonth - 1, currentDay));
+  const weekday = today.getUTCDay();
+  const daysToMonday = weekday === 0 ? -6 : 1 - weekday;
+  const monday = new Date(today);
+  monday.setUTCDate(today.getUTCDate() + daysToMonday + weekOffset * 7);
+
+  const dayMs = 24 * 60 * 60 * 1000;
+  const rotationAnchor = Date.UTC(2026, 0, 5);
+  const schedules = [];
+  const usersById = new Map(participants.map((person) => [person.id, person]));
+  for (let weekIndex = 0; weekIndex < 1; weekIndex += 1) {
+    for (let workday = 0; workday < 5; workday += 1) {
+      const date = new Date(monday);
+      date.setUTCDate(monday.getUTCDate() + weekIndex * 7 + workday);
+      const workingDaysFromAnchor =
+        Math.floor((date.getTime() - rotationAnchor) / (dayMs * 7)) * 5 +
+        workday;
+      const defaultPerson =
+        participants[
+          ((workingDaysFromAnchor % participants.length) +
+            participants.length) %
+            participants.length
+        ];
+      const dateKey = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}-${String(date.getUTCDate()).padStart(2, "0")}`;
+      const person = usersById.get(overrides[dateKey]) || defaultPerson;
+      const year = date.getUTCFullYear();
+      const month = date.getUTCMonth() + 1;
+      const day = date.getUTCDate();
+      schedules.push({
+        id: `trash_${year}${String(month).padStart(2, "0")}${String(day).padStart(2, "0")}`,
+        date: `${String(day).padStart(2, "0")}/${String(month).padStart(2, "0")}/${year}`,
+        dateKey,
+        weekday: workday + 1,
+        weekIndex,
+        userId: person.id,
+        name: person.name,
+        code: person.code,
+        avatarUrl: person.avatarUrl || "",
+        role: person.role,
+        gender: person.gender,
+      });
+    }
+  }
+  return schedules;
 }
 
 /**

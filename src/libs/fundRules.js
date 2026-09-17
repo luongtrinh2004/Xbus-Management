@@ -26,21 +26,21 @@ export const currentFundPeriod = () => {
 };
 export function amountForPeriod(settings, categoryId, fund) {
   const key = periodKey(fund);
-  if (settings.fundContributionWindow) {
-    const window = settings.fundContributionWindow;
-    return Number(
-      key >= window.startPeriod && key <= window.endPeriod
-        ? (window.amounts[categoryId] ?? defaultFundAmounts[categoryId])
-        : defaultFundAmounts[categoryId],
-    );
-  }
   const rule = (settings.fundContributionRules || []).find(
     (r) =>
       r.categoryId === categoryId &&
       r.startPeriod <= key &&
       (!r.endPeriod || r.endPeriod >= key),
   );
-  return Number(rule?.amount ?? defaultFundAmounts[categoryId] ?? 100000);
+  if (rule) return Number(rule.amount);
+  if (settings.fundContributionWindow) {
+    const window = settings.fundContributionWindow;
+    if (key >= window.startPeriod && key <= window.endPeriod)
+      return Number(
+        window.amounts[categoryId] ?? defaultFundAmounts[categoryId],
+      );
+  }
+  return Number(defaultFundAmounts[categoryId] ?? 100000);
 }
 export function snapshotFund(fund, users, settings) {
   if (periodKey(fund) > periodKey(currentFundPeriod())) {

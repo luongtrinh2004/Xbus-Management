@@ -1,6 +1,29 @@
 {
   "auditLogs": [
     {
+      "id": "log_1789611123779_i225",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "SHIFT_TRASH_SCHEDULE",
+      "targetType": "trash_schedule",
+      "targetId": "2026-09-14",
+      "details": "Đôn lịch đổ rác từ ngày 2026-09-14",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-17T02:12:03.779Z"
+    },
+    {
+      "id": "log_1789608783732_f5oo",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "UPDATE_FUND_SETTINGS",
+      "targetType": "FUND",
+      "details": "Cập nhật mức đóng Chính thức 150.000 đồng, 2026-11 đến 2026-12",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-17T01:33:03.732Z"
+    },
+    {
       "id": "log_1789553925399_hbdd",
       "adminId": "usr_admin_001",
       "adminName": "Quản trị viên Hệ thống",

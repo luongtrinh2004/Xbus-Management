@@ -7,7 +7,11 @@ import {
   getWaterExemptions,
   appendAuditLog,
 } from "@/libs/dataRepository";
-import { getWeeksOfMonth, getEligibleWaterUsers } from "@/libs/waterScheduler";
+import {
+  getWeeksOfMonth,
+  getEligibleWaterUsers,
+  getTrashSchedules,
+} from "@/libs/waterScheduler";
 import { toVietnamDateKey } from "@/libs/dateTime";
 
 const secret = process.env.NEXTAUTH_SECRET;
@@ -15,6 +19,8 @@ const secret = process.env.NEXTAUTH_SECRET;
 export async function GET(req) {
   try {
     const token = await getToken({ req, secret });
+    if (!token?.id)
+      return NextResponse.json({ error: "Chưa xác thực" }, { status: 401 });
     const searchParams = req.nextUrl.searchParams;
     const [currentYear, currentMonth] = toVietnamDateKey()
       .split("-")
@@ -32,6 +38,11 @@ export async function GET(req) {
     const allUsers = await getUsers();
     const eligibleUsers = getEligibleWaterUsers(allUsers);
     const exemptUserIds = await getWaterExemptions();
+    const trashSchedules = getTrashSchedules(
+      allUsers,
+      exemptUserIds,
+      toVietnamDateKey(),
+    );
 
     // Lọc theo tháng và năm
     let result = allSchedules.filter(
@@ -74,6 +85,7 @@ export async function GET(req) {
       month,
       year,
       schedules: result,
+      trashSchedules,
       weeksMeta,
       eligibleUsers: ["admin", "assistant"].includes(token?.role)
         ? eligibleUsers

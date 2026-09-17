@@ -56,6 +56,12 @@ const EditUserDialog = ({
     categoryId: "category_official",
     status: "able",
     birthday: "",
+    citizenId: "",
+    citizenIssuedDate: "",
+    address: "",
+    position: "",
+    jiraAccount: "",
+    joinedDate: "",
     avatarUrl: "",
     schedulingPoints: 0,
   });
@@ -86,6 +92,12 @@ const EditUserDialog = ({
         categoryId: updatingUser.categoryId || "category_official",
         status: updatingUser.status || "able",
         birthday: updatingUser.birthday || "",
+        citizenId: updatingUser.citizenId || "",
+        citizenIssuedDate: updatingUser.citizenIssuedDate || "",
+        address: updatingUser.address || "",
+        position: updatingUser.position || "",
+        jiraAccount: updatingUser.jiraAccount || "",
+        joinedDate: updatingUser.joinedDate || "",
         avatarUrl: updatingUser.avatarUrl || "",
         schedulingPoints: updatingUser.schedulingPoints || 0,
       });
@@ -509,6 +521,41 @@ const EditUserDialog = ({
               slotProps={{ inputLabel: { shrink: true } }}
             />
           </Grid>
+          {[
+            ["citizenId", "Số CCCD", "text"],
+            ["citizenIssuedDate", "Ngày cấp CCCD", "date"],
+            ["joinedDate", "Ngày tham gia", "date"],
+            ["position", "Chức vụ", "text"],
+            ["jiraAccount", "Tài khoản Jira", "text"],
+            ["address", "Địa chỉ", "text"],
+          ].map(([field, label, type]) => (
+            <Grid
+              key={field}
+              size={{ xs: 12, sm: field === "address" ? 12 : 4 }}
+            >
+              <CustomTextField
+                fullWidth
+                type={type}
+                label={label}
+                value={userData[field]}
+                inputProps={
+                  field === "citizenId" ? { inputMode: "numeric" } : undefined
+                }
+                slotProps={
+                  type === "date" ? { inputLabel: { shrink: true } } : undefined
+                }
+                onChange={(event) =>
+                  setUserData({
+                    ...userData,
+                    [field]:
+                      field === "citizenId"
+                        ? event.target.value.replace(/\D/g, "")
+                        : event.target.value,
+                  })
+                }
+              />
+            </Grid>
+          ))}
         </Grid>
       </DialogContent>
 

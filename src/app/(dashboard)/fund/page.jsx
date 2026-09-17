@@ -37,7 +37,6 @@ import { exportJsonToExcel } from "@/libs/excelHelper";
 import { resolveAvatar } from "@/utils/getDefaultAvatar";
 import { toast } from "react-toastify";
 import ConfirmDialog from "@components/ConfirmDialog";
-import FundSettingsDialog from "./components/FundSettingsDialog";
 import FundStatistics from "./components/FundStatistics";
 import {
   fundPaymentStatus,
@@ -112,7 +111,6 @@ export default function FundPage() {
     category_intern: 100000,
     category_collaborator: 100000,
   });
-  const [settingsOpen, setSettingsOpen] = useState(false);
   const [cancelObligationTarget, setCancelObligationTarget] = useState(null);
   const [cancellationReason, setCancellationReason] = useState("Được miễn");
   const [savingObligation, setSavingObligation] = useState(false);
@@ -204,9 +202,7 @@ export default function FundPage() {
       !Number.isSafeInteger(actualPaymentAmount) ||
       actualPaymentAmount < minimumOnlinePaymentAmount
     ) {
-      toast.error(
-        `Số tiền đóng phải từ ${money(minimumOnlinePaymentAmount)}`,
-      );
+      toast.error(`Số tiền đóng phải từ ${money(minimumOnlinePaymentAmount)}`);
       return;
     }
     setCreatingPayment(true);
@@ -562,16 +558,6 @@ export default function FundPage() {
           }
           action={
             <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-              {canManage && (
-                <Button
-                  size="small"
-                  variant="tonal"
-                  startIcon={<i className="tabler-settings" />}
-                  onClick={() => setSettingsOpen(true)}
-                >
-                  Cài đặt mức đóng quỹ
-                </Button>
-              )}
               <CustomTextField
                 type="month"
                 size="small"
@@ -1314,7 +1300,10 @@ export default function FundPage() {
                             {isEditingPayment ||
                             member.obligationCancelled ||
                             (!member.paid && member.requiredAmount === 0) ? (
-                              <Typography variant="body2" color="text.secondary">
+                              <Typography
+                                variant="body2"
+                                color="text.secondary"
+                              >
                                 —
                               </Typography>
                             ) : !member.paid ? (
@@ -1404,7 +1393,9 @@ export default function FundPage() {
                                     Math.floor(required / 1000) || "";
                                   setPaymentThousands(
                                     inThousands
-                                      ? Number(inThousands).toLocaleString("vi-VN")
+                                      ? Number(inThousands).toLocaleString(
+                                          "vi-VN",
+                                        )
                                       : "",
                                   );
                                   setPaymentData(null);
@@ -1414,7 +1405,10 @@ export default function FundPage() {
                               </Button>
                             ) : (
                               !canManage && (
-                                <Typography variant="body2" color="text.secondary">
+                                <Typography
+                                  variant="body2"
+                                  color="text.secondary"
+                                >
                                   —
                                 </Typography>
                               )
@@ -1740,15 +1734,6 @@ export default function FundPage() {
         onConfirm={() =>
           deleteTransaction(deleteTarget.kind, deleteTarget.item)
         }
-      />
-      <FundSettingsDialog
-        open={settingsOpen}
-        onClose={() => setSettingsOpen(false)}
-        users={users}
-        onSaved={async (data) => {
-          setMinimumAmounts(data.minimumAmounts);
-          await loadFund(period);
-        }}
       />
       <Dialog
         open={Boolean(paymentMember)}

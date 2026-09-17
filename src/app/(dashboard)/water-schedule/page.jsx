@@ -7,6 +7,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Typography from "@mui/material/Typography";
 import AdminScheduleView from "./components/AdminScheduleView";
 import UserScheduleView from "./components/UserScheduleView";
+import TrashScheduleCard from "./components/TrashScheduleCard";
 import { toVietnamDateKey } from "@/libs/dateTime";
 
 const currentVietnamPeriod = () => {
@@ -74,24 +75,30 @@ export default function WaterSchedulePage() {
 
   if (isAdmin) {
     return (
-      <AdminScheduleView
-        month={month}
-        setMonth={setMonth}
-        year={year}
-        setYear={setYear}
-        schedules={schedules}
-        weeksMeta={weeksMeta}
-        eligibleUsers={eligibleUsers}
-        exemptUserIds={exemptUserIds}
-        onRefresh={loadData}
-      />
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 4 }}>
+        <AdminScheduleView
+          month={month}
+          setMonth={setMonth}
+          year={year}
+          setYear={setYear}
+          schedules={schedules}
+          weeksMeta={weeksMeta}
+          eligibleUsers={eligibleUsers}
+          exemptUserIds={exemptUserIds}
+          onRefresh={loadData}
+        />
+        <TrashScheduleCard canManage />
+      </Box>
     );
   }
 
   return (
-    <UserScheduleView
-      schedules={schedules}
-      currentUser={currentUser || session?.user}
-    />
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 4 }}>
+      <UserScheduleView
+        schedules={schedules}
+        currentUser={currentUser || session?.user}
+      />
+      <TrashScheduleCard />
+    </Box>
   );
 }

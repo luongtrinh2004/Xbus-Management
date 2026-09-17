@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import * as XLSX from "xlsx";
 import Autocomplete from "@mui/material/Autocomplete";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
@@ -35,6 +36,8 @@ import { formatVietnamDate, toVietnamDateKey } from "@/libs/dateTime";
 const emptyForm = {
   code: "",
   name: "",
+  category: "",
+  description: "",
   date: toVietnamDateKey(),
   quantity: 1,
   location: "",
@@ -43,31 +46,41 @@ const emptyForm = {
 };
 const columns = {
   import: [
-    "Mã",
-    "Tên",
     "Ngày nhập",
+    "Loại SP",
+    "Mã sản phẩm",
+    "Tên sản phẩm",
+    "Mô tả sản phẩm",
+    "Người nhập kho",
     "Số lượng",
     "Vị trí",
-    "Người nhập",
     "Ghi chú",
   ],
   export: [
-    "Mã",
-    "Tên",
     "Ngày xuất",
+    "Loại SP",
+    "Mã sản phẩm",
+    "Tên sản phẩm",
+    "Người mượn tài sản",
     "Số lượng",
-    "Vị trí",
-    "Người xuất",
     "Ghi chú",
   ],
   stock: [
-    "Mã",
-    "Tên",
-    "Ngày nhập",
-    "Số lượng",
+    "Loại SP",
+    "Mã SP",
+    "Tên sản phẩm",
+    "Tổng nhập",
+    "Tổng xuất",
+    "Tồn kho",
     "Vị trí",
-    "Người nhập",
-    "Ghi chú",
+  ],
+  products: [
+    "Mã sản phẩm",
+    "Tên sản phẩm",
+    "Tổng nhập",
+    "Tổng xuất",
+    "Tồn kho",
+    "Vị trí",
   ],
 };
 const formatDate = formatVietnamDate;
@@ -110,7 +123,7 @@ const filterAssetOptions = (options, inputValue) => {
 };
 
 function AssetTable({ rows, type, canManage, onEdit, onDelete }) {
-  const editable = type !== "stock";
+  const editable = !["stock", "products"].includes(type);
 
   return (
     <TableContainer>
@@ -129,17 +142,53 @@ function AssetTable({ rows, type, canManage, onEdit, onDelete }) {
           {rows.length ? (
             rows.map((row) => (
               <TableRow key={row.id || row.code} hover>
-                <TableCell>
-                  <Typography color="primary.main" fontWeight={600}>
-                    {row.code}
-                  </Typography>
-                </TableCell>
-                <TableCell>{row.name}</TableCell>
-                <TableCell>{formatDate(row.date)}</TableCell>
-                <TableCell>{row.quantity}</TableCell>
-                <TableCell>{row.location}</TableCell>
-                <TableCell>{row.person}</TableCell>
-                <TableCell>{row.note || "—"}</TableCell>
+                {type === "import" ? (
+                  <>
+                    <TableCell>{formatDate(row.date)}</TableCell>
+                    <TableCell>{row.category || "—"}</TableCell>
+                    <TableCell>
+                      <Typography color="primary.main" fontWeight={600}>
+                        {row.code}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>{row.name}</TableCell>
+                    <TableCell>{row.description || "—"}</TableCell>
+                    <TableCell>{row.person}</TableCell>
+                    <TableCell>{row.quantity}</TableCell>
+                    <TableCell>{row.location || "—"}</TableCell>
+                    <TableCell>{row.note || "—"}</TableCell>
+                  </>
+                ) : type === "export" ? (
+                  <>
+                    <TableCell>{formatDate(row.date)}</TableCell>
+                    <TableCell>{row.category || "—"}</TableCell>
+                    <TableCell>
+                      <Typography color="primary.main" fontWeight={600}>
+                        {row.code}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>{row.name}</TableCell>
+                    <TableCell>{row.person}</TableCell>
+                    <TableCell>{row.quantity}</TableCell>
+                    <TableCell>{row.note || "—"}</TableCell>
+                  </>
+                ) : (
+                  <>
+                    <TableCell>{row.category || "—"}</TableCell>
+                    <TableCell>
+                      <Typography color="primary.main" fontWeight={600}>
+                        {row.code}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>{row.name}</TableCell>
+                    <TableCell>{row.totalImport}</TableCell>
+                    <TableCell>{row.totalExport}</TableCell>
+                    <TableCell>
+                      <Typography fontWeight={700}>{row.quantity}</Typography>
+                    </TableCell>
+                    <TableCell>{row.location || "—"}</TableCell>
+                  </>
+                )}
                 {editable && canManage && (
                   <TableCell align="center">
                     <Box display="flex" justifyContent="center" gap={0.5}>
@@ -166,7 +215,10 @@ function AssetTable({ rows, type, canManage, onEdit, onDelete }) {
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={editable && canManage ? 8 : 7} align="center">
+              <TableCell
+                colSpan={columns[type].length + (editable && canManage ? 1 : 0)}
+                align="center"
+              >
                 <Typography color="text.secondary" py={5}>
                   Chưa có dữ liệu
                 </Typography>
@@ -205,6 +257,8 @@ function TransactionDialog({
       ...value,
       code,
       name: item?.name || "",
+      category: item?.category || "",
+      description: item?.description || "",
       location: item?.location || "",
     }));
   };
@@ -356,6 +410,21 @@ function TransactionDialog({
             <CustomTextField label="Tên tài sản *" value={form.name} disabled />
           )}
           <CustomTextField
+            label="Loại SP"
+            value={form.category}
+            disabled={type === "export"}
+            onChange={(e) => setForm({ ...form, category: e.target.value })}
+          />
+          {type === "import" && (
+            <CustomTextField
+              label="Mô tả sản phẩm"
+              value={form.description}
+              onChange={(e) =>
+                setForm({ ...form, description: e.target.value })
+              }
+            />
+          )}
+          <CustomTextField
             type="date"
             label={type === "import" ? "Ngày nhập *" : "Ngày xuất *"}
             value={form.date}
@@ -440,6 +509,9 @@ export default function AssetsPage() {
   const [search, setSearch] = useState("");
   const [limit, setLimit] = useState(10);
   const [page, setPage] = useState(1);
+  const [excelWarningOpen, setExcelWarningOpen] = useState(false);
+  const [importingExcel, setImportingExcel] = useState(false);
+  const excelInputRef = useRef(null);
   const loadData = async () => {
     setLoading(true);
     try {
@@ -492,8 +564,27 @@ export default function AssetsPage() {
     });
     return [...rows.values()];
   }, [data]);
+  const products = useMemo(
+    () =>
+      stock.map((item) => ({
+        ...item,
+        totalImport: data.imports
+          .filter((entry) => entry.code === item.code)
+          .reduce((sum, entry) => sum + Number(entry.quantity || 0), 0),
+        totalExport: data.exports
+          .filter((entry) => entry.code === item.code)
+          .reduce((sum, entry) => sum + Number(entry.quantity || 0), 0),
+      })),
+    [data, stock],
+  );
   const activeRows =
-    tab === "import" ? data.imports : tab === "export" ? data.exports : stock;
+    tab === "import"
+      ? data.imports
+      : tab === "export"
+        ? data.exports
+        : tab === "products"
+          ? products
+          : products;
   const filteredRows = useMemo(
     () =>
       activeRows.filter((row) =>
@@ -503,6 +594,146 @@ export default function AssetsPage() {
       ),
     [activeRows, search],
   );
+  const normalizeExcelDate = (value) => {
+    if (typeof value === "number") {
+      const parsed = XLSX.SSF.parse_date_code(value);
+      if (parsed)
+        return `${parsed.y}-${String(parsed.m).padStart(2, "0")}-${String(parsed.d).padStart(2, "0")}`;
+    }
+    const text = String(value || "").trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(text)) return text;
+    const match = text.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})/);
+    if (match)
+      return `${match[3]}-${match[2].padStart(2, "0")}-${match[1].padStart(2, "0")}`;
+    const shortMatch = text.match(/^(\d{1,2})[/-](\d{1,2})$/);
+    return shortMatch
+      ? `${new Date().getFullYear()}-${shortMatch[2].padStart(2, "0")}-${shortMatch[1].padStart(2, "0")}`
+      : "";
+  };
+  const pick = (row, names) => {
+    const key = Object.keys(row).find((item) =>
+      names.includes(normalizeSearchText(item).replace(/\s+/g, "")),
+    );
+    return key ? row[key] : "";
+  };
+  const importExcel = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    setImportingExcel(true);
+    try {
+      const workbook = XLSX.read(await file.arrayBuffer(), {
+        type: "array",
+        cellDates: false,
+      });
+      const findSheet = (expected) => {
+        const name = workbook.SheetNames.find(
+          (item) => normalizeSearchText(item).replace(/\s+/g, "") === expected,
+        );
+        return name ? workbook.Sheets[name] : null;
+      };
+      const importSheet = findSheet("nhapkho");
+      const exportSheet = findSheet("xuatkho");
+      const stockSheet = findSheet("tonkho");
+      if (!importSheet || !exportSheet || !stockSheet)
+        throw new Error(
+          "File phải có đủ 3 sheet: Nhập kho, Xuất kho và Tồn kho",
+        );
+      const mapRows = (sheet, type) =>
+        XLSX.utils
+          .sheet_to_json(sheet, { defval: "", raw: true })
+          .filter((row) => pick(row, ["masanpham", "masp", "ma", "code"]))
+          .map((row) => ({
+            code: pick(row, ["masanpham", "masp", "ma", "code"]),
+            name: pick(row, ["tensanpham", "tensp", "ten", "name"]),
+            category: pick(row, ["loaisp", "loaisanpham", "category"]),
+            description: pick(row, ["motasanpham", "mota", "description"]),
+            date: normalizeExcelDate(
+              pick(row, [
+                type === "import" ? "f" : "cot1",
+                type === "import" ? "ngaynhap" : "ngayxuat",
+                "ngay",
+                "date",
+              ]),
+            ),
+            quantity: Number(pick(row, ["soluong", "quantity"])),
+            location: pick(row, ["vitri", "location"]),
+            person: pick(row, [
+              type === "import" ? "nguoinhapkho" : "nguoimuontaisan",
+              type === "import" ? "nguoinhap" : "nguoixuat",
+              "nguoithuchien",
+              "person",
+            ]),
+            note: pick(row, ["ghichu", "note"]),
+          }));
+      const imports = mapRows(importSheet, "import");
+      const exports = mapRows(exportSheet, "export");
+      const response = await fetch("/api/assets", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ imports, exports }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error);
+      setData(result);
+      setTab("products");
+      toast.success(
+        `Đã thêm ${result.summary?.added || 0} và cập nhật ${result.summary?.updated || 0} giao dịch từ Excel`,
+      );
+    } catch (error) {
+      toast.error(error.message || "Không thể đọc file Excel");
+    } finally {
+      setImportingExcel(false);
+    }
+  };
+  const exportCurrentList = () => {
+    const workbook = XLSX.utils.book_new();
+    const importRows = data.imports.map((item) => ({
+      "Ngày nhập": item.date,
+      "Loại SP": item.category || "",
+      "Mã sản phẩm": item.code,
+      "Tên sản phẩm": item.name,
+      "Mô tả sản phẩm": item.description || "",
+      "Người nhập kho": item.person,
+      "Số lượng": item.quantity,
+      "Vị trí": item.location,
+      "Ghi chú": item.note || "",
+    }));
+    const exportRows = data.exports.map((item) => ({
+      "Ngày xuất": item.date,
+      "Loại SP": item.category || "",
+      "Mã sản phẩm": item.code,
+      "Tên sản phẩm": item.name,
+      "Người mượn tài sản": item.person,
+      "Số lượng": item.quantity,
+      "Ghi chú": item.note || "",
+    }));
+    const stockRows = products.map((item) => ({
+      "Loại SP": item.category || "",
+      "Mã SP": item.code,
+      "Tên sản phẩm": item.name,
+      "Tổng số lượng nhập kho": item.totalImport,
+      "Tổng số lượng xuất kho": item.totalExport,
+      "Tồn kho": item.quantity,
+      "Vị trí": item.location || "",
+    }));
+    XLSX.utils.book_append_sheet(
+      workbook,
+      XLSX.utils.json_to_sheet(importRows),
+      "Nhập kho",
+    );
+    XLSX.utils.book_append_sheet(
+      workbook,
+      XLSX.utils.json_to_sheet(exportRows),
+      "Xuất kho",
+    );
+    XLSX.utils.book_append_sheet(
+      workbook,
+      XLSX.utils.json_to_sheet(stockRows),
+      "Tồn kho",
+    );
+    XLSX.writeFile(workbook, `danh_sach_tai_san_${toVietnamDateKey()}.xlsx`);
+  };
   const pagedRows = filteredRows.slice((page - 1) * limit, page * limit);
   if (status === "loading" || loading)
     return (
@@ -536,6 +767,22 @@ export default function AssetsPage() {
           action={
             canManage ? (
               <Box display="flex" gap={2}>
+                <Button
+                  variant="outlined"
+                  startIcon={<i className="tabler-download" />}
+                  onClick={exportCurrentList}
+                >
+                  Xuất danh sách hiện tại
+                </Button>
+                <Button
+                  variant="tonal"
+                  color="warning"
+                  startIcon={<i className="tabler-file-upload" />}
+                  disabled={importingExcel}
+                  onClick={() => setExcelWarningOpen(true)}
+                >
+                  {importingExcel ? "Đang import…" : "Import Excel"}
+                </Button>
                 <Button
                   variant="tonal"
                   startIcon={<i className="tabler-package-import" />}
@@ -584,6 +831,10 @@ export default function AssetsPage() {
           <Tab value="import" label={`Nhập kho (${data.imports.length})`} />
           <Tab value="export" label={`Xuất kho (${data.exports.length})`} />
           <Tab value="stock" label={`Tồn kho (${stock.length})`} />
+          <Tab
+            value="products"
+            label={`Danh sách sản phẩm (${products.length})`}
+          />
         </Tabs>
         <AssetTable
           type={tab}
@@ -628,6 +879,25 @@ export default function AssetsPage() {
           onConfirm={() =>
             deleteTransaction(deleteTarget.type, deleteTarget.item)
           }
+        />
+        <input
+          ref={excelInputRef}
+          hidden
+          type="file"
+          accept=".xlsx,.xls"
+          onChange={importExcel}
+        />
+        <ConfirmDialog
+          open={excelWarningOpen}
+          title="Import dữ liệu tài sản từ Excel"
+          message="File cần có đủ 3 sheet Nhập kho, Xuất kho và Tồn kho. Dòng trùng mã sản phẩm, ngày và người thực hiện sẽ được cập nhật toàn bộ theo file; dòng mới sẽ được thêm vào danh sách hiện tại."
+          confirmText="Chọn file để import"
+          confirmColor="warning"
+          onClose={() => setExcelWarningOpen(false)}
+          onConfirm={() => {
+            setExcelWarningOpen(false);
+            excelInputRef.current?.click();
+          }}
         />
       </Card>
     </Box>

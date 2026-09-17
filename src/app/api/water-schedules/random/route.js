@@ -31,6 +31,7 @@ export async function POST(req) {
       weekIndex,
       requiredPeople = 5,
       currentDraft = [],
+      fixedParticipants = [],
     } = body;
 
     const allUsers = await getUsers();
@@ -41,7 +42,7 @@ export async function POST(req) {
 
     if (eligibleUsers.length === 0) {
       return NextResponse.json(
-        { error: "Không có nhân sự nam nào đủ điều kiện để xếp lịch" },
+        { error: "Không có nhân sự nào đủ điều kiện để xếp lịch" },
         { status: 400 },
       );
     }
@@ -50,14 +51,24 @@ export async function POST(req) {
     const weeksMeta = getWeeksOfMonth(year, month);
 
     if (mode === "single_week") {
-      // Random cho duy nhất 1 tuần
-      const participants = selectFairParticipants({
+      const uniqueFixed = [
+        ...new Map(
+          (Array.isArray(fixedParticipants) ? fixedParticipants : []).map(
+            (participant) => [participant.userId || participant, participant],
+          ),
+        ).values(),
+      ].slice(0, requiredPeople);
+      const remainingSlots = Math.max(0, requiredPeople - uniqueFixed.length);
+      const generatedParticipants = selectFairParticipants({
         eligibleUsers,
         existingSchedules: allSchedules,
-        requiredPeople,
+        requiredPeople: remainingSlots,
         tentativeCounts: {},
-        excludeUserIds: [],
+        excludeUserIds: uniqueFixed.map(
+          (participant) => participant.userId || participant,
+        ),
       });
+      const participants = [...uniqueFixed, ...generatedParticipants];
 
       return NextResponse.json({
         success: true,

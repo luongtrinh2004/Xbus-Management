@@ -13,9 +13,9 @@ const verticalMenuData = [
     roles: ["user", "assistant", "admin"],
   },
   {
-    label: "Lịch bê nước",
+    label: "Sinh hoạt đội",
     href: "/water-schedule",
-    icon: "tabler-droplet",
+    icon: "tabler-users-group",
     roles: ["user", "assistant", "admin"],
   },
   {
@@ -56,6 +56,12 @@ const verticalMenuData = [
     label: "Lịch sử hoạt động",
     href: "/audit-logs",
     icon: "tabler-history",
+    roles: ["assistant", "admin"],
+  },
+  {
+    label: "Cài đặt",
+    href: "/settings",
+    icon: "tabler-settings",
     roles: ["assistant", "admin"],
   },
 ];

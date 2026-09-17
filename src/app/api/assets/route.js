@@ -10,6 +10,79 @@ const normalizeData = (data) => ({
   exports: Array.isArray(data.exports) ? data.exports : [],
 });
 
+const normalizeText = (value) => String(value || "").trim();
+const transactionBaseKey = (item) =>
+  [
+    normalizeText(item.code).toUpperCase(),
+    normalizeText(item.date),
+    normalizeText(item.person).toLocaleLowerCase("vi"),
+  ].join("|");
+
+const mergeTransactions = (current, incoming, type, token) => {
+  const currentGroups = new Map();
+  current.forEach((item) => {
+    const key = transactionBaseKey(item);
+    currentGroups.set(key, [...(currentGroups.get(key) || []), item]);
+  });
+  const occurrences = new Map();
+  let added = 0;
+  let updated = 0;
+  const now = new Date().toISOString();
+  const replacements = new Map();
+
+  incoming.forEach((item, index) => {
+    const code = normalizeText(item.code).toUpperCase();
+    const name = normalizeText(item.name);
+    const quantity = Number(item.quantity);
+    if (
+      !code ||
+      !name ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(item.date || "") ||
+      !Number.isInteger(quantity) ||
+      quantity <= 0
+    )
+      throw new Error(
+        `Sheet ${type === "import" ? "Nhập kho" : "Xuất kho"}, dòng ${index + 2}: mã, tên, ngày hoặc số lượng không hợp lệ`,
+      );
+
+    const normalized = {
+      code,
+      name,
+      category: normalizeText(item.category),
+      description: normalizeText(item.description),
+      date: item.date,
+      quantity,
+      location: normalizeText(item.location),
+      person: normalizeText(item.person) || token.name || "Import Excel",
+      note: normalizeText(item.note),
+    };
+    const baseKey = transactionBaseKey(normalized);
+    const occurrence = occurrences.get(baseKey) || 0;
+    occurrences.set(baseKey, occurrence + 1);
+    const existing = currentGroups.get(baseKey)?.[occurrence];
+    if (existing) {
+      replacements.set(existing.id, {
+        ...normalized,
+        id: existing.id,
+        createdAt: existing.createdAt || now,
+        updatedAt: now,
+      });
+      updated += 1;
+    } else {
+      const id = `${type}_excel_${Date.now()}_${index}_${Math.random().toString(36).slice(2, 6)}`;
+      replacements.set(id, { ...normalized, id, createdAt: now });
+      added += 1;
+    }
+  });
+
+  const merged = current.map((item) => replacements.get(item.id) || item);
+  replacements.forEach((item, id) => {
+    if (!current.some((currentItem) => currentItem.id === id))
+      merged.push(item);
+  });
+  return { records: merged, added, updated };
+};
+
 export async function GET(req) {
   const token = await getToken({ req, secret });
   if (!canManageAssets(token))
@@ -76,6 +149,14 @@ export async function POST(req) {
       id: `${type}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
       code: normalizedCode,
       name: type === "export" ? source.name : body.name.trim(),
+      category:
+        type === "export"
+          ? source.category || ""
+          : normalizeText(body.category),
+      description:
+        type === "export"
+          ? source.description || ""
+          : normalizeText(body.description),
       date: body.date,
       quantity,
       location: type === "export" ? source.location : body.location.trim(),
@@ -100,6 +181,64 @@ export async function POST(req) {
     return NextResponse.json(
       { error: "Không thể lưu giao dịch tài sản" },
       { status: 500 },
+    );
+  }
+}
+
+export async function PUT(req) {
+  try {
+    const token = await getToken({ req, secret });
+    if (!canManageAssets(token))
+      return NextResponse.json(
+        { error: "Không có quyền truy cập" },
+        { status: 403 },
+      );
+    const body = await req.json();
+    if (
+      (!Array.isArray(body.imports) || !body.imports.length) &&
+      (!Array.isArray(body.exports) || !body.exports.length)
+    )
+      return NextResponse.json(
+        { error: "File Excel không có dữ liệu nhập kho" },
+        { status: 400 },
+      );
+    const current = normalizeData(await getAssets());
+    const importResult = mergeTransactions(
+      current.imports,
+      body.imports || [],
+      "import",
+      token,
+    );
+    const exportResult = mergeTransactions(
+      current.exports,
+      body.exports || [],
+      "export",
+      token,
+    );
+    const merged = {
+      imports: importResult.records,
+      exports: exportResult.records,
+    };
+    await saveAssets(merged);
+    await appendAuditLog({
+      adminId: token.id,
+      adminName: token.name || "Người dùng",
+      adminEmail: token.email || "",
+      action: "UPSERT_ASSETS_FROM_EXCEL",
+      targetType: "ASSET",
+      details: `Import Excel: thêm ${importResult.added + exportResult.added}, cập nhật ${importResult.updated + exportResult.updated} giao dịch`,
+    });
+    return NextResponse.json({
+      ...merged,
+      summary: {
+        added: importResult.added + exportResult.added,
+        updated: importResult.updated + exportResult.updated,
+      },
+    });
+  } catch (error) {
+    return NextResponse.json(
+      { error: error.message || "Không thể import Excel" },
+      { status: 400 },
     );
   }
 }
@@ -157,6 +296,14 @@ export async function PATCH(req) {
       ...previous,
       code: normalizedCode,
       name: type === "export" ? source.name : body.name.trim(),
+      category:
+        type === "export"
+          ? source.category || ""
+          : normalizeText(body.category),
+      description:
+        type === "export"
+          ? source.description || ""
+          : normalizeText(body.description),
       date: body.date,
       quantity,
       location: type === "export" ? source.location : body.location.trim(),

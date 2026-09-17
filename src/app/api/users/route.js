@@ -9,10 +9,18 @@ const normalizeStaffCode = (value) =>
   String(value || "")
     .trim()
     .toUpperCase();
+const validEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value || "");
+const validPhone = (value) => !value || /^(\+84|0)\d{9,10}$/.test(value);
+const today = () =>
+  new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Ho_Chi_Minh" }).format(
+    new Date(),
+  );
 
 export async function GET(req) {
   try {
     const token = await getToken({ req, secret });
+    if (!token?.id)
+      return NextResponse.json({ error: "Chưa xác thực" }, { status: 401 });
     const searchParams = req.nextUrl.searchParams;
     const role = searchParams.get("role") || "";
     const status = searchParams.get("status") || "";
@@ -178,6 +186,30 @@ export async function POST(req) {
         { status: 400 },
       );
     }
+    if (!validEmail(body.email))
+      return NextResponse.json(
+        { error: "Email không hợp lệ" },
+        { status: 400 },
+      );
+    if (!validPhone(body.phone))
+      return NextResponse.json(
+        { error: "Số điện thoại không hợp lệ" },
+        { status: 400 },
+      );
+    if (body.citizenId && !/^\d{9,12}$/.test(body.citizenId))
+      return NextResponse.json(
+        { error: "CCCD phải gồm 9 đến 12 chữ số" },
+        { status: 400 },
+      );
+    if (
+      [body.birthday, body.citizenIssuedDate, body.joinedDate].some(
+        (date) => date && date > today(),
+      )
+    )
+      return NextResponse.json(
+        { error: "Ngày hồ sơ không được lớn hơn ngày hiện tại" },
+        { status: 400 },
+      );
 
     const users = await getUsers();
     const code = normalizeStaffCode(body.code);
@@ -215,6 +247,12 @@ export async function POST(req) {
       gender: body.gender || "unspecified",
       birthday: body.birthday || "",
       phone: body.phone || "",
+      citizenId: body.citizenId || "",
+      citizenIssuedDate: body.citizenIssuedDate || "",
+      address: body.address || "",
+      position: body.position || "",
+      jiraAccount: body.jiraAccount || "",
+      joinedDate: body.joinedDate || "",
       role: body.role || "user",
       typeId: body.typeId || "type_web_app",
       categoryId: body.categoryId || "category_official",

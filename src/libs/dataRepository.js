@@ -77,6 +77,12 @@ export async function getUsers() {
     status: row.status,
     password: row.password_hash || "",
     birthday: toDateOnly(row.birthday),
+    citizenId: row.citizen_id || "",
+    citizenIssuedDate: toDateOnly(row.citizen_issued_date),
+    address: row.address || "",
+    position: row.position || "",
+    jiraAccount: row.jira_account || "",
+    joinedDate: toDateOnly(row.joined_date),
     schedulingPoints: Number(row.scheduling_points || 0),
     waterTripCount: Number(row.water_trip_count || 0),
     createdAt: toIso(row.created_at),
@@ -114,9 +120,9 @@ export async function saveUsers(users) {
     }
     for (const item of users) {
       await connection.execute(
-        `INSERT INTO users (id,google_id,name,email,code,avatar_url,gender,phone,role,department_id,category_id,status,password_hash,birthday,scheduling_points,water_trip_count,created_at,updated_at,activated_at,activated_by)
-         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-         ON DUPLICATE KEY UPDATE google_id=VALUES(google_id),name=VALUES(name),email=VALUES(email),code=VALUES(code),avatar_url=VALUES(avatar_url),gender=VALUES(gender),phone=VALUES(phone),role=VALUES(role),department_id=VALUES(department_id),category_id=VALUES(category_id),status=VALUES(status),password_hash=VALUES(password_hash),birthday=VALUES(birthday),scheduling_points=VALUES(scheduling_points),water_trip_count=VALUES(water_trip_count),updated_at=VALUES(updated_at),activated_at=VALUES(activated_at),activated_by=VALUES(activated_by)`,
+        `INSERT INTO users (id,google_id,name,email,code,avatar_url,gender,phone,role,department_id,category_id,status,password_hash,birthday,citizen_id,citizen_issued_date,address,position,jira_account,joined_date,scheduling_points,water_trip_count,created_at,updated_at,activated_at,activated_by)
+         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+         ON DUPLICATE KEY UPDATE google_id=VALUES(google_id),name=VALUES(name),email=VALUES(email),code=VALUES(code),avatar_url=VALUES(avatar_url),gender=VALUES(gender),phone=VALUES(phone),role=VALUES(role),department_id=VALUES(department_id),category_id=VALUES(category_id),status=VALUES(status),password_hash=VALUES(password_hash),birthday=VALUES(birthday),citizen_id=VALUES(citizen_id),citizen_issued_date=VALUES(citizen_issued_date),address=VALUES(address),position=VALUES(position),jira_account=VALUES(jira_account),joined_date=VALUES(joined_date),scheduling_points=VALUES(scheduling_points),water_trip_count=VALUES(water_trip_count),updated_at=VALUES(updated_at),activated_at=VALUES(activated_at),activated_by=VALUES(activated_by)`,
         [
           item.id,
           item.googleId || null,
@@ -132,6 +138,12 @@ export async function saveUsers(users) {
           item.status || "disabled",
           item.password || null,
           item.birthday || null,
+          item.citizenId || null,
+          item.citizenIssuedDate || null,
+          item.address || null,
+          item.position || null,
+          item.jiraAccount || null,
+          item.joinedDate || null,
           Number(item.schedulingPoints || 0),
           Number(item.waterTripCount || 0),
           item.createdAt ? new Date(item.createdAt) : new Date(),
@@ -480,6 +492,8 @@ export async function getAssets() {
     id: row.id,
     code: row.asset_code,
     name: row.name,
+    category: row.asset_type || "",
+    description: row.description || "",
     date: toDateOnly(row.transaction_date),
     quantity: Number(row.quantity),
     location: row.location || "",
@@ -505,12 +519,14 @@ export async function saveAssets(data) {
     ])
       for (const item of records)
         await connection.execute(
-          "INSERT INTO asset_transactions (id,type,asset_code,name,transaction_date,quantity,location,person,note,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+          "INSERT INTO asset_transactions (id,type,asset_code,name,asset_type,description,transaction_date,quantity,location,person,note,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
           [
             item.id,
             type,
             item.code,
             item.name,
+            item.category || null,
+            item.description || null,
             item.date,
             Number(item.quantity),
             item.location || null,

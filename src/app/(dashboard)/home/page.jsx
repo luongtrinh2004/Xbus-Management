@@ -106,7 +106,9 @@ function StatCard({ icon, title, value }) {
   );
 }
 
-function WaterSchedule({ schedules, isAdmin }) {
+const trashWeekdays = ["Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu"];
+
+function WaterSchedule({ schedules, trashSchedules, isAdmin }) {
   const next = schedules[0];
   return (
     <Card sx={{ height: "100%" }}>
@@ -174,6 +176,82 @@ function WaterSchedule({ schedules, isAdmin }) {
           </Button>
         )}
       </CardContent>
+      <Divider />
+      <CardHeader
+        title={<SectionTitle icon="tabler-trash">Lịch Đổ Rác</SectionTitle>}
+        sx={{ pb: 1 }}
+      />
+      <CardContent sx={{ pt: 1 }}>
+        {trashSchedules.length ? (
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: "repeat(5, minmax(0, 1fr))",
+              border: "1px solid",
+              borderColor: "divider",
+              borderRadius: 2,
+              overflow: "hidden",
+            }}
+          >
+            {trashSchedules.map((schedule, index) => (
+              <Box
+                key={schedule.id}
+                sx={{
+                  minWidth: 0,
+                  borderLeft: index ? "1px solid" : 0,
+                  borderColor: "divider",
+                }}
+              >
+                <Box
+                  sx={{
+                    px: 1,
+                    py: 1,
+                    bgcolor: "action.hover",
+                    textAlign: "center",
+                  }}
+                >
+                  <Typography variant="caption" fontWeight={700} noWrap>
+                    {trashWeekdays[schedule.weekday - 1]}
+                    <Box
+                      component="span"
+                      sx={{ mx: 0.5, color: "text.disabled" }}
+                    >
+                      ·
+                    </Box>
+                    <Box
+                      component="span"
+                      color="text.secondary"
+                      fontWeight={500}
+                    >
+                      {schedule.date.slice(0, 5)}
+                    </Box>
+                  </Typography>
+                </Box>
+                <Box
+                  sx={{
+                    px: 1.25,
+                    py: 1.5,
+                    textAlign: "center",
+                  }}
+                >
+                  <Typography
+                    variant="body2"
+                    fontWeight={600}
+                    noWrap
+                    title={schedule.name}
+                  >
+                    {schedule.name}
+                  </Typography>
+                </Box>
+              </Box>
+            ))}
+          </Box>
+        ) : (
+          <Typography color="text.secondary" textAlign="center" py={2}>
+            Chưa có lịch đổ rác trong tuần
+          </Typography>
+        )}
+      </CardContent>
     </Card>
   );
 }
@@ -182,6 +260,7 @@ export default function HomePage() {
   const { data: session } = useSession();
   const [users, setUsers] = useState([]);
   const [waterSchedules, setWaterSchedules] = useState([]);
+  const [trashSchedules, setTrashSchedules] = useState([]);
   const [fund, setFund] = useState(null);
   const [period, setPeriod] = useState("month");
   const [loading, setLoading] = useState(true);
@@ -191,12 +270,14 @@ export default function HomePage() {
       fetch("/api/users?limit=200"),
       fetch("/api/water-schedules"),
       fetch("/api/funds"),
+      fetch("/api/water-schedules/trash?weekOffset=0"),
     ])
-      .then(async ([usersRes, waterRes, fundRes]) => {
-        const [usersData, waterData, fundData] = await Promise.all([
+      .then(async ([usersRes, waterRes, fundRes, trashRes]) => {
+        const [usersData, waterData, fundData, trashData] = await Promise.all([
           usersRes.json(),
           waterRes.json(),
           fundRes.json(),
+          trashRes.json(),
         ]);
         setUsers(usersData.data || []);
         const today = new Date();
@@ -212,6 +293,7 @@ export default function HomePage() {
             .sort((a, b) => parseWaterDate(a.date) - parseWaterDate(b.date)),
         );
         setFund(fundData);
+        setTrashSchedules(trashData.schedules || []);
       })
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -420,7 +502,11 @@ export default function HomePage() {
         </Card>
       </Grid>
       <Grid size={{ xs: 12, md: 7 }}>
-        <WaterSchedule schedules={waterSchedules} isAdmin={isAdmin} />
+        <WaterSchedule
+          schedules={waterSchedules}
+          trashSchedules={trashSchedules}
+          isAdmin={isAdmin}
+        />
       </Grid>
 
       <Grid size={{ xs: 12, md: 7 }}>
