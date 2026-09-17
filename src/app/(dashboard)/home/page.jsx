@@ -37,9 +37,10 @@ const parseWaterDate = (value) => {
 };
 
 const departmentLabel = {
-  type_web_app: "Web/App",
-  type_ap: "AP",
-  type_peer_admin: "Peer Admin",
+  web_app: "Web/App",
+  ap: "AP",
+  peer_admin: "Peer Admin",
+  van_hanh: "Vận Hành",
 };
 
 function SectionTitle({ icon, children, color = PRIMARY }) {
@@ -460,7 +461,7 @@ export default function HomePage() {
       </Grid>
 
       <Grid size={{ xs: 12, md: 5 }} sx={{ order: { xs: 3, md: 3 } }}>
-        <Card sx={{ height: "100%" }}>
+        <Card sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
           <CardHeader
             title={
               <SectionTitle icon="tabler-trophy" color={WARNING}>
@@ -469,7 +470,9 @@ export default function HomePage() {
             }
           />
           <Divider />
-          <CardContent>
+          <CardContent
+            sx={{ display: "flex", flexDirection: "column", flex: 1 }}
+          >
             <Typography
               variant="body2"
               color="text.secondary"
@@ -478,43 +481,56 @@ export default function HomePage() {
               Kỳ quỹ tháng {fund?.month || new Date().getMonth() + 1}/
               {fund?.year || new Date().getFullYear()}
             </Typography>
-            <ReactApexChart
-              type="bar"
-              height={270}
-              options={{
-                chart: {
-                  toolbar: { show: false },
-                  foreColor: "var(--mui-palette-text-secondary)",
-                },
-                colors: [WARNING],
-                plotOptions: { bar: { borderRadius: 5, columnWidth: "48%" } },
-                xaxis: {
-                  categories: topContributors.map(
-                    (member) =>
-                      member.user?.name || member.name || "Thành viên",
-                  ),
-                },
-                yaxis: { labels: { formatter: (value) => `${fmt(value)} đ` } },
-                dataLabels: { enabled: false },
-                grid: { borderColor: "rgba(47,43,61,.12)", strokeDashArray: 4 },
-                tooltip: {
-                  theme: muiTheme.palette.mode,
-                  y: { formatter: (value) => `${fmt(value)} đ` },
-                },
-              }}
-              series={[
-                {
-                  name: "Đã đóng",
-                  data: topContributors.map((member) => member.amount),
-                },
-              ]}
-            />
+            <Box sx={{ mt: "auto" }}>
+              <ReactApexChart
+                type="bar"
+                height={270}
+                options={{
+                  chart: {
+                    toolbar: { show: false },
+                    foreColor: "var(--mui-palette-text-secondary)",
+                  },
+                  colors: [WARNING],
+                  plotOptions: { bar: { borderRadius: 5, columnWidth: "48%" } },
+                  xaxis: {
+                    categories: topContributors.map(
+                      (member) =>
+                        member.user?.name || member.name || "Thành viên",
+                    ),
+                    labels: {
+                      rotate: 0,
+                      trim: true,
+                      maxHeight: 40,
+                      style: { fontSize: "11px" },
+                    },
+                  },
+                  yaxis: {
+                    labels: { formatter: (value) => `${fmt(value)} đ` },
+                  },
+                  dataLabels: { enabled: false },
+                  grid: {
+                    borderColor: "rgba(47,43,61,.12)",
+                    strokeDashArray: 4,
+                  },
+                  tooltip: {
+                    theme: muiTheme.palette.mode,
+                    y: { formatter: (value) => `${fmt(value)} đ` },
+                  },
+                }}
+                series={[
+                  {
+                    name: "Đã đóng",
+                    data: topContributors.map((member) => member.amount),
+                  },
+                ]}
+              />
+            </Box>
           </CardContent>
         </Card>
       </Grid>
 
       <Grid size={{ xs: 12, md: 7 }} sx={{ order: { xs: 2, md: 2 } }}>
-        <Card sx={{ height: "100%" }}>
+        <Card sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
           <CardHeader
             title={
               <SectionTitle icon="tabler-chart-line" color={SUCCESS}>
@@ -523,7 +539,9 @@ export default function HomePage() {
             }
           />
           <Divider />
-          <CardContent>
+          <CardContent
+            sx={{ display: "flex", flexDirection: "column", flex: 1 }}
+          >
             <Box
               sx={{ display: "flex", alignItems: "baseline", gap: 1, mb: 2 }}
             >
@@ -560,7 +578,7 @@ export default function HomePage() {
                 sx={{ flex: 1, minWidth: 130 }}
               />
             </Box>
-            <Box sx={{ mt: 7 }}>
+            <Box sx={{ mt: "auto" }}>
               <ReactApexChart
                 type="area"
                 height={180}

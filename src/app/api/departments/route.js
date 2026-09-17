@@ -4,6 +4,30 @@ import { getTypes, saveTypes } from "@/libs/dataRepository";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
+function createDepartmentId(name, existingTypes) {
+  const baseId = name
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/gi, "d")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .slice(0, 48);
+
+  // Dự phòng cho tên chỉ gồm ký tự không thể chuyển thành slug.
+  const safeBaseId = baseId || "bo_phan";
+  let id = safeBaseId;
+  let suffix = 2;
+
+  while (existingTypes.some((type) => type.id === id)) {
+    id = `${safeBaseId}_${suffix}`;
+    suffix += 1;
+  }
+
+  return id;
+}
+
 export async function GET() {
   try {
     const types = await getTypes();
@@ -44,13 +68,8 @@ export async function POST(req) {
       );
     }
 
-    const slug = body.name
-      .trim()
-      .toLowerCase()
-      .replace(/\s+/g, "_")
-      .replace(/[^a-z0-9_]/g, "");
     const newType = {
-      id: `type_${slug}_${Date.now()}`,
+      id: createDepartmentId(body.name, types),
       name: body.name.trim(),
       description: body.description?.trim() || "",
       active: true,

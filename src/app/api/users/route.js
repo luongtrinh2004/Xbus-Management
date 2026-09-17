@@ -254,7 +254,7 @@ export async function POST(req) {
       jiraAccount: body.jiraAccount || "",
       joinedDate: body.joinedDate || "",
       role: body.role || "user",
-      typeId: body.typeId || "type_web_app",
+      typeId: body.typeId || "web_app",
       categoryId: body.categoryId || "category_official",
       status: body.status || "able",
       schedulingPoints: 0,

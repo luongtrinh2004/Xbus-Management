@@ -529,10 +529,7 @@ const EditUserDialog = ({
             ["jiraAccount", "Tài khoản Jira", "text"],
             ["address", "Địa chỉ", "text"],
           ].map(([field, label, type]) => (
-            <Grid
-              key={field}
-              size={{ xs: 12, sm: field === "address" ? 12 : 4 }}
-            >
+            <Grid key={field} size={{ xs: 12, sm: 4 }}>
               <CustomTextField
                 fullWidth
                 type={type}

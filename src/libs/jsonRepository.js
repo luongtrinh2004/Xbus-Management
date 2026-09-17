@@ -126,7 +126,11 @@ export function saveFunds(funds) {
 }
 
 export function getAssets() {
-  return readJsonFile("assets.json", { imports: [], exports: [] });
+  return readJsonFile("assets.json", {
+    imports: [],
+    exports: [],
+    products: [],
+  });
 }
 
 export function saveAssets(data) {

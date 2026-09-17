@@ -16,6 +16,13 @@ const normalizeStaffCode = (value) =>
   String(value || "")
     .trim()
     .toUpperCase();
+const normalizeProfileDate = (value) => {
+  const text = String(value || "").trim();
+  const match = text.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (match)
+    return `${match[3]}-${match[2].padStart(2, "0")}-${match[1].padStart(2, "0")}`;
+  return text;
+};
 const AVATARS_DIR = path.join(process.cwd(), "public", "images", "avatars");
 const DEFAULT_AVATAR_FILES = new Set([
   "male-admin.png",
@@ -71,6 +78,10 @@ export async function PATCH(req, { params }) {
     }
     const { id } = await params;
     const body = await req.json();
+    ["birthday", "citizenIssuedDate", "joinedDate"].forEach((field) => {
+      if (Object.prototype.hasOwnProperty.call(body, field))
+        body[field] = normalizeProfileDate(body[field]);
+    });
 
     const users = await getUsers();
     const index = users.findIndex((u) => u.id === id);

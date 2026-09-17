@@ -33,9 +33,10 @@ const CATEGORY_LABEL = {
 };
 
 const TYPE_LABEL = {
-  type_web_app: "Web/App",
-  type_ap: "AP",
-  type_peer_admin: "Peer Admin",
+  web_app: "Web/App",
+  ap: "AP",
+  peer_admin: "Peer Admin",
+  van_hanh: "Vận Hành",
 };
 
 const STATUS_COLOR = {

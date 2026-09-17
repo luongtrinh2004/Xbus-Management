@@ -1,13 +1,22 @@
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
-import { appendAuditLog, getAssets, saveAssets } from "@/libs/dataRepository";
+import {
+  appendAuditLog,
+  createAssetTransaction,
+  deleteAssetTransaction,
+  getAssets,
+  saveAssets,
+  updateAssetTransaction,
+} from "@/libs/dataRepository";
 
 const secret = process.env.NEXTAUTH_SECRET;
 const canManageAssets = (token) =>
   token?.role === "admin" || token?.role === "assistant";
+const canViewAssets = (token) => Boolean(token);
 const normalizeData = (data) => ({
   imports: Array.isArray(data.imports) ? data.imports : [],
   exports: Array.isArray(data.exports) ? data.exports : [],
+  products: Array.isArray(data.products) ? data.products : [],
 });
 
 const normalizeText = (value) => String(value || "").trim();
@@ -33,27 +42,21 @@ const mergeTransactions = (current, incoming, type, token) => {
   incoming.forEach((item, index) => {
     const code = normalizeText(item.code).toUpperCase();
     const name = normalizeText(item.name);
-    const quantity = Number(item.quantity);
-    if (
-      !code ||
-      !name ||
-      !/^\d{4}-\d{2}-\d{2}$/.test(item.date || "") ||
-      !Number.isInteger(quantity) ||
-      quantity <= 0
-    )
-      throw new Error(
-        `Sheet ${type === "import" ? "Nhập kho" : "Xuất kho"}, dòng ${index + 2}: mã, tên, ngày hoặc số lượng không hợp lệ`,
-      );
+    const parsedQuantity = Number(item.quantity);
+    const quantity =
+      Number.isInteger(parsedQuantity) && parsedQuantity > 0
+        ? parsedQuantity
+        : null;
 
     const normalized = {
       code,
       name,
       category: normalizeText(item.category),
       description: normalizeText(item.description),
-      date: item.date,
+      date: /^\d{4}-\d{2}-\d{2}$/.test(item.date || "") ? item.date : null,
       quantity,
       location: normalizeText(item.location),
-      person: normalizeText(item.person) || token.name || "Import Excel",
+      person: normalizeText(item.person),
       note: normalizeText(item.note),
     };
     const baseKey = transactionBaseKey(normalized);
@@ -85,7 +88,7 @@ const mergeTransactions = (current, incoming, type, token) => {
 
 export async function GET(req) {
   const token = await getToken({ req, secret });
-  if (!canManageAssets(token))
+  if (!canViewAssets(token))
     return NextResponse.json(
       { error: "Không có quyền truy cập" },
       { status: 403 },
@@ -106,13 +109,7 @@ export async function POST(req) {
     const type = body.type === "export" ? "export" : "import";
     const quantity = Number(body.quantity);
     const normalizedCode = body.code?.trim().toUpperCase();
-    if (
-      !body.code?.trim() ||
-      !body.name?.trim() ||
-      !body.date ||
-      !body.location?.trim() ||
-      !body.person?.trim()
-    ) {
+    if (!body.code?.trim() || !body.date || !body.person?.trim()) {
       return NextResponse.json(
         { error: "Vui lòng nhập đầy đủ các trường bắt buộc" },
         { status: 400 },
@@ -124,15 +121,20 @@ export async function POST(req) {
         { status: 400 },
       );
     }
-    const source = data.imports.find(
-      (item) => item.code?.trim().toUpperCase() === normalizedCode,
+    const product = (data.products || []).find(
+      (item) => item.code === normalizedCode,
     );
+    if (!product)
+      return NextResponse.json(
+        { error: "Sản phẩm không tồn tại trong danh mục" },
+        { status: 400 },
+      );
+    if (!product.active)
+      return NextResponse.json(
+        { error: "Sản phẩm đã ngừng sử dụng" },
+        { status: 400 },
+      );
     if (type === "export") {
-      if (!source)
-        return NextResponse.json(
-          { error: "Mã tài sản không tồn tại trong bảng nhập" },
-          { status: 400 },
-        );
       const imported = data.imports
         .filter((item) => item.code?.trim().toUpperCase() === normalizedCode)
         .reduce((sum, item) => sum + item.quantity, 0);
@@ -148,24 +150,18 @@ export async function POST(req) {
     const record = {
       id: `${type}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
       code: normalizedCode,
-      name: type === "export" ? source.name : body.name.trim(),
-      category:
-        type === "export"
-          ? source.category || ""
-          : normalizeText(body.category),
-      description:
-        type === "export"
-          ? source.description || ""
-          : normalizeText(body.description),
+      name: product.name,
+      category: product.unit,
+      description: product.description || "",
       date: body.date,
       quantity,
-      location: type === "export" ? source.location : body.location.trim(),
+      location: product.location || "",
       person: body.person.trim(),
+      performedBy: token.id || "",
       note: body.note?.trim() || "",
       createdAt: new Date().toISOString(),
     };
-    data[type === "export" ? "exports" : "imports"].unshift(record);
-    await saveAssets(data);
+    await createAssetTransaction(type, record);
     await appendAuditLog({
       adminId: token.id,
       adminName: token.name || "Người dùng",
@@ -265,13 +261,7 @@ export async function PATCH(req) {
         { error: "Không tìm thấy phiếu tài sản" },
         { status: 404 },
       );
-    if (
-      !normalizedCode ||
-      !body.name?.trim() ||
-      !body.date ||
-      !body.location?.trim() ||
-      !body.person?.trim()
-    )
+    if (!normalizedCode || !body.date || !body.person?.trim())
       return NextResponse.json(
         { error: "Vui lòng nhập đầy đủ các trường bắt buộc" },
         { status: 400 },
@@ -282,12 +272,17 @@ export async function PATCH(req) {
         { status: 400 },
       );
 
-    const source = data.imports.find(
-      (item) => item.code?.trim().toUpperCase() === normalizedCode,
+    const product = (data.products || []).find(
+      (item) => item.code === normalizedCode,
     );
-    if (type === "export" && !source)
+    if (!product)
       return NextResponse.json(
-        { error: "Mã tài sản không tồn tại trong bảng nhập" },
+        { error: "Sản phẩm không tồn tại trong danh mục" },
+        { status: 400 },
+      );
+    if (!product.active)
+      return NextResponse.json(
+        { error: "Sản phẩm đã ngừng sử dụng" },
         { status: 400 },
       );
 
@@ -295,18 +290,13 @@ export async function PATCH(req) {
     const updated = {
       ...previous,
       code: normalizedCode,
-      name: type === "export" ? source.name : body.name.trim(),
-      category:
-        type === "export"
-          ? source.category || ""
-          : normalizeText(body.category),
-      description:
-        type === "export"
-          ? source.description || ""
-          : normalizeText(body.description),
+      name: product.name,
+      category: product.unit,
+      description: product.description || "",
       date: body.date,
       quantity,
-      location: type === "export" ? source.location : body.location.trim(),
+      location: product.location || "",
+      performedBy: previous.performedBy || token.id || "",
       person: body.person.trim(),
       note: body.note?.trim() || "",
       updatedAt: new Date().toISOString(),
@@ -339,7 +329,7 @@ export async function PATCH(req) {
         { status: 400 },
       );
 
-    await saveAssets(data);
+    await updateAssetTransaction(type, updated);
     await appendAuditLog({
       adminId: token.id,
       adminName: token.name || "Người dùng",
@@ -396,8 +386,7 @@ export async function DELETE(req) {
         { status: 400 },
       );
 
-    collection.splice(index, 1);
-    await saveAssets(data);
+    await deleteAssetTransaction(type, record.id);
     await appendAuditLog({
       adminId: token.id,
       adminName: token.name || "Người dùng",

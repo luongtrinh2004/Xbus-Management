@@ -123,7 +123,7 @@ const filterAssetOptions = (options, inputValue) => {
 };
 
 function AssetTable({ rows, type, canManage, onEdit, onDelete }) {
-  const editable = !["stock", "products"].includes(type);
+  const editable = type !== "stock";
 
   return (
     <TableContainer>
@@ -144,32 +144,36 @@ function AssetTable({ rows, type, canManage, onEdit, onDelete }) {
               <TableRow key={row.id || row.code} hover>
                 {type === "import" ? (
                   <>
-                    <TableCell>{formatDate(row.date)}</TableCell>
+                    <TableCell>
+                      {row.date ? formatDate(row.date) : "—"}
+                    </TableCell>
                     <TableCell>{row.category || "—"}</TableCell>
                     <TableCell>
                       <Typography color="primary.main" fontWeight={600}>
-                        {row.code}
+                        {row.code || "—"}
                       </Typography>
                     </TableCell>
-                    <TableCell>{row.name}</TableCell>
+                    <TableCell>{row.name || "—"}</TableCell>
                     <TableCell>{row.description || "—"}</TableCell>
-                    <TableCell>{row.person}</TableCell>
-                    <TableCell>{row.quantity}</TableCell>
+                    <TableCell>{row.person || "—"}</TableCell>
+                    <TableCell>{row.quantity ?? "—"}</TableCell>
                     <TableCell>{row.location || "—"}</TableCell>
                     <TableCell>{row.note || "—"}</TableCell>
                   </>
                 ) : type === "export" ? (
                   <>
-                    <TableCell>{formatDate(row.date)}</TableCell>
+                    <TableCell>
+                      {row.date ? formatDate(row.date) : "—"}
+                    </TableCell>
                     <TableCell>{row.category || "—"}</TableCell>
                     <TableCell>
                       <Typography color="primary.main" fontWeight={600}>
-                        {row.code}
+                        {row.code || "—"}
                       </Typography>
                     </TableCell>
-                    <TableCell>{row.name}</TableCell>
-                    <TableCell>{row.person}</TableCell>
-                    <TableCell>{row.quantity}</TableCell>
+                    <TableCell>{row.name || "—"}</TableCell>
+                    <TableCell>{row.person || "—"}</TableCell>
+                    <TableCell>{row.quantity ?? "—"}</TableCell>
                     <TableCell>{row.note || "—"}</TableCell>
                   </>
                 ) : (
@@ -200,14 +204,16 @@ function AssetTable({ rows, type, canManage, onEdit, onDelete }) {
                       >
                         <i className="tabler-edit" />
                       </IconButton>
-                      <IconButton
-                        size="small"
-                        color="error"
-                        aria-label={`Xóa ${row.name}`}
-                        onClick={() => onDelete(type, row)}
-                      >
-                        <i className="tabler-trash" />
-                      </IconButton>
+                      {type !== "products" && (
+                        <IconButton
+                          size="small"
+                          color="error"
+                          aria-label={`Xóa ${row.name}`}
+                          onClick={() => onDelete(type, row)}
+                        >
+                          <i className="tabler-trash" />
+                        </IconButton>
+                      )}
                     </Box>
                   </TableCell>
                 )}
@@ -236,6 +242,7 @@ function TransactionDialog({
   type,
   imports,
   exports,
+  products,
   currentName,
   editingItem,
   onClose,
@@ -243,6 +250,14 @@ function TransactionDialog({
 }) {
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [people, setPeople] = useState([]);
+  useEffect(() => {
+    if (!open) return;
+    fetch("/api/users?status=able&limit=500")
+      .then((response) => response.json())
+      .then((result) => setPeople(result.data || []))
+      .catch(() => setPeople([]));
+  }, [open]);
   useEffect(() => {
     if (open)
       setForm(
@@ -251,20 +266,18 @@ function TransactionDialog({
           : { ...emptyForm, person: currentName || "" },
       );
   }, [open, currentName, editingItem]);
-  const selectImport = (code) => {
-    const item = imports.find((entry) => entry.code === code);
+  const selectProduct = (code) => {
+    const item = products.find((entry) => entry.code === code);
     setForm((value) => ({
       ...value,
       code,
       name: item?.name || "",
-      category: item?.category || "",
+      category: item?.unit || "",
       description: item?.description || "",
       location: item?.location || "",
     }));
   };
-  const assetOptions = [
-    ...new Map(imports.map((item) => [item.code, item])).values(),
-  ];
+  const assetOptions = products.filter((item) => item.active);
   const selectedStock = form.code
     ? imports
         .filter((item) => item.code === form.code)
@@ -332,7 +345,7 @@ function TransactionDialog({
               value={
                 assetOptions.find((item) => item.code === form.code) || null
               }
-              onChange={(_, item) => selectImport(item?.code || "")}
+              onChange={(_, item) => selectProduct(item?.code || "")}
               getOptionLabel={(item) => `${item.code} — ${item.name}`}
               isOptionEqualToValue={(option, value) =>
                 option.code === value.code
@@ -353,28 +366,13 @@ function TransactionDialog({
               )}
             />
           ) : (
-            <CustomTextField
-              label="Mã tài sản *"
-              value={form.code}
-              onChange={(e) => setForm({ ...form, code: e.target.value })}
-            />
-          )}
-          {type === "import" ? (
             <Autocomplete
-              freeSolo
               options={assetOptions}
-              inputValue={form.name}
-              onInputChange={(_, value, reason) => {
-                if (reason !== "reset") {
-                  setForm((current) => ({ ...current, name: value }));
-                }
-              }}
-              onChange={(_, item) => {
-                if (item && typeof item !== "string") selectImport(item.code);
-              }}
-              getOptionLabel={(item) =>
-                typeof item === "string" ? item : item.name
+              value={
+                assetOptions.find((item) => item.code === form.code) || null
               }
+              onChange={(_, item) => selectProduct(item?.code || "")}
+              getOptionLabel={(item) => `${item.code} — ${item.name}`}
               isOptionEqualToValue={(option, value) =>
                 option.code === value?.code
               }
@@ -401,29 +399,18 @@ function TransactionDialog({
               renderInput={(params) => (
                 <CustomTextField
                   {...params}
-                  label="Tên tài sản *"
-                  placeholder=""
+                  label="Chọn sản phẩm *"
+                  placeholder="Tìm mã/tên; chưa có thì thêm sản phẩm trước"
                 />
               )}
             />
-          ) : (
-            <CustomTextField label="Tên tài sản *" value={form.name} disabled />
           )}
+          <CustomTextField label="Đơn vị tính" value={form.category} disabled />
           <CustomTextField
-            label="Loại SP"
-            value={form.category}
-            disabled={type === "export"}
-            onChange={(e) => setForm({ ...form, category: e.target.value })}
+            label="Mô tả sản phẩm"
+            value={form.description}
+            disabled
           />
-          {type === "import" && (
-            <CustomTextField
-              label="Mô tả sản phẩm"
-              value={form.description}
-              onChange={(e) =>
-                setForm({ ...form, description: e.target.value })
-              }
-            />
-          )}
           <CustomTextField
             type="date"
             label={type === "import" ? "Ngày nhập *" : "Ngày xuất *"}
@@ -449,16 +436,38 @@ function TransactionDialog({
               ...(type === "export" ? { max: availableForExport } : {}),
             }}
           />
-          <CustomTextField
-            label="Vị trí *"
-            value={form.location}
-            disabled={type === "export"}
-            onChange={(e) => setForm({ ...form, location: e.target.value })}
-          />
-          <CustomTextField
-            label={type === "import" ? "Người nhập *" : "Người xuất *"}
-            value={form.person}
-            onChange={(e) => setForm({ ...form, person: e.target.value })}
+          <CustomTextField label="Vị trí *" value={form.location} disabled />
+          <Autocomplete
+            freeSolo
+            options={people}
+            inputValue={form.person}
+            onInputChange={(_, value) => setForm({ ...form, person: value })}
+            onChange={(_, person) => {
+              if (person && typeof person !== "string")
+                setForm({ ...form, person: person.name });
+            }}
+            getOptionLabel={(person) =>
+              typeof person === "string" ? person : person.name || ""
+            }
+            renderOption={(props, person) => (
+              <Box component="li" {...props} key={person.id}>
+                <Box>
+                  <Typography variant="body2" fontWeight={600}>
+                    {person.name}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {person.code || "—"} · {person.email || "—"}
+                  </Typography>
+                </Box>
+              </Box>
+            )}
+            renderInput={(params) => (
+              <CustomTextField
+                {...params}
+                label={type === "import" ? "Người nhận *" : "Người nhận *"}
+                placeholder="Gõ tên hoặc chọn nhân sự"
+              />
+            )}
           />
           <CustomTextField
             sx={{ gridColumn: { sm: "1 / -1" } }}
@@ -497,12 +506,118 @@ function TransactionDialog({
   );
 }
 
+function ProductDialog({ open, product, onClose, onSaved }) {
+  const [form, setForm] = useState({
+    code: "",
+    name: "",
+    unit: "Cái",
+    description: "",
+    location: "",
+    active: true,
+  });
+  useEffect(() => {
+    if (open)
+      setForm(
+        product || {
+          code: "",
+          name: "",
+          unit: "Cái",
+          description: "",
+          location: "",
+          active: true,
+        },
+      );
+  }, [open, product]);
+  const save = async () => {
+    const response = await fetch("/api/asset-products", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
+    });
+    const result = await response.json();
+    if (!response.ok)
+      return toast.error(result.error || "Không thể lưu sản phẩm");
+    toast.success(product ? "Đã cập nhật sản phẩm" : "Đã tạo sản phẩm");
+    onSaved();
+    onClose();
+  };
+  return (
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+      <DialogTitle>
+        {product ? "Chỉnh sửa sản phẩm" : "Thêm sản phẩm"}
+      </DialogTitle>
+      <DialogContent dividers>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+            gap: 3,
+            pt: 1,
+          }}
+        >
+          <CustomTextField
+            label="Mã sản phẩm *"
+            value={form.code}
+            disabled={Boolean(product)}
+            onChange={(e) => setForm({ ...form, code: e.target.value })}
+          />
+          <CustomTextField
+            label="Tên sản phẩm *"
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+          />
+          <CustomTextField
+            label="Đơn vị tính *"
+            value={form.unit}
+            onChange={(e) => setForm({ ...form, unit: e.target.value })}
+          />
+          <CustomTextField
+            label="Vị trí"
+            value={form.location}
+            onChange={(e) => setForm({ ...form, location: e.target.value })}
+          />
+          <CustomTextField
+            sx={{ gridColumn: { sm: "1 / -1" } }}
+            label="Mô tả"
+            multiline
+            minRows={2}
+            value={form.description}
+            onChange={(e) => setForm({ ...form, description: e.target.value })}
+          />
+          <label>
+            <input
+              type="checkbox"
+              checked={form.active}
+              onChange={(e) => setForm({ ...form, active: e.target.checked })}
+            />{" "}
+            Đang hoạt động
+          </label>
+        </Box>
+      </DialogContent>
+      <DialogActions>
+        <Button color="secondary" onClick={onClose}>
+          Hủy
+        </Button>
+        <Button
+          variant="contained"
+          disabled={!form.code.trim() || !form.name.trim() || !form.unit.trim()}
+          onClick={save}
+        >
+          Lưu sản phẩm
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
+
 export default function AssetsPage() {
   const { data: session, status } = useSession();
   const canManage = ["admin", "assistant"].includes(session?.user?.role);
-  const [data, setData] = useState({ imports: [], exports: [] });
+  const [data, setData] = useState({ imports: [], exports: [], products: [] });
   const [tab, setTab] = useState("import");
   const [dialog, setDialog] = useState(null);
+  const [productDialog, setProductDialog] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
   const [editingItem, setEditingItem] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -546,28 +661,43 @@ export default function AssetsPage() {
   const stock = useMemo(() => {
     const rows = new Map();
     data.imports.forEach((item) => {
+      if (!item.code || item.quantity === null || item.quantity === undefined)
+        return;
       const current = rows.get(item.code);
       rows.set(
         item.code,
         current
-          ? { ...current, quantity: current.quantity + item.quantity }
-          : { ...item },
+          ? {
+              ...current,
+              totalImport: current.totalImport + Number(item.quantity),
+              quantity: current.quantity + Number(item.quantity),
+            }
+          : { ...item, totalImport: Number(item.quantity), totalExport: 0 },
       );
     });
     data.exports.forEach((item) => {
-      const current = rows.get(item.code);
-      if (current)
-        rows.set(item.code, {
-          ...current,
-          quantity: current.quantity - item.quantity,
-        });
+      if (!item.code || item.quantity === null || item.quantity === undefined)
+        return;
+      const current = rows.get(item.code) || {
+        ...item,
+        totalImport: 0,
+        totalExport: 0,
+        quantity: 0,
+      };
+      rows.set(item.code, {
+        ...current,
+        totalExport: current.totalExport + Number(item.quantity),
+        quantity: current.quantity - Number(item.quantity),
+      });
     });
     return [...rows.values()];
   }, [data]);
   const products = useMemo(
     () =>
-      stock.map((item) => ({
+      (data.products || []).map((item) => ({
         ...item,
+        quantity:
+          stock.find((entry) => entry.code === item.code)?.quantity || 0,
         totalImport: data.imports
           .filter((entry) => entry.code === item.code)
           .reduce((sum, entry) => sum + Number(entry.quantity || 0), 0),
@@ -584,7 +714,7 @@ export default function AssetsPage() {
         ? data.exports
         : tab === "products"
           ? products
-          : products;
+          : stock;
   const filteredRows = useMemo(
     () =>
       activeRows.filter((row) =>
@@ -642,7 +772,9 @@ export default function AssetsPage() {
       const mapRows = (sheet, type) =>
         XLSX.utils
           .sheet_to_json(sheet, { defval: "", raw: true })
-          .filter((row) => pick(row, ["masanpham", "masp", "ma", "code"]))
+          .filter((row) =>
+            Object.values(row).some((value) => String(value || "").trim()),
+          )
           .map((row) => ({
             code: pick(row, ["masanpham", "masp", "ma", "code"]),
             name: pick(row, ["tensanpham", "tensp", "ten", "name"]),
@@ -717,6 +849,14 @@ export default function AssetsPage() {
       "Tồn kho": item.quantity,
       "Vị trí": item.location || "",
     }));
+    const productRows = (data.products || []).map((item) => ({
+      "Mã sản phẩm": item.code || "",
+      "Tên sản phẩm": item.name || "",
+      "Đơn vị tính": item.unit || "",
+      "Mô tả": item.description || "",
+      "Vị trí": item.location || "",
+      "Trạng thái": item.active ? "Đang hoạt động" : "Ngừng sử dụng",
+    }));
     XLSX.utils.book_append_sheet(
       workbook,
       XLSX.utils.json_to_sheet(importRows),
@@ -731,6 +871,11 @@ export default function AssetsPage() {
       workbook,
       XLSX.utils.json_to_sheet(stockRows),
       "Tồn kho",
+    );
+    XLSX.utils.book_append_sheet(
+      workbook,
+      XLSX.utils.json_to_sheet(productRows),
+      "Danh sách sản phẩm",
     );
     XLSX.writeFile(workbook, `danh_sach_tai_san_${toVietnamDateKey()}.xlsx`);
   };
@@ -782,6 +927,16 @@ export default function AssetsPage() {
                   onClick={() => setExcelWarningOpen(true)}
                 >
                   {importingExcel ? "Đang import…" : "Import Excel"}
+                </Button>
+                <Button
+                  variant="outlined"
+                  startIcon={<i className="tabler-plus" />}
+                  onClick={() => {
+                    setEditingProduct(null);
+                    setProductDialog(true);
+                  }}
+                >
+                  Thêm sản phẩm
                 </Button>
                 <Button
                   variant="tonal"
@@ -841,8 +996,13 @@ export default function AssetsPage() {
           rows={pagedRows}
           canManage={canManage}
           onEdit={(type, item) => {
-            setEditingItem(item);
-            setDialog(type);
+            if (type === "products") {
+              setEditingProduct(item);
+              setProductDialog(true);
+            } else {
+              setEditingItem(item);
+              setDialog(type);
+            }
           }}
           onDelete={(type, item) => setDeleteTarget({ type, item })}
         />
@@ -858,11 +1018,21 @@ export default function AssetsPage() {
           type={dialog || "import"}
           imports={data.imports}
           exports={data.exports}
+          products={data.products || []}
           editingItem={editingItem}
           currentName={session?.user?.name}
           onClose={() => {
             setDialog(null);
             setEditingItem(null);
+          }}
+          onSaved={loadData}
+        />
+        <ProductDialog
+          open={productDialog}
+          product={editingProduct}
+          onClose={() => {
+            setProductDialog(false);
+            setEditingProduct(null);
           }}
           onSaved={loadData}
         />

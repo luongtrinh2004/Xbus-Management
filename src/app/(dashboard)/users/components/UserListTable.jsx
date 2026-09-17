@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
+import * as XLSX from "xlsx";
 import Card from "@mui/material/Card";
 import CardHeader from "@mui/material/CardHeader";
 import Button from "@mui/material/Button";
@@ -26,6 +27,7 @@ import AddUserDrawer from "./AddUserDrawer";
 import CustomTextField from "@core/components/mui/TextField";
 import CustomAvatar from "@core/components/mui/Avatar";
 import EditUserDialog from "./EditUserDialog";
+import ViewUserDialog from "./ViewUserDialog";
 import TableFilters from "./TableFilters";
 import { getInitials } from "@/utils/getInitials";
 import { resolveAvatar } from "@/utils/getDefaultAvatar";
@@ -33,9 +35,10 @@ import { formatVietnamDate } from "@/libs/dateTime";
 import tableStyles from "@core/styles/table.module.css";
 
 const typeNameMap = {
-  type_web_app: "Web/App",
-  type_ap: "AP",
-  type_peer_admin: "Peer Admin",
+  web_app: "Web/App",
+  ap: "AP",
+  peer_admin: "Peer Admin",
+  van_hanh: "Vận Hành",
 };
 
 const categoryNameMap = {
@@ -87,7 +90,57 @@ const UserListTable = ({
   const [data, setData] = useState(tableData || []);
   const [openUpdate, setOpenUpdate] = useState(false);
   const [updatingUser, setUpdatingUser] = useState(null);
+  const [viewingUser, setViewingUser] = useState(null);
   const [departments, setDepartments] = useState([]);
+  const importInputRef = useRef(null);
+
+  const importUsers = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    try {
+      const workbook = XLSX.read(await file.arrayBuffer(), { type: "array" });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const rows = XLSX.utils
+        .sheet_to_json(sheet, { defval: "" })
+        .map((row) => {
+          const mapped = {
+            code: row["Mã nhân sự"] || row["Mã NV"] || row.Code || row.code,
+            name: row["Họ và tên"] ?? row["Họ tên"],
+            email: row.Email ?? row.email,
+            phone: row["Số điện thoại"] ?? row.Phone,
+            gender: row["Giới tính"],
+            birthday: row["Ngày sinh"],
+            citizenId: row.CCCD ?? row["Số CCCD"],
+            citizenIssuedDate: row["Ngày cấp"],
+            address: row["Địa chỉ"],
+            position: row["Chức vụ"],
+            jiraAccount: row["Tk Jira"] ?? row.Jira,
+            joinedDate: row["Ngày tham gia"],
+            typeId: row["Bộ phận"],
+            categoryId: row["Hình thức"],
+            status: row["Trạng thái"],
+          };
+          return Object.fromEntries(
+            Object.entries(mapped).filter(([, value]) => value !== undefined),
+          );
+        });
+      const response = await fetch("/api/users/import", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rows }),
+      });
+      const result = await response.json();
+      if (!response.ok)
+        return toast.error(result.error || "Không thể import nhân sự");
+      toast.success(
+        `Đã cập nhật ${result.updated} nhân sự; bỏ qua ${result.skipped} dòng không khớp mã`,
+      );
+      fetchUsers();
+    } catch {
+      toast.error("Không thể đọc file Excel");
+    }
+  };
 
   // Load departments dynamically
   useEffect(() => {
@@ -177,6 +230,7 @@ const UserListTable = ({
                 color="text.primary"
                 fontWeight={600}
                 className="hover:text-primary cursor-pointer"
+                onClick={() => setViewingUser(row.original)}
               >
                 {row.original.name}
               </Typography>
@@ -454,6 +508,26 @@ const UserListTable = ({
             </Button>
 
             {isAdmin && (
+              <>
+                <Button
+                  variant="tonal"
+                  color="warning"
+                  startIcon={<i className="tabler-file-upload" />}
+                  onClick={() => importInputRef.current?.click()}
+                >
+                  Import nhân sự
+                </Button>
+                <input
+                  ref={importInputRef}
+                  hidden
+                  type="file"
+                  accept=".xlsx,.xls"
+                  onChange={importUsers}
+                />
+              </>
+            )}
+
+            {isAdmin && (
               <Button
                 variant="contained"
                 color="primary"
@@ -569,6 +643,11 @@ const UserListTable = ({
         setUpdatingUser={setUpdatingUser}
         setData={setData}
         onUserUpdated={onUserUpdated}
+      />
+      <ViewUserDialog
+        user={viewingUser}
+        open={Boolean(viewingUser)}
+        onClose={() => setViewingUser(null)}
       />
     </>
   );

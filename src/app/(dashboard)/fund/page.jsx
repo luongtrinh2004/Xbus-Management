@@ -56,9 +56,10 @@ const moneyInput = (value) =>
   value ? `${new Intl.NumberFormat("vi-VN").format(Number(value))} VNĐ` : "";
 const localDate = () => toVietnamDateKey();
 const departments = {
-  type_web_app: "Web/App",
-  type_ap: "AP",
-  type_peer_admin: "Peer Admin",
+  web_app: "Web/App",
+  ap: "AP",
+  peer_admin: "Peer Admin",
+  van_hanh: "Vận Hành",
 };
 const categories = {
   category_official: "Chính thức",

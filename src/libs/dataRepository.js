@@ -485,9 +485,10 @@ export async function saveFunds(funds) {
 
 export async function getAssets() {
   if (!mysqlEnabled()) return json.getAssets();
-  const [rows] = await query(
-    "SELECT * FROM asset_transactions ORDER BY created_at DESC, id DESC",
-  );
+  const [[rows], [productRows]] = await Promise.all([
+    query("SELECT * FROM asset_transactions ORDER BY created_at DESC, id DESC"),
+    query("SELECT * FROM asset_products ORDER BY name"),
+  ]);
   const map = (row) => ({
     id: row.id,
     code: row.asset_code,
@@ -495,17 +496,139 @@ export async function getAssets() {
     category: row.asset_type || "",
     description: row.description || "",
     date: toDateOnly(row.transaction_date),
-    quantity: Number(row.quantity),
+    quantity: row.quantity === null ? null : Number(row.quantity),
     location: row.location || "",
     person: row.person || "",
     note: row.note || "",
+    voucherCode: row.voucher_code || "",
+    performedBy: row.performed_by || "",
     createdAt: toIso(row.created_at),
     updatedAt: toIso(row.updated_at),
   });
   return {
     imports: rows.filter((row) => row.type === "import").map(map),
     exports: rows.filter((row) => row.type === "export").map(map),
+    products: productRows.map((row) => ({
+      id: row.id,
+      code: row.code,
+      name: row.name,
+      unit: row.unit,
+      description: row.description || "",
+      location: row.location || "",
+      active: Boolean(row.active),
+      createdAt: toIso(row.created_at),
+      updatedAt: toIso(row.updated_at),
+    })),
   };
+}
+
+export async function saveAssetProduct(product) {
+  if (!mysqlEnabled()) {
+    const data = await json.getAssets();
+    const products = Array.isArray(data.products) ? data.products : [];
+    const index = products.findIndex((item) => item.id === product.id);
+    if (index >= 0) products[index] = product;
+    else products.push(product);
+    return json.saveAssets({ ...data, products });
+  }
+  await query(
+    "INSERT INTO asset_products (id,code,name,unit,description,location,active,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE code=VALUES(code),name=VALUES(name),unit=VALUES(unit),description=VALUES(description),location=VALUES(location),active=VALUES(active),updated_at=VALUES(updated_at)",
+    [
+      product.id,
+      product.code,
+      product.name,
+      product.unit,
+      product.description || null,
+      product.location || null,
+      Boolean(product.active),
+      product.createdAt ? new Date(product.createdAt) : new Date(),
+      new Date(),
+    ],
+  );
+  return true;
+}
+
+const assetTransactionValues = (item, type) => [
+  item.id,
+  item.voucherCode || null,
+  type,
+  item.code,
+  item.name,
+  item.category || null,
+  item.description || null,
+  item.date,
+  item.quantity === null || item.quantity === "" ? null : Number(item.quantity),
+  item.location || null,
+  item.person || null,
+  item.performedBy || null,
+  item.note || null,
+  item.createdAt ? new Date(item.createdAt) : new Date(),
+  item.updatedAt ? new Date(item.updatedAt) : null,
+];
+
+export async function createAssetTransaction(type, item) {
+  if (!mysqlEnabled()) {
+    const data = await json.getAssets();
+    const key = type === "export" ? "exports" : "imports";
+    await json.saveAssets({ ...data, [key]: [item, ...(data[key] || [])] });
+    return true;
+  }
+  await query(
+    "INSERT INTO asset_transactions (id,voucher_code,type,asset_code,name,asset_type,description,transaction_date,quantity,location,person,performed_by,note,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+    assetTransactionValues(item, type),
+  );
+  return true;
+}
+
+export async function updateAssetTransaction(type, item) {
+  if (!mysqlEnabled()) {
+    const data = await json.getAssets();
+    const key = type === "export" ? "exports" : "imports";
+    await json.saveAssets({
+      ...data,
+      [key]: (data[key] || []).map((row) => (row.id === item.id ? item : row)),
+    });
+    return true;
+  }
+  await query(
+    "UPDATE asset_transactions SET voucher_code=?,asset_code=?,name=?,asset_type=?,description=?,transaction_date=?,quantity=?,location=?,person=?,performed_by=?,note=?,updated_at=? WHERE id=? AND type=?",
+    [
+      item.voucherCode || null,
+      item.code,
+      item.name,
+      item.category || null,
+      item.description || null,
+      item.date,
+      item.quantity === null || item.quantity === ""
+        ? null
+        : Number(item.quantity),
+      item.location || null,
+      item.person || null,
+      item.performedBy || null,
+      item.note || null,
+      new Date(),
+      item.id,
+      type,
+    ],
+  );
+  return true;
+}
+
+export async function deleteAssetTransaction(type, id) {
+  if (!mysqlEnabled()) {
+    const data = await json.getAssets();
+    const key = type === "export" ? "exports" : "imports";
+    await json.saveAssets({
+      ...data,
+      [key]: (data[key] || []).filter((row) => row.id !== id),
+    });
+    return true;
+  }
+  await query("DELETE FROM asset_transactions WHERE id=? AND type=?", [
+    id,
+    type,
+  ]);
+  return true;
 }
 export async function saveAssets(data) {
   if (!mysqlEnabled()) return json.saveAssets(data);
@@ -519,18 +642,22 @@ export async function saveAssets(data) {
     ])
       for (const item of records)
         await connection.execute(
-          "INSERT INTO asset_transactions (id,type,asset_code,name,asset_type,description,transaction_date,quantity,location,person,note,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+          "INSERT INTO asset_transactions (id,voucher_code,type,asset_code,name,asset_type,description,transaction_date,quantity,location,person,performed_by,note,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
           [
             item.id,
+            item.voucherCode || null,
             type,
             item.code,
             item.name,
             item.category || null,
             item.description || null,
             item.date,
-            Number(item.quantity),
+            item.quantity === null || item.quantity === ""
+              ? null
+              : Number(item.quantity),
             item.location || null,
             item.person || null,
+            item.performedBy || null,
             item.note || null,
             item.createdAt ? new Date(item.createdAt) : new Date(),
             item.updatedAt ? new Date(item.updatedAt) : null,

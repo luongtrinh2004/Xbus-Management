@@ -3,6 +3,23 @@ import path from "node:path";
 import mysql from "mysql2/promise";
 
 const migrationsDir = path.join(process.cwd(), "database", "migrations");
+const initialEnvironment = new Set(Object.keys(process.env));
+const loadEnvFile = (filename) => {
+  const filepath = path.join(process.cwd(), filename);
+  if (!fs.existsSync(filepath)) return;
+  for (const line of fs.readFileSync(filepath, "utf8").split(/\r?\n/)) {
+    const match = line.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)\s*$/);
+    if (!match || initialEnvironment.has(match[1])) continue;
+    process.env[match[1]] = match[2].replace(/^['"]|['"]$/g, "");
+  }
+};
+
+loadEnvFile(".env");
+loadEnvFile(".env.local");
+
+if (!process.env.DATABASE_URL)
+  throw new Error("DATABASE_URL chưa được cấu hình trong .env hoặc .env.local");
+
 const connection = await mysql.createConnection(process.env.DATABASE_URL);
 
 try {
@@ -34,7 +51,21 @@ try {
       .split(";")
       .map((item) => item.trim())
       .filter(Boolean)) {
-      await connection.query(statement);
+      try {
+        await connection.query(statement);
+      } catch (error) {
+        // Một số database cũ đã có cột/index nhưng chưa ghi nhận migration.
+        // Chỉ bỏ qua đúng các lỗi đã tồn tại; các lỗi schema khác vẫn phải dừng.
+        if (
+          ![
+            "ER_DUP_FIELDNAME",
+            "ER_DUP_KEYNAME",
+            "ER_TABLE_EXISTS_ERROR",
+          ].includes(error.code)
+        )
+          throw error;
+        console.log(`Skipped existing schema: ${error.code}`);
+      }
     }
     await connection.execute(
       "INSERT INTO schema_migrations (filename, applied_at) VALUES (?, ?)",

@@ -15,6 +15,14 @@ function shuffleArray(arr) {
   return result;
 }
 
+// Nhóm Vận Hành không tham gia trực bê nước/đổ rác.
+const isOperationsUser = (user) =>
+  ["type_operations", "van_hanh", "vận_hành"].includes(
+    String(user.typeId || "")
+      .trim()
+      .toLowerCase(),
+  );
+
 const toLocalDateKey = (date) =>
   `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 
@@ -27,7 +35,8 @@ export function getEligibleWaterUsers(users = []) {
   return users.filter(
     (user) =>
       ["user", "assistant", "admin"].includes(user.role) &&
-      user.status === "able",
+      user.status === "able" &&
+      !isOperationsUser(user),
   );
 }
 
@@ -42,7 +51,12 @@ export function getTrashSchedules(
 ) {
   const exemptSet = new Set(exemptUserIds);
   const participants = users
-    .filter((user) => exemptSet.has(user.id) && user.status === "able")
+    .filter(
+      (user) =>
+        exemptSet.has(user.id) &&
+        user.status === "able" &&
+        !isOperationsUser(user),
+    )
     .sort((a, b) => (a.schedulingPoints || 0) - (b.schedulingPoints || 0));
   if (!participants.length) return [];
 

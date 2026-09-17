@@ -34,9 +34,10 @@ import { formatVietnamDate } from "@/libs/dateTime";
 const columnHelper = createColumnHelper();
 
 const typeOptions = [
-  { value: "type_web_app", label: "Web/App" },
-  { value: "type_ap", label: "AP" },
-  { value: "type_peer_admin", label: "Peer Admin" },
+  { value: "web_app", label: "Web/App" },
+  { value: "ap", label: "AP" },
+  { value: "peer_admin", label: "Peer Admin" },
+  { value: "van_hanh", label: "Vận Hành" },
 ];
 
 const categoryOptions = [
@@ -70,7 +71,7 @@ export default function PendingUsersTable({
       name: user.name || "",
       code: user.code || "",
       role: user.role || "user",
-      typeId: user.typeId || "type_web_app",
+      typeId: user.typeId || "web_app",
       categoryId: user.categoryId || "category_official",
       gender: user.gender || "male",
       phone: user.phone || "",
@@ -374,7 +375,7 @@ export default function PendingUsersTable({
                 select
                 fullWidth
                 label="Bộ phận"
-                value={formData.typeId || "type_web_app"}
+                value={formData.typeId || "web_app"}
                 onChange={(e) =>
                   setFormData({ ...formData, typeId: e.target.value })
                 }
