@@ -153,7 +153,7 @@ const UserDropdown = () => {
                   </MenuItem>
                   <MenuItem
                     className="mli-2 gap-3"
-                    onClick={(e) => handleDropdownClose(e)}
+                    onClick={(e) => handleDropdownClose(e, "/settings")}
                   >
                     <i className="tabler-settings" />
                     <Typography color="text.primary">Cài đặt</Typography>

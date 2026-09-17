@@ -88,8 +88,8 @@ export default function HeaderAnnouncements() {
     <Box
       aria-label="Thông báo"
       sx={{
-        flex: 1,
-        minWidth: 0,
+        width: { xs: 180, sm: 360 },
+        maxWidth: "35vw",
         overflow: "hidden",
         borderRadius: 1.5,
         bgcolor: "error.main",

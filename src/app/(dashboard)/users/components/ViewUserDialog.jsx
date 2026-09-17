@@ -53,7 +53,7 @@ export default function ViewUserDialog({ user, open, onClose }) {
   );
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
-      <DialogTitle>
+      <DialogTitle component="div">
         <Typography variant="h5" fontWeight={600}>
           Thông Tin Nhân Sự
         </Typography>

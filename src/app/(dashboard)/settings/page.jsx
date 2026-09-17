@@ -221,16 +221,9 @@ export default function SettingsPage() {
     <Box>
       <Card sx={{ mb: 4 }}>
         <CardHeader
-          title="Lịch sử mức đóng quỹ"
-          subheader="Các cấu hình đã hết hiệu lực, sắp xếp từ kỳ gần nhất. Lịch sử chỉ được xem và không thể sửa hoặc xóa."
-          avatar={<i className="tabler-history" style={{ fontSize: 26 }} />}
-        />
-        {settingsTable(historyRules, true)}
-      </Card>
-      <Card>
-        <CardHeader
-          title="Mức đóng hiện tại và sắp áp dụng"
-          subheader="Mỗi loại nhân sự có một mức đóng tại một thời điểm. Cấu hình mới không thay đổi các kỳ đã phát sinh."
+          title="Cài đặt quỹ phòng"
+          subheader="Quản lý mức đóng theo loại nhân sự và thời gian áp dụng. Các kỳ đã phát sinh không bị thay đổi."
+          avatar={<i className="tabler-settings" style={{ fontSize: 26 }} />}
           action={
             <Button
               variant="contained"
@@ -242,6 +235,14 @@ export default function SettingsPage() {
           }
         />
         {settingsTable(manageableRules)}
+      </Card>
+      <Card sx={{ mt: 4 }}>
+        <CardHeader
+          title="Lịch sử mức đóng quỹ"
+          subheader="Các cấu hình đã hết hiệu lực, sắp xếp từ kỳ gần nhất. Lịch sử chỉ xem và không thể sửa hoặc xóa."
+          avatar={<i className="tabler-history" style={{ fontSize: 26 }} />}
+        />
+        {settingsTable(historyRules, true)}
       </Card>
       <Dialog
         open={Boolean(form)}

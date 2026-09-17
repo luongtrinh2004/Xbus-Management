@@ -24,8 +24,8 @@ const NavbarContent = () => {
         <NavToggle />
         <ModeDropdown />
       </div>
-      <HeaderAnnouncements />
       <div className="flex items-center gap-2">
+        <HeaderAnnouncements />
         <UserDropdown />
       </div>
     </div>
