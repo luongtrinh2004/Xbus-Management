@@ -49,6 +49,7 @@ export default function AdminScheduleView({
   setYear,
   schedules = [],
   eligibleUsers = [],
+  trashAssignableUsers = [],
   exemptUserIds = [],
   trashSchedules = [],
   onRefresh,
@@ -62,6 +63,7 @@ export default function AdminScheduleView({
   const [waterScheduleOpen, setWaterScheduleOpen] = useState(true);
   const [trashEdit, setTrashEdit] = useState(null);
   const [trashAssignee, setTrashAssignee] = useState("");
+  const [trashSearch, setTrashSearch] = useState("");
   const [completionTarget, setCompletionTarget] = useState(null);
   useEffect(() => setExemptIds(exemptUserIds), [exemptUserIds]);
 
@@ -160,7 +162,7 @@ export default function AdminScheduleView({
   };
 
   const addTrashUser = async (date, userId) => {
-    const user = eligibleUsers.find((item) => item.id === userId);
+    const user = trashAssignableUsers.find((item) => item.id === userId);
     const existing = trashByDate.get(date);
     if (!user || existing?.completed) return;
     if (existing?.userId) return toast.info("Ngày này đã có người đổ rác");
@@ -392,6 +394,7 @@ export default function AdminScheduleView({
     if (!response.ok)
       return toast.error(result.error || "Không thể đổi người đổ rác");
     setTrashEdit(null);
+    setTrashSearch("");
     toast.success("Đã chỉ định người đổ rác");
     onRefresh?.();
   };
@@ -633,6 +636,27 @@ export default function AdminScheduleView({
                               {!completed && <Box sx={{ ml: "auto" }} />}
                               {!completed && (
                                 <>
+                                  {hasAnySchedule && (
+                                    <IconButton
+                                      title="Xác nhận hoàn thành cả ô lịch"
+                                      color="success"
+                                      size="small"
+                                      disabled={busyId === cell.date}
+                                      onClick={() =>
+                                        setCompletionTarget({
+                                          type: "all",
+                                          date: cell.date,
+                                          schedule,
+                                          trash,
+                                          waterCompleted,
+                                          trashCompleted,
+                                        })
+                                      }
+                                      sx={iconButtonSx}
+                                    >
+                                      <i className="tabler-check text-sm" />
+                                    </IconButton>
+                                  )}
                                   <IconButton
                                     title="Phân công ngẫu nhiên cả bê nước và đổ rác"
                                     color="primary"
@@ -1024,7 +1048,9 @@ export default function AdminScheduleView({
         title={
           completionTarget?.type === "water"
             ? "Xác nhận hoàn thành bê nước"
-            : "Xác nhận hoàn thành đổ rác"
+            : completionTarget?.type === "trash"
+              ? "Xác nhận hoàn thành đổ rác"
+              : "Xác nhận hoàn thành cả ô lịch"
         }
         message={
           completionTarget?.type === "water"
@@ -1033,7 +1059,9 @@ export default function AdminScheduleView({
               )
                 .map((person) => person.name || person)
                 .join(", ")}?`
-            : `Bạn có muốn xác nhận ${completionTarget?.trash?.name || "nhân sự được phân công"} đã đổ rác ngày ${completionTarget?.date || ""}?`
+            : completionTarget?.type === "trash"
+              ? `Bạn có muốn xác nhận ${completionTarget?.trash?.name || "nhân sự được phân công"} đã đổ rác ngày ${completionTarget?.date || ""}?`
+              : `Bạn có muốn xác nhận hoàn thành toàn bộ lịch bê nước và đổ rác ngày ${completionTarget?.date || ""}?`
         }
         confirmText="Xác nhận hoàn thành"
         confirmColor="success"
@@ -1044,10 +1072,19 @@ export default function AdminScheduleView({
           if (!target) return;
           setBusyId(`complete-${target.type}-${target.date}`);
           try {
-            const success =
-              target.type === "water"
-                ? await completeWater(target.schedule)
-                : await completeTrash(target.trash);
+            let success;
+            if (target.type === "water")
+              success = await completeWater(target.schedule);
+            else if (target.type === "trash")
+              success = await completeTrash(target.trash);
+            else {
+              const results = [];
+              if (target.schedule?.id && !target.waterCompleted)
+                results.push(await completeWater(target.schedule));
+              if (target.trash?.userId && !target.trashCompleted)
+                results.push(await completeTrash(target.trash));
+              success = results.length > 0 && results.every(Boolean);
+            }
             if (success) setCompletionTarget(null);
           } finally {
             setBusyId(null);
@@ -1056,7 +1093,10 @@ export default function AdminScheduleView({
       />
       <Dialog
         open={Boolean(trashEdit)}
-        onClose={() => setTrashEdit(null)}
+        onClose={() => {
+          setTrashEdit(null);
+          setTrashSearch("");
+        }}
         fullWidth
         maxWidth="xs"
       >
@@ -1067,7 +1107,9 @@ export default function AdminScheduleView({
               Người đang được xếp:{" "}
               <strong>
                 {trashAssignee
-                  ? eligibleUsers.find((user) => user.id === trashAssignee)
+                  ? trashAssignableUsers.find(
+                      (user) => user.id === trashAssignee,
+                    )
                       ?.name || trashEdit?.name
                   : "Chưa có"}
               </strong>
@@ -1083,8 +1125,30 @@ export default function AdminScheduleView({
               </IconButton>
             )}
           </Box>
-          {eligibleUsers
-            .filter((user) => exemptIds.includes(user.id))
+          <CustomTextField
+            fullWidth
+            value={trashSearch}
+            placeholder="Tìm theo tên hoặc mã nhân sự"
+            onChange={(event) => setTrashSearch(event.target.value)}
+            sx={{ mb: 2 }}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <i className="tabler-search" style={{ marginRight: 8 }} />
+                ),
+              },
+            }}
+          />
+          {[...trashAssignableUsers]
+            .filter((user) => {
+              const query = trashSearch.trim().toLocaleLowerCase("vi");
+              if (!query) return true;
+              return [user.name, user.code].some((value) =>
+                String(value || "")
+                  .toLocaleLowerCase("vi")
+                  .includes(query),
+              );
+            })
             .sort(
               (a, b) => (a.schedulingPoints || 0) - (b.schedulingPoints || 0),
             )
@@ -1124,7 +1188,14 @@ export default function AdminScheduleView({
             ))}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setTrashEdit(null)}>Hủy</Button>
+          <Button
+            onClick={() => {
+              setTrashEdit(null);
+              setTrashSearch("");
+            }}
+          >
+            Hủy
+          </Button>
           <Button variant="contained" onClick={() => assignTrash()}>
             Lưu
           </Button>

@@ -23,6 +23,7 @@ export default function WaterSchedulePage() {
   const [schedules, setSchedules] = useState([]);
   const [weeksMeta, setWeeksMeta] = useState([]);
   const [eligibleUsers, setEligibleUsers] = useState([]);
+  const [trashAssignableUsers, setTrashAssignableUsers] = useState([]);
   const [exemptUserIds, setExemptUserIds] = useState([]);
   const [trashSchedules, setTrashSchedules] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
@@ -39,6 +40,7 @@ export default function WaterSchedulePage() {
         setSchedules(data.schedules || []);
         setWeeksMeta(data.weeksMeta || []);
         setEligibleUsers(data.eligibleUsers || []);
+        setTrashAssignableUsers(data.trashAssignableUsers || []);
         setExemptUserIds(data.exemptUserIds || []);
         setTrashSchedules(data.trashSchedules || []);
         setCurrentUser(data.currentUser || null);
@@ -85,6 +87,7 @@ export default function WaterSchedulePage() {
           schedules={schedules}
           weeksMeta={weeksMeta}
           eligibleUsers={eligibleUsers}
+          trashAssignableUsers={trashAssignableUsers}
           exemptUserIds={exemptUserIds}
           trashSchedules={trashSchedules}
           onRefresh={loadData}

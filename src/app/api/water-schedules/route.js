@@ -133,6 +133,13 @@ export async function GET(req) {
       eligibleUsers: ["admin", "assistant"].includes(token?.role)
         ? eligibleUsers
         : [],
+      trashAssignableUsers: ["admin", "assistant"].includes(token?.role)
+        ? allUsers.filter(
+            (user) =>
+              user.status === "able" &&
+              ["user", "assistant", "admin"].includes(user.role),
+          )
+        : [],
       exemptUserIds: ["admin", "assistant"].includes(token?.role)
         ? exemptUserIds
         : [],

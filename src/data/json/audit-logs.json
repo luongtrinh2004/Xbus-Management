@@ -1,6 +1,18 @@
 {
   "auditLogs": [
     {
+      "id": "log_1789715305603_6mol",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "COMPLETE_SCHEDULE",
+      "targetType": "water_schedules",
+      "targetId": "water_20260901",
+      "details": "Xác nhận hoàn thành lịch ngày 01/09/2026, cộng 1 điểm cho 3 người: Quản trị viên Hệ thống, Đặng Đình Khánh, Bùi Tùng Lâm",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-18T07:08:25.603Z"
+    },
+    {
       "id": "log_1789714085861_bwk3",
       "adminId": "usr_admin_001",
       "adminName": "Quản trị viên Hệ thống",
