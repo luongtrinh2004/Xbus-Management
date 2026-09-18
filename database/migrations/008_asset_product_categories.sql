@@ -9,12 +9,15 @@ ALTER TABLE asset_products ADD COLUMN category_id VARCHAR(64) NULL AFTER name;
 CREATE INDEX ix_asset_products_category ON asset_products (category_id);
 
 INSERT IGNORE INTO asset_product_categories (id, name, created_at)
-SELECT CONCAT('asset_category_', LEFT(MD5(TRIM(asset_type)), 16)),
-       TRIM(asset_type),
+SELECT CONCAT('asset_category_', LEFT(MD5(category_name), 16)),
+       category_name,
        NOW(3)
-FROM asset_transactions
-WHERE asset_type IS NOT NULL AND TRIM(asset_type) <> ''
-GROUP BY TRIM(asset_type);
+FROM (
+  SELECT TRIM(asset_type) AS category_name
+  FROM asset_transactions
+  WHERE asset_type IS NOT NULL AND TRIM(asset_type) <> ''
+  GROUP BY TRIM(asset_type)
+) legacy_categories;
 
 UPDATE asset_products product
 JOIN (

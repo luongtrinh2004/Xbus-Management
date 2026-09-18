@@ -548,11 +548,14 @@ export async function getAssets() {
   }
   await query(`
     INSERT IGNORE INTO asset_product_categories (id, name, created_at)
-    SELECT CONCAT('asset_category_', LEFT(MD5(TRIM(asset_type)), 16)),
-           TRIM(asset_type), NOW(3)
-    FROM asset_transactions
-    WHERE asset_type IS NOT NULL AND TRIM(asset_type) <> ''
-    GROUP BY TRIM(asset_type)
+    SELECT CONCAT('asset_category_', LEFT(MD5(category_name), 16)),
+           category_name, NOW(3)
+    FROM (
+      SELECT TRIM(asset_type) AS category_name
+      FROM asset_transactions
+      WHERE asset_type IS NOT NULL AND TRIM(asset_type) <> ''
+      GROUP BY TRIM(asset_type)
+    ) legacy_categories
   `);
   await query(`
     UPDATE asset_products product

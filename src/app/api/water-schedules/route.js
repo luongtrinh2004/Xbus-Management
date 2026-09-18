@@ -41,7 +41,7 @@ export async function GET(req) {
     const eligibleUsers = getEligibleWaterUsers(allUsers);
     const exemptUserIds = await getWaterExemptions();
     const settings = await getSettings();
-    const activationDate = new Date(Date.UTC(year, month - 2, 25));
+    const activationDate = new Date(Date.UTC(year, month - 2, 15));
     const [todayYear, todayMonth, todayDay] = toVietnamDateKey()
       .split("-")
       .map(Number);

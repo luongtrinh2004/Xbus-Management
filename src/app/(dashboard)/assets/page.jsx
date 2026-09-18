@@ -46,6 +46,11 @@ const emptyForm = {
   person: "",
   note: "",
 };
+const makeImportLine = (currentName = "") => ({
+  ...emptyForm,
+  clientId: `asset_line_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+  person: currentName || "",
+});
 const columns = {
   import: [
     "Ngày nhập",
@@ -288,8 +293,10 @@ function TransactionDialog({
   onSaved,
 }) {
   const [form, setForm] = useState(emptyForm);
+  const [importLines, setImportLines] = useState([makeImportLine()]);
   const [saving, setSaving] = useState(false);
   const [people, setPeople] = useState([]);
+  const isBulkImport = type === "import" && !editingItem;
   useEffect(() => {
     if (!open) return;
     fetch("/api/users?status=able&limit=500")
@@ -298,24 +305,43 @@ function TransactionDialog({
       .catch(() => setPeople([]));
   }, [open]);
   useEffect(() => {
-    if (open)
+    if (open) {
       setForm(
         editingItem
           ? { ...emptyForm, ...editingItem }
           : { ...emptyForm, person: currentName || "" },
       );
+      setImportLines([makeImportLine(currentName)]);
+    }
   }, [open, currentName, editingItem]);
-  const selectProduct = (code) => {
+  const productFields = (code) => {
     const item = products.find((entry) => entry.code === code);
-    setForm((value) => ({
-      ...value,
+    return {
       code,
       name: item?.name || "",
       category: item?.unit || "",
       description: item?.description || "",
       location: item?.location || "",
+    };
+  };
+  const selectProduct = (code) => {
+    setForm((value) => ({
+      ...value,
+      ...productFields(code),
     }));
   };
+  const updateImportLine = (clientId, values) =>
+    setImportLines((rows) =>
+      rows.map((row) => (row.clientId === clientId ? { ...row, ...values } : row)),
+    );
+  const selectImportLineProduct = (clientId, code) =>
+    updateImportLine(clientId, productFields(code));
+  const addImportLine = () =>
+    setImportLines((rows) => [...rows, makeImportLine(currentName)]);
+  const removeImportLine = (clientId) =>
+    setImportLines((rows) =>
+      rows.length > 1 ? rows.filter((row) => row.clientId !== clientId) : rows,
+    );
   const assetOptions = products.filter((item) => item.active);
   const selectedStock = form.code
     ? imports
@@ -333,20 +359,48 @@ function TransactionDialog({
   const quantity = Number(form.quantity);
   const quantityError =
     type === "export" && Boolean(form.code) && quantity > availableForExport;
+  const validImportLines = importLines.filter(
+    (row) =>
+      row.code?.trim() &&
+      row.date &&
+      row.person?.trim() &&
+      Number.isInteger(Number(row.quantity)) &&
+      Number(row.quantity) > 0,
+  );
+  const bulkImportInvalid =
+    isBulkImport && validImportLines.length !== importLines.length;
   const submit = async () => {
-    if (quantityError) return;
+    if (quantityError || bulkImportInvalid) return;
     setSaving(true);
     try {
-      const response = await fetch("/api/assets", {
-        method: editingItem ? "PATCH" : "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, id: editingItem?.id, type }),
-      });
-      const result = await response.json();
-      if (!response.ok)
-        return toast.error(result.error || "Không thể lưu giao dịch");
+      if (isBulkImport) {
+        for (const row of importLines) {
+          const { clientId, ...payload } = row;
+          const response = await fetch("/api/assets", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ...payload, type: "import" }),
+          });
+          const result = await response.json();
+          if (!response.ok)
+            return toast.error(
+              result.error || `Không thể lưu phiếu nhập ${row.code}`,
+            );
+        }
+      } else {
+        const response = await fetch("/api/assets", {
+          method: editingItem ? "PATCH" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...form, id: editingItem?.id, type }),
+        });
+        const result = await response.json();
+        if (!response.ok)
+          return toast.error(result.error || "Không thể lưu giao dịch");
+      }
       toast.success(
-        editingItem
+        isBulkImport
+          ? `Đã ghi nhận ${importLines.length} phiếu nhập tài sản`
+          : editingItem
           ? "Đã cập nhật giao dịch tài sản"
           : type === "import"
             ? "Đã ghi nhận nhập tài sản"
@@ -361,7 +415,7 @@ function TransactionDialog({
     }
   };
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth={isBulkImport ? "lg" : "sm"}>
       <DialogTitle>
         {editingItem
           ? `Chỉnh sửa phiếu ${type === "import" ? "nhập" : "xuất"}`
@@ -370,14 +424,129 @@ function TransactionDialog({
             : "Xuất tài sản"}
       </DialogTitle>
       <DialogContent dividers>
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
-            gap: 3,
-            pt: 1,
-          }}
-        >
+        {isBulkImport ? (
+          <Box sx={{ display: "grid", gap: 2, pt: 1 }}>
+            <Box display="flex" alignItems="center" justifyContent="space-between" gap={2}>
+              <Typography variant="body2" color="text.secondary">
+                Có thể nhập nhiều sản phẩm trong cùng một ngày; mỗi dòng sẽ tạo một phiếu nhập riêng.
+              </Typography>
+              <Button
+                variant="tonal"
+                startIcon={<i className="tabler-plus" />}
+                onClick={addImportLine}
+              >
+                Thêm dòng
+              </Button>
+            </Box>
+            {importLines.map((row, index) => (
+              <Box
+                key={row.clientId}
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: {
+                    xs: "1fr",
+                    md: "minmax(220px,1.3fr) 130px 110px minmax(150px,1fr) minmax(150px,1fr) minmax(160px,1fr) 44px",
+                  },
+                  gap: 2,
+                  p: 2,
+                  border: "1px solid",
+                  borderColor: "divider",
+                  borderRadius: 1.5,
+                  alignItems: "start",
+                }}
+              >
+                <Autocomplete
+                  options={assetOptions}
+                  value={assetOptions.find((item) => item.code === row.code) || null}
+                  onChange={(_, item) =>
+                    selectImportLineProduct(row.clientId, item?.code || "")
+                  }
+                  getOptionLabel={(item) => `${item.code} — ${item.name}`}
+                  isOptionEqualToValue={(option, value) => option.code === value?.code}
+                  filterOptions={(options, state) =>
+                    filterAssetOptions(options, state.inputValue)
+                  }
+                  noOptionsText="Không tìm thấy sản phẩm tương tự"
+                  renderInput={(params) => (
+                    <CustomTextField
+                      {...params}
+                      label={`Sản phẩm ${index + 1} *`}
+                      placeholder="Tìm mã/tên sản phẩm"
+                    />
+                  )}
+                />
+                <CustomTextField
+                  type="date"
+                  label="Ngày nhập *"
+                  value={row.date}
+                  onChange={(e) =>
+                    updateImportLine(row.clientId, { date: e.target.value })
+                  }
+                  slotProps={{ inputLabel: { shrink: true } }}
+                />
+                <CustomTextField
+                  type="number"
+                  label="Số lượng *"
+                  value={row.quantity}
+                  onChange={(e) =>
+                    updateImportLine(row.clientId, { quantity: e.target.value })
+                  }
+                  inputProps={{ min: 1 }}
+                />
+                <CustomTextField label="Đơn vị tính" value={row.category} disabled />
+                <CustomTextField label="Vị trí" value={row.location} disabled />
+                <Autocomplete
+                  freeSolo
+                  options={people}
+                  inputValue={row.person}
+                  onInputChange={(_, value) =>
+                    updateImportLine(row.clientId, { person: value })
+                  }
+                  onChange={(_, person) => {
+                    if (person && typeof person !== "string")
+                      updateImportLine(row.clientId, { person: person.name });
+                  }}
+                  getOptionLabel={(person) =>
+                    typeof person === "string" ? person : person.name || ""
+                  }
+                  renderInput={(params) => (
+                    <CustomTextField
+                      {...params}
+                      label="Người nhập kho *"
+                      placeholder="Tên nhân sự"
+                    />
+                  )}
+                />
+                <IconButton
+                  color="error"
+                  disabled={importLines.length === 1}
+                  onClick={() => removeImportLine(row.clientId)}
+                  sx={{ mt: 4 }}
+                  aria-label="Xóa dòng nhập"
+                >
+                  <i className="tabler-trash" />
+                </IconButton>
+                <CustomTextField
+                  sx={{ gridColumn: { md: "1 / -1" } }}
+                  label="Ghi chú"
+                  value={row.note}
+                  onChange={(e) =>
+                    updateImportLine(row.clientId, { note: e.target.value })
+                  }
+                  placeholder="Ghi chú riêng cho phiếu này"
+                />
+              </Box>
+            ))}
+          </Box>
+        ) : (
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+              gap: 3,
+              pt: 1,
+            }}
+          >
           {type === "export" ? (
             <Autocomplete
               options={assetOptions}
@@ -516,7 +685,8 @@ function TransactionDialog({
             value={form.note}
             onChange={(e) => setForm({ ...form, note: e.target.value })}
           />
-        </Box>
+          </Box>
+        )}
       </DialogContent>
       <DialogActions>
         <Button color="secondary" onClick={onClose}>
@@ -526,9 +696,9 @@ function TransactionDialog({
           variant="contained"
           disabled={
             saving ||
-            quantityError ||
-            !Number.isInteger(quantity) ||
-            quantity <= 0
+            (isBulkImport
+              ? bulkImportInvalid
+              : quantityError || !Number.isInteger(quantity) || quantity <= 0)
           }
           onClick={submit}
         >

@@ -40,6 +40,22 @@ export function getEligibleWaterUsers(users = []) {
   );
 }
 
+export function getEligibleTrashUsers(users = [], exemptUserIds = []) {
+  const exemptSet = new Set(exemptUserIds);
+  return users
+    .filter(
+      (user) =>
+        exemptSet.has(user.id) &&
+        user.status === "able" &&
+        !isOperationsUser(user),
+    )
+    .sort(
+      (a, b) =>
+        (a.schedulingPoints || 0) - (b.schedulingPoints || 0) ||
+        String(a.name || "").localeCompare(String(b.name || ""), "vi"),
+    );
+}
+
 /** Lịch đổ rác cho 5 ngày làm việc của tuần hiện tại và tuần kế tiếp. */
 export function getTrashSchedules(
   users = [],
@@ -49,15 +65,7 @@ export function getTrashSchedules(
   overrides = {},
   waterSchedules = [],
 ) {
-  const exemptSet = new Set(exemptUserIds);
-  const participants = users
-    .filter(
-      (user) =>
-        exemptSet.has(user.id) &&
-        user.status === "able" &&
-        !isOperationsUser(user),
-    )
-    .sort((a, b) => (a.schedulingPoints || 0) - (b.schedulingPoints || 0));
+  const participants = getEligibleTrashUsers(users, exemptUserIds);
   if (!participants.length) return [];
 
   const [currentYear, currentMonth, currentDay] = String(currentDateKey)
@@ -147,19 +155,7 @@ export function getTrashSchedulesForMonth(
   overrides = {},
   autoAssign = true,
 ) {
-  const exemptSet = new Set(exemptUserIds);
-  const participants = users
-    .filter(
-      (user) =>
-        exemptSet.has(user.id) &&
-        user.status === "able" &&
-        !isOperationsUser(user),
-    )
-    .sort(
-      (a, b) =>
-        (a.schedulingPoints || 0) - (b.schedulingPoints || 0) ||
-        String(a.name || "").localeCompare(String(b.name || ""), "vi"),
-    );
+  const participants = getEligibleTrashUsers(users, exemptUserIds);
   const usersById = new Map(users.map((person) => [person.id, person]));
   const schedules = [];
   const anchor = Date.UTC(2026, 0, 5);
