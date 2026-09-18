@@ -630,20 +630,6 @@
         {
           "paid": false,
           "amount": 0,
-          "userId": "usr_1789710244406",
-          "memberName": "Nguyễn Thanh Hải",
-          "categoryId": "category_intern",
-          "baseAmount": 100000,
-          "requiredAmount": 100000,
-          "voluntarySurplus": false,
-          "rosterHidden": false,
-          "carryIn": 0,
-          "difference": 0,
-          "carryOut": 0
-        },
-        {
-          "paid": false,
-          "amount": 0,
           "userId": "usr_1789204311678",
           "memberName": "Nhân viên hệ thống",
           "categoryId": "category_official",
@@ -1055,20 +1041,6 @@
       "year": 2026,
       "openingBalance": 0,
       "members": [
-        {
-          "paid": false,
-          "amount": 0,
-          "userId": "usr_1789710244406",
-          "memberName": "Nguyễn Thanh Hải",
-          "categoryId": "category_intern",
-          "baseAmount": 100000,
-          "requiredAmount": 100000,
-          "voluntarySurplus": false,
-          "rosterHidden": false,
-          "carryIn": 0,
-          "difference": 0,
-          "carryOut": 0
-        },
         {
           "paid": false,
           "amount": 0,

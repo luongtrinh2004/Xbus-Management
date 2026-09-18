@@ -44,7 +44,7 @@ const verticalMenuData = [
     label: "Quản lý tài sản",
     href: "/assets",
     icon: "tabler-package",
-    roles: ["assistant", "admin"],
+    roles: ["user", "assistant", "admin"],
   },
   {
     label: "Trà chiều",

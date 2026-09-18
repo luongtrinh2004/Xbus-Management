@@ -10,6 +10,7 @@ const accessControl: Record<Role, string[]> = {
     "/users",
     "/water-schedule",
     "/fund",
+    "/assets",
     "/afternoon-tea",
   ],
   assistant: [

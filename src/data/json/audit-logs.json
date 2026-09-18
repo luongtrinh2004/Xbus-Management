@@ -1,6 +1,52 @@
 {
   "auditLogs": [
     {
+      "id": "log_1789720722435_tfg4",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "UPDATE_USER",
+      "targetType": "USER",
+      "targetId": "usr_001",
+      "details": "Cập nhật thông tin nhân sự Vũ Hoàng Dũng (PNKX047): name, code, phone, gender, role, typeId, categoryId, status, birthday, citizenId, citizenIssuedDate, address, position, jiraAccount, joinedDate, avatarUrl, schedulingPoints",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-18T08:38:42.435Z"
+    },
+    {
+      "id": "log_1789720291910_w277",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "UPSERT_ASSET_PRODUCTS_FROM_EXCEL",
+      "targetType": "ASSET_PRODUCT",
+      "details": "Import Excel: thêm 0, cập nhật 103 sản phẩm",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-18T08:31:31.910Z"
+    },
+    {
+      "id": "log_1789716612968_q6tn",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "UPDATE_USER",
+      "targetType": "USER",
+      "targetId": "usr_admin_001",
+      "details": "Cập nhật thông tin nhân sự Quản trị viên Hệ thống (ADM001): name, code, phone, gender, role, typeId, categoryId, status, birthday, citizenId, citizenIssuedDate, address, position, jiraAccount, joinedDate, avatarUrl, schedulingPoints",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-18T07:30:12.969Z"
+    },
+    {
+      "id": "log_1789715999921_rfj8",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "IMPORT_USERS",
+      "targetType": "USER",
+      "details": "Import nhân sự: cập nhật 30/30 dòng khớp mã nhân sự",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-18T07:19:59.921Z"
+    },
+    {
       "id": "log_1789715305603_6mol",
       "adminId": "usr_admin_001",
       "adminName": "Quản trị viên Hệ thống",

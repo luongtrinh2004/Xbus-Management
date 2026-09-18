@@ -53,6 +53,7 @@ export async function POST(req) {
       id: body.id || `product_${slug(code) || Date.now()}`,
       code,
       name,
+      categoryId: String(body.categoryId || "").trim(),
       unit,
       description: String(body.description || "").trim(),
       location: String(body.location || "").trim(),
@@ -101,6 +102,7 @@ export async function PUT(req) {
       incomingByCode.set(code, {
         code,
         name,
+        categoryId: String(row.categoryId || "").trim(),
         unit: String(row.unit || "Cái").trim() || "Cái",
         description: String(row.description || "").trim(),
         location: String(row.location || "").trim(),

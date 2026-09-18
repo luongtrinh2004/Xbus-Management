@@ -130,6 +130,7 @@ export function getAssets() {
     imports: [],
     exports: [],
     products: [],
+    categories: [],
   });
 }
 

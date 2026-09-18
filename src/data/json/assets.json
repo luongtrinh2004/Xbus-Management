@@ -5423,8 +5423,9 @@
       "unit": "Cái",
       "description": "",
       "location": "B-2-0",
-      "active": false,
-      "createdAt": "2026-09-18T03:18:53.870Z"
+      "active": true,
+      "createdAt": "2026-09-18T03:18:53.870Z",
+      "categoryId": "asset_category_50d5c47695c25f8c6288"
     },
     {
       "code": "CB-002",
@@ -5434,7 +5435,8 @@
       "location": "",
       "active": true,
       "id": "product_cb_002",
-      "createdAt": "2026-09-18T03:18:53.875Z"
+      "createdAt": "2026-09-18T03:18:53.875Z",
+      "categoryId": "asset_category_50d5c47695c25f8c6288"
     },
     {
       "code": "CB-003",
@@ -5444,7 +5446,8 @@
       "location": "",
       "active": true,
       "id": "product_cb_003",
-      "createdAt": "2026-09-18T03:18:53.876Z"
+      "createdAt": "2026-09-18T03:18:53.876Z",
+      "categoryId": "asset_category_50d5c47695c25f8c6288"
     },
     {
       "code": "CB-004",
@@ -5454,7 +5457,8 @@
       "location": "",
       "active": true,
       "id": "product_cb_004",
-      "createdAt": "2026-09-18T03:18:53.878Z"
+      "createdAt": "2026-09-18T03:18:53.878Z",
+      "categoryId": "asset_category_50d5c47695c25f8c6288"
     },
     {
       "code": "CB-005",
@@ -5464,7 +5468,8 @@
       "location": "B-2-0",
       "active": true,
       "id": "product_cb_005",
-      "createdAt": "2026-09-18T03:18:53.880Z"
+      "createdAt": "2026-09-18T03:18:53.880Z",
+      "categoryId": "asset_category_50d5c47695c25f8c6288"
     },
     {
       "code": "CB-006",
@@ -5474,7 +5479,8 @@
       "location": "",
       "active": true,
       "id": "product_cb_006",
-      "createdAt": "2026-09-18T03:18:53.882Z"
+      "createdAt": "2026-09-18T03:18:53.882Z",
+      "categoryId": "asset_category_50d5c47695c25f8c6288"
     },
     {
       "code": "CB-007",
@@ -5484,7 +5490,8 @@
       "location": "",
       "active": true,
       "id": "product_cb_007",
-      "createdAt": "2026-09-18T03:18:53.884Z"
+      "createdAt": "2026-09-18T03:18:53.884Z",
+      "categoryId": "asset_category_50d5c47695c25f8c6288"
     },
     {
       "code": "CB-008",
@@ -5494,7 +5501,8 @@
       "location": "",
       "active": true,
       "id": "product_cb_008",
-      "createdAt": "2026-09-18T03:18:53.885Z"
+      "createdAt": "2026-09-18T03:18:53.885Z",
+      "categoryId": "asset_category_50d5c47695c25f8c6288"
     },
     {
       "code": "CB-009",
@@ -5504,7 +5512,8 @@
       "location": "",
       "active": true,
       "id": "product_cb_009",
-      "createdAt": "2026-09-18T03:18:53.886Z"
+      "createdAt": "2026-09-18T03:18:53.886Z",
+      "categoryId": "asset_category_50d5c47695c25f8c6288"
     },
     {
       "code": "CB-010",
@@ -5514,7 +5523,8 @@
       "location": "",
       "active": true,
       "id": "product_cb_010",
-      "createdAt": "2026-09-18T03:18:53.887Z"
+      "createdAt": "2026-09-18T03:18:53.887Z",
+      "categoryId": "asset_category_50d5c47695c25f8c6288"
     },
     {
       "code": "CB-011",
@@ -5524,7 +5534,8 @@
       "location": "B-1-2",
       "active": true,
       "id": "product_cb_011",
-      "createdAt": "2026-09-18T03:18:53.888Z"
+      "createdAt": "2026-09-18T03:18:53.888Z",
+      "categoryId": "asset_category_50d5c47695c25f8c6288"
     },
     {
       "code": "CB-012",
@@ -5534,7 +5545,8 @@
       "location": "B-2-0",
       "active": true,
       "id": "product_cb_012",
-      "createdAt": "2026-09-18T03:18:53.889Z"
+      "createdAt": "2026-09-18T03:18:53.889Z",
+      "categoryId": "asset_category_50d5c47695c25f8c6288"
     },
     {
       "code": "CB-013",
@@ -5544,7 +5556,8 @@
       "location": "",
       "active": true,
       "id": "product_cb_013",
-      "createdAt": "2026-09-18T03:18:53.890Z"
+      "createdAt": "2026-09-18T03:18:53.890Z",
+      "categoryId": "asset_category_50d5c47695c25f8c6288"
     },
     {
       "code": "CB-014",
@@ -5554,7 +5567,8 @@
       "location": "",
       "active": true,
       "id": "product_cb_014",
-      "createdAt": "2026-09-18T03:18:53.891Z"
+      "createdAt": "2026-09-18T03:18:53.891Z",
+      "categoryId": "asset_category_50d5c47695c25f8c6288"
     },
     {
       "code": "CB-015",
@@ -5564,7 +5578,8 @@
       "location": "",
       "active": true,
       "id": "product_cb_015",
-      "createdAt": "2026-09-18T03:18:53.892Z"
+      "createdAt": "2026-09-18T03:18:53.892Z",
+      "categoryId": "asset_category_50d5c47695c25f8c6288"
     },
     {
       "code": "CB-016",
@@ -5574,7 +5589,8 @@
       "location": "B-2-0",
       "active": true,
       "id": "product_cb_016",
-      "createdAt": "2026-09-18T03:18:53.893Z"
+      "createdAt": "2026-09-18T03:18:53.893Z",
+      "categoryId": "asset_category_50d5c47695c25f8c6288"
     },
     {
       "code": "CB-017",
@@ -5584,7 +5600,8 @@
       "location": "",
       "active": true,
       "id": "product_cb_017",
-      "createdAt": "2026-09-18T03:18:53.895Z"
+      "createdAt": "2026-09-18T03:18:53.895Z",
+      "categoryId": "asset_category_50d5c47695c25f8c6288"
     },
     {
       "code": "CB-018",
@@ -5594,7 +5611,8 @@
       "location": "",
       "active": true,
       "id": "product_cb_018",
-      "createdAt": "2026-09-18T03:18:53.896Z"
+      "createdAt": "2026-09-18T03:18:53.896Z",
+      "categoryId": "asset_category_50d5c47695c25f8c6288"
     },
     {
       "code": "CB-019",
@@ -5604,7 +5622,8 @@
       "location": "",
       "active": true,
       "id": "product_cb_019",
-      "createdAt": "2026-09-18T03:18:53.897Z"
+      "createdAt": "2026-09-18T03:18:53.897Z",
+      "categoryId": "asset_category_50d5c47695c25f8c6288"
     },
     {
       "code": "CB-020",
@@ -5614,7 +5633,8 @@
       "location": "",
       "active": true,
       "id": "product_cb_020",
-      "createdAt": "2026-09-18T03:18:53.898Z"
+      "createdAt": "2026-09-18T03:18:53.898Z",
+      "categoryId": "asset_category_50d5c47695c25f8c6288"
     },
     {
       "code": "CB-021",
@@ -5624,7 +5644,8 @@
       "location": "",
       "active": true,
       "id": "product_cb_021",
-      "createdAt": "2026-09-18T03:18:53.899Z"
+      "createdAt": "2026-09-18T03:18:53.899Z",
+      "categoryId": "asset_category_50d5c47695c25f8c6288"
     },
     {
       "code": "CB-022",
@@ -5634,7 +5655,8 @@
       "location": "",
       "active": true,
       "id": "product_cb_022",
-      "createdAt": "2026-09-18T03:18:53.900Z"
+      "createdAt": "2026-09-18T03:18:53.900Z",
+      "categoryId": "asset_category_50d5c47695c25f8c6288"
     },
     {
       "code": "CB-023",
@@ -5644,7 +5666,8 @@
       "location": "",
       "active": true,
       "id": "product_cb_023",
-      "createdAt": "2026-09-18T03:18:53.901Z"
+      "createdAt": "2026-09-18T03:18:53.901Z",
+      "categoryId": "asset_category_50d5c47695c25f8c6288"
     },
     {
       "code": "CB-024",
@@ -5654,7 +5677,8 @@
       "location": "A-3-0",
       "active": true,
       "id": "product_cb_024",
-      "createdAt": "2026-09-18T03:18:53.903Z"
+      "createdAt": "2026-09-18T03:18:53.903Z",
+      "categoryId": "asset_category_50d5c47695c25f8c6288"
     },
     {
       "code": "CB-025",
@@ -5664,7 +5688,8 @@
       "location": "A-1-0",
       "active": true,
       "id": "product_cb_025",
-      "createdAt": "2026-09-18T03:18:53.904Z"
+      "createdAt": "2026-09-18T03:18:53.904Z",
+      "categoryId": "asset_category_50d5c47695c25f8c6288"
     },
     {
       "code": "CB-026",
@@ -5674,7 +5699,8 @@
       "location": "A-2-0",
       "active": true,
       "id": "product_cb_026",
-      "createdAt": "2026-09-18T03:18:53.905Z"
+      "createdAt": "2026-09-18T03:18:53.905Z",
+      "categoryId": "asset_category_50d5c47695c25f8c6288"
     },
     {
       "code": "CB-027",
@@ -5684,7 +5710,8 @@
       "location": "A-1-2",
       "active": true,
       "id": "product_cb_027",
-      "createdAt": "2026-09-18T03:18:53.906Z"
+      "createdAt": "2026-09-18T03:18:53.906Z",
+      "categoryId": "asset_category_50d5c47695c25f8c6288"
     },
     {
       "code": "CB-028",
@@ -5694,7 +5721,8 @@
       "location": "",
       "active": true,
       "id": "product_cb_028",
-      "createdAt": "2026-09-18T03:18:53.907Z"
+      "createdAt": "2026-09-18T03:18:53.907Z",
+      "categoryId": "asset_category_50d5c47695c25f8c6288"
     },
     {
       "code": "CB-031",
@@ -5704,7 +5732,8 @@
       "location": "",
       "active": true,
       "id": "product_cb_031",
-      "createdAt": "2026-09-18T03:18:53.908Z"
+      "createdAt": "2026-09-18T03:18:53.908Z",
+      "categoryId": "asset_category_50d5c47695c25f8c6288"
     },
     {
       "code": "DEV-MAC-01",
@@ -5714,7 +5743,8 @@
       "location": "Phòng ban",
       "active": true,
       "id": "product_dev_mac_01",
-      "createdAt": "2026-09-18T03:18:53.910Z"
+      "createdAt": "2026-09-18T03:18:53.910Z",
+      "categoryId": ""
     },
     {
       "code": "DEV-MNTR-02",
@@ -5724,7 +5754,8 @@
       "location": "Phòng ban",
       "active": true,
       "id": "product_dev_mntr_02",
-      "createdAt": "2026-09-18T03:18:53.911Z"
+      "createdAt": "2026-09-18T03:18:53.911Z",
+      "categoryId": ""
     },
     {
       "code": "DEV-MOUSE-01",
@@ -5734,7 +5765,8 @@
       "location": "Phòng ban",
       "active": true,
       "id": "product_dev_mouse_01",
-      "createdAt": "2026-09-18T03:18:53.912Z"
+      "createdAt": "2026-09-18T03:18:53.912Z",
+      "categoryId": ""
     },
     {
       "code": "DEV-PC-01",
@@ -5744,7 +5776,8 @@
       "location": "Phòng ban",
       "active": true,
       "id": "product_dev_pc_01",
-      "createdAt": "2026-09-18T03:18:53.914Z"
+      "createdAt": "2026-09-18T03:18:53.914Z",
+      "categoryId": ""
     },
     {
       "code": "MT&PK001",
@@ -5754,7 +5787,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk001",
-      "createdAt": "2026-09-18T03:18:53.915Z"
+      "createdAt": "2026-09-18T03:18:53.915Z",
+      "categoryId": "asset_category_24acf55712108605b994"
     },
     {
       "code": "MT&PK002",
@@ -5764,7 +5798,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk002",
-      "createdAt": "2026-09-18T03:18:53.928Z"
+      "createdAt": "2026-09-18T03:18:53.928Z",
+      "categoryId": "asset_category_24acf55712108605b994"
     },
     {
       "code": "MT&PK003",
@@ -5774,7 +5809,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk003",
-      "createdAt": "2026-09-18T03:18:53.930Z"
+      "createdAt": "2026-09-18T03:18:53.930Z",
+      "categoryId": "asset_category_24acf55712108605b994"
     },
     {
       "code": "MT&PK004",
@@ -5784,7 +5820,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk004",
-      "createdAt": "2026-09-18T03:18:53.933Z"
+      "createdAt": "2026-09-18T03:18:53.933Z",
+      "categoryId": "asset_category_24acf55712108605b994"
     },
     {
       "code": "MT&PK005",
@@ -5794,7 +5831,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk005",
-      "createdAt": "2026-09-18T03:18:53.936Z"
+      "createdAt": "2026-09-18T03:18:53.936Z",
+      "categoryId": "asset_category_24acf55712108605b994"
     },
     {
       "code": "MT&PK006",
@@ -5804,7 +5842,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk006",
-      "createdAt": "2026-09-18T03:18:53.938Z"
+      "createdAt": "2026-09-18T03:18:53.938Z",
+      "categoryId": "asset_category_24acf55712108605b994"
     },
     {
       "code": "MT&PK007",
@@ -5814,7 +5853,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk007",
-      "createdAt": "2026-09-18T03:18:53.945Z"
+      "createdAt": "2026-09-18T03:18:53.945Z",
+      "categoryId": "asset_category_24acf55712108605b994"
     },
     {
       "code": "MT&PK009",
@@ -5824,7 +5864,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk009",
-      "createdAt": "2026-09-18T03:18:53.946Z"
+      "createdAt": "2026-09-18T03:18:53.946Z",
+      "categoryId": "asset_category_9f0c0732dca7cf809587"
     },
     {
       "code": "MT&PK010",
@@ -5834,7 +5875,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk010",
-      "createdAt": "2026-09-18T03:18:53.947Z"
+      "createdAt": "2026-09-18T03:18:53.947Z",
+      "categoryId": "asset_category_9f0c0732dca7cf809587"
     },
     {
       "code": "MT&PK011",
@@ -5844,7 +5886,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk011",
-      "createdAt": "2026-09-18T03:18:53.948Z"
+      "createdAt": "2026-09-18T03:18:53.948Z",
+      "categoryId": "asset_category_9f0c0732dca7cf809587"
     },
     {
       "code": "MT&PK012",
@@ -5854,7 +5897,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk012",
-      "createdAt": "2026-09-18T03:18:53.949Z"
+      "createdAt": "2026-09-18T03:18:53.949Z",
+      "categoryId": "asset_category_9f0c0732dca7cf809587"
     },
     {
       "code": "MT&PK013",
@@ -5864,7 +5908,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk013",
-      "createdAt": "2026-09-18T03:18:53.950Z"
+      "createdAt": "2026-09-18T03:18:53.950Z",
+      "categoryId": "asset_category_9f0c0732dca7cf809587"
     },
     {
       "code": "MT&PK014",
@@ -5874,7 +5919,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk014",
-      "createdAt": "2026-09-18T03:18:53.951Z"
+      "createdAt": "2026-09-18T03:18:53.951Z",
+      "categoryId": "asset_category_9f0c0732dca7cf809587"
     },
     {
       "code": "MT&PK015",
@@ -5884,7 +5930,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk015",
-      "createdAt": "2026-09-18T03:18:53.952Z"
+      "createdAt": "2026-09-18T03:18:53.952Z",
+      "categoryId": "asset_category_9f0c0732dca7cf809587"
     },
     {
       "code": "MT&PK016",
@@ -5894,7 +5941,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk016",
-      "createdAt": "2026-09-18T03:18:53.953Z"
+      "createdAt": "2026-09-18T03:18:53.953Z",
+      "categoryId": "asset_category_9f0c0732dca7cf809587"
     },
     {
       "code": "MT&PK017",
@@ -5904,7 +5952,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk017",
-      "createdAt": "2026-09-18T03:18:53.954Z"
+      "createdAt": "2026-09-18T03:18:53.954Z",
+      "categoryId": "asset_category_9f0c0732dca7cf809587"
     },
     {
       "code": "MT&PK018",
@@ -5914,7 +5963,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk018",
-      "createdAt": "2026-09-18T03:18:53.955Z"
+      "createdAt": "2026-09-18T03:18:53.955Z",
+      "categoryId": "asset_category_9f0c0732dca7cf809587"
     },
     {
       "code": "MT&PK019",
@@ -5924,7 +5974,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk019",
-      "createdAt": "2026-09-18T03:18:53.956Z"
+      "createdAt": "2026-09-18T03:18:53.956Z",
+      "categoryId": "asset_category_9f0c0732dca7cf809587"
     },
     {
       "code": "MT&PK020",
@@ -5934,7 +5985,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk020",
-      "createdAt": "2026-09-18T03:18:53.958Z"
+      "createdAt": "2026-09-18T03:18:53.958Z",
+      "categoryId": "asset_category_9f0c0732dca7cf809587"
     },
     {
       "code": "MT&PK021",
@@ -5944,7 +5996,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk021",
-      "createdAt": "2026-09-18T03:18:53.959Z"
+      "createdAt": "2026-09-18T03:18:53.959Z",
+      "categoryId": "asset_category_9f0c0732dca7cf809587"
     },
     {
       "code": "MT&PK022",
@@ -5954,7 +6007,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk022",
-      "createdAt": "2026-09-18T03:18:53.960Z"
+      "createdAt": "2026-09-18T03:18:53.960Z",
+      "categoryId": "asset_category_9f0c0732dca7cf809587"
     },
     {
       "code": "MT&PK023",
@@ -5964,7 +6018,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk023",
-      "createdAt": "2026-09-18T03:18:53.961Z"
+      "createdAt": "2026-09-18T03:18:53.961Z",
+      "categoryId": "asset_category_9f0c0732dca7cf809587"
     },
     {
       "code": "MT&PK024",
@@ -5974,7 +6029,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk024",
-      "createdAt": "2026-09-18T03:18:53.962Z"
+      "createdAt": "2026-09-18T03:18:53.962Z",
+      "categoryId": "asset_category_9f0c0732dca7cf809587"
     },
     {
       "code": "MT&PK025",
@@ -5984,7 +6040,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk025",
-      "createdAt": "2026-09-18T03:18:53.964Z"
+      "createdAt": "2026-09-18T03:18:53.964Z",
+      "categoryId": "asset_category_9f0c0732dca7cf809587"
     },
     {
       "code": "MT&PK026",
@@ -5994,7 +6051,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk026",
-      "createdAt": "2026-09-18T03:18:53.965Z"
+      "createdAt": "2026-09-18T03:18:53.965Z",
+      "categoryId": "asset_category_9f0c0732dca7cf809587"
     },
     {
       "code": "MT&PK027",
@@ -6004,7 +6062,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk027",
-      "createdAt": "2026-09-18T03:18:53.966Z"
+      "createdAt": "2026-09-18T03:18:53.966Z",
+      "categoryId": "asset_category_9f0c0732dca7cf809587"
     },
     {
       "code": "MT&PK028",
@@ -6014,7 +6073,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk028",
-      "createdAt": "2026-09-18T03:18:53.967Z"
+      "createdAt": "2026-09-18T03:18:53.967Z",
+      "categoryId": "asset_category_9f0c0732dca7cf809587"
     },
     {
       "code": "MT&PK029",
@@ -6024,7 +6084,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk029",
-      "createdAt": "2026-09-18T03:18:53.968Z"
+      "createdAt": "2026-09-18T03:18:53.968Z",
+      "categoryId": "asset_category_9f0c0732dca7cf809587"
     },
     {
       "code": "MT&PK030",
@@ -6034,7 +6095,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk030",
-      "createdAt": "2026-09-18T03:18:53.969Z"
+      "createdAt": "2026-09-18T03:18:53.969Z",
+      "categoryId": "asset_category_9f0c0732dca7cf809587"
     },
     {
       "code": "MT&PK031",
@@ -6044,7 +6106,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk031",
-      "createdAt": "2026-09-18T03:18:53.970Z"
+      "createdAt": "2026-09-18T03:18:53.970Z",
+      "categoryId": "asset_category_9f0c0732dca7cf809587"
     },
     {
       "code": "MT&PK032",
@@ -6054,7 +6117,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk032",
-      "createdAt": "2026-09-18T03:18:53.971Z"
+      "createdAt": "2026-09-18T03:18:53.971Z",
+      "categoryId": "asset_category_9f0c0732dca7cf809587"
     },
     {
       "code": "MT&PK033",
@@ -6064,7 +6128,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk033",
-      "createdAt": "2026-09-18T03:18:53.972Z"
+      "createdAt": "2026-09-18T03:18:53.972Z",
+      "categoryId": "asset_category_9f0c0732dca7cf809587"
     },
     {
       "code": "MT&PK034",
@@ -6074,7 +6139,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk034",
-      "createdAt": "2026-09-18T03:18:53.973Z"
+      "createdAt": "2026-09-18T03:18:53.973Z",
+      "categoryId": "asset_category_9f0c0732dca7cf809587"
     },
     {
       "code": "MT&PK035",
@@ -6084,7 +6150,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk035",
-      "createdAt": "2026-09-18T03:18:53.975Z"
+      "createdAt": "2026-09-18T03:18:53.975Z",
+      "categoryId": "asset_category_9f0c0732dca7cf809587"
     },
     {
       "code": "MT&PK036",
@@ -6094,7 +6161,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk036",
-      "createdAt": "2026-09-18T03:18:53.977Z"
+      "createdAt": "2026-09-18T03:18:53.977Z",
+      "categoryId": "asset_category_9f0c0732dca7cf809587"
     },
     {
       "code": "MT&PK037",
@@ -6104,7 +6172,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk037",
-      "createdAt": "2026-09-18T03:18:53.979Z"
+      "createdAt": "2026-09-18T03:18:53.979Z",
+      "categoryId": "asset_category_9f0c0732dca7cf809587"
     },
     {
       "code": "MT&PK045",
@@ -6114,7 +6183,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk045",
-      "createdAt": "2026-09-18T03:18:53.980Z"
+      "createdAt": "2026-09-18T03:18:53.980Z",
+      "categoryId": "asset_category_9f0c0732dca7cf809587"
     },
     {
       "code": "MT&PK046",
@@ -6124,7 +6194,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk046",
-      "createdAt": "2026-09-18T03:18:53.981Z"
+      "createdAt": "2026-09-18T03:18:53.981Z",
+      "categoryId": "asset_category_9f0c0732dca7cf809587"
     },
     {
       "code": "MT&PK051",
@@ -6134,7 +6205,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk051",
-      "createdAt": "2026-09-18T03:18:53.982Z"
+      "createdAt": "2026-09-18T03:18:53.982Z",
+      "categoryId": "asset_category_9f0c0732dca7cf809587"
     },
     {
       "code": "MT&PK052",
@@ -6144,7 +6216,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk052",
-      "createdAt": "2026-09-18T03:18:53.983Z"
+      "createdAt": "2026-09-18T03:18:53.983Z",
+      "categoryId": "asset_category_9f0c0732dca7cf809587"
     },
     {
       "code": "MT&PK053",
@@ -6154,7 +6227,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk053",
-      "createdAt": "2026-09-18T03:18:53.984Z"
+      "createdAt": "2026-09-18T03:18:53.984Z",
+      "categoryId": "asset_category_9f0c0732dca7cf809587"
     },
     {
       "code": "MT&PK054",
@@ -6164,7 +6238,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk054",
-      "createdAt": "2026-09-18T03:18:53.985Z"
+      "createdAt": "2026-09-18T03:18:53.985Z",
+      "categoryId": "asset_category_9f0c0732dca7cf809587"
     },
     {
       "code": "MT&PK055",
@@ -6174,7 +6249,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk055",
-      "createdAt": "2026-09-18T03:18:53.986Z"
+      "createdAt": "2026-09-18T03:18:53.986Z",
+      "categoryId": "asset_category_9f0c0732dca7cf809587"
     },
     {
       "code": "MT&PK056",
@@ -6184,7 +6260,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk056",
-      "createdAt": "2026-09-18T03:18:53.987Z"
+      "createdAt": "2026-09-18T03:18:53.987Z",
+      "categoryId": "asset_category_9f0c0732dca7cf809587"
     },
     {
       "code": "MT&PK057",
@@ -6194,7 +6271,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk057",
-      "createdAt": "2026-09-18T03:18:53.989Z"
+      "createdAt": "2026-09-18T03:18:53.989Z",
+      "categoryId": "asset_category_9f0c0732dca7cf809587"
     },
     {
       "code": "MT&PK058",
@@ -6204,7 +6282,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk058",
-      "createdAt": "2026-09-18T03:18:53.990Z"
+      "createdAt": "2026-09-18T03:18:53.990Z",
+      "categoryId": "asset_category_9f0c0732dca7cf809587"
     },
     {
       "code": "MT&PK059",
@@ -6214,7 +6293,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk059",
-      "createdAt": "2026-09-18T03:18:53.991Z"
+      "createdAt": "2026-09-18T03:18:53.991Z",
+      "categoryId": "asset_category_9f0c0732dca7cf809587"
     },
     {
       "code": "MT&PK060",
@@ -6224,7 +6304,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk060",
-      "createdAt": "2026-09-18T03:18:53.992Z"
+      "createdAt": "2026-09-18T03:18:53.992Z",
+      "categoryId": "asset_category_9f0c0732dca7cf809587"
     },
     {
       "code": "MT&PK061",
@@ -6234,7 +6315,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk061",
-      "createdAt": "2026-09-18T03:18:53.993Z"
+      "createdAt": "2026-09-18T03:18:53.993Z",
+      "categoryId": "asset_category_9f0c0732dca7cf809587"
     },
     {
       "code": "MT&PK062",
@@ -6244,7 +6326,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk062",
-      "createdAt": "2026-09-18T03:18:53.994Z"
+      "createdAt": "2026-09-18T03:18:53.994Z",
+      "categoryId": "asset_category_9f0c0732dca7cf809587"
     },
     {
       "code": "MT&PK063",
@@ -6254,7 +6337,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk063",
-      "createdAt": "2026-09-18T03:18:53.995Z"
+      "createdAt": "2026-09-18T03:18:53.995Z",
+      "categoryId": "asset_category_9f0c0732dca7cf809587"
     },
     {
       "code": "MT&PK064",
@@ -6264,7 +6348,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk064",
-      "createdAt": "2026-09-18T03:18:53.996Z"
+      "createdAt": "2026-09-18T03:18:53.996Z",
+      "categoryId": "asset_category_9f0c0732dca7cf809587"
     },
     {
       "code": "MT&PK065",
@@ -6274,7 +6359,8 @@
       "location": "",
       "active": true,
       "id": "product_mt_pk065",
-      "createdAt": "2026-09-18T03:18:53.997Z"
+      "createdAt": "2026-09-18T03:18:53.997Z",
+      "categoryId": "asset_category_9f0c0732dca7cf809587"
     },
     {
       "code": "PS001",
@@ -6284,7 +6370,8 @@
       "location": "",
       "active": true,
       "id": "product_ps001",
-      "createdAt": "2026-09-18T03:18:53.999Z"
+      "createdAt": "2026-09-18T03:18:53.999Z",
+      "categoryId": "asset_category_4e0bded182c90da63e05"
     },
     {
       "code": "PS002",
@@ -6294,7 +6381,8 @@
       "location": "",
       "active": true,
       "id": "product_ps002",
-      "createdAt": "2026-09-18T03:18:54.000Z"
+      "createdAt": "2026-09-18T03:18:54.000Z",
+      "categoryId": "asset_category_4e0bded182c90da63e05"
     },
     {
       "code": "PS003",
@@ -6304,7 +6392,8 @@
       "location": "",
       "active": true,
       "id": "product_ps003",
-      "createdAt": "2026-09-18T03:18:54.001Z"
+      "createdAt": "2026-09-18T03:18:54.001Z",
+      "categoryId": "asset_category_4e0bded182c90da63e05"
     },
     {
       "code": "PS004",
@@ -6314,7 +6403,8 @@
       "location": "",
       "active": true,
       "id": "product_ps004",
-      "createdAt": "2026-09-18T03:18:54.002Z"
+      "createdAt": "2026-09-18T03:18:54.002Z",
+      "categoryId": "asset_category_4e0bded182c90da63e05"
     },
     {
       "code": "PS005",
@@ -6324,7 +6414,8 @@
       "location": "",
       "active": true,
       "id": "product_ps005",
-      "createdAt": "2026-09-18T03:18:54.003Z"
+      "createdAt": "2026-09-18T03:18:54.003Z",
+      "categoryId": "asset_category_4e0bded182c90da63e05"
     },
     {
       "code": "SC001",
@@ -6334,7 +6425,8 @@
       "location": "",
       "active": true,
       "id": "product_sc001",
-      "createdAt": "2026-09-18T03:18:54.004Z"
+      "createdAt": "2026-09-18T03:18:54.004Z",
+      "categoryId": "asset_category_2d933e6efb00d18c9209"
     },
     {
       "code": "TBLT001",
@@ -6344,7 +6436,8 @@
       "location": "",
       "active": true,
       "id": "product_tblt001",
-      "createdAt": "2026-09-18T03:18:54.005Z"
+      "createdAt": "2026-09-18T03:18:54.005Z",
+      "categoryId": "asset_category_5d6f58efe7e772048283"
     },
     {
       "code": "TBLT002",
@@ -6354,7 +6447,8 @@
       "location": "",
       "active": true,
       "id": "product_tblt002",
-      "createdAt": "2026-09-18T03:18:54.006Z"
+      "createdAt": "2026-09-18T03:18:54.006Z",
+      "categoryId": "asset_category_5d6f58efe7e772048283"
     },
     {
       "code": "TBLT003",
@@ -6364,7 +6458,8 @@
       "location": "",
       "active": true,
       "id": "product_tblt003",
-      "createdAt": "2026-09-18T03:18:54.007Z"
+      "createdAt": "2026-09-18T03:18:54.007Z",
+      "categoryId": "asset_category_5d6f58efe7e772048283"
     },
     {
       "code": "TBLT005",
@@ -6374,7 +6469,8 @@
       "location": "",
       "active": true,
       "id": "product_tblt005",
-      "createdAt": "2026-09-18T03:18:54.008Z"
+      "createdAt": "2026-09-18T03:18:54.008Z",
+      "categoryId": "asset_category_5d6f58efe7e772048283"
     },
     {
       "code": "TBĐ-000",
@@ -6384,7 +6480,8 @@
       "location": "",
       "active": true,
       "id": "product_tbd_000",
-      "createdAt": "2026-09-18T03:18:54.010Z"
+      "createdAt": "2026-09-18T03:18:54.010Z",
+      "categoryId": "asset_category_d850b13db5b7561421d1"
     },
     {
       "code": "TBĐ-001",
@@ -6394,7 +6491,8 @@
       "location": "",
       "active": true,
       "id": "product_tbd_001",
-      "createdAt": "2026-09-18T03:18:54.012Z"
+      "createdAt": "2026-09-18T03:18:54.012Z",
+      "categoryId": "asset_category_83cffc149320f5f9d1ef"
     },
     {
       "code": "TBĐ-002",
@@ -6404,7 +6502,8 @@
       "location": "B-2-0",
       "active": true,
       "id": "product_tbd_002",
-      "createdAt": "2026-09-18T03:18:54.013Z"
+      "createdAt": "2026-09-18T03:18:54.013Z",
+      "categoryId": "asset_category_83cffc149320f5f9d1ef"
     },
     {
       "code": "TBĐ-003",
@@ -6414,7 +6513,8 @@
       "location": "B-2-0",
       "active": true,
       "id": "product_tbd_003",
-      "createdAt": "2026-09-18T03:18:54.015Z"
+      "createdAt": "2026-09-18T03:18:54.015Z",
+      "categoryId": "asset_category_56c3cabb77d887134888"
     },
     {
       "code": "TBĐ004",
@@ -6424,7 +6524,8 @@
       "location": "A-0-2",
       "active": true,
       "id": "product_tbd004",
-      "createdAt": "2026-09-18T03:18:54.016Z"
+      "createdAt": "2026-09-18T03:18:54.016Z",
+      "categoryId": "asset_category_137108362e2ae38734fc"
     },
     {
       "code": "TBĐ005",
@@ -6434,7 +6535,8 @@
       "location": "",
       "active": true,
       "id": "product_tbd005",
-      "createdAt": "2026-09-18T03:18:54.017Z"
+      "createdAt": "2026-09-18T03:18:54.017Z",
+      "categoryId": "asset_category_137108362e2ae38734fc"
     },
     {
       "code": "TBĐ006",
@@ -6444,7 +6546,65 @@
       "location": "",
       "active": true,
       "id": "product_tbd006",
-      "createdAt": "2026-09-18T03:18:54.018Z"
+      "createdAt": "2026-09-18T03:18:54.018Z",
+      "categoryId": "asset_category_b732e4cc44def5256718"
+    }
+  ],
+  "categories": [
+    {
+      "id": "asset_category_50d5c47695c25f8c6288",
+      "name": "Cảm biến",
+      "createdAt": "2026-09-18T08:38:31.929Z"
+    },
+    {
+      "id": "asset_category_24acf55712108605b994",
+      "name": "Máy tính nhúng & Phụ kiện",
+      "createdAt": "2026-09-18T08:38:31.929Z"
+    },
+    {
+      "id": "asset_category_9f0c0732dca7cf809587",
+      "name": "Phụ kiện & Máy tính",
+      "createdAt": "2026-09-18T08:38:31.929Z"
+    },
+    {
+      "id": "asset_category_4e0bded182c90da63e05",
+      "name": "Power Supply",
+      "createdAt": "2026-09-18T08:38:31.929Z"
+    },
+    {
+      "id": "asset_category_2d933e6efb00d18c9209",
+      "name": "sim mạng",
+      "createdAt": "2026-09-18T08:38:31.929Z"
+    },
+    {
+      "id": "asset_category_d850b13db5b7561421d1",
+      "name": "dây cảm biến",
+      "createdAt": "2026-09-18T08:38:31.929Z"
+    },
+    {
+      "id": "asset_category_83cffc149320f5f9d1ef",
+      "name": "dây dữ liệu",
+      "createdAt": "2026-09-18T08:38:31.929Z"
+    },
+    {
+      "id": "asset_category_56c3cabb77d887134888",
+      "name": "dây mạng",
+      "createdAt": "2026-09-18T08:38:31.929Z"
+    },
+    {
+      "id": "asset_category_137108362e2ae38734fc",
+      "name": "phụ kiện của cảm biến",
+      "createdAt": "2026-09-18T08:38:31.929Z"
+    },
+    {
+      "id": "asset_category_b732e4cc44def5256718",
+      "name": "Thiết bị điện",
+      "createdAt": "2026-09-18T08:38:31.929Z"
+    },
+    {
+      "id": "asset_category_5d6f58efe7e772048283",
+      "name": "Thiết bị lưu trữ",
+      "createdAt": "2026-09-18T08:38:31.929Z"
     }
   ]
 }

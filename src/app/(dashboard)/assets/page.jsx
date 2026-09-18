@@ -70,12 +70,21 @@ const columns = {
   stock: [
     "Mã SP",
     "Tên SP",
+    "Loại sản phẩm",
     "Đơn vị tính",
+    "Vị trí",
     "Tổng nhập",
     "Tổng xuất",
     "Tồn kho",
   ],
-  products: ["Mã SP", "Tên SP", "Đơn vị tính", "Trạng thái"],
+  products: [
+    "Mã SP",
+    "Tên SP",
+    "Loại sản phẩm",
+    "Đơn vị tính",
+    "Vị trí",
+    "Trạng thái",
+  ],
 };
 const formatDate = formatVietnamDate;
 
@@ -178,7 +187,9 @@ function AssetTable({ rows, type, canManage, onView, onEdit, onDelete }) {
                       </Typography>
                     </TableCell>
                     <TableCell>{row.name}</TableCell>
+                    <TableCell>{row.categoryName || "—"}</TableCell>
                     <TableCell>{row.unit || "—"}</TableCell>
+                    <TableCell>{row.location || "—"}</TableCell>
                     <TableCell>{row.totalImport}</TableCell>
                     <TableCell>{row.totalExport}</TableCell>
                     <TableCell>
@@ -193,7 +204,9 @@ function AssetTable({ rows, type, canManage, onView, onEdit, onDelete }) {
                       </Typography>
                     </TableCell>
                     <TableCell>{row.name}</TableCell>
+                    <TableCell>{row.categoryName || "—"}</TableCell>
                     <TableCell>{row.unit || "—"}</TableCell>
+                    <TableCell>{row.location || "—"}</TableCell>
                     <TableCell>
                       <Chip
                         size="small"
@@ -532,10 +545,18 @@ function TransactionDialog({
   );
 }
 
-function ProductDialog({ open, product, readOnly = false, onClose, onSaved }) {
+function ProductDialog({
+  open,
+  product,
+  categories,
+  readOnly = false,
+  onClose,
+  onSaved,
+}) {
   const [form, setForm] = useState({
     code: "",
     name: "",
+    categoryId: "",
     unit: "Cái",
     description: "",
     location: "",
@@ -547,6 +568,7 @@ function ProductDialog({ open, product, readOnly = false, onClose, onSaved }) {
         product || {
           code: "",
           name: "",
+          categoryId: "",
           unit: "Cái",
           description: "",
           location: "",
@@ -597,6 +619,20 @@ function ProductDialog({ open, product, readOnly = false, onClose, onSaved }) {
             disabled={readOnly}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
           />
+          <CustomTextField
+            select
+            label="Loại sản phẩm"
+            value={form.categoryId || ""}
+            disabled={readOnly}
+            onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
+          >
+            <MenuItem value="">Chưa phân loại</MenuItem>
+            {(categories || []).map((category) => (
+              <MenuItem key={category.id} value={category.id}>
+                {category.name}
+              </MenuItem>
+            ))}
+          </CustomTextField>
           <CustomTextField
             label="Đơn vị tính *"
             value={form.unit}
@@ -649,15 +685,113 @@ function ProductDialog({ open, product, readOnly = false, onClose, onSaved }) {
   );
 }
 
+function CategoryManagerDialog({ open, categories, onClose, onChanged }) {
+  const [search, setSearch] = useState("");
+  const [editing, setEditing] = useState(null);
+  const [name, setName] = useState("");
+  const [saving, setSaving] = useState(false);
+  const visibleCategories = (categories || []).filter((item) =>
+    normalizeSearchText(item.name).includes(normalizeSearchText(search)),
+  );
+  const save = async () => {
+    if (!name.trim()) return;
+    setSaving(true);
+    try {
+      const response = await fetch("/api/asset-categories", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: editing?.id, name }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error);
+      toast.success(editing ? "Đã cập nhật loại sản phẩm" : "Đã thêm loại sản phẩm");
+      setEditing(null);
+      setName("");
+      await onChanged();
+    } catch (error) {
+      toast.error(error.message || "Không thể lưu loại sản phẩm");
+    } finally {
+      setSaving(false);
+    }
+  };
+  const remove = async (category) => {
+    try {
+      const response = await fetch("/api/asset-categories", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: category.id }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error);
+      toast.success("Đã xóa loại sản phẩm");
+      await onChanged();
+    } catch (error) {
+      toast.error(error.message || "Không thể xóa loại sản phẩm");
+    }
+  };
+  return (
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+      <DialogTitle>
+        Quản lý loại sản phẩm ({(categories || []).length})
+      </DialogTitle>
+      <DialogContent dividers>
+        <CustomTextField
+          fullWidth
+          value={search}
+          placeholder="Tìm loại sản phẩm"
+          onChange={(event) => setSearch(event.target.value)}
+          sx={{ mb: 3 }}
+        />
+        <Box display="flex" gap={1.5} mb={3}>
+          <CustomTextField
+            fullWidth
+            label={editing ? "Sửa tên loại" : "Tên loại sản phẩm mới"}
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+          />
+          <Button variant="contained" disabled={saving || !name.trim()} onClick={save}>
+            {editing ? "Lưu" : "Thêm"}
+          </Button>
+          {editing && (
+            <Button color="secondary" onClick={() => { setEditing(null); setName(""); }}>
+              Hủy
+            </Button>
+          )}
+        </Box>
+        <Box display="grid" gap={1}>
+          {visibleCategories.length ? visibleCategories.map((category) => (
+            <Box key={`${category.id}:${category.name}`} display="flex" alignItems="center" sx={{ p: 1.5, border: "1px solid", borderColor: "divider", borderRadius: 1.5 }}>
+              <Typography sx={{ flex: 1 }} fontWeight={600}>{category.name}</Typography>
+              <IconButton color="primary" size="small" onClick={() => { setEditing(category); setName(category.name); }}>
+                <i className="tabler-edit" />
+              </IconButton>
+              <IconButton color="error" size="small" onClick={() => remove(category)}>
+                <i className="tabler-trash" />
+              </IconButton>
+            </Box>
+          )) : <Typography color="text.secondary" textAlign="center" py={3}>Chưa có loại sản phẩm</Typography>}
+        </Box>
+      </DialogContent>
+      <DialogActions><Button onClick={onClose}>Đóng</Button></DialogActions>
+    </Dialog>
+  );
+}
+
 export default function AssetsPage() {
   const { data: session, status } = useSession();
   const canManage = ["admin", "assistant"].includes(session?.user?.role);
-  const [data, setData] = useState({ imports: [], exports: [], products: [] });
+  const [data, setData] = useState({
+    imports: [],
+    exports: [],
+    products: [],
+    categories: [],
+  });
   const [tab, setTab] = useState("import");
   const [dialog, setDialog] = useState(null);
   const [productDialog, setProductDialog] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [viewingProduct, setViewingProduct] = useState(null);
+  const [categoryManagerOpen, setCategoryManagerOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -735,9 +869,14 @@ export default function AssetsPage() {
     return rows;
   }, [data]);
   const products = useMemo(
-    () =>
-      (data.products || []).map((item) => ({
+    () => {
+      const categoryNames = new Map(
+        (data.categories || []).map((item) => [item.id, item.name]),
+      );
+      return (data.products || []).map((item) => ({
         ...item,
+        categoryName: categoryNames.get(item.categoryId) || "",
+        location: stockByCode.get(item.code)?.location || item.location || "",
         quantity: stockByCode.get(item.code)?.quantity || 0,
         totalImport: data.imports
           .filter((entry) => entry.code === item.code)
@@ -745,7 +884,8 @@ export default function AssetsPage() {
         totalExport: data.exports
           .filter((entry) => entry.code === item.code)
           .reduce((sum, entry) => sum + Number(entry.quantity || 0), 0),
-      })),
+      }));
+    },
     [data, stockByCode],
   );
   const activeRows =
@@ -819,6 +959,7 @@ export default function AssetsPage() {
           .map((row) => ({
             code: pick(row, ["masanpham", "masp", "ma", "code"]),
             name: pick(row, ["tensanpham", "tensp", "ten", "name"]),
+            categoryId: pick(row, ["maloaisanpham", "categoryid"]),
             unit: pick(row, ["donvitinh", "donvi", "loaisp", "unit"]) || "Cái",
             description: pick(row, ["motasanpham", "mota", "description"]),
             location: pick(row, ["vitri", "location"]),
@@ -945,6 +1086,9 @@ export default function AssetsPage() {
     const productRows = (data.products || []).map((item) => ({
       "Mã sản phẩm": item.code || "",
       "Tên sản phẩm": item.name || "",
+      "Loại sản phẩm":
+        (data.categories || []).find((entry) => entry.id === item.categoryId)
+          ?.name || "",
       "Đơn vị tính": item.unit || "",
       "Mô tả": item.description || "",
       "Vị trí": item.location || "",
@@ -1004,7 +1148,7 @@ export default function AssetsPage() {
           }
           action={
             canManage ? (
-              <Box display="flex" gap={2}>
+              <Box display="flex" gap={2} flexWrap="wrap" justifyContent="flex-end">
                 <Button
                   variant="outlined"
                   startIcon={<i className="tabler-download" />}
@@ -1021,36 +1165,21 @@ export default function AssetsPage() {
                 >
                   {importingExcel ? "Đang import…" : "Import Excel"}
                 </Button>
-                <Button
-                  variant="outlined"
-                  startIcon={<i className="tabler-plus" />}
-                  onClick={() => {
-                    setEditingProduct(null);
-                    setProductDialog(true);
-                  }}
-                >
-                  Thêm sản phẩm
-                </Button>
-                <Button
-                  variant="tonal"
-                  startIcon={<i className="tabler-package-import" />}
-                  onClick={() => {
-                    setEditingItem(null);
-                    setDialog("import");
-                  }}
-                >
-                  Nhập tài sản
-                </Button>
-                <Button
-                  variant="contained"
-                  startIcon={<i className="tabler-package-export" />}
-                  onClick={() => {
-                    setEditingItem(null);
-                    setDialog("export");
-                  }}
-                >
-                  Xuất tài sản
-                </Button>
+                {tab === "products" && (
+                  <Button variant="contained" startIcon={<i className="tabler-plus" />} onClick={() => { setEditingProduct(null); setProductDialog(true); }}>
+                    Thêm sản phẩm
+                  </Button>
+                )}
+                {tab === "import" && (
+                  <Button variant="contained" startIcon={<i className="tabler-package-import" />} onClick={() => { setEditingItem(null); setDialog("import"); }}>
+                    Nhập tài sản
+                  </Button>
+                )}
+                {tab === "export" && (
+                  <Button variant="contained" startIcon={<i className="tabler-package-export" />} onClick={() => { setEditingItem(null); setDialog("export"); }}>
+                    Xuất tài sản
+                  </Button>
+                )}
               </Box>
             ) : null
           }
@@ -1085,22 +1214,39 @@ export default function AssetsPage() {
           />
         </Tabs>
         {tab === "products" && (
-          <Box px={5} pb={2} display="flex" justifyContent="flex-end">
-            <CustomTextField
-              select
-              size="small"
-              label="Trạng thái"
-              value={productStatus}
-              onChange={(event) => {
-                setProductStatus(event.target.value);
-                setPage(1);
-              }}
-              sx={{ minWidth: 190 }}
-            >
-              <MenuItem value="all">Tất cả trạng thái</MenuItem>
-              <MenuItem value="active">Hoạt động</MenuItem>
-              <MenuItem value="inactive">Ngừng sử dụng</MenuItem>
-            </CustomTextField>
+          <Box
+            px={5}
+            py={2}
+            display="flex"
+            justifyContent="flex-end"
+            alignItems="center"
+            gap={2}
+          >
+            {canManage && (
+              <Button
+                variant="tonal"
+                startIcon={<i className="tabler-category-plus" />}
+                onClick={() => setCategoryManagerOpen(true)}
+              >
+                Thêm loại sản phẩm
+              </Button>
+            )}
+            <Box sx={{ minWidth: 190 }}>
+              <CustomTextField
+                select
+                fullWidth
+                size="small"
+                value={productStatus}
+                onChange={(event) => {
+                  setProductStatus(event.target.value);
+                  setPage(1);
+                }}
+              >
+                <MenuItem value="all">Tất cả trạng thái</MenuItem>
+                <MenuItem value="active">Hoạt động</MenuItem>
+                <MenuItem value="inactive">Ngừng sử dụng</MenuItem>
+              </CustomTextField>
+            </Box>
           </Box>
         )}
         <AssetTable
@@ -1143,6 +1289,7 @@ export default function AssetsPage() {
         <ProductDialog
           open={productDialog}
           product={editingProduct}
+          categories={data.categories || []}
           onClose={() => {
             setProductDialog(false);
             setEditingProduct(null);
@@ -1152,9 +1299,16 @@ export default function AssetsPage() {
         <ProductDialog
           open={Boolean(viewingProduct)}
           product={viewingProduct}
+          categories={data.categories || []}
           readOnly
           onClose={() => setViewingProduct(null)}
           onSaved={loadData}
+        />
+        <CategoryManagerDialog
+          open={categoryManagerOpen}
+          categories={data.categories || []}
+          onClose={() => setCategoryManagerOpen(false)}
+          onChanged={loadData}
         />
         <ConfirmDialog
           open={Boolean(deleteTarget)}

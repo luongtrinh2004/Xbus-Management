@@ -19,7 +19,7 @@ import Typography from "@mui/material/Typography";
 import { useTheme } from "@mui/material/styles";
 import { useSession } from "next-auth/react";
 import { resolveAvatar } from "@/utils/getDefaultAvatar";
-import { formatVietnamDate } from "@/libs/dateTime";
+import { formatVietnamDate, toVietnamDateKey } from "@/libs/dateTime";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
@@ -216,6 +216,7 @@ export default function HomePage() {
   const [users, setUsers] = useState([]);
   const [waterSchedules, setWaterSchedules] = useState([]);
   const [trashSchedules, setTrashSchedules] = useState([]);
+  const [departments, setDepartments] = useState([]);
   const [fund, setFund] = useState(null);
   const [period, setPeriod] = useState("month");
   const [startDate, setStartDate] = useState("");
@@ -228,23 +229,30 @@ export default function HomePage() {
       fetch("/api/water-schedules"),
       fetch("/api/funds"),
       fetch("/api/water-schedules/trash?weekOffset=0"),
+      fetch("/api/departments"),
     ])
-      .then(async ([usersRes, waterRes, fundRes, trashRes]) => {
-        const [usersData, waterData, fundData, trashData] = await Promise.all([
-          usersRes.json(),
-          waterRes.json(),
-          fundRes.json(),
-          trashRes.json(),
-        ]);
+      .then(async ([usersRes, waterRes, fundRes, trashRes, departmentsRes]) => {
+        const [usersData, waterData, fundData, trashData, departmentsData] =
+          await Promise.all([
+            usersRes.json(),
+            waterRes.json(),
+            fundRes.json(),
+            trashRes.json(),
+            departmentsRes.json(),
+          ]);
         setUsers(usersData.data || []);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        setDepartments(
+          Array.isArray(departmentsData) ? departmentsData : [],
+        );
+        const [todayYear, todayMonth, todayDay] = toVietnamDateKey()
+          .split("-")
+          .map(Number);
+        const today = new Date(todayYear, todayMonth - 1, todayDay);
         setWaterSchedules(
           (waterData.schedules || waterData.data || [])
             .filter(
               (item) =>
                 item.status === "upcoming" &&
-                item.savedAt &&
                 parseWaterDate(item.date) >= today,
             )
             .sort((a, b) => parseWaterDate(a.date) - parseWaterDate(b.date)),
@@ -268,14 +276,21 @@ export default function HomePage() {
     [activeUsers],
   );
   const maxPoints = topUsers[0]?.schedulingPoints || 1;
+  const departmentNames = useMemo(
+    () => new Map(departments.map((item) => [item.id, item.name])),
+    [departments],
+  );
   const departmentStats = useMemo(
     () =>
       activeUsers.reduce((stats, user) => {
-        const label = departmentLabel[user.typeId] || "Chưa phân bộ phận";
+        const label =
+          departmentNames.get(user.typeId) ||
+          departmentLabel[user.typeId] ||
+          "Chưa phân bộ phận";
         stats[label] = (stats[label] || 0) + 1;
         return stats;
       }, {}),
-    [activeUsers],
+    [activeUsers, departmentNames],
   );
   const upcomingBirthdays = useMemo(() => {
     const today = new Date();
