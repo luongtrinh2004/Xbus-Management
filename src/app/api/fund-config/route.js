@@ -20,6 +20,12 @@ const payload = (settings) => ({
     enabled: false,
     deadlineDay: 10,
     daysBefore: [3, 1],
+    sendTime: "14:00",
+  },
+  scheduleReminder: settings.scheduleReminderSettings || {
+    enabled: true,
+    daysBefore: 1,
+    sendTime: "14:00",
   },
   channels: (settings.payosPaymentChannels || [])
     .filter((item) => !item.archived)
@@ -55,14 +61,18 @@ export async function PATCH(req) {
     if (body.action === "saveReminder") {
       const deadlineDay = Number(body.deadlineDay);
       const daysBefore = [...new Set((body.daysBefore || []).map(Number))]
-        .filter((day) => Number.isInteger(day) && day > 0 && day <= 31)
+        .filter((day) => Number.isInteger(day) && day >= 0 && day <= 31)
         .sort((a, b) => b - a);
+      const sendTime = String(body.sendTime || "");
       if (!Number.isInteger(deadlineDay) || deadlineDay < 1 || deadlineDay > 28)
         throw new Error("Ngày hạn đóng phải từ 1 đến 28");
+      if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(sendTime))
+        throw new Error("Giờ gửi nhắc không hợp lệ");
       settings.fundReminderSettings = {
         enabled: Boolean(body.enabled),
         deadlineDay,
         daysBefore,
+        sendTime,
       };
       const funds = await getFunds();
       for (const fund of funds) {
@@ -72,6 +82,19 @@ export async function PATCH(req) {
       }
       await saveFunds(funds);
       details = "Cập nhật cài đặt nhắc lịch đóng quỹ";
+    } else if (body.action === "saveScheduleReminder") {
+      const daysBefore = Number(body.daysBefore);
+      const sendTime = String(body.sendTime || "");
+      if (!Number.isInteger(daysBefore) || daysBefore < 0 || daysBefore > 7)
+        throw new Error("Số ngày báo trước phải từ 0 đến 7");
+      if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(sendTime))
+        throw new Error("Giờ gửi nhắc không hợp lệ");
+      settings.scheduleReminderSettings = {
+        enabled: Boolean(body.enabled),
+        daysBefore,
+        sendTime,
+      };
+      details = "Cập nhật cài đặt nhắc lịch bê nước và đổ rác";
     } else if (body.action === "saveChannel") {
       const channels = settings.payosPaymentChannels || [];
       const existing = channels.find((item) => item.id === body.id);

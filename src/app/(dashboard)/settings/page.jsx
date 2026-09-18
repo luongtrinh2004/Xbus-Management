@@ -49,10 +49,18 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [reminderCooldown, setReminderCooldown] = useState(0);
+  const [scheduleReminderCooldown, setScheduleReminderCooldown] = useState(0);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [tab, setTab] = useState("reminder");
   const [config, setConfig] = useState({
-    reminder: { enabled: false, deadlineDay: 10, daysBefore: [3, 1] },
+    reminder: {
+      enabled: false,
+      deadlineDay: 10,
+      daysBefore: [3, 1],
+      sendTime: "14:00",
+    },
+    scheduleReminder: { enabled: true, daysBefore: 1, sendTime: "14:00" },
     channels: [],
   });
   const [channelForm, setChannelForm] = useState(null);
@@ -112,6 +120,63 @@ export default function SettingsPage() {
       setSaving(false);
     }
   };
+  const sendFundReminderNow = async () => {
+    setSaving(true);
+    try {
+      const response = await fetch("/api/notifications/run", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "sendFundNow" }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error);
+      setReminderCooldown(Math.max(60, result.retryAfterSeconds || 0));
+      toast.success(
+        `Đã gửi ${result.sent || 0} email; bỏ qua ${result.skipped || 0}; lỗi ${result.failed || 0}`,
+      );
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+  const sendScheduleReminderNow = async () => {
+    setSaving(true);
+    try {
+      const response = await fetch("/api/notifications/run", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "sendScheduleNow" }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error);
+      setScheduleReminderCooldown(result.retryAfterSeconds || 60);
+      toast.success(
+        `Đã gửi ${result.sent || 0} email; bỏ qua ${result.skipped || 0}; lỗi ${result.failed || 0}`,
+      );
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+  useEffect(() => {
+    if (reminderCooldown <= 0) return undefined;
+    const timer = window.setInterval(
+      () => setReminderCooldown((seconds) => Math.max(0, seconds - 1)),
+      1000,
+    );
+    return () => window.clearInterval(timer);
+  }, [reminderCooldown > 0]);
+  useEffect(() => {
+    if (scheduleReminderCooldown <= 0) return undefined;
+    const timer = window.setInterval(
+      () =>
+        setScheduleReminderCooldown((seconds) => Math.max(0, seconds - 1)),
+      1000,
+    );
+    return () => window.clearInterval(timer);
+  }, [scheduleReminderCooldown > 0]);
   useEffect(() => {
     if (status === "loading") return;
     load()
@@ -273,74 +338,188 @@ export default function SettingsPage() {
       </Card>
 
       {tab === "reminder" && (
-        <Card>
-          <CardHeader
-            title="Nhắc lịch đóng quỹ"
-            subheader="Thiết lập ngày hết hạn và các mốc nhắc mặc định"
-          />
-          <Box sx={{ px: 5, pb: 5, display: "grid", gap: 3, maxWidth: 560 }}>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={Boolean(config.reminder?.enabled)}
-                  onChange={(event) =>
-                    setConfig((value) => ({
-                      ...value,
-                      reminder: {
-                        ...value.reminder,
-                        enabled: event.target.checked,
-                      },
-                    }))
+        <Box sx={{ display: "grid", gap: 4 }}>
+          <Card>
+            <CardHeader
+              title="Nhắc lịch đóng quỹ"
+              subheader="Thiết lập ngày hết hạn và các mốc nhắc mặc định"
+            />
+            <Box sx={{ px: 5, pb: 5, display: "grid", gap: 3, maxWidth: 560 }}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={Boolean(config.reminder?.enabled)}
+                    onChange={(event) =>
+                      setConfig((value) => ({
+                        ...value,
+                        reminder: {
+                          ...value.reminder,
+                          enabled: event.target.checked,
+                        },
+                      }))
+                    }
+                  />
+                }
+                label="Bật nhắc lịch đóng quỹ"
+              />
+              <CustomTextField
+                type="number"
+                label="Ngày hết hạn trong tháng"
+                value={config.reminder?.deadlineDay || 10}
+                inputProps={{ min: 1, max: 28 }}
+                onChange={(event) =>
+                  setConfig((value) => ({
+                    ...value,
+                    reminder: {
+                      ...value.reminder,
+                      deadlineDay: event.target.value,
+                    },
+                  }))
+                }
+              />
+              <CustomTextField
+                label="Nhắc trước (ngày)"
+                value={(config.reminder?.daysBefore || []).join(", ")}
+                helperText="Ví dụ: 7, 3, 1"
+                onChange={(event) =>
+                  setConfig((value) => ({
+                    ...value,
+                    reminder: {
+                      ...value.reminder,
+                      daysBefore: event.target.value
+                        .split(",")
+                        .map((item) => item.trim()),
+                    },
+                  }))
+                }
+              />
+              <CustomTextField
+                type="time"
+                label="Giờ gửi nhắc"
+                value={config.reminder?.sendTime || "14:00"}
+                slotProps={{ inputLabel: { shrink: true } }}
+                onChange={(event) =>
+                  setConfig((value) => ({
+                    ...value,
+                    reminder: {
+                      ...value.reminder,
+                      sendTime: event.target.value,
+                    },
+                  }))
+                }
+              />
+              <Box display="flex" gap={2} flexWrap="wrap">
+                <Button
+                  variant="contained"
+                  disabled={saving}
+                  onClick={() =>
+                    saveConfig(
+                      { action: "saveReminder", ...config.reminder },
+                      "Đã lưu cài đặt nhắc đóng quỹ",
+                    )
                   }
-                />
-              }
-              label="Bật nhắc lịch đóng quỹ"
+                >
+                  Lưu cài đặt
+                </Button>
+                <Button
+                  variant="tonal"
+                  color="warning"
+                  startIcon={<i className="tabler-mail-forward" />}
+                  disabled={saving || reminderCooldown > 0}
+                  onClick={sendFundReminderNow}
+                >
+                  {reminderCooldown > 0
+                    ? `Có thể gửi lại sau ${reminderCooldown}s`
+                    : "Gửi nhắc ngay người chưa đóng"}
+                </Button>
+              </Box>
+            </Box>
+          </Card>
+          <Card>
+            <CardHeader
+              title="Nhắc lịch bê nước và đổ rác"
+              subheader="Gửi email cho đúng nhân sự đã được phân công trước ngày thực hiện"
             />
-            <CustomTextField
-              type="number"
-              label="Ngày hết hạn trong tháng"
-              value={config.reminder?.deadlineDay || 10}
-              inputProps={{ min: 1, max: 28 }}
-              onChange={(event) =>
-                setConfig((value) => ({
-                  ...value,
-                  reminder: {
-                    ...value.reminder,
-                    deadlineDay: event.target.value,
-                  },
-                }))
-              }
-            />
-            <CustomTextField
-              label="Nhắc trước (ngày)"
-              value={(config.reminder?.daysBefore || []).join(", ")}
-              helperText="Ví dụ: 7, 3, 1"
-              onChange={(event) =>
-                setConfig((value) => ({
-                  ...value,
-                  reminder: {
-                    ...value.reminder,
-                    daysBefore: event.target.value
-                      .split(",")
-                      .map((item) => item.trim()),
-                  },
-                }))
-              }
-            />
-            <Button
-              variant="contained"
-              disabled={saving}
-              onClick={() =>
-                saveConfig(
-                  { action: "saveReminder", ...config.reminder },
-                  "Đã lưu cài đặt nhắc lịch",
-                )
-              }
-            >
-              Lưu cài đặt
-            </Button>
-          </Box>
-        </Card>
+            <Box sx={{ px: 5, pb: 5, display: "grid", gap: 3, maxWidth: 560 }}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={Boolean(config.scheduleReminder?.enabled)}
+                    onChange={(event) =>
+                      setConfig((value) => ({
+                        ...value,
+                        scheduleReminder: {
+                          ...value.scheduleReminder,
+                          enabled: event.target.checked,
+                        },
+                      }))
+                    }
+                  />
+                }
+                label="Bật email nhắc lịch bê nước và đổ rác"
+              />
+              <CustomTextField
+                type="number"
+                label="Gửi trước (ngày)"
+                value={config.scheduleReminder?.daysBefore ?? 1}
+                inputProps={{ min: 0, max: 7 }}
+                helperText="Mặc định 1 ngày trước lịch"
+                onChange={(event) =>
+                  setConfig((value) => ({
+                    ...value,
+                    scheduleReminder: {
+                      ...value.scheduleReminder,
+                      daysBefore: event.target.value,
+                    },
+                  }))
+                }
+              />
+              <CustomTextField
+                type="time"
+                label="Giờ gửi nhắc"
+                value={config.scheduleReminder?.sendTime || "14:00"}
+                slotProps={{ inputLabel: { shrink: true } }}
+                onChange={(event) =>
+                  setConfig((value) => ({
+                    ...value,
+                    scheduleReminder: {
+                      ...value.scheduleReminder,
+                      sendTime: event.target.value,
+                    },
+                  }))
+                }
+              />
+              <Box display="flex" gap={2} flexWrap="wrap">
+                <Button
+                  variant="contained"
+                  disabled={saving}
+                  onClick={() =>
+                    saveConfig(
+                      {
+                        action: "saveScheduleReminder",
+                        ...config.scheduleReminder,
+                      },
+                      "Đã lưu cài đặt nhắc lịch bê nước và đổ rác",
+                    )
+                  }
+                >
+                  Lưu cài đặt
+                </Button>
+                <Button
+                  variant="tonal"
+                  color="warning"
+                  startIcon={<i className="tabler-mail-forward" />}
+                  disabled={saving || scheduleReminderCooldown > 0}
+                  onClick={sendScheduleReminderNow}
+                >
+                  {scheduleReminderCooldown > 0
+                    ? `Có thể gửi lại sau ${scheduleReminderCooldown}s`
+                    : "Gửi nhắc lịch gần nhất"}
+                </Button>
+              </Box>
+            </Box>
+          </Card>
+        </Box>
       )}
 
       {tab === "period" && (

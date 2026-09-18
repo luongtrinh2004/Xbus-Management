@@ -27,6 +27,21 @@ const displayDate = (value) => {
   return `${date.day}/${date.month}`;
 };
 
+const birthdayMonthDay = (value) => {
+  if (value === "" || value === null || value === undefined) return "";
+  if (typeof value === "number" && Number.isFinite(value)) {
+    const date = new Date(Date.UTC(1899, 11, 30) + value * 86400000);
+    return date.toISOString().slice(5, 10);
+  }
+  const text = String(value).trim();
+  const iso = text.match(/^\d{4}-(\d{2})-(\d{2})/);
+  if (iso) return `${iso[1]}-${iso[2]}`;
+  const vietnamese = text.match(/^(\d{1,2})\/(\d{1,2})\/\d{4}$/);
+  if (vietnamese)
+    return `${vietnamese[2].padStart(2, "0")}-${vietnamese[1].padStart(2, "0")}`;
+  return "";
+};
+
 export default function HeaderAnnouncements() {
   const [users, setUsers] = useState([]);
   const [invitations, setInvitations] = useState([]);
@@ -54,7 +69,7 @@ export default function HeaderAnnouncements() {
       .filter(
         (user) =>
           user.status === "able" &&
-          user.birthday?.slice(5) === todayKey.slice(5),
+          birthdayMonthDay(user.birthday) === todayKey.slice(5),
       )
       .map((user) => user.name)
       .filter(Boolean);

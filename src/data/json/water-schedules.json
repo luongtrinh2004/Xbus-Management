@@ -242,16 +242,40 @@
       "requiredPeople": 5,
       "participants": [
         {
-          "userId": "usr_015",
-          "name": "Nghiêm Thành Long",
-          "code": "PNKX169",
+          "userId": "usr_1789710244406",
+          "name": "Nguyễn Thanh Hải",
+          "code": "HDK123",
+          "completed": false
+        },
+        {
+          "userId": "usr_010",
+          "name": "Bùi Văn Quốc Anh",
+          "code": "PNKX304",
+          "completed": false
+        },
+        {
+          "userId": "usr_018",
+          "name": "Nguyễn Mạnh Cường",
+          "code": "PHKX353",
+          "completed": false
+        },
+        {
+          "userId": "usr_022",
+          "name": "Bùi Tùng Lâm",
+          "code": "HĐK207",
+          "completed": false
+        },
+        {
+          "userId": "usr_024",
+          "name": "Trịnh Phúc Lương",
+          "code": "HĐK181",
           "completed": false
         }
       ],
       "status": "upcoming",
       "note": "",
       "savedAt": "2026-09-18T04:21:43.815Z",
-      "updatedAt": "2026-09-18T04:21:43.815Z"
+      "updatedAt": "2026-09-18T06:09:19.373Z"
     }
   ]
 }

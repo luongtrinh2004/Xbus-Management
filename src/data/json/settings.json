@@ -78,7 +78,7 @@
     "2026-09-15": "usr_007",
     "2026-09-16": "usr_026",
     "2026-09-17": "usr_admin_001",
-    "2026-09-18": "usr_001",
+    "2026-09-18": "usr_007",
     "2026-09-01": "usr_007",
     "2026-09-02": "usr_026",
     "2026-09-03": "usr_admin_001",
@@ -120,5 +120,35 @@
       "updatedAt": "2026-09-18T03:52:45.380Z"
     }
   ],
-  "activePayosChannelId": "payos-channel-1789703565379"
+  "activePayosChannelId": "payos-channel-1789703565379",
+  "notificationEmailLogs": {
+    "fund:fund_2026_09:usr_admin_001:manual-2026-09-18": "2026-09-18T05:47:27.974Z",
+    "fund:fund_2026_09:usr_010:manual-2026-09-18": "2026-09-18T05:47:31.309Z",
+    "fund:fund_2026_09:usr_013:manual-2026-09-18": "2026-09-18T05:47:33.362Z",
+    "fund:fund_2026_09:usr_024:manual-2026-09-18": "2026-09-18T05:47:36.036Z",
+    "fund:fund_2026_09:usr_1789710244406:manual-2026-09-18": "2026-09-18T05:47:38.652Z",
+    "fund:fund_2026_09:usr_024:manual": "2026-09-18T06:02:42.716Z",
+    "fund:fund_2026_09:usr_1789710244406:manual": "2026-09-18T06:02:45.376Z",
+    "water:2026-09-18:usr_1789710244406:manual": "2026-09-18T06:48:26.365Z",
+    "water:2026-09-18:usr_020:manual": "2026-09-18T06:08:06.434Z",
+    "water:2026-09-18:usr_010:manual": "2026-09-18T06:48:29.048Z",
+    "water:2026-09-18:usr_018:manual": "2026-09-18T06:48:31.716Z",
+    "water:2026-09-18:usr_022:manual": "2026-09-18T06:48:34.154Z",
+    "trash:2026-09-18:usr_007:manual": "2026-09-18T06:48:38.326Z",
+    "water:2026-09-18:usr_024:manual": "2026-09-18T06:48:36.253Z"
+  },
+  "fundReminderSettings": {
+    "enabled": false,
+    "deadlineDay": 10,
+    "daysBefore": [
+      3,
+      1
+    ],
+    "sendTime": "14:00"
+  },
+  "scheduleReminderSettings": {
+    "enabled": true,
+    "daysBefore": 1,
+    "sendTime": "14:00"
+  }
 }

@@ -305,7 +305,12 @@ export async function DELETE(req, { params }) {
         item.userId === id ||
         String(item.person || "").trim() === String(userToDelete.name).trim(),
     );
-    if (hasFundHistory || hasWaterHistory || hasAssetHistory)
+    // Tài khoản chờ kích hoạt (status=disabled) được phép xóa dứt điểm.
+    // Với nhân sự đã kích hoạt, vẫn giữ chốt an toàn để tránh mất lịch sử.
+    if (
+      userToDelete.status !== "disabled" &&
+      (hasFundHistory || hasWaterHistory || hasAssetHistory)
+    )
       return NextResponse.json(
         {
           error:

@@ -41,6 +41,11 @@ Mở `http://localhost:3000`. Google Cloud cần có:
 | `GOOGLE_CLIENT_ID` | Có | Google OAuth Client ID |
 | `GOOGLE_CLIENT_SECRET` | Có | Google OAuth Client Secret |
 | `NEXT_PUBLIC_APP_URL` | Nên có | URL public của giao diện |
+| `SMTP_HOST` | Khi gửi email | Máy chủ SMTP, mặc định `smtp.gmail.com` |
+| `SMTP_PORT` | Khi gửi email | `465` cho Gmail SSL |
+| `SMTP_USER` | Khi gửi email | Địa chỉ Gmail/Google Workspace gửi thông báo |
+| `SMTP_APP_PASSWORD` | Khi gửi email | App Password 16 ký tự, không dùng mật khẩu Google chính |
+| `CRON_SECRET` | Khi gửi tự động | Khóa bí mật bảo vệ endpoint chạy lịch thông báo |
 | `BASEPATH` | Không | Để trống khi chạy tại domain gốc |
 | `SKIP_POSTINSTALL` | Không | Có thể đặt `true` trong Docker |
 
@@ -168,6 +173,16 @@ curl -I https://office.example.com/login
 ```
 
 Kiểm tra đăng nhập Google, duyệt tài khoản mới, upload avatar/menu, CRUD nhân sự, lịch bê nước, quỹ phòng, tài sản và Audit Log.
+
+## Gửi email nhắc tự động
+
+Sau khi cấu hình SMTP và `CRON_SECRET` trong `.env` trên VPS, cho cron gọi endpoint mỗi phút. Endpoint chỉ gửi khi trùng giờ đã đặt trong trang Cài đặt và tự chống gửi trùng:
+
+```cron
+* * * * * curl -fsS -X POST -H "Authorization: Bearer YOUR_CRON_SECRET" -H "Content-Type: application/json" -d '{}' https://office.example.com/api/notifications/run >/dev/null 2>&1
+```
+
+Tài khoản Google gửi thư phải bật xác minh hai bước và dùng App Password. Không commit App Password hoặc `CRON_SECRET` vào Git.
 
 ## Lưu ý production
 

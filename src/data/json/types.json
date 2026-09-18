@@ -1,25 +1,39 @@
 {
   "types": [
     {
-      "id": "type_web_app",
-      "name": "Web/App",
-      "description": "Phát triển Web và ứng dụng",
+      "id": "van_hanh",
+      "name": "Vận Hành",
+      "description": "",
       "active": true,
-      "createdAt": "2026-09-12T10:00:00.000Z"
+      "createdAt": "2026-09-18T06:15:44.658Z"
     },
     {
-      "id": "type_ap",
+      "id": "web_app",
+      "name": "Web App",
+      "description": "",
+      "active": true,
+      "createdAt": "2026-09-18T06:17:04.395Z"
+    },
+    {
+      "id": "ap",
       "name": "AP",
-      "description": "Autonomous Platform",
+      "description": "",
       "active": true,
-      "createdAt": "2026-09-12T10:00:00.000Z"
+      "createdAt": "2026-09-18T06:17:39.716Z"
     },
     {
-      "id": "type_peer_admin",
-      "name": "Peer Admin",
-      "description": "Quản trị mạng & vận hành",
+      "id": "quan_ly_du_an",
+      "name": "Quản Lý Dự Án",
+      "description": "",
       "active": true,
-      "createdAt": "2026-09-12T10:00:00.000Z"
+      "createdAt": "2026-09-18T06:18:21.150Z"
+    },
+    {
+      "id": "mua_sam",
+      "name": "Mua Sắm",
+      "description": "",
+      "active": true,
+      "createdAt": "2026-09-18T06:19:12.880Z"
     }
   ]
 }

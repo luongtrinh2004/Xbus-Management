@@ -119,7 +119,10 @@ const UserListTable = ({
             joinedDate: row["Ngày tham gia"],
             typeId: row["Bộ phận"],
             categoryId: row["Hình thức"],
+            role: row["Vai trò"],
             status: row["Trạng thái"],
+            schedulingPoints: row["Điểm bê nước"],
+            waterTripCount: row["Số lượt bê nước"],
           };
           return Object.fromEntries(
             Object.entries(mapped).filter(([, value]) => value !== undefined),

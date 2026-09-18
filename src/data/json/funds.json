@@ -24,10 +24,10 @@
         },
         {
           "userId": "usr_002",
-          "paid": false,
-          "amount": 0,
-          "paidAt": null,
-          "updatedAt": "2026-09-16T10:10:36.769Z",
+          "paid": true,
+          "amount": 333333,
+          "paidAt": "2026-09-18T05:41:32.809Z",
+          "updatedAt": "2026-09-18T05:41:32.809Z",
           "approvedBy": "usr_admin_001",
           "memberName": "Hà Quốc Việt",
           "categoryId": "category_official",
@@ -87,18 +87,18 @@
         },
         {
           "userId": "usr_admin_001",
-          "paid": false,
-          "amount": 150000,
-          "paidAt": null,
-          "updatedAt": "2026-09-16T08:49:07.035Z",
+          "paid": true,
+          "amount": 2222,
+          "paidAt": "2026-09-18T05:52:32.071Z",
+          "updatedAt": "2026-09-18T05:52:32.071Z",
           "approvedBy": "usr_admin_001",
           "memberName": "Quản trị viên Hệ thống",
           "categoryId": "category_official",
           "requiredAmount": 150000,
           "baseAmount": 150000,
           "carryIn": 0,
-          "difference": 0,
-          "carryOut": 0,
+          "difference": -147778,
+          "carryOut": 147778,
           "paymentStatus": "PENDING",
           "orderCode": 1789553978477,
           "paymentLinkId": "2120c9f48053407dbcb82b2e3e771fc3",
@@ -212,8 +212,8 @@
         },
         {
           "userId": "usr_010",
-          "paid": false,
-          "amount": 0,
+          "paid": true,
+          "amount": 222222,
           "memberName": "Bùi Văn Quốc Anh",
           "categoryId": "category_official",
           "requiredAmount": 150000,
@@ -221,12 +221,15 @@
           "carryIn": 0,
           "difference": 0,
           "carryOut": 0,
-          "voluntarySurplus": false
+          "voluntarySurplus": false,
+          "paidAt": "2026-09-18T05:50:47.175Z",
+          "updatedAt": "2026-09-18T05:50:47.175Z",
+          "approvedBy": "usr_admin_001"
         },
         {
           "userId": "usr_011",
-          "paid": false,
-          "amount": 0,
+          "paid": true,
+          "amount": 333333,
           "memberName": "Lê Tuấn Long",
           "categoryId": "category_official",
           "requiredAmount": 150000,
@@ -234,7 +237,10 @@
           "carryIn": 0,
           "difference": 0,
           "carryOut": 0,
-          "voluntarySurplus": false
+          "voluntarySurplus": false,
+          "paidAt": "2026-09-18T05:41:37.124Z",
+          "updatedAt": "2026-09-18T05:41:37.124Z",
+          "approvedBy": "usr_admin_001"
         },
         {
           "userId": "usr_012",
@@ -242,17 +248,21 @@
           "amount": 0,
           "memberName": "Trần Việt Dũng",
           "categoryId": "category_official",
-          "requiredAmount": 150000,
+          "requiredAmount": 0,
           "baseAmount": 150000,
           "carryIn": 0,
           "difference": 0,
           "carryOut": 0,
-          "voluntarySurplus": false
+          "voluntarySurplus": false,
+          "obligationCancelled": true,
+          "cancellationReason": "Được miễn",
+          "cancelledAt": "2026-09-18T05:42:56.832Z",
+          "cancelledBy": "usr_admin_001"
         },
         {
           "userId": "usr_013",
-          "paid": false,
-          "amount": 0,
+          "paid": true,
+          "amount": 1111111,
           "memberName": "Phan Thành Nam",
           "categoryId": "category_official",
           "requiredAmount": 150000,
@@ -260,12 +270,19 @@
           "carryIn": 0,
           "difference": 0,
           "carryOut": 0,
-          "voluntarySurplus": false
+          "voluntarySurplus": false,
+          "obligationCancelled": false,
+          "cancellationReason": "",
+          "cancelledAt": null,
+          "cancelledBy": null,
+          "paidAt": "2026-09-18T05:49:32.406Z",
+          "updatedAt": "2026-09-18T05:49:32.406Z",
+          "approvedBy": "usr_admin_001"
         },
         {
           "userId": "usr_014",
-          "paid": false,
-          "amount": 0,
+          "paid": true,
+          "amount": 333333,
           "memberName": "Đặng Đình Khánh",
           "categoryId": "category_official",
           "requiredAmount": 150000,
@@ -273,12 +290,15 @@
           "carryIn": 0,
           "difference": 0,
           "carryOut": 0,
-          "voluntarySurplus": false
+          "voluntarySurplus": false,
+          "paidAt": "2026-09-18T05:41:29.442Z",
+          "updatedAt": "2026-09-18T05:41:29.442Z",
+          "approvedBy": "usr_admin_001"
         },
         {
           "userId": "usr_015",
-          "paid": false,
-          "amount": 0,
+          "paid": true,
+          "amount": 333333,
           "memberName": "Nghiêm Thành Long",
           "categoryId": "category_official",
           "requiredAmount": 150000,
@@ -286,7 +306,10 @@
           "carryIn": 0,
           "difference": 0,
           "carryOut": 0,
-          "voluntarySurplus": false
+          "voluntarySurplus": false,
+          "paidAt": "2026-09-18T05:41:41.089Z",
+          "updatedAt": "2026-09-18T05:41:41.089Z",
+          "approvedBy": "usr_admin_001"
         },
         {
           "userId": "usr_016",
@@ -294,12 +317,16 @@
           "amount": 0,
           "memberName": "Nguyễn Văn Bằng",
           "categoryId": "category_official",
-          "requiredAmount": 150000,
+          "requiredAmount": 0,
           "baseAmount": 150000,
           "carryIn": 0,
           "difference": 0,
           "carryOut": 0,
-          "voluntarySurplus": false
+          "voluntarySurplus": false,
+          "obligationCancelled": true,
+          "cancellationReason": "Được miễn",
+          "cancelledAt": "2026-09-18T05:42:41.807Z",
+          "cancelledBy": "usr_admin_001"
         },
         {
           "userId": "usr_017",
@@ -307,17 +334,21 @@
           "amount": 0,
           "memberName": "Nguyễn Minh Sang",
           "categoryId": "category_official",
-          "requiredAmount": 150000,
+          "requiredAmount": 0,
           "baseAmount": 150000,
           "carryIn": 0,
           "difference": 0,
           "carryOut": 0,
-          "voluntarySurplus": false
+          "voluntarySurplus": false,
+          "obligationCancelled": true,
+          "cancellationReason": "Được miễn",
+          "cancelledAt": "2026-09-18T05:42:37.487Z",
+          "cancelledBy": "usr_admin_001"
         },
         {
           "userId": "usr_018",
-          "paid": false,
-          "amount": 0,
+          "paid": true,
+          "amount": 333333,
           "memberName": "Nguyễn Mạnh Cường",
           "categoryId": "category_official",
           "requiredAmount": 150000,
@@ -325,7 +356,10 @@
           "carryIn": 0,
           "difference": 0,
           "carryOut": 0,
-          "voluntarySurplus": false
+          "voluntarySurplus": false,
+          "paidAt": "2026-09-18T05:41:50.054Z",
+          "updatedAt": "2026-09-18T05:41:50.054Z",
+          "approvedBy": "usr_admin_001"
         },
         {
           "userId": "usr_019",
@@ -333,12 +367,16 @@
           "amount": 0,
           "memberName": "Phạm Hoàng Sơn",
           "categoryId": "category_official",
-          "requiredAmount": 150000,
+          "requiredAmount": 0,
           "baseAmount": 150000,
           "carryIn": 0,
           "difference": 0,
           "carryOut": 0,
-          "voluntarySurplus": false
+          "voluntarySurplus": false,
+          "obligationCancelled": true,
+          "cancellationReason": "Được miễn",
+          "cancelledAt": "2026-09-18T05:42:43.720Z",
+          "cancelledBy": "usr_admin_001"
         },
         {
           "userId": "usr_020",
@@ -346,12 +384,16 @@
           "amount": 0,
           "memberName": "Trần Bảo Khánh",
           "categoryId": "category_official",
-          "requiredAmount": 150000,
+          "requiredAmount": 0,
           "baseAmount": 150000,
           "carryIn": 0,
           "difference": 0,
           "carryOut": 0,
-          "voluntarySurplus": false
+          "voluntarySurplus": false,
+          "obligationCancelled": true,
+          "cancellationReason": "Được miễn",
+          "cancelledAt": "2026-09-18T05:42:47.281Z",
+          "cancelledBy": "usr_admin_001"
         },
         {
           "userId": "usr_021",
@@ -359,17 +401,21 @@
           "amount": 0,
           "memberName": "Nguyễn Thanh Hải",
           "categoryId": "category_intern",
-          "requiredAmount": 100000,
+          "requiredAmount": 0,
           "baseAmount": 100000,
           "carryIn": 0,
           "difference": 0,
           "carryOut": 0,
-          "voluntarySurplus": false
+          "voluntarySurplus": false,
+          "obligationCancelled": true,
+          "cancellationReason": "Được miễn",
+          "cancelledAt": "2026-09-18T05:43:09.793Z",
+          "cancelledBy": "usr_admin_001"
         },
         {
           "userId": "usr_022",
-          "paid": false,
-          "amount": 0,
+          "paid": true,
+          "amount": 333333,
           "memberName": "Bùi Tùng Lâm",
           "categoryId": "category_intern",
           "requiredAmount": 100000,
@@ -377,12 +423,15 @@
           "carryIn": 0,
           "difference": 0,
           "carryOut": 0,
-          "voluntarySurplus": false
+          "voluntarySurplus": false,
+          "paidAt": "2026-09-18T05:41:21.089Z",
+          "updatedAt": "2026-09-18T05:41:21.089Z",
+          "approvedBy": "usr_admin_001"
         },
         {
           "userId": "usr_023",
-          "paid": false,
-          "amount": 0,
+          "paid": true,
+          "amount": 333333,
           "memberName": "Nguyễn Bách Tùng",
           "categoryId": "category_intern",
           "requiredAmount": 100000,
@@ -390,7 +439,10 @@
           "carryIn": 0,
           "difference": 0,
           "carryOut": 0,
-          "voluntarySurplus": false
+          "voluntarySurplus": false,
+          "paidAt": "2026-09-18T05:41:44.321Z",
+          "updatedAt": "2026-09-18T05:41:44.321Z",
+          "approvedBy": "usr_admin_001"
         },
         {
           "userId": "usr_024",
@@ -403,7 +455,14 @@
           "carryIn": 0,
           "difference": 0,
           "carryOut": 0,
-          "voluntarySurplus": false
+          "voluntarySurplus": false,
+          "obligationCancelled": false,
+          "cancellationReason": "",
+          "cancelledAt": null,
+          "cancelledBy": null,
+          "paidAt": null,
+          "updatedAt": "2026-09-18T05:50:36.759Z",
+          "approvedBy": "usr_admin_001"
         },
         {
           "userId": "usr_025",
@@ -411,12 +470,16 @@
           "amount": 0,
           "memberName": "Nguyễn Minh Hoàng",
           "categoryId": "category_probation",
-          "requiredAmount": 150000,
+          "requiredAmount": 0,
           "baseAmount": 150000,
           "carryIn": 0,
           "difference": 0,
           "carryOut": 0,
-          "voluntarySurplus": false
+          "voluntarySurplus": false,
+          "obligationCancelled": true,
+          "cancellationReason": "Được miễn",
+          "cancelledAt": "2026-09-18T05:42:31.945Z",
+          "cancelledBy": "usr_admin_001"
         },
         {
           "userId": "usr_026",
@@ -424,12 +487,32 @@
           "amount": 0,
           "memberName": "Nguyễn Thị Thuyết",
           "categoryId": "category_probation",
-          "requiredAmount": 150000,
+          "requiredAmount": 0,
           "baseAmount": 150000,
           "carryIn": 0,
           "difference": 0,
           "carryOut": 0,
-          "voluntarySurplus": false
+          "voluntarySurplus": false,
+          "obligationCancelled": true,
+          "cancellationReason": "Được miễn",
+          "cancelledAt": "2026-09-18T05:42:39.719Z",
+          "cancelledBy": "usr_admin_001"
+        },
+        {
+          "userId": "usr_1789710244406",
+          "paid": false,
+          "amount": 0,
+          "memberName": "Nguyễn Thanh Hải",
+          "categoryId": "category_intern",
+          "baseAmount": 100000,
+          "voluntarySurplus": false,
+          "requiredAmount": 100000,
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0,
+          "paidAt": null,
+          "updatedAt": "2026-09-18T05:55:46.242Z",
+          "approvedBy": "usr_admin_001"
         }
       ],
       "expenses": [
@@ -458,7 +541,7 @@
       ],
       "createdBy": "usr_admin_001",
       "createdAt": "2026-09-01T08:00:00.000Z",
-      "updatedAt": "2026-09-16T10:10:51.780Z",
+      "updatedAt": "2026-09-18T05:55:46.242Z",
       "incomes": [
         {
           "id": "inc_1789385892060",
@@ -530,7 +613,13 @@
         "category_probation": 150000,
         "category_intern": 100000,
         "category_collaborator": 100000
-      }
+      },
+      "paymentDeadline": "2026-09-10",
+      "reminderDaysBefore": [
+        3,
+        1
+      ],
+      "emailReminderEnabled": false
     },
     {
       "id": "fund_2026_10",
@@ -538,6 +627,20 @@
       "year": 2026,
       "openingBalance": 0,
       "members": [
+        {
+          "paid": false,
+          "amount": 0,
+          "userId": "usr_1789710244406",
+          "memberName": "Nguyễn Thanh Hải",
+          "categoryId": "category_intern",
+          "baseAmount": 100000,
+          "requiredAmount": 100000,
+          "voluntarySurplus": false,
+          "rosterHidden": false,
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0
+        },
         {
           "paid": false,
           "amount": 0,
@@ -559,10 +662,10 @@
           "memberName": "Quản trị viên Hệ thống",
           "categoryId": "category_official",
           "baseAmount": 150000,
-          "requiredAmount": 150000,
+          "requiredAmount": 297778,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": 0,
+          "carryIn": 147778,
           "difference": 0,
           "carryOut": 0
         },
@@ -849,20 +952,6 @@
         {
           "paid": false,
           "amount": 0,
-          "userId": "usr_021",
-          "memberName": "Nguyễn Thanh Hải",
-          "categoryId": "category_intern",
-          "baseAmount": 100000,
-          "requiredAmount": 100000,
-          "voluntarySurplus": false,
-          "rosterHidden": false,
-          "carryIn": 0,
-          "difference": 0,
-          "carryOut": 0
-        },
-        {
-          "paid": false,
-          "amount": 0,
           "userId": "usr_022",
           "memberName": "Bùi Tùng Lâm",
           "categoryId": "category_intern",
@@ -952,7 +1041,13 @@
         "category_probation": 150000,
         "category_intern": 100000,
         "category_collaborator": 100000
-      }
+      },
+      "paymentDeadline": "2026-10-10",
+      "reminderDaysBefore": [
+        3,
+        1
+      ],
+      "emailReminderEnabled": false
     },
     {
       "id": "fund_2026_11",
@@ -960,6 +1055,20 @@
       "year": 2026,
       "openingBalance": 0,
       "members": [
+        {
+          "paid": false,
+          "amount": 0,
+          "userId": "usr_1789710244406",
+          "memberName": "Nguyễn Thanh Hải",
+          "categoryId": "category_intern",
+          "baseAmount": 100000,
+          "requiredAmount": 100000,
+          "voluntarySurplus": false,
+          "rosterHidden": false,
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0
+        },
         {
           "paid": false,
           "amount": 0,
@@ -1271,20 +1380,6 @@
         {
           "paid": false,
           "amount": 0,
-          "userId": "usr_021",
-          "memberName": "Nguyễn Thanh Hải",
-          "categoryId": "category_intern",
-          "baseAmount": 100000,
-          "requiredAmount": 100000,
-          "voluntarySurplus": false,
-          "rosterHidden": false,
-          "carryIn": 0,
-          "difference": 0,
-          "carryOut": 0
-        },
-        {
-          "paid": false,
-          "amount": 0,
           "userId": "usr_022",
           "memberName": "Bùi Tùng Lâm",
           "categoryId": "category_intern",
@@ -1374,7 +1469,13 @@
         "category_probation": 150000,
         "category_intern": 100000,
         "category_collaborator": 100000
-      }
+      },
+      "paymentDeadline": "2026-11-10",
+      "reminderDaysBefore": [
+        3,
+        1
+      ],
+      "emailReminderEnabled": false
     }
   ]
 }
