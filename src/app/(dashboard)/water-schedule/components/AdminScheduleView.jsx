@@ -19,17 +19,11 @@ import Typography from "@mui/material/Typography";
 import { toast } from "react-toastify";
 import CustomTextField from "@core/components/mui/TextField";
 import { resolveAvatar } from "@/utils/getDefaultAvatar";
-import CompleteScheduleModal from "./CompleteScheduleModal";
+import ConfirmDialog from "@components/ConfirmDialog";
 
 const weekDays = ["Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu"];
 const pad = (value) => String(value).padStart(2, "0");
 const toDate = (year, month, day) => `${pad(day)}/${pad(month)}/${year}`;
-const statusColor = {
-  upcoming: "primary",
-  completed: "success",
-  cancelled: "error",
-};
-
 function getWorkWeeks(year, month) {
   const days = new Date(year, month, 0).getDate();
   const weeks = [];
@@ -61,14 +55,14 @@ export default function AdminScheduleView({
 }) {
   const [search, setSearch] = useState("");
   const [busyId, setBusyId] = useState(null);
-  const [dragOverDate, setDragOverDate] = useState(null);
-  const [completeSchedule, setCompleteSchedule] = useState(null);
+  const [dragTarget, setDragTarget] = useState(null);
   const [exemptOpen, setExemptOpen] = useState(false);
   const [exemptIds, setExemptIds] = useState(exemptUserIds);
   const [exemptSearch, setExemptSearch] = useState("");
   const [waterScheduleOpen, setWaterScheduleOpen] = useState(true);
   const [trashEdit, setTrashEdit] = useState(null);
   const [trashAssignee, setTrashAssignee] = useState("");
+  const [completionTarget, setCompletionTarget] = useState(null);
   useEffect(() => setExemptIds(exemptUserIds), [exemptUserIds]);
 
   const weeks = useMemo(() => getWorkWeeks(year, month), [year, month]);
@@ -80,28 +74,20 @@ export default function AdminScheduleView({
     () => new Map(trashSchedules.map((item) => [item.date, item])),
     [trashSchedules],
   );
-  const assignableUsers = useMemo(
-    () => eligibleUsers.filter((user) => !exemptIds.includes(user.id)),
-    [eligibleUsers, exemptIds],
-  );
   const filteredUsers = useMemo(() => {
     const query = search.trim().toLowerCase();
-    return assignableUsers
-      .filter(
-        (user) =>
-          !query ||
-          user.name?.toLowerCase().includes(query) ||
-          user.code?.toLowerCase().includes(query),
-      )
+    return eligibleUsers
+      .filter((user) => !query || user.name?.toLowerCase().includes(query))
       .sort(
         (a, b) =>
+          Number(exemptIds.includes(a.id)) - Number(exemptIds.includes(b.id)) ||
           (Number(a.schedulingPoints) || 0) -
             (Number(b.schedulingPoints) || 0) ||
           String(a.name || "").localeCompare(String(b.name || ""), "vi", {
             sensitivity: "base",
           }),
       );
-  }, [assignableUsers, search]);
+  }, [eligibleUsers, exemptIds, search]);
 
   const makeSchedule = (date) => {
     const day = Number(date.slice(0, 2));
@@ -143,9 +129,11 @@ export default function AdminScheduleView({
   };
 
   const addUser = async (date, userId) => {
-    const user = assignableUsers.find((item) => item.id === userId);
+    const user = eligibleUsers.find((item) => item.id === userId);
     const schedule = byDate.get(date) || makeSchedule(date);
     if (!user || schedule.status === "completed") return;
+    if (exemptIds.includes(user.id))
+      return toast.info(`${user.name} thuộc danh sách miễn bê nước`);
     if (
       (schedule.participants || []).some(
         (item) => (item.userId || item) === user.id,
@@ -169,6 +157,29 @@ export default function AdminScheduleView({
       },
       `Đã thêm ${user.name} vào ngày ${date}`,
     );
+  };
+
+  const addTrashUser = async (date, userId) => {
+    const user = eligibleUsers.find((item) => item.id === userId);
+    const existing = trashByDate.get(date);
+    if (!user || existing?.completed) return;
+    if (existing?.userId) return toast.info("Ngày này đã có người đổ rác");
+    const [day, selectedMonth, selectedYear] = date.split("/");
+    const response = await fetch("/api/water-schedules/trash", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "assign",
+        dateKey: `${selectedYear}-${selectedMonth}-${day}`,
+        userId,
+        weekOffset: 0,
+      }),
+    });
+    const result = await response.json();
+    if (!response.ok)
+      return toast.error(result.error || "Không thể phân công đổ rác");
+    toast.success(`Đã thêm ${user.name} vào lịch đổ rác ngày ${date}`);
+    await onRefresh?.();
   };
 
   const removeUser = async (schedule, userId) => {
@@ -204,7 +215,9 @@ export default function AdminScheduleView({
       });
       const result = await response.json();
       if (!response.ok)
-        return toast.error(result.error || "Không thể phân công ngẫu nhiên bê nước");
+        return toast.error(
+          result.error || "Không thể phân công ngẫu nhiên bê nước",
+        );
 
       await saveSchedule(
         { ...schedule, participants: result.participants || fixedParticipants },
@@ -216,7 +229,9 @@ export default function AdminScheduleView({
         (user) => exemptIds.includes(user.id) && user.status === "able",
       );
       if (!trashCandidates.length) {
-        trashCandidates = eligibleUsers.filter((user) => user.status === "able");
+        trashCandidates = eligibleUsers.filter(
+          (user) => user.status === "able",
+        );
       }
       if (trashCandidates.length > 0) {
         const minPoints = Math.min(
@@ -240,7 +255,9 @@ export default function AdminScheduleView({
         }
       }
 
-      toast.success(`Đã phân công ngẫu nhiên cả bê nước và đổ rác ngày ${date}`);
+      toast.success(
+        `Đã phân công ngẫu nhiên cả bê nước và đổ rác ngày ${date}`,
+      );
       await onRefresh?.();
     } catch {
       toast.error("Không thể phân công ngẫu nhiên");
@@ -333,8 +350,31 @@ export default function AdminScheduleView({
     });
     const result = await response.json();
     if (!response.ok)
-      return toast.error(result.error || "Không thể xác nhận đổ rác");
+      return toast.error(result.error || "Không thể xác nhận đổ rác"), false;
     toast.success("Đã xác nhận đổ rác (+1 điểm)");
+    await onRefresh?.();
+    return true;
+  };
+  const completeWater = async (schedule) => {
+    if (!schedule?.id || schedule.status === "completed") return;
+    const response = await fetch(
+      `/api/water-schedules/${schedule.id}/complete`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          completedUserIds: (schedule.participants || []).map(
+            (person) => person.userId || person,
+          ),
+        }),
+      },
+    );
+    const result = await response.json();
+    if (!response.ok)
+      return toast.error(result.error || "Không thể xác nhận bê nước"), false;
+    toast.success("Đã xác nhận bê nước hoàn thành");
+    await onRefresh?.();
+    return true;
   };
   const assignTrash = async (userId = trashAssignee) => {
     if (!trashEdit) return;
@@ -439,14 +479,14 @@ export default function AdminScheduleView({
                 Nhân sự
               </Typography>
               <Typography variant="caption" color="text.secondary">
-                {assignableUsers.length} người có thể phân công
+                {eligibleUsers.length} nhân sự
               </Typography>
               <CustomTextField
                 fullWidth
                 size="small"
                 type="search"
                 autoComplete="off"
-                placeholder="Tìm theo tên, mã nhân sự"
+                placeholder="Tìm theo tên nhân sự"
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 sx={{ my: 2 }}
@@ -496,7 +536,8 @@ export default function AdminScheduleView({
                         {user.name}
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
-                        {user.code} · {user.schedulingPoints || 0} điểm
+                        {user.schedulingPoints || 0} điểm
+                        {exemptIds.includes(user.id) ? " · Miễn bê nước" : ""}
                       </Typography>
                     </Box>
                     <i className="tabler-grip-vertical ml-auto text-disabled" />
@@ -536,49 +577,34 @@ export default function AdminScheduleView({
                   week.map((cell, columnIndex) => {
                     const schedule = cell ? byDate.get(cell.date) : null;
                     const trash = cell ? trashByDate.get(cell.date) : null;
-                    const completed =
-                      schedule?.status === "completed" || Boolean(trash?.completed);
+                    const waterCompleted = schedule?.status === "completed";
+                    const trashCompleted = Boolean(trash?.completed);
+                    const completed = waterCompleted && trashCompleted;
                     const hasWater = Boolean(
                       schedule && (schedule.participants || []).length > 0,
                     );
-                    const hasTrash = Boolean(trash && (trash.userId || trash.name));
+                    const hasTrash = Boolean(
+                      trash && (trash.userId || trash.name),
+                    );
                     const hasAnySchedule = hasWater || hasTrash;
-                    const color = statusColor[schedule?.status] || "primary";
+                    const draggingWater =
+                      dragTarget?.date === cell?.date &&
+                      dragTarget?.type === "water";
+                    const draggingTrash =
+                      dragTarget?.date === cell?.date &&
+                      dragTarget?.type === "trash";
                     return (
                       <Box
                         key={`${rowIndex}-${columnIndex}`}
-                        onDragOver={(event) => {
-                          if (cell && !completed) {
-                            event.preventDefault();
-                            setDragOverDate(cell.date);
-                          }
-                        }}
-                        onDragLeave={() => setDragOverDate(null)}
-                        onDrop={(event) => {
-                          event.preventDefault();
-                          setDragOverDate(null);
-                          if (cell)
-                            addUser(
-                              cell.date,
-                              event.dataTransfer.getData("text/plain"),
-                            );
-                        }}
                         sx={{
                           minHeight: 190,
                           p: 1.25,
                           display: "flex",
                           flexDirection: "column",
-                          bgcolor: !cell
-                            ? "action.hover"
-                            : dragOverDate === cell.date
-                              ? "rgba(0,186,209,.10)"
-                              : "background.paper",
+                          bgcolor: !cell ? "action.hover" : "background.paper",
                           borderTop: "1px solid",
                           borderRight: columnIndex < 4 ? "1px solid" : 0,
-                          borderColor:
-                            dragOverDate === cell?.date
-                              ? "info.main"
-                              : "divider",
+                          borderColor: "divider",
                           transition: "all .15s",
                         }}
                       >
@@ -592,22 +618,19 @@ export default function AdminScheduleView({
                                 mb: 1,
                               }}
                             >
-                              <Typography
-                                variant="body2"
-                                fontWeight={800}
-                              >
+                              <Typography variant="body2" fontWeight={800}>
                                 {cell.day}
                               </Typography>
                               {completed && (
                                 <Typography
                                   variant="caption"
                                   fontWeight={700}
-                                  sx={{ color: "#28C76F", ml: 0.5 }}
+                                  sx={{ color: "#28C76F", ml: "auto" }}
                                 >
                                   Hoàn thành
                                 </Typography>
                               )}
-                              <Box sx={{ ml: "auto" }} />
+                              {!completed && <Box sx={{ ml: "auto" }} />}
                               {!completed && (
                                 <>
                                   <IconButton
@@ -615,28 +638,13 @@ export default function AdminScheduleView({
                                     color="primary"
                                     size="small"
                                     disabled={busyId === cell.date}
-                                    onClick={() => randomFullSchedule(cell.date)}
+                                    onClick={() =>
+                                      randomFullSchedule(cell.date)
+                                    }
                                     sx={iconButtonSx}
                                   >
                                     <i className="tabler-arrows-shuffle text-sm" />
                                   </IconButton>
-                                  {hasAnySchedule && (
-                                    <IconButton
-                                      title="Xác nhận hoàn thành"
-                                      color="success"
-                                      size="small"
-                                      onClick={() =>
-                                        setCompleteSchedule({
-                                          ...(schedule || makeSchedule(cell.date)),
-                                          trash,
-                                          date: cell.date,
-                                        })
-                                      }
-                                      sx={iconButtonSx}
-                                    >
-                                      <i className="tabler-check text-sm" />
-                                    </IconButton>
-                                  )}
                                   {hasAnySchedule && (
                                     <IconButton
                                       title="Xóa toàn bộ lịch"
@@ -644,7 +652,11 @@ export default function AdminScheduleView({
                                       size="small"
                                       disabled={busyId === cell.date}
                                       onClick={() =>
-                                        deleteFullSchedule(cell.date, schedule, trash)
+                                        deleteFullSchedule(
+                                          cell.date,
+                                          schedule,
+                                          trash,
+                                        )
                                       }
                                       sx={iconButtonSx}
                                     >
@@ -654,116 +666,243 @@ export default function AdminScheduleView({
                                 </>
                               )}
                             </Box>
-                            {hasWater && (
+                            <Box
+                              onDragOver={(event) => {
+                                if (!waterCompleted) {
+                                  event.preventDefault();
+                                  setDragTarget({
+                                    date: cell.date,
+                                    type: "water",
+                                  });
+                                }
+                              }}
+                              onDragLeave={() => setDragTarget(null)}
+                              onDrop={(event) => {
+                                event.preventDefault();
+                                setDragTarget(null);
+                                addUser(
+                                  cell.date,
+                                  event.dataTransfer.getData("text/plain"),
+                                );
+                              }}
+                              onClick={() =>
+                                hasWater &&
+                                !waterCompleted &&
+                                setCompletionTarget({
+                                  type: "water",
+                                  date: cell.date,
+                                  schedule,
+                                })
+                              }
+                              title={
+                                hasWater
+                                  ? waterCompleted
+                                    ? "Bê nước đã hoàn thành"
+                                    : "Bấm để xác nhận bê nước"
+                                  : "Kéo nhân sự vào đây để phân công bê nước"
+                              }
+                              sx={{
+                                display: "flex",
+                                gap: 0.75,
+                                alignItems: "stretch",
+                                minHeight: 66,
+                                cursor:
+                                  hasWater && !waterCompleted
+                                    ? "pointer"
+                                    : "default",
+                                borderRadius: 1.5,
+                                bgcolor: draggingWater
+                                  ? "rgba(0, 186, 209, 0.12)"
+                                  : "transparent",
+                                "&:hover": !waterCompleted
+                                  ? draggingWater
+                                    ? {
+                                        bgcolor: "rgba(0, 186, 209, 0.16)",
+                                        "& .schedule-bracket": {
+                                          borderColor: "info.main",
+                                        },
+                                        "& .schedule-icon": {
+                                          color: "#00BAD1 !important",
+                                        },
+                                      }
+                                    : {
+                                        bgcolor: "success.lighter",
+                                        "& .schedule-bracket": {
+                                          borderColor: "success.main",
+                                        },
+                                        "& .schedule-icon": {
+                                          color: "#28C76F !important",
+                                        },
+                                      }
+                                  : {},
+                              }}
+                            >
                               <Box
+                                component="i"
+                                className="tabler-droplet text-sm schedule-icon"
                                 sx={{
+                                  color: waterCompleted ? "#28C76F" : "#00BAD1",
+                                  mt: "5px",
+                                }}
+                              />
+                              <Box
+                                className="schedule-bracket"
+                                sx={{
+                                  flex: 1,
+                                  minWidth: 0,
+                                  px: 0.75,
+                                  py: 0.5,
+                                  borderRadius: 1.5,
+                                  borderLeft: "3px solid",
+                                  borderColor: waterCompleted
+                                    ? "success.main"
+                                    : "info.main",
                                   display: "flex",
-                                  gap: 0.75,
-                                  alignItems: "stretch",
+                                  flexDirection: "column",
+                                  gap: 0.25,
                                 }}
                               >
-                                <i
-                                  className="tabler-droplet text-sm"
-                                  style={{
-                                    color: completed ? "#28C76F" : "#00BAD1",
-                                    marginTop: 5,
-                                  }}
-                                />
-                                <Box
-                                  sx={{
-                                    flex: 1,
-                                    minWidth: 0,
-                                    px: 0.75,
-                                    py: 0.5,
-                                    borderRadius: 1.5,
-                                    bgcolor: `${color}.lighter`,
-                                    borderLeft: "3px solid",
-                                    borderColor: `${color}.main`,
-                                    pl: 0.75,
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    gap: 0.25,
-                                  }}
-                                >
-                                  {(schedule.participants || []).map(
-                                    (person) => (
-                                      <Box
-                                        key={person.userId || person}
-                                        sx={{
-                                          display: "flex",
-                                          alignItems: "center",
-                                          gap: 0.5,
-                                          minWidth: 0,
-                                        }}
-                                      >
-                                        <Typography
-                                          variant="caption"
-                                          noWrap
-                                          sx={{ flex: 1, minWidth: 0 }}
+                                {hasWater
+                                  ? (schedule.participants || []).map(
+                                      (person) => (
+                                        <Box
+                                          key={person.userId || person}
+                                          sx={{
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: 0.5,
+                                            minWidth: 0,
+                                          }}
                                         >
-                                          • {person.name || person}
-                                        </Typography>
-                                        {!completed && (
-                                          <IconButton
-                                            title="Đưa ra khỏi lịch"
-                                            size="small"
-                                            color="secondary"
-                                            onClick={() =>
-                                              removeUser(
-                                                schedule,
-                                                person.userId || person,
-                                              )
-                                            }
-                                            sx={iconButtonSx}
+                                          <Typography
+                                            variant="caption"
+                                            noWrap
+                                            sx={{ flex: 1, minWidth: 0 }}
                                           >
-                                            <i className="tabler-arrow-left text-xs" />
-                                          </IconButton>
-                                        )}
-                                      </Box>
-                                    ),
-                                  )}
-                                </Box>
+                                            • {person.name || person}
+                                          </Typography>
+                                          {!waterCompleted && (
+                                            <IconButton
+                                              title="Đưa ra khỏi lịch"
+                                              size="small"
+                                              color="secondary"
+                                              onClick={(event) => {
+                                                event.stopPropagation();
+                                                removeUser(
+                                                  schedule,
+                                                  person.userId || person,
+                                                );
+                                              }}
+                                              sx={iconButtonSx}
+                                            >
+                                              <i className="tabler-arrow-left text-xs" />
+                                            </IconButton>
+                                          )}
+                                        </Box>
+                                      ),
+                                    )
+                                  : null}
                               </Box>
-                            )}
-                            {hasTrash && (
+                            </Box>
+                            <Box
+                              onDragOver={(event) => {
+                                if (!trashCompleted && !hasTrash) {
+                                  event.preventDefault();
+                                  setDragTarget({
+                                    date: cell.date,
+                                    type: "trash",
+                                  });
+                                }
+                              }}
+                              onDragLeave={() => setDragTarget(null)}
+                              onDrop={(event) => {
+                                event.preventDefault();
+                                setDragTarget(null);
+                                addTrashUser(
+                                  cell.date,
+                                  event.dataTransfer.getData("text/plain"),
+                                );
+                              }}
+                              onClick={() =>
+                                hasTrash &&
+                                !trashCompleted &&
+                                setCompletionTarget({
+                                  type: "trash",
+                                  date: cell.date,
+                                  trash,
+                                })
+                              }
+                              title={
+                                hasTrash
+                                  ? trashCompleted
+                                    ? "Đổ rác đã hoàn thành"
+                                    : "Bấm để xác nhận đổ rác"
+                                  : "Kéo nhân sự vào đây để phân công đổ rác"
+                              }
+                              sx={{
+                                mt: "auto",
+                                pt: 1.25,
+                                display: "flex",
+                                alignItems: "stretch",
+                                gap: 0.75,
+                                minHeight: 42,
+                                cursor:
+                                  hasTrash && !trashCompleted
+                                    ? "pointer"
+                                    : "default",
+                                borderRadius: 1.5,
+                                bgcolor: draggingTrash
+                                  ? "rgba(0, 186, 209, 0.12)"
+                                  : "transparent",
+                                "&:hover": !trashCompleted
+                                  ? draggingTrash
+                                    ? {
+                                        bgcolor: "rgba(0, 186, 209, 0.16)",
+                                        "& .schedule-bracket": {
+                                          borderColor: "info.main",
+                                        },
+                                        "& .schedule-icon": {
+                                          color: "#00BAD1 !important",
+                                        },
+                                      }
+                                    : {
+                                        bgcolor: "success.lighter",
+                                        "& .schedule-bracket": {
+                                          borderColor: "success.main",
+                                        },
+                                        "& .schedule-icon": {
+                                          color: "#28C76F !important",
+                                        },
+                                      }
+                                  : {},
+                              }}
+                            >
                               <Box
+                                component="i"
+                                className="tabler-trash text-sm schedule-icon"
                                 sx={{
-                                  mt: "auto",
-                                  pt: 1.25,
+                                  color: trashCompleted ? "#28C76F" : "#FF9F43",
+                                  mt: "5px",
+                                }}
+                              />
+                              <Box
+                                className="schedule-bracket"
+                                sx={{
+                                  flex: 1,
+                                  minWidth: 0,
+                                  px: 0.75,
+                                  py: 0.5,
+                                  borderRadius: 1.5,
+                                  borderLeft: "3px solid",
+                                  borderColor: trashCompleted
+                                    ? "success.main"
+                                    : "warning.main",
                                   display: "flex",
-                                  alignItems: "stretch",
-                                  gap: 0.75,
+                                  alignItems: "center",
+                                  gap: 0.5,
                                 }}
                               >
-                                <i
-                                  className="tabler-trash text-sm"
-                                  style={{
-                                    color: trash.completed
-                                      ? "#28C76F"
-                                      : "#FF9F43",
-                                    marginTop: 5,
-                                  }}
-                                />
-                                <Box
-                                  sx={{
-                                    flex: 1,
-                                    minWidth: 0,
-                                    px: 0.75,
-                                    py: 0.5,
-                                    borderRadius: 1.5,
-                                    bgcolor: trash.completed
-                                      ? "success.lighter"
-                                      : "warning.lighter",
-                                    borderLeft: "3px solid",
-                                    borderColor: trash.completed
-                                      ? "success.main"
-                                      : "warning.main",
-                                    pl: 0.75,
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: 0.5,
-                                  }}
-                                >
+                                {hasTrash && (
                                   <Typography
                                     variant="caption"
                                     fontWeight={700}
@@ -772,23 +911,24 @@ export default function AdminScheduleView({
                                   >
                                     {trash.name}
                                   </Typography>
-                                  {!completed && (
-                                    <IconButton
-                                      title="Đổi người đổ rác"
-                                      size="small"
-                                      color="warning"
-                                      sx={iconButtonSx}
-                                      onClick={() => {
-                                        setTrashEdit(trash);
-                                        setTrashAssignee(trash.userId || "");
-                                      }}
-                                    >
-                                      <i className="tabler-user-edit text-sm" />
-                                    </IconButton>
-                                  )}
-                                </Box>
+                                )}
+                                {hasTrash && !trashCompleted && (
+                                  <IconButton
+                                    title="Đổi người đổ rác"
+                                    size="small"
+                                    color="warning"
+                                    sx={iconButtonSx}
+                                    onClick={(event) => {
+                                      event.stopPropagation();
+                                      setTrashEdit(trash);
+                                      setTrashAssignee(trash.userId || "");
+                                    }}
+                                  >
+                                    <i className="tabler-user-edit text-sm" />
+                                  </IconButton>
+                                )}
                               </Box>
-                            )}
+                            </Box>
                           </>
                         )}
                       </Box>
@@ -879,6 +1019,41 @@ export default function AdminScheduleView({
           </Button>
         </DialogActions>
       </Dialog>
+      <ConfirmDialog
+        open={Boolean(completionTarget)}
+        title={
+          completionTarget?.type === "water"
+            ? "Xác nhận hoàn thành bê nước"
+            : "Xác nhận hoàn thành đổ rác"
+        }
+        message={
+          completionTarget?.type === "water"
+            ? `Bạn có muốn xác nhận danh sách bê nước ngày ${completionTarget.date}: ${(
+                completionTarget.schedule?.participants || []
+              )
+                .map((person) => person.name || person)
+                .join(", ")}?`
+            : `Bạn có muốn xác nhận ${completionTarget?.trash?.name || "nhân sự được phân công"} đã đổ rác ngày ${completionTarget?.date || ""}?`
+        }
+        confirmText="Xác nhận hoàn thành"
+        confirmColor="success"
+        loading={Boolean(busyId)}
+        onClose={() => setCompletionTarget(null)}
+        onConfirm={async () => {
+          const target = completionTarget;
+          if (!target) return;
+          setBusyId(`complete-${target.type}-${target.date}`);
+          try {
+            const success =
+              target.type === "water"
+                ? await completeWater(target.schedule)
+                : await completeTrash(target.trash);
+            if (success) setCompletionTarget(null);
+          } finally {
+            setBusyId(null);
+          }
+        }}
+      />
       <Dialog
         open={Boolean(trashEdit)}
         onClose={() => setTrashEdit(null)}
@@ -955,21 +1130,6 @@ export default function AdminScheduleView({
           </Button>
         </DialogActions>
       </Dialog>
-      <CompleteScheduleModal
-        open={Boolean(completeSchedule)}
-        schedule={completeSchedule}
-        onClose={() => setCompleteSchedule(null)}
-        onSuccess={async () => {
-          if (
-            completeSchedule?.trash?.userId &&
-            !completeSchedule.trash.completed
-          ) {
-            await completeTrash(completeSchedule.trash);
-          }
-          setCompleteSchedule(null);
-          await onRefresh?.();
-        }}
-      />
     </>
   );
 }

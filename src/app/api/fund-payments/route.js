@@ -15,26 +15,23 @@ import {
   currentFundPeriod,
   minimumOnlinePaymentAmount,
 } from "@/libs/fundRules";
+import { payosCredentials } from "@/libs/payosChannels";
 
 const secret = process.env.NEXTAUTH_SECRET;
-const configured = () =>
-  Boolean(
-    (process.env.PAYOS_CLIENT_ID || process.env.CLIENT_ID) &&
-      (process.env.PAYOS_API_KEY || process.env.API_KEY) &&
-      (process.env.PAYOS_CHECKSUM_KEY || process.env.CHECKSUM_KEY),
-  );
-const payOS = () =>
+const payOS = (credentials) =>
   new PayOS({
-    clientId: process.env.PAYOS_CLIENT_ID || process.env.CLIENT_ID,
-    apiKey: process.env.PAYOS_API_KEY || process.env.API_KEY,
-    checksumKey: process.env.PAYOS_CHECKSUM_KEY || process.env.CHECKSUM_KEY,
+    clientId: credentials.clientId,
+    apiKey: credentials.apiKey,
+    checksumKey: credentials.checksumKey,
   });
 
 export async function POST(req) {
   const token = await getToken({ req, secret });
   if (!token?.id)
     return NextResponse.json({ error: "Chưa xác thực" }, { status: 401 });
-  if (!configured())
+  const settings = await getSettings();
+  const credentials = payosCredentials(settings);
+  if (!credentials)
     return NextResponse.json(
       {
         error:
@@ -69,7 +66,7 @@ export async function POST(req) {
         { status: 403 },
       );
     const contribution = Number(amount);
-    snapshotFund(funds[fundIndex], users, await getSettings());
+    snapshotFund(funds[fundIndex], users, settings);
     if (
       !Number.isSafeInteger(contribution) ||
       contribution < minimumOnlinePaymentAmount
@@ -100,7 +97,7 @@ export async function POST(req) {
         { error: "Chưa cấu hình URL ứng dụng" },
         { status: 500 },
       );
-    const payment = await payOS().paymentRequests.create({
+    const payment = await payOS(credentials).paymentRequests.create({
       orderCode,
       amount: contribution,
       description: `Quy phong ${month}/${year}`,
@@ -127,6 +124,7 @@ export async function POST(req) {
       orderCode,
       paymentLinkId: payment.paymentLinkId,
       checkoutUrl: payment.checkoutUrl,
+      paymentChannelId: credentials.id,
       createdAt: new Date().toISOString(),
     };
     const index = members.findIndex((item) => item.userId === user.id);
@@ -166,6 +164,7 @@ export async function GET(req) {
       { status: 400 },
     );
   const funds = await getFunds();
+  const settings = await getSettings();
   for (const fund of funds) {
     const paymentIndex = (fund.members || []).findIndex(
       (item) => Number(item.orderCode) === orderCode,
@@ -181,9 +180,14 @@ export async function GET(req) {
           { status: 403 },
         );
 
-      if (!payment.paid && configured()) {
+      const credentials = payosCredentials(
+        settings,
+        payment.paymentChannelId || "legacy-env",
+      );
+      if (!payment.paid && credentials) {
         try {
-          const remotePayment = await payOS().paymentRequests.get(orderCode);
+          const remotePayment =
+            await payOS(credentials).paymentRequests.get(orderCode);
           const remoteStatus = remotePayment.status || "PENDING";
 
           if (

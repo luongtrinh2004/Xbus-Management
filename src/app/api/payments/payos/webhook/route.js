@@ -5,26 +5,39 @@ import {
   saveFunds,
   appendAuditLog,
   getUsers,
+  getSettings,
 } from "@/libs/dataRepository";
+import { payosCredentials } from "@/libs/payosChannels";
 
-const payOS = () =>
+const payOS = (credentials) =>
   new PayOS({
-    clientId: process.env.PAYOS_CLIENT_ID || process.env.CLIENT_ID,
-    apiKey: process.env.PAYOS_API_KEY || process.env.API_KEY,
-    checksumKey: process.env.PAYOS_CHECKSUM_KEY || process.env.CHECKSUM_KEY,
+    clientId: credentials.clientId,
+    apiKey: credentials.apiKey,
+    checksumKey: credentials.checksumKey,
   });
 
 export async function POST(req) {
   try {
-    if (!(process.env.PAYOS_CHECKSUM_KEY || process.env.CHECKSUM_KEY))
+    const rawBody = await req.json();
+    const unverifiedOrderCode = Number(
+      rawBody?.data?.orderCode || rawBody?.orderCode,
+    );
+    const funds = await getFunds();
+    const matchedMember = funds
+      .flatMap((fund) => fund.members || [])
+      .find((item) => Number(item.orderCode) === unverifiedOrderCode);
+    const credentials = payosCredentials(
+      await getSettings(),
+      matchedMember?.paymentChannelId || "legacy-env",
+    );
+    if (!credentials)
       return NextResponse.json(
         { error: "PayOS chưa được cấu hình" },
         { status: 503 },
       );
-    const webhookData = await payOS().webhooks.verify(await req.json());
+    const webhookData = await payOS(credentials).webhooks.verify(rawBody);
     if (webhookData.code !== "00") return NextResponse.json({ code: "00" });
     const orderCode = Number(webhookData.orderCode);
-    const funds = await getFunds();
     for (const fund of funds) {
       const index = (fund.members || []).findIndex(
         (item) => item.orderCode === orderCode,

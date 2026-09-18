@@ -6,12 +6,13 @@ import {
   getUsers,
   getWaterExemptions,
   getSettings,
+  saveSettings,
   appendAuditLog,
 } from "@/libs/dataRepository";
 import {
   getWeeksOfMonth,
   getEligibleWaterUsers,
-  getTrashSchedules,
+  getTrashSchedulesForMonth,
 } from "@/libs/waterScheduler";
 import { toVietnamDateKey } from "@/libs/dateTime";
 
@@ -40,24 +41,51 @@ export async function GET(req) {
     const eligibleUsers = getEligibleWaterUsers(allUsers);
     const exemptUserIds = await getWaterExemptions();
     const settings = await getSettings();
-    const trashSchedules = Array.from({ length: 25 }, (_, index) => index - 12)
-      .flatMap((weekOffset) =>
-        getTrashSchedules(
+    const activationDate = new Date(Date.UTC(year, month - 2, 25));
+    const [todayYear, todayMonth, todayDay] = toVietnamDateKey()
+      .split("-")
+      .map(Number);
+    const today = new Date(Date.UTC(todayYear, todayMonth - 1, todayDay));
+    const shouldGenerateTrash = today >= activationDate;
+    let trashOverrides = settings.trashScheduleOverrides || {};
+    let trashSchedules = getTrashSchedulesForMonth(
+      allUsers,
+      exemptUserIds,
+      year,
+      month,
+      trashOverrides,
+      shouldGenerateTrash,
+    );
+    if (shouldGenerateTrash) {
+      let changed = false;
+      const frozenOverrides = { ...trashOverrides };
+      for (const item of trashSchedules)
+        if (
+          !Object.prototype.hasOwnProperty.call(frozenOverrides, item.dateKey)
+        ) {
+          frozenOverrides[item.dateKey] = item.userId || null;
+          changed = true;
+        }
+      if (changed) {
+        trashOverrides = frozenOverrides;
+        await saveSettings({
+          ...settings,
+          trashScheduleOverrides: frozenOverrides,
+        });
+        trashSchedules = getTrashSchedulesForMonth(
           allUsers,
           exemptUserIds,
-          toVietnamDateKey(),
-          weekOffset,
-          settings.trashScheduleOverrides || {},
-          allSchedules,
-        ),
-      )
-      .filter((item) =>
-        item.dateKey.startsWith(`${year}-${String(month).padStart(2, "0")}`),
-      )
-      .map((item) => ({
-        ...item,
-        completed: Boolean(settings.trashScheduleCompletions?.[item.dateKey]),
-      }));
+          year,
+          month,
+          frozenOverrides,
+          true,
+        );
+      }
+    }
+    trashSchedules = trashSchedules.map((item) => ({
+      ...item,
+      completed: Boolean(settings.trashScheduleCompletions?.[item.dateKey]),
+    }));
 
     // Lọc theo tháng và năm
     let result = allSchedules.filter(

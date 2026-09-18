@@ -1,6 +1,87 @@
 {
   "auditLogs": [
     {
+      "id": "log_1789705541900_q2a5",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "COMPLETE_SCHEDULE",
+      "targetType": "water_schedules",
+      "targetId": "water_20260902",
+      "details": "Xác nhận hoàn thành lịch ngày 02/09/2026, cộng 1 điểm cho 1 người: Bùi Đình Quý",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-18T04:25:41.900Z"
+    },
+    {
+      "id": "log_1789705312190_wr5s",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "COMPLETE_SCHEDULE",
+      "targetType": "water_schedules",
+      "targetId": "water_20260909",
+      "details": "Xác nhận hoàn thành lịch ngày 09/09/2026, cộng 1 điểm cho 3 người: Nguyễn Trung Kiên, Trần Cao Khâm, Phan Thành Nam",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-18T04:21:52.190Z"
+    },
+    {
+      "id": "log_1789705110065_5v5x",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "DELETE_SCHEDULE",
+      "targetType": "water_schedules",
+      "targetId": "water_20260921",
+      "details": "Xóa lịch bê nước ngày 21/09/2026",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-18T04:18:30.065Z"
+    },
+    {
+      "id": "log_1789705039512_2djq",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "DELETE_SCHEDULE",
+      "targetType": "water_schedules",
+      "targetId": "water_20260907",
+      "details": "Xóa lịch bê nước ngày 07/09/2026",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-18T04:17:19.512Z"
+    },
+    {
+      "id": "log_1789703565382_f354",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "UPDATE_FUND_CONFIG",
+      "targetType": "FUND",
+      "details": "Thêm cấu hình PayOS Trịnh Phúc Lương",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-18T03:52:45.382Z"
+    },
+    {
+      "id": "log_1789701534021_g4jq",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "UPSERT_ASSET_PRODUCTS_FROM_EXCEL",
+      "targetType": "ASSET_PRODUCT",
+      "details": "Import Excel: thêm 103, cập nhật 0 sản phẩm",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-18T03:18:54.021Z"
+    },
+    {
+      "id": "log_1789699061155_n5nx",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "UPSERT_ASSETS_FROM_EXCEL",
+      "targetType": "ASSET",
+      "details": "Import Excel: thêm 412, cập nhật 0 giao dịch",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-18T02:37:41.155Z"
+    },
+    {
       "id": "log_1789611123779_i225",
       "adminId": "usr_admin_001",
       "adminName": "Quản trị viên Hệ thống",

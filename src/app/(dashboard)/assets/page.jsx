@@ -8,6 +8,7 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardHeader from "@mui/material/CardHeader";
+import Chip from "@mui/material/Chip";
 import CircularProgress from "@mui/material/CircularProgress";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
@@ -15,6 +16,7 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
+import MenuItem from "@mui/material/MenuItem";
 import Tab from "@mui/material/Tab";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -66,22 +68,14 @@ const columns = {
     "Ghi chú",
   ],
   stock: [
-    "Loại SP",
     "Mã SP",
-    "Tên sản phẩm",
+    "Tên SP",
+    "Đơn vị tính",
     "Tổng nhập",
     "Tổng xuất",
     "Tồn kho",
-    "Vị trí",
   ],
-  products: [
-    "Mã sản phẩm",
-    "Tên sản phẩm",
-    "Tổng nhập",
-    "Tổng xuất",
-    "Tồn kho",
-    "Vị trí",
-  ],
+  products: ["Mã SP", "Tên SP", "Đơn vị tính", "Trạng thái"],
 };
 const formatDate = formatVietnamDate;
 
@@ -122,7 +116,7 @@ const filterAssetOptions = (options, inputValue) => {
     .map(({ item }) => item);
 };
 
-function AssetTable({ rows, type, canManage, onEdit, onDelete }) {
+function AssetTable({ rows, type, canManage, onView, onEdit, onDelete }) {
   const editable = type !== "stock";
 
   return (
@@ -133,7 +127,7 @@ function AssetTable({ rows, type, canManage, onEdit, onDelete }) {
             {columns[type].map((label) => (
               <TableCell key={label}>{label}</TableCell>
             ))}
-            {editable && canManage && (
+            {(type === "products" || (editable && canManage)) && (
               <TableCell align="center">Thao tác</TableCell>
             )}
           </TableRow>
@@ -176,34 +170,63 @@ function AssetTable({ rows, type, canManage, onEdit, onDelete }) {
                     <TableCell>{row.quantity ?? "—"}</TableCell>
                     <TableCell>{row.note || "—"}</TableCell>
                   </>
-                ) : (
+                ) : type === "stock" ? (
                   <>
-                    <TableCell>{row.category || "—"}</TableCell>
                     <TableCell>
                       <Typography color="primary.main" fontWeight={600}>
                         {row.code}
                       </Typography>
                     </TableCell>
                     <TableCell>{row.name}</TableCell>
+                    <TableCell>{row.unit || "—"}</TableCell>
                     <TableCell>{row.totalImport}</TableCell>
                     <TableCell>{row.totalExport}</TableCell>
                     <TableCell>
                       <Typography fontWeight={700}>{row.quantity}</Typography>
                     </TableCell>
-                    <TableCell>{row.location || "—"}</TableCell>
+                  </>
+                ) : (
+                  <>
+                    <TableCell>
+                      <Typography color="primary.main" fontWeight={600}>
+                        {row.code}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>{row.name}</TableCell>
+                    <TableCell>{row.unit || "—"}</TableCell>
+                    <TableCell>
+                      <Chip
+                        size="small"
+                        variant="tonal"
+                        color={row.active ? "success" : "secondary"}
+                        label={row.active ? "Hoạt động" : "Ngừng sử dụng"}
+                      />
+                    </TableCell>
                   </>
                 )}
-                {editable && canManage && (
+                {(type === "products" || (editable && canManage)) && (
                   <TableCell align="center">
                     <Box display="flex" justifyContent="center" gap={0.5}>
-                      <IconButton
-                        size="small"
-                        color="primary"
-                        aria-label={`Chỉnh sửa ${row.name}`}
-                        onClick={() => onEdit(type, row)}
-                      >
-                        <i className="tabler-edit" />
-                      </IconButton>
+                      {type === "products" && (
+                        <IconButton
+                          size="small"
+                          color="info"
+                          aria-label={`Xem ${row.name}`}
+                          onClick={() => onView(row)}
+                        >
+                          <i className="tabler-eye" />
+                        </IconButton>
+                      )}
+                      {canManage && (
+                        <IconButton
+                          size="small"
+                          color="primary"
+                          aria-label={`Chỉnh sửa ${row.name}`}
+                          onClick={() => onEdit(type, row)}
+                        >
+                          <i className="tabler-edit" />
+                        </IconButton>
+                      )}
                       {type !== "products" && (
                         <IconButton
                           size="small"
@@ -222,7 +245,10 @@ function AssetTable({ rows, type, canManage, onEdit, onDelete }) {
           ) : (
             <TableRow>
               <TableCell
-                colSpan={columns[type].length + (editable && canManage ? 1 : 0)}
+                colSpan={
+                  columns[type].length +
+                  (type === "products" || (editable && canManage) ? 1 : 0)
+                }
                 align="center"
               >
                 <Typography color="text.secondary" py={5}>
@@ -506,7 +532,7 @@ function TransactionDialog({
   );
 }
 
-function ProductDialog({ open, product, onClose, onSaved }) {
+function ProductDialog({ open, product, readOnly = false, onClose, onSaved }) {
   const [form, setForm] = useState({
     code: "",
     name: "",
@@ -544,7 +570,11 @@ function ProductDialog({ open, product, onClose, onSaved }) {
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle>
-        {product ? "Chỉnh sửa sản phẩm" : "Thêm sản phẩm"}
+        {readOnly
+          ? "Chi tiết sản phẩm"
+          : product
+            ? "Chỉnh sửa sản phẩm"
+            : "Thêm sản phẩm"}
       </DialogTitle>
       <DialogContent dividers>
         <Box
@@ -558,22 +588,25 @@ function ProductDialog({ open, product, onClose, onSaved }) {
           <CustomTextField
             label="Mã sản phẩm *"
             value={form.code}
-            disabled={Boolean(product)}
+            disabled={Boolean(product) || readOnly}
             onChange={(e) => setForm({ ...form, code: e.target.value })}
           />
           <CustomTextField
             label="Tên sản phẩm *"
             value={form.name}
+            disabled={readOnly}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
           />
           <CustomTextField
             label="Đơn vị tính *"
             value={form.unit}
+            disabled={readOnly}
             onChange={(e) => setForm({ ...form, unit: e.target.value })}
           />
           <CustomTextField
             label="Vị trí"
             value={form.location}
+            disabled={readOnly}
             onChange={(e) => setForm({ ...form, location: e.target.value })}
           />
           <CustomTextField
@@ -582,12 +615,14 @@ function ProductDialog({ open, product, onClose, onSaved }) {
             multiline
             minRows={2}
             value={form.description}
+            disabled={readOnly}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
           />
           <label>
             <input
               type="checkbox"
               checked={form.active}
+              disabled={readOnly}
               onChange={(e) => setForm({ ...form, active: e.target.checked })}
             />{" "}
             Đang hoạt động
@@ -596,15 +631,19 @@ function ProductDialog({ open, product, onClose, onSaved }) {
       </DialogContent>
       <DialogActions>
         <Button color="secondary" onClick={onClose}>
-          Hủy
+          {readOnly ? "Đóng" : "Hủy"}
         </Button>
-        <Button
-          variant="contained"
-          disabled={!form.code.trim() || !form.name.trim() || !form.unit.trim()}
-          onClick={save}
-        >
-          Lưu sản phẩm
-        </Button>
+        {!readOnly && (
+          <Button
+            variant="contained"
+            disabled={
+              !form.code.trim() || !form.name.trim() || !form.unit.trim()
+            }
+            onClick={save}
+          >
+            Lưu sản phẩm
+          </Button>
+        )}
       </DialogActions>
     </Dialog>
   );
@@ -618,13 +657,16 @@ export default function AssetsPage() {
   const [dialog, setDialog] = useState(null);
   const [productDialog, setProductDialog] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
+  const [viewingProduct, setViewingProduct] = useState(null);
   const [editingItem, setEditingItem] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [productStatus, setProductStatus] = useState("all");
   const [limit, setLimit] = useState(10);
   const [page, setPage] = useState(1);
   const [excelWarningOpen, setExcelWarningOpen] = useState(false);
+  const [excelImportType, setExcelImportType] = useState(null);
   const [importingExcel, setImportingExcel] = useState(false);
   const excelInputRef = useRef(null);
   const loadData = async () => {
@@ -658,7 +700,7 @@ export default function AssetsPage() {
   useEffect(() => {
     if (status === "authenticated") loadData();
   }, [status]);
-  const stock = useMemo(() => {
+  const stockByCode = useMemo(() => {
     const rows = new Map();
     data.imports.forEach((item) => {
       if (!item.code || item.quantity === null || item.quantity === undefined)
@@ -690,14 +732,13 @@ export default function AssetsPage() {
         quantity: current.quantity - Number(item.quantity),
       });
     });
-    return [...rows.values()];
+    return rows;
   }, [data]);
   const products = useMemo(
     () =>
       (data.products || []).map((item) => ({
         ...item,
-        quantity:
-          stock.find((entry) => entry.code === item.code)?.quantity || 0,
+        quantity: stockByCode.get(item.code)?.quantity || 0,
         totalImport: data.imports
           .filter((entry) => entry.code === item.code)
           .reduce((sum, entry) => sum + Number(entry.quantity || 0), 0),
@@ -705,7 +746,7 @@ export default function AssetsPage() {
           .filter((entry) => entry.code === item.code)
           .reduce((sum, entry) => sum + Number(entry.quantity || 0), 0),
       })),
-    [data, stock],
+    [data, stockByCode],
   );
   const activeRows =
     tab === "import"
@@ -714,15 +755,22 @@ export default function AssetsPage() {
         ? data.exports
         : tab === "products"
           ? products
-          : stock;
+          : products;
   const filteredRows = useMemo(
     () =>
-      activeRows.filter((row) =>
-        normalizeSearchText(
-          `${row.code} ${row.name} ${row.location} ${row.person} ${row.note}`,
-        ).includes(normalizeSearchText(search)),
-      ),
-    [activeRows, search],
+      activeRows.filter((row) => {
+        const matchesSearch = normalizeSearchText(
+          tab === "products"
+            ? `${row.code} ${row.name}`
+            : `${row.code} ${row.name} ${row.location} ${row.person} ${row.note}`,
+        ).includes(normalizeSearchText(search));
+        const matchesStatus =
+          tab !== "products" ||
+          productStatus === "all" ||
+          (productStatus === "active" ? row.active : !row.active);
+        return matchesSearch && matchesStatus;
+      }),
+    [activeRows, productStatus, search, tab],
   );
   const normalizeExcelDate = (value) => {
     if (typeof value === "number") {
@@ -756,6 +804,51 @@ export default function AssetsPage() {
         type: "array",
         cellDates: false,
       });
+      if (excelImportType === "products") {
+        const productSheetName = workbook.SheetNames.find(
+          (item) =>
+            normalizeSearchText(item).replace(/\s+/g, "") === "danhsachsanpham",
+        );
+        const productSheet =
+          workbook.Sheets[productSheetName || workbook.SheetNames[0]];
+        const products = XLSX.utils
+          .sheet_to_json(productSheet, { defval: "", raw: true })
+          .filter((row) =>
+            Object.values(row).some((value) => String(value || "").trim()),
+          )
+          .map((row) => ({
+            code: pick(row, ["masanpham", "masp", "ma", "code"]),
+            name: pick(row, ["tensanpham", "tensp", "ten", "name"]),
+            unit: pick(row, ["donvitinh", "donvi", "loaisp", "unit"]) || "Cái",
+            description: pick(row, ["motasanpham", "mota", "description"]),
+            location: pick(row, ["vitri", "location"]),
+            active: ![
+              "inactive",
+              "ngung su dung",
+              "ngung hoat dong",
+              "khong hoat dong",
+              "false",
+              "0",
+            ].includes(
+              normalizeSearchText(pick(row, ["trangthai", "status", "active"])),
+            ),
+          }));
+        if (!products.length) throw new Error("File không có dữ liệu sản phẩm");
+
+        const response = await fetch("/api/asset-products", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ products }),
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error);
+        await loadData();
+        setTab("products");
+        toast.success(
+          `Đã thêm ${result.summary?.added || 0} và cập nhật ${result.summary?.updated || 0} sản phẩm`,
+        );
+        return;
+      }
       const findSheet = (expected) => {
         const name = workbook.SheetNames.find(
           (item) => normalizeSearchText(item).replace(/\s+/g, "") === expected,
@@ -816,6 +909,7 @@ export default function AssetsPage() {
       toast.error(error.message || "Không thể đọc file Excel");
     } finally {
       setImportingExcel(false);
+      setExcelImportType(null);
     }
   };
   const exportCurrentList = () => {
@@ -841,13 +935,12 @@ export default function AssetsPage() {
       "Ghi chú": item.note || "",
     }));
     const stockRows = products.map((item) => ({
-      "Loại SP": item.category || "",
       "Mã SP": item.code,
-      "Tên sản phẩm": item.name,
-      "Tổng số lượng nhập kho": item.totalImport,
-      "Tổng số lượng xuất kho": item.totalExport,
+      "Tên SP": item.name,
+      "Đơn vị tính": item.unit || "",
+      "Tổng nhập": item.totalImport,
+      "Tổng xuất": item.totalExport,
       "Tồn kho": item.quantity,
-      "Vị trí": item.location || "",
     }));
     const productRows = (data.products || []).map((item) => ({
       "Mã sản phẩm": item.code || "",
@@ -855,7 +948,7 @@ export default function AssetsPage() {
       "Đơn vị tính": item.unit || "",
       "Mô tả": item.description || "",
       "Vị trí": item.location || "",
-      "Trạng thái": item.active ? "Đang hoạt động" : "Ngừng sử dụng",
+      "Trạng thái": item.active ? "Hoạt động" : "Ngừng sử dụng",
     }));
     XLSX.utils.book_append_sheet(
       workbook,
@@ -985,16 +1078,36 @@ export default function AssetsPage() {
         >
           <Tab value="import" label={`Nhập kho (${data.imports.length})`} />
           <Tab value="export" label={`Xuất kho (${data.exports.length})`} />
-          <Tab value="stock" label={`Tồn kho (${stock.length})`} />
+          <Tab value="stock" label={`Tồn kho (${products.length})`} />
           <Tab
             value="products"
             label={`Danh sách sản phẩm (${products.length})`}
           />
         </Tabs>
+        {tab === "products" && (
+          <Box px={5} pb={2} display="flex" justifyContent="flex-end">
+            <CustomTextField
+              select
+              size="small"
+              label="Trạng thái"
+              value={productStatus}
+              onChange={(event) => {
+                setProductStatus(event.target.value);
+                setPage(1);
+              }}
+              sx={{ minWidth: 190 }}
+            >
+              <MenuItem value="all">Tất cả trạng thái</MenuItem>
+              <MenuItem value="active">Hoạt động</MenuItem>
+              <MenuItem value="inactive">Ngừng sử dụng</MenuItem>
+            </CustomTextField>
+          </Box>
+        )}
         <AssetTable
           type={tab}
           rows={pagedRows}
           canManage={canManage}
+          onView={(item) => setViewingProduct(item)}
           onEdit={(type, item) => {
             if (type === "products") {
               setEditingProduct(item);
@@ -1036,6 +1149,13 @@ export default function AssetsPage() {
           }}
           onSaved={loadData}
         />
+        <ProductDialog
+          open={Boolean(viewingProduct)}
+          product={viewingProduct}
+          readOnly
+          onClose={() => setViewingProduct(null)}
+          onSaved={loadData}
+        />
         <ConfirmDialog
           open={Boolean(deleteTarget)}
           title="Xác nhận xóa phiếu tài sản"
@@ -1057,18 +1177,62 @@ export default function AssetsPage() {
           accept=".xlsx,.xls"
           onChange={importExcel}
         />
-        <ConfirmDialog
+        <Dialog
           open={excelWarningOpen}
-          title="Import dữ liệu tài sản từ Excel"
-          message="File cần có đủ 3 sheet Nhập kho, Xuất kho và Tồn kho. Dòng trùng mã sản phẩm, ngày và người thực hiện sẽ được cập nhật toàn bộ theo file; dòng mới sẽ được thêm vào danh sách hiện tại."
-          confirmText="Chọn file để import"
-          confirmColor="warning"
           onClose={() => setExcelWarningOpen(false)}
-          onConfirm={() => {
-            setExcelWarningOpen(false);
-            excelInputRef.current?.click();
-          }}
-        />
+          fullWidth
+          maxWidth="sm"
+        >
+          <DialogTitle>Import dữ liệu tài sản từ Excel</DialogTitle>
+          <DialogContent dividers>
+            <Typography color="text.secondary" mb={3}>
+              Chọn loại dữ liệu bạn muốn import. Dữ liệu trùng sẽ được cập nhật,
+              dữ liệu mới sẽ được bổ sung.
+            </Typography>
+            <Box display="grid" gap={2}>
+              <Button
+                variant="outlined"
+                size="large"
+                startIcon={<i className="tabler-list-details" />}
+                onClick={() => {
+                  setExcelImportType("products");
+                  setExcelWarningOpen(false);
+                  excelInputRef.current?.click();
+                }}
+              >
+                Import danh sách sản phẩm
+              </Button>
+              <Typography variant="caption" color="text.secondary">
+                Cột hỗ trợ: Mã sản phẩm, Tên sản phẩm, Đơn vị tính, Mô tả, Vị
+                trí. Đơn vị mặc định là Cái.
+              </Typography>
+              <Button
+                variant="outlined"
+                color="warning"
+                size="large"
+                startIcon={<i className="tabler-arrows-exchange" />}
+                onClick={() => {
+                  setExcelImportType("transactions");
+                  setExcelWarningOpen(false);
+                  excelInputRef.current?.click();
+                }}
+              >
+                Import danh sách nhập / xuất / tồn hiện tại
+              </Button>
+              <Typography variant="caption" color="text.secondary">
+                File cần có đủ 3 sheet: Nhập kho, Xuất kho và Tồn kho.
+              </Typography>
+            </Box>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              color="secondary"
+              onClick={() => setExcelWarningOpen(false)}
+            >
+              Hủy
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Card>
     </Box>
   );

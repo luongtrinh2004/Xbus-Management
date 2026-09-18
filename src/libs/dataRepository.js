@@ -334,6 +334,8 @@ export async function getFunds() {
           checkoutUrl: item.checkout_url || undefined,
           paymentReference: item.payment_reference || undefined,
           approvedBy: item.approved_by || undefined,
+          paymentChannelId: metadata.get(fund.id)?.members?.[item.user_id]
+            ?.paymentChannelId,
           updatedAt: toIso(item.updated_at),
         })),
       incomes: transactions
@@ -394,6 +396,7 @@ export async function saveFunds(funds) {
             cancellationReason: item.cancellationReason || "",
             cancelledAt: item.cancelledAt,
             cancelledBy: item.cancelledBy,
+            paymentChannelId: item.paymentChannelId,
           },
         ]),
       );

@@ -78,6 +78,47 @@
     "2026-09-15": "usr_007",
     "2026-09-16": "usr_026",
     "2026-09-17": "usr_admin_001",
-    "2026-09-18": "usr_001"
-  }
+    "2026-09-18": "usr_001",
+    "2026-09-01": "usr_007",
+    "2026-09-02": "usr_026",
+    "2026-09-03": "usr_admin_001",
+    "2026-09-04": "usr_admin_001",
+    "2026-09-07": "usr_002",
+    "2026-09-08": "usr_021",
+    "2026-09-09": null,
+    "2026-09-10": "usr_026",
+    "2026-09-11": "usr_001",
+    "2026-09-21": null,
+    "2026-09-22": "usr_admin_001",
+    "2026-09-23": "usr_023",
+    "2026-09-24": "usr_021",
+    "2026-09-25": "usr_007",
+    "2026-09-28": "usr_026",
+    "2026-09-29": "usr_001",
+    "2026-09-30": "usr_admin_001"
+  },
+  "payosPaymentChannels": [
+    {
+      "id": "payos-channel-1789703565379",
+      "name": "Trịnh Phúc Lương",
+      "archived": false,
+      "clientId": {
+        "iv": "x5JDjtI8rglIkZtH",
+        "tag": "b38AeNFvhEiXDleOFSYvoA==",
+        "data": "n+UZiTVU661fPf+oFP/xmbvDLsW+slFvlQo3o72qBp86dI8V"
+      },
+      "apiKey": {
+        "iv": "1EsvV21dBk3I47B/",
+        "tag": "NKguC+jqCrd+euI4SgjT1w==",
+        "data": "AdSq04IhrRlusp4LZgUVdh5TB+FTi00j7k3Z3L9zHzK4VYaX"
+      },
+      "checksumKey": {
+        "iv": "K3ye1DJ8BRFDRgG2",
+        "tag": "6zPLg3+mxd24bSyWc7hmMw==",
+        "data": "4e1UJwq9YpiYmA/cgDXGsEs24RTpC1nCtOfTDEcHbgSpf+09O2yBEyYzAIg/95KUWNtJojxnT/t6olq/6/Ra0g=="
+      },
+      "updatedAt": "2026-09-18T03:52:45.380Z"
+    }
+  ],
+  "activePayosChannelId": "payos-channel-1789703565379"
 }

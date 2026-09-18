@@ -41,7 +41,7 @@ if [[ -n "${VPS_SSH_KEY}" ]]; then
 fi
 SKIP_BUILD="${SKIP_BUILD:-false}"
 
-echo "🔐 [0/6] Kiểm tra SSH tới ${VPS_TARGET}:${VPS_PORT}"
+echo "🔐 [0/7] Kiểm tra SSH tới ${VPS_TARGET}:${VPS_PORT}"
 if ! "${SSH[@]}" "${VPS_TARGET}" true; then
   cat >&2 <<EOF
 Không thể SSH tới VPS. Hãy tạo ${SCRIPT_DIR}/.deploy.env theo mẫu
@@ -51,27 +51,27 @@ EOF
 fi
 
 if [[ "${SKIP_BUILD}" == "true" ]]; then
-  echo "⏭️  [1-2/6] Dùng image đã push: ${IMAGE_NAME}"
+  echo "⏭️  [1-2/7] Dùng image đã push: ${IMAGE_NAME}"
 else
-  echo "🚀 [1/6] Build image local cho linux/amd64: ${IMAGE_NAME}"
+  echo "🚀 [1/7] Build image local cho linux/amd64: ${IMAGE_NAME}"
   docker build \
     --platform linux/amd64 \
     --build-arg "NEXT_PUBLIC_APP_URL=${PUBLIC_APP_URL}" \
     --tag "${IMAGE_NAME}" \
     .
 
-  echo "📤 [2/6] Push image lên Docker Hub"
+  echo "📤 [2/7] Push image lên Docker Hub"
   docker push "${IMAGE_NAME}"
 fi
 
-echo "🧹 [3/6] Dọn các image rác ở local"
+echo "🧹 [3/7] Dọn các image rác ở local"
 docker image prune --force
 
-echo "📥 [4/6] Đồng bộ Docker Compose lên VPS"
+echo "📥 [4/7] Đồng bộ Docker Compose lên VPS"
 "${SSH[@]}" "${VPS_TARGET}" "mkdir -p '${VPS_DIR}'"
 "${SCP[@]}" "${SCRIPT_DIR}/docker-compose.yml" "${VPS_TARGET}:${VPS_DIR}/docker-compose.yml"
 
-echo "🔄 [5/6] Pull image và restart container trên VPS (không build lại)"
+echo "🔄 [5/7] Pull image và restart container trên VPS (không build lại)"
 "${SSH[@]}" "${VPS_TARGET}" bash -s -- "${VPS_DIR}" "${IMAGE_NAME}" <<'REMOTE_SCRIPT'
 set -Eeuo pipefail
 
@@ -95,7 +95,26 @@ $DOCKER_COMPOSE ps
 docker image prune --force
 REMOTE_SCRIPT
 
-echo "🩺 [6/6] Kiểm tra ứng dụng trên VPS"
+echo "🗃️  [6/7] Áp dụng migration cơ sở dữ liệu"
+"${SSH[@]}" "${VPS_TARGET}" bash -s -- "${VPS_DIR}" <<'MIGRATION_SCRIPT'
+set -Eeuo pipefail
+
+VPS_DIR="$1"
+cd "${VPS_DIR}"
+
+if docker compose version >/dev/null 2>&1; then
+  DOCKER_COMPOSE="docker compose"
+elif command -v docker-compose >/dev/null 2>&1; then
+  DOCKER_COMPOSE="docker-compose"
+else
+  echo "Không tìm thấy Docker Compose trên VPS" >&2
+  exit 1
+fi
+
+$DOCKER_COMPOSE exec -T xbus-office npm run db:migrate
+MIGRATION_SCRIPT
+
+echo "🩺 [7/7] Kiểm tra ứng dụng trên VPS"
 "${SSH[@]}" "${VPS_TARGET}" bash -s <<'HEALTHCHECK_SCRIPT'
 set -Eeuo pipefail
 

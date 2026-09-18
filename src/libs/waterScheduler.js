@@ -138,6 +138,72 @@ export function getTrashSchedules(
   return schedules;
 }
 
+/** Tạo lịch đổ rác cho toàn bộ ngày làm việc trong một tháng. */
+export function getTrashSchedulesForMonth(
+  users = [],
+  exemptUserIds = [],
+  year,
+  month,
+  overrides = {},
+  autoAssign = true,
+) {
+  const exemptSet = new Set(exemptUserIds);
+  const participants = users
+    .filter(
+      (user) =>
+        exemptSet.has(user.id) &&
+        user.status === "able" &&
+        !isOperationsUser(user),
+    )
+    .sort(
+      (a, b) =>
+        (a.schedulingPoints || 0) - (b.schedulingPoints || 0) ||
+        String(a.name || "").localeCompare(String(b.name || ""), "vi"),
+    );
+  const usersById = new Map(users.map((person) => [person.id, person]));
+  const schedules = [];
+  const anchor = Date.UTC(2026, 0, 5);
+  const dayMs = 86400000;
+  const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
+
+  for (let day = 1; day <= daysInMonth; day += 1) {
+    const date = new Date(Date.UTC(year, month - 1, day));
+    const weekday = date.getUTCDay();
+    if (weekday === 0 || weekday === 6) continue;
+    const dateKey = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+    const hasOverride = Object.prototype.hasOwnProperty.call(
+      overrides,
+      dateKey,
+    );
+    const elapsedDays = Math.floor((date.getTime() - anchor) / dayMs);
+    const workingIndex =
+      Math.floor(elapsedDays / 7) * 5 + Math.max(0, weekday - 1);
+    const defaultPerson =
+      autoAssign && participants.length
+        ? participants[
+            ((workingIndex % participants.length) + participants.length) %
+              participants.length
+          ]
+        : null;
+    const person = hasOverride
+      ? usersById.get(overrides[dateKey]) || null
+      : defaultPerson;
+    schedules.push({
+      id: `trash_${year}${String(month).padStart(2, "0")}${String(day).padStart(2, "0")}`,
+      date: `${String(day).padStart(2, "0")}/${String(month).padStart(2, "0")}/${year}`,
+      dateKey,
+      weekday,
+      userId: person?.id || "",
+      name: person?.name || "",
+      code: person?.code || "",
+      avatarUrl: person?.avatarUrl || "",
+      role: person?.role || "",
+      gender: person?.gender || "",
+    });
+  }
+  return schedules;
+}
+
 /**
  * Tính toán danh sách các tuần trong một tháng nhất định
  * Tuần bắt đầu từ Thứ Hai và kết thúc vào Chủ Nhật (Mục 2.4)

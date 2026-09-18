@@ -60,9 +60,25 @@ const verticalMenuData = [
   },
   {
     label: "Cài đặt",
-    href: "/settings",
     icon: "tabler-settings",
     roles: ["assistant", "admin"],
+    children: [
+      {
+        label: "Nhắc lịch",
+        href: "/settings?section=reminder",
+        roles: ["assistant", "admin"],
+      },
+      {
+        label: "Kỳ đóng",
+        href: "/settings?section=period",
+        roles: ["assistant", "admin"],
+      },
+      {
+        label: "QR đóng quỹ",
+        href: "/settings?section=qr",
+        roles: ["assistant", "admin"],
+      },
+    ],
   },
 ];
 

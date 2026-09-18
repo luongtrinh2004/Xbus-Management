@@ -29,6 +29,17 @@ const fundLabels = {
 // Ngày nhập trong form là ngày nghiệp vụ Việt Nam, không phải ngày UTC.
 const businessDateToIso = (date, fallback) =>
   date ? new Date(`${date}T12:00:00+07:00`).toISOString() : fallback;
+const reminderDefaults = (period, settings) => {
+  const reminder = settings.fundReminderSettings;
+  if (!reminder) return {};
+  const lastDay = new Date(Date.UTC(period.year, period.month, 0)).getUTCDate();
+  const day = Math.min(Number(reminder.deadlineDay || 10), lastDay);
+  return {
+    paymentDeadline: `${period.year}-${String(period.month).padStart(2, "0")}-${String(day).padStart(2, "0")}`,
+    reminderDaysBefore: reminder.daysBefore || [],
+    emailReminderEnabled: Boolean(reminder.enabled),
+  };
+};
 
 const buildFundResponse = (fund, allFunds) => {
   const memberIncome = (fund.members || []).reduce(
@@ -102,6 +113,7 @@ export async function GET(req) {
       allFunds.push({
         id: `fund_${current.year}_${current.month}`,
         ...current,
+        ...reminderDefaults(current, settings),
         openingBalance: previous
           ? buildFundResponse(previous, allFunds).balance
           : 0,
@@ -119,6 +131,7 @@ export async function GET(req) {
       allFunds.push({
         id: `fund_${selected.year}_${selected.month}`,
         ...selected,
+        ...reminderDefaults(selected, settings),
         openingBalance: 0,
         members: [],
         incomes: [],

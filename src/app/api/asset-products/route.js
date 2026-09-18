@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
-import { getAssets, saveAssetProduct } from "@/libs/dataRepository";
+import {
+  appendAuditLog,
+  getAssets,
+  saveAssetProduct,
+} from "@/libs/dataRepository";
 
 const secret = process.env.NEXTAUTH_SECRET;
 const canManage = (token) => ["admin", "assistant"].includes(token?.role);
@@ -62,6 +66,84 @@ export async function POST(req) {
     return NextResponse.json(
       { error: "Không thể lưu sản phẩm" },
       { status: 500 },
+    );
+  }
+}
+
+export async function PUT(req) {
+  const token = await getToken({ req, secret });
+  if (!canManage(token))
+    return NextResponse.json(
+      { error: "Không có quyền truy cập" },
+      { status: 403 },
+    );
+
+  try {
+    const body = await req.json();
+    if (!Array.isArray(body.products) || !body.products.length)
+      return NextResponse.json(
+        { error: "File Excel không có dữ liệu sản phẩm" },
+        { status: 400 },
+      );
+
+    const { products: currentProducts = [] } = await getAssets();
+    const currentByCode = new Map(
+      currentProducts.map((item) => [item.code.toUpperCase(), item]),
+    );
+    const incomingByCode = new Map();
+
+    for (const row of body.products) {
+      const code = String(row.code || "")
+        .trim()
+        .toUpperCase();
+      const name = String(row.name || "").trim();
+      if (!code || !name) continue;
+      incomingByCode.set(code, {
+        code,
+        name,
+        unit: String(row.unit || "Cái").trim() || "Cái",
+        description: String(row.description || "").trim(),
+        location: String(row.location || "").trim(),
+        active: row.active !== false,
+      });
+    }
+
+    if (!incomingByCode.size)
+      return NextResponse.json(
+        { error: "Không tìm thấy dòng có đủ Mã và Tên sản phẩm" },
+        { status: 400 },
+      );
+
+    let added = 0;
+    let updated = 0;
+    for (const item of incomingByCode.values()) {
+      const existing = currentByCode.get(item.code);
+      await saveAssetProduct({
+        ...existing,
+        ...item,
+        id: existing?.id || `product_${slug(item.code) || Date.now()}`,
+        active: item.active,
+        createdAt: existing?.createdAt || new Date().toISOString(),
+      });
+      if (existing) updated += 1;
+      else added += 1;
+    }
+
+    await appendAuditLog({
+      adminId: token.id,
+      adminName: token.name || "Người dùng",
+      adminEmail: token.email || "",
+      action: "UPSERT_ASSET_PRODUCTS_FROM_EXCEL",
+      targetType: "ASSET_PRODUCT",
+      details: `Import Excel: thêm ${added}, cập nhật ${updated} sản phẩm`,
+    });
+
+    return NextResponse.json({ summary: { added, updated } });
+  } catch (error) {
+    console.error("[API Asset Products Import]", error);
+    return NextResponse.json(
+      { error: error.message || "Không thể import danh sách sản phẩm" },
+      { status: 400 },
     );
   }
 }

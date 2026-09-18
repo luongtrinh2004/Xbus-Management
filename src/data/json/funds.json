@@ -34,8 +34,8 @@
           "requiredAmount": 150000,
           "baseAmount": 150000,
           "carryIn": 0,
-          "difference": -150000,
-          "carryOut": -150000,
+          "difference": 0,
+          "carryOut": 0,
           "voluntarySurplus": false
         },
         {
@@ -51,7 +51,7 @@
           "baseAmount": 150000,
           "carryIn": 0,
           "difference": -1000,
-          "carryOut": -1000,
+          "carryOut": 1000,
           "voluntarySurplus": true
         },
         {
@@ -67,7 +67,7 @@
           "baseAmount": 150000,
           "carryIn": 0,
           "difference": -100000,
-          "carryOut": -100000,
+          "carryOut": 100000,
           "voluntarySurplus": false
         },
         {
@@ -82,7 +82,7 @@
           "baseAmount": 150000,
           "carryIn": 0,
           "difference": -50000,
-          "carryOut": -50000,
+          "carryOut": 50000,
           "voluntarySurplus": false
         },
         {
@@ -97,8 +97,8 @@
           "requiredAmount": 150000,
           "baseAmount": 150000,
           "carryIn": 0,
-          "difference": -150000,
-          "carryOut": -150000,
+          "difference": 0,
+          "carryOut": 0,
           "paymentStatus": "PENDING",
           "orderCode": 1789553978477,
           "paymentLinkId": "2120c9f48053407dbcb82b2e3e771fc3",
@@ -118,8 +118,8 @@
           "requiredAmount": 0,
           "baseAmount": 5000,
           "carryIn": 0,
-          "difference": 50000,
-          "carryOut": 50000,
+          "difference": 0,
+          "carryOut": 0,
           "voluntarySurplus": false,
           "obligationCancelled": true,
           "cancellationReason": "Được miễn",
@@ -139,7 +139,7 @@
           "baseAmount": 150000,
           "carryIn": 0,
           "difference": -100000,
-          "carryOut": -100000,
+          "carryOut": 100000,
           "voluntarySurplus": false
         },
         {
@@ -155,7 +155,7 @@
           "baseAmount": 150000,
           "carryIn": 0,
           "difference": -100000,
-          "carryOut": -100000,
+          "carryOut": 100000,
           "voluntarySurplus": false
         },
         {
@@ -171,7 +171,7 @@
           "baseAmount": 150000,
           "carryIn": 0,
           "difference": -100000,
-          "carryOut": -100000,
+          "carryOut": 100000,
           "voluntarySurplus": false
         },
         {
@@ -191,7 +191,7 @@
           "baseAmount": 150000,
           "carryIn": 0,
           "difference": -100000,
-          "carryOut": -100000,
+          "carryOut": 100000,
           "voluntarySurplus": false
         },
         {
@@ -206,8 +206,8 @@
           "requiredAmount": 100000,
           "baseAmount": 100000,
           "carryIn": 0,
-          "difference": 5900000,
-          "carryOut": 5900000,
+          "difference": 0,
+          "carryOut": 0,
           "voluntarySurplus": false
         },
         {
@@ -219,8 +219,8 @@
           "requiredAmount": 150000,
           "baseAmount": 150000,
           "carryIn": 0,
-          "difference": -150000,
-          "carryOut": -150000,
+          "difference": 0,
+          "carryOut": 0,
           "voluntarySurplus": false
         },
         {
@@ -232,8 +232,8 @@
           "requiredAmount": 150000,
           "baseAmount": 150000,
           "carryIn": 0,
-          "difference": -150000,
-          "carryOut": -150000,
+          "difference": 0,
+          "carryOut": 0,
           "voluntarySurplus": false
         },
         {
@@ -245,8 +245,8 @@
           "requiredAmount": 150000,
           "baseAmount": 150000,
           "carryIn": 0,
-          "difference": -150000,
-          "carryOut": -150000,
+          "difference": 0,
+          "carryOut": 0,
           "voluntarySurplus": false
         },
         {
@@ -258,8 +258,8 @@
           "requiredAmount": 150000,
           "baseAmount": 150000,
           "carryIn": 0,
-          "difference": -150000,
-          "carryOut": -150000,
+          "difference": 0,
+          "carryOut": 0,
           "voluntarySurplus": false
         },
         {
@@ -271,8 +271,8 @@
           "requiredAmount": 150000,
           "baseAmount": 150000,
           "carryIn": 0,
-          "difference": -150000,
-          "carryOut": -150000,
+          "difference": 0,
+          "carryOut": 0,
           "voluntarySurplus": false
         },
         {
@@ -284,8 +284,8 @@
           "requiredAmount": 150000,
           "baseAmount": 150000,
           "carryIn": 0,
-          "difference": -150000,
-          "carryOut": -150000,
+          "difference": 0,
+          "carryOut": 0,
           "voluntarySurplus": false
         },
         {
@@ -297,8 +297,8 @@
           "requiredAmount": 150000,
           "baseAmount": 150000,
           "carryIn": 0,
-          "difference": -150000,
-          "carryOut": -150000,
+          "difference": 0,
+          "carryOut": 0,
           "voluntarySurplus": false
         },
         {
@@ -310,8 +310,8 @@
           "requiredAmount": 150000,
           "baseAmount": 150000,
           "carryIn": 0,
-          "difference": -150000,
-          "carryOut": -150000,
+          "difference": 0,
+          "carryOut": 0,
           "voluntarySurplus": false
         },
         {
@@ -323,8 +323,8 @@
           "requiredAmount": 150000,
           "baseAmount": 150000,
           "carryIn": 0,
-          "difference": -150000,
-          "carryOut": -150000,
+          "difference": 0,
+          "carryOut": 0,
           "voluntarySurplus": false
         },
         {
@@ -336,8 +336,8 @@
           "requiredAmount": 150000,
           "baseAmount": 150000,
           "carryIn": 0,
-          "difference": -150000,
-          "carryOut": -150000,
+          "difference": 0,
+          "carryOut": 0,
           "voluntarySurplus": false
         },
         {
@@ -349,8 +349,8 @@
           "requiredAmount": 150000,
           "baseAmount": 150000,
           "carryIn": 0,
-          "difference": -150000,
-          "carryOut": -150000,
+          "difference": 0,
+          "carryOut": 0,
           "voluntarySurplus": false
         },
         {
@@ -362,8 +362,8 @@
           "requiredAmount": 100000,
           "baseAmount": 100000,
           "carryIn": 0,
-          "difference": -100000,
-          "carryOut": -100000,
+          "difference": 0,
+          "carryOut": 0,
           "voluntarySurplus": false
         },
         {
@@ -375,8 +375,8 @@
           "requiredAmount": 100000,
           "baseAmount": 100000,
           "carryIn": 0,
-          "difference": -100000,
-          "carryOut": -100000,
+          "difference": 0,
+          "carryOut": 0,
           "voluntarySurplus": false
         },
         {
@@ -388,8 +388,8 @@
           "requiredAmount": 100000,
           "baseAmount": 100000,
           "carryIn": 0,
-          "difference": -100000,
-          "carryOut": -100000,
+          "difference": 0,
+          "carryOut": 0,
           "voluntarySurplus": false
         },
         {
@@ -401,8 +401,8 @@
           "requiredAmount": 100000,
           "baseAmount": 100000,
           "carryIn": 0,
-          "difference": -100000,
-          "carryOut": -100000,
+          "difference": 0,
+          "carryOut": 0,
           "voluntarySurplus": false
         },
         {
@@ -414,8 +414,8 @@
           "requiredAmount": 150000,
           "baseAmount": 150000,
           "carryIn": 0,
-          "difference": -150000,
-          "carryOut": -150000,
+          "difference": 0,
+          "carryOut": 0,
           "voluntarySurplus": false
         },
         {
@@ -427,8 +427,8 @@
           "requiredAmount": 150000,
           "baseAmount": 150000,
           "carryIn": 0,
-          "difference": -150000,
-          "carryOut": -150000,
+          "difference": 0,
+          "carryOut": 0,
           "voluntarySurplus": false
         }
       ],
@@ -545,12 +545,12 @@
           "memberName": "Nhân viên hệ thống",
           "categoryId": "category_official",
           "baseAmount": 150000,
-          "requiredAmount": 100000,
+          "requiredAmount": 150000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": 50000,
-          "difference": -100000,
-          "carryOut": -100000
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -559,12 +559,12 @@
           "memberName": "Quản trị viên Hệ thống",
           "categoryId": "category_official",
           "baseAmount": 150000,
-          "requiredAmount": 300000,
+          "requiredAmount": 150000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -150000,
-          "difference": -300000,
-          "carryOut": -300000
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -577,8 +577,8 @@
           "voluntarySurplus": false,
           "rosterHidden": false,
           "carryIn": 0,
-          "difference": -100000,
-          "carryOut": -100000
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -587,12 +587,12 @@
           "memberName": "Hà Quốc Việt",
           "categoryId": "category_official",
           "baseAmount": 150000,
-          "requiredAmount": 300000,
+          "requiredAmount": 150000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -150000,
-          "difference": -300000,
-          "carryOut": -300000
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -604,9 +604,9 @@
           "requiredAmount": 151000,
           "voluntarySurplus": true,
           "rosterHidden": false,
-          "carryIn": -1000,
-          "difference": -151000,
-          "carryOut": -151000
+          "carryIn": 1000,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -618,9 +618,9 @@
           "requiredAmount": 250000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -100000,
-          "difference": -250000,
-          "carryOut": -250000
+          "carryIn": 100000,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -632,9 +632,9 @@
           "requiredAmount": 200000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -50000,
-          "difference": -200000,
-          "carryOut": -200000
+          "carryIn": 50000,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -646,9 +646,9 @@
           "requiredAmount": 250000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -100000,
-          "difference": -250000,
-          "carryOut": -250000
+          "carryIn": 100000,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -660,9 +660,9 @@
           "requiredAmount": 250000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -100000,
-          "difference": -250000,
-          "carryOut": -250000
+          "carryIn": 100000,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -674,9 +674,9 @@
           "requiredAmount": 250000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -100000,
-          "difference": -250000,
-          "carryOut": -250000
+          "carryIn": 100000,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -688,9 +688,9 @@
           "requiredAmount": 250000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -100000,
-          "difference": -250000,
-          "carryOut": -250000
+          "carryIn": 100000,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -699,12 +699,12 @@
           "memberName": "Bùi Văn Quốc Anh",
           "categoryId": "category_official",
           "baseAmount": 150000,
-          "requiredAmount": 300000,
+          "requiredAmount": 150000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -150000,
-          "difference": -300000,
-          "carryOut": -300000
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -713,12 +713,12 @@
           "memberName": "Lê Tuấn Long",
           "categoryId": "category_official",
           "baseAmount": 150000,
-          "requiredAmount": 300000,
+          "requiredAmount": 150000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -150000,
-          "difference": -300000,
-          "carryOut": -300000
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -727,12 +727,12 @@
           "memberName": "Trần Việt Dũng",
           "categoryId": "category_official",
           "baseAmount": 150000,
-          "requiredAmount": 300000,
+          "requiredAmount": 150000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -150000,
-          "difference": -300000,
-          "carryOut": -300000
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -741,12 +741,12 @@
           "memberName": "Phan Thành Nam",
           "categoryId": "category_official",
           "baseAmount": 150000,
-          "requiredAmount": 300000,
+          "requiredAmount": 150000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -150000,
-          "difference": -300000,
-          "carryOut": -300000
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -755,12 +755,12 @@
           "memberName": "Đặng Đình Khánh",
           "categoryId": "category_official",
           "baseAmount": 150000,
-          "requiredAmount": 300000,
+          "requiredAmount": 150000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -150000,
-          "difference": -300000,
-          "carryOut": -300000
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -769,12 +769,12 @@
           "memberName": "Nghiêm Thành Long",
           "categoryId": "category_official",
           "baseAmount": 150000,
-          "requiredAmount": 300000,
+          "requiredAmount": 150000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -150000,
-          "difference": -300000,
-          "carryOut": -300000
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -783,12 +783,12 @@
           "memberName": "Nguyễn Văn Bằng",
           "categoryId": "category_official",
           "baseAmount": 150000,
-          "requiredAmount": 300000,
+          "requiredAmount": 150000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -150000,
-          "difference": -300000,
-          "carryOut": -300000
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -797,12 +797,12 @@
           "memberName": "Nguyễn Minh Sang",
           "categoryId": "category_official",
           "baseAmount": 150000,
-          "requiredAmount": 300000,
+          "requiredAmount": 150000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -150000,
-          "difference": -300000,
-          "carryOut": -300000
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -811,12 +811,12 @@
           "memberName": "Nguyễn Mạnh Cường",
           "categoryId": "category_official",
           "baseAmount": 150000,
-          "requiredAmount": 300000,
+          "requiredAmount": 150000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -150000,
-          "difference": -300000,
-          "carryOut": -300000
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -825,12 +825,12 @@
           "memberName": "Phạm Hoàng Sơn",
           "categoryId": "category_official",
           "baseAmount": 150000,
-          "requiredAmount": 300000,
+          "requiredAmount": 150000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -150000,
-          "difference": -300000,
-          "carryOut": -300000
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -839,12 +839,12 @@
           "memberName": "Trần Bảo Khánh",
           "categoryId": "category_official",
           "baseAmount": 150000,
-          "requiredAmount": 300000,
+          "requiredAmount": 150000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -150000,
-          "difference": -300000,
-          "carryOut": -300000
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -853,12 +853,12 @@
           "memberName": "Nguyễn Thanh Hải",
           "categoryId": "category_intern",
           "baseAmount": 100000,
-          "requiredAmount": 200000,
+          "requiredAmount": 100000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -100000,
-          "difference": -200000,
-          "carryOut": -200000
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -867,12 +867,12 @@
           "memberName": "Bùi Tùng Lâm",
           "categoryId": "category_intern",
           "baseAmount": 100000,
-          "requiredAmount": 200000,
+          "requiredAmount": 100000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -100000,
-          "difference": -200000,
-          "carryOut": -200000
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -881,12 +881,12 @@
           "memberName": "Nguyễn Bách Tùng",
           "categoryId": "category_intern",
           "baseAmount": 100000,
-          "requiredAmount": 200000,
+          "requiredAmount": 100000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -100000,
-          "difference": -200000,
-          "carryOut": -200000
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -895,12 +895,12 @@
           "memberName": "Trịnh Phúc Lương",
           "categoryId": "category_intern",
           "baseAmount": 100000,
-          "requiredAmount": 200000,
+          "requiredAmount": 100000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -100000,
-          "difference": -200000,
-          "carryOut": -200000
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -909,12 +909,12 @@
           "memberName": "Nguyễn Minh Hoàng",
           "categoryId": "category_probation",
           "baseAmount": 150000,
-          "requiredAmount": 300000,
+          "requiredAmount": 150000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -150000,
-          "difference": -300000,
-          "carryOut": -300000
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -923,12 +923,12 @@
           "memberName": "Nguyễn Thị Thuyết",
           "categoryId": "category_probation",
           "baseAmount": 150000,
-          "requiredAmount": 300000,
+          "requiredAmount": 150000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -150000,
-          "difference": -300000,
-          "carryOut": -300000
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -937,12 +937,12 @@
           "memberName": "Lê Ngọc Sơn",
           "categoryId": "category_intern",
           "baseAmount": 100000,
-          "requiredAmount": 0,
+          "requiredAmount": 100000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": 5900000,
+          "carryIn": 0,
           "difference": 0,
-          "carryOut": 5800000
+          "carryOut": 0
         }
       ],
       "incomes": [],
@@ -967,12 +967,12 @@
           "memberName": "Nhân viên hệ thống",
           "categoryId": "category_official",
           "baseAmount": 150000,
-          "requiredAmount": 250000,
+          "requiredAmount": 150000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -100000,
-          "difference": -250000,
-          "carryOut": -250000
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -981,12 +981,12 @@
           "memberName": "Quản trị viên Hệ thống",
           "categoryId": "category_official",
           "baseAmount": 150000,
-          "requiredAmount": 450000,
+          "requiredAmount": 150000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -300000,
-          "difference": -450000,
-          "carryOut": -450000
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -995,12 +995,12 @@
           "memberName": "Vũ Hoàng Dũng",
           "categoryId": "category_intern",
           "baseAmount": 100000,
-          "requiredAmount": 200000,
+          "requiredAmount": 100000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -100000,
-          "difference": -200000,
-          "carryOut": -200000
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -1009,12 +1009,12 @@
           "memberName": "Hà Quốc Việt",
           "categoryId": "category_official",
           "baseAmount": 150000,
-          "requiredAmount": 450000,
+          "requiredAmount": 150000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -300000,
-          "difference": -450000,
-          "carryOut": -450000
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -1023,12 +1023,12 @@
           "memberName": "Hoàng Duy Lộc",
           "categoryId": "category_official",
           "baseAmount": 150000,
-          "requiredAmount": 301000,
+          "requiredAmount": 150000,
           "voluntarySurplus": true,
           "rosterHidden": false,
-          "carryIn": -151000,
-          "difference": -301000,
-          "carryOut": -301000
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -1037,12 +1037,12 @@
           "memberName": "Nguyễn Trung Kiên",
           "categoryId": "category_official",
           "baseAmount": 150000,
-          "requiredAmount": 400000,
+          "requiredAmount": 150000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -250000,
-          "difference": -400000,
-          "carryOut": -400000
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -1051,12 +1051,12 @@
           "memberName": "Trần Cao Khâm",
           "categoryId": "category_official",
           "baseAmount": 150000,
-          "requiredAmount": 350000,
+          "requiredAmount": 150000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -200000,
-          "difference": -350000,
-          "carryOut": -350000
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -1065,12 +1065,12 @@
           "memberName": "Trần Hoàng Hà",
           "categoryId": "category_official",
           "baseAmount": 150000,
-          "requiredAmount": 400000,
+          "requiredAmount": 150000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -250000,
-          "difference": -400000,
-          "carryOut": -400000
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -1079,12 +1079,12 @@
           "memberName": "Nguyễn Thị Hồng Quyên",
           "categoryId": "category_official",
           "baseAmount": 150000,
-          "requiredAmount": 400000,
+          "requiredAmount": 150000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -250000,
-          "difference": -400000,
-          "carryOut": -400000
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -1093,12 +1093,12 @@
           "memberName": "Nguyễn Hữu Lâm",
           "categoryId": "category_official",
           "baseAmount": 150000,
-          "requiredAmount": 400000,
+          "requiredAmount": 150000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -250000,
-          "difference": -400000,
-          "carryOut": -400000
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -1107,12 +1107,12 @@
           "memberName": "Bùi Đình Quý",
           "categoryId": "category_official",
           "baseAmount": 150000,
-          "requiredAmount": 400000,
+          "requiredAmount": 150000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -250000,
-          "difference": -400000,
-          "carryOut": -400000
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -1121,12 +1121,12 @@
           "memberName": "Bùi Văn Quốc Anh",
           "categoryId": "category_official",
           "baseAmount": 150000,
-          "requiredAmount": 450000,
+          "requiredAmount": 150000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -300000,
-          "difference": -450000,
-          "carryOut": -450000
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -1135,12 +1135,12 @@
           "memberName": "Lê Tuấn Long",
           "categoryId": "category_official",
           "baseAmount": 150000,
-          "requiredAmount": 450000,
+          "requiredAmount": 150000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -300000,
-          "difference": -450000,
-          "carryOut": -450000
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -1149,12 +1149,12 @@
           "memberName": "Trần Việt Dũng",
           "categoryId": "category_official",
           "baseAmount": 150000,
-          "requiredAmount": 450000,
+          "requiredAmount": 150000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -300000,
-          "difference": -450000,
-          "carryOut": -450000
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -1163,12 +1163,12 @@
           "memberName": "Phan Thành Nam",
           "categoryId": "category_official",
           "baseAmount": 150000,
-          "requiredAmount": 450000,
+          "requiredAmount": 150000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -300000,
-          "difference": -450000,
-          "carryOut": -450000
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -1177,12 +1177,12 @@
           "memberName": "Đặng Đình Khánh",
           "categoryId": "category_official",
           "baseAmount": 150000,
-          "requiredAmount": 450000,
+          "requiredAmount": 150000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -300000,
-          "difference": -450000,
-          "carryOut": -450000
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -1191,12 +1191,12 @@
           "memberName": "Nghiêm Thành Long",
           "categoryId": "category_official",
           "baseAmount": 150000,
-          "requiredAmount": 450000,
+          "requiredAmount": 150000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -300000,
-          "difference": -450000,
-          "carryOut": -450000
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -1205,12 +1205,12 @@
           "memberName": "Nguyễn Văn Bằng",
           "categoryId": "category_official",
           "baseAmount": 150000,
-          "requiredAmount": 450000,
+          "requiredAmount": 150000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -300000,
-          "difference": -450000,
-          "carryOut": -450000
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -1219,12 +1219,12 @@
           "memberName": "Nguyễn Minh Sang",
           "categoryId": "category_official",
           "baseAmount": 150000,
-          "requiredAmount": 450000,
+          "requiredAmount": 150000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -300000,
-          "difference": -450000,
-          "carryOut": -450000
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -1233,12 +1233,12 @@
           "memberName": "Nguyễn Mạnh Cường",
           "categoryId": "category_official",
           "baseAmount": 150000,
-          "requiredAmount": 450000,
+          "requiredAmount": 150000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -300000,
-          "difference": -450000,
-          "carryOut": -450000
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -1247,12 +1247,12 @@
           "memberName": "Phạm Hoàng Sơn",
           "categoryId": "category_official",
           "baseAmount": 150000,
-          "requiredAmount": 450000,
+          "requiredAmount": 150000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -300000,
-          "difference": -450000,
-          "carryOut": -450000
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -1261,12 +1261,12 @@
           "memberName": "Trần Bảo Khánh",
           "categoryId": "category_official",
           "baseAmount": 150000,
-          "requiredAmount": 450000,
+          "requiredAmount": 150000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -300000,
-          "difference": -450000,
-          "carryOut": -450000
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -1275,12 +1275,12 @@
           "memberName": "Nguyễn Thanh Hải",
           "categoryId": "category_intern",
           "baseAmount": 100000,
-          "requiredAmount": 300000,
+          "requiredAmount": 100000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -200000,
-          "difference": -300000,
-          "carryOut": -300000
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -1289,12 +1289,12 @@
           "memberName": "Bùi Tùng Lâm",
           "categoryId": "category_intern",
           "baseAmount": 100000,
-          "requiredAmount": 300000,
+          "requiredAmount": 100000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -200000,
-          "difference": -300000,
-          "carryOut": -300000
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -1303,12 +1303,12 @@
           "memberName": "Nguyễn Bách Tùng",
           "categoryId": "category_intern",
           "baseAmount": 100000,
-          "requiredAmount": 300000,
+          "requiredAmount": 100000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -200000,
-          "difference": -300000,
-          "carryOut": -300000
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -1317,12 +1317,12 @@
           "memberName": "Trịnh Phúc Lương",
           "categoryId": "category_intern",
           "baseAmount": 100000,
-          "requiredAmount": 300000,
+          "requiredAmount": 100000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -200000,
-          "difference": -300000,
-          "carryOut": -300000
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -1331,12 +1331,12 @@
           "memberName": "Nguyễn Minh Hoàng",
           "categoryId": "category_probation",
           "baseAmount": 150000,
-          "requiredAmount": 450000,
+          "requiredAmount": 150000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -300000,
-          "difference": -450000,
-          "carryOut": -450000
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -1345,12 +1345,12 @@
           "memberName": "Nguyễn Thị Thuyết",
           "categoryId": "category_probation",
           "baseAmount": 150000,
-          "requiredAmount": 450000,
+          "requiredAmount": 150000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": -300000,
-          "difference": -450000,
-          "carryOut": -450000
+          "carryIn": 0,
+          "difference": 0,
+          "carryOut": 0
         },
         {
           "paid": false,
@@ -1359,12 +1359,12 @@
           "memberName": "Lê Ngọc Sơn",
           "categoryId": "category_intern",
           "baseAmount": 100000,
-          "requiredAmount": 0,
+          "requiredAmount": 100000,
           "voluntarySurplus": false,
           "rosterHidden": false,
-          "carryIn": 5800000,
+          "carryIn": 0,
           "difference": 0,
-          "carryOut": 5700000
+          "carryOut": 0
         }
       ],
       "incomes": [],
