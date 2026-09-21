@@ -93,10 +93,13 @@ export default function AdminScheduleView({
 
   const makeSchedule = (date) => {
     const day = Number(date.slice(0, 2));
+    const weekIndex =
+      weeks.findIndex((week) => week.some((cell) => cell?.date === date)) + 1;
     return {
       id: `water_${year}${pad(month)}${pad(day)}`,
       year,
       month,
+      weekIndex,
       date,
       time: "14:00",
       requiredPeople: 5,
@@ -199,22 +202,90 @@ export default function AdminScheduleView({
   const randomFullSchedule = async (date) => {
     setBusyId(date);
     try {
-      const response = await fetch("/api/water-schedules/trash", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "fill_empty", month, year }),
-      });
-      const result = await response.json();
-      if (!response.ok)
-        return toast.error(result.error || "Không thể random lịch đổ rác");
-      toast.success(
-        result.assigned
-          ? `Đã phân công ${result.assigned} ô đổ rác còn trống đến cuối tháng`
-          : "Không còn ô đổ rác trống cần phân công",
-      );
+      const currentSchedule = byDate.get(date);
+      const fixedParticipants = currentSchedule?.participants || [];
+      const requiredPeople = currentSchedule?.requiredPeople || 5;
+      const needsWater =
+        currentSchedule?.status !== "completed" &&
+        fixedParticipants.length < requiredPeople;
+
+      const fillWater = async () => {
+        if (!needsWater) return { assigned: 0, skipped: true };
+        const randomResponse = await fetch("/api/water-schedules/random", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            month,
+            year,
+            mode: "single_week",
+            weekIndex:
+              currentSchedule?.weekIndex ||
+              weeks.findIndex((week) =>
+                week.some((cell) => cell?.date === date),
+              ) +
+                1,
+            requiredPeople,
+            fixedParticipants,
+          }),
+        });
+        const randomResult = await randomResponse.json();
+        if (!randomResponse.ok)
+          throw new Error(
+            randomResult.error || "Không thể random lịch bê nước",
+          );
+        const schedule = {
+          ...(currentSchedule || makeSchedule(date)),
+          participants: randomResult.participants || [],
+          selectionMode: "automatic",
+        };
+        const saveResponse = await fetch("/api/water-schedules", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ month, year, schedule }),
+        });
+        const saveResult = await saveResponse.json();
+        if (!saveResponse.ok)
+          throw new Error(saveResult.error || "Không thể lưu lịch bê nước");
+        return {
+          assigned: Math.max(
+            0,
+            (randomResult.participants || []).length - fixedParticipants.length,
+          ),
+          skipped: false,
+        };
+      };
+
+      const fillTrash = async () => {
+        const response = await fetch("/api/water-schedules/trash", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "fill_empty", month, year }),
+        });
+        const result = await response.json();
+        if (!response.ok)
+          throw new Error(result.error || "Không thể random lịch đổ rác");
+        return result;
+      };
+
+      const [waterOutcome, trashOutcome] = await Promise.allSettled([
+        fillWater(),
+        fillTrash(),
+      ]);
+      if (waterOutcome.status === "rejected")
+        toast.error(waterOutcome.reason.message || "Không thể random lịch nước");
+      else if (!waterOutcome.value.skipped)
+        toast.success(
+          `Đã bổ sung ${waterOutcome.value.assigned} người vào lịch nước ngày ${date}`,
+        );
+      if (trashOutcome.status === "rejected")
+        toast.error(trashOutcome.reason.message || "Không thể random lịch đổ rác");
+      else if (trashOutcome.value.assigned)
+        toast.success(
+          `Đã phân công ${trashOutcome.value.assigned} ô đổ rác còn trống đến cuối tháng`,
+        );
       await onRefresh?.();
     } catch {
-      toast.error("Không thể random lịch đổ rác");
+      toast.error("Không thể random lịch nước và lịch đổ rác");
     } finally {
       setBusyId(null);
     }
@@ -619,7 +690,7 @@ export default function AdminScheduleView({
                                     </IconButton>
                                   )}
                                   <IconButton
-                                    title="Random toàn bộ ô đổ rác còn trống đến cuối tháng"
+                                    title="Random lịch nước của ô này và các ô đổ rác còn trống"
                                     color="primary"
                                     size="small"
                                     disabled={busyId === cell.date}

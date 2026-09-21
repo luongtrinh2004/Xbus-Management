@@ -1,6 +1,102 @@
 {
   "auditLogs": [
     {
+      "id": "log_1789972086802_928b",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "FILL_EMPTY_TRASH_SCHEDULE",
+      "targetType": "trash_schedule",
+      "targetId": "2026-09",
+      "details": "Random 0 ô lịch đổ rác còn trống từ 2026-09-21",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-21T06:28:06.802Z"
+    },
+    {
+      "id": "log_1789972084933_yjt6",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "FILL_EMPTY_TRASH_SCHEDULE",
+      "targetType": "trash_schedule",
+      "targetId": "2026-09",
+      "details": "Random 0 ô lịch đổ rác còn trống từ 2026-09-21",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-21T06:28:04.933Z"
+    },
+    {
+      "id": "log_1789972082668_q74j",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "FILL_EMPTY_TRASH_SCHEDULE",
+      "targetType": "trash_schedule",
+      "targetId": "2026-09",
+      "details": "Random 0 ô lịch đổ rác còn trống từ 2026-09-21",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-21T06:28:02.668Z"
+    },
+    {
+      "id": "log_1789972081232_xq4r",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "FILL_EMPTY_TRASH_SCHEDULE",
+      "targetType": "trash_schedule",
+      "targetId": "2026-09",
+      "details": "Random 0 ô lịch đổ rác còn trống từ 2026-09-21",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-21T06:28:01.232Z"
+    },
+    {
+      "id": "log_1789972079544_i5ng",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "FILL_EMPTY_TRASH_SCHEDULE",
+      "targetType": "trash_schedule",
+      "targetId": "2026-09",
+      "details": "Random 0 ô lịch đổ rác còn trống từ 2026-09-21",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-21T06:27:59.544Z"
+    },
+    {
+      "id": "log_1789972077289_ph6m",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "FILL_EMPTY_TRASH_SCHEDULE",
+      "targetType": "trash_schedule",
+      "targetId": "2026-09",
+      "details": "Random 0 ô lịch đổ rác còn trống từ 2026-09-21",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-21T06:27:57.289Z"
+    },
+    {
+      "id": "log_1789972072395_dj5p",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "FILL_EMPTY_TRASH_SCHEDULE",
+      "targetType": "trash_schedule",
+      "targetId": "2026-09",
+      "details": "Random 0 ô lịch đổ rác còn trống từ 2026-09-21",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-21T06:27:52.395Z"
+    },
+    {
+      "id": "log_1789972068420_vjz7",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "FILL_EMPTY_TRASH_SCHEDULE",
+      "targetType": "trash_schedule",
+      "targetId": "2026-09",
+      "details": "Random 0 ô lịch đổ rác còn trống từ 2026-09-21",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-21T06:27:48.420Z"
+    },
+    {
       "id": "log_1789960024128_muge",
       "adminId": "usr_admin_001",
       "adminName": "Quản trị viên Hệ thống",

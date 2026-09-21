@@ -406,6 +406,98 @@
       "note": "",
       "savedAt": "2026-09-21T03:06:40.118Z",
       "updatedAt": "2026-09-21T03:06:40.118Z"
+    },
+    {
+      "id": "water_20260910",
+      "year": 2026,
+      "month": 9,
+      "weekIndex": 2,
+      "date": "10/09/2026",
+      "time": "14:00",
+      "requiredPeople": 5,
+      "participants": [
+        {
+          "userId": "usr_018",
+          "name": "Nguyễn Mạnh Cường",
+          "code": "PNKX353",
+          "completed": false
+        },
+        {
+          "userId": "usr_012",
+          "name": "Trần Việt Dũng",
+          "code": "PNKX316",
+          "completed": false
+        },
+        {
+          "userId": "usr_017",
+          "name": "Nguyễn Minh Sang",
+          "code": "PNKX346",
+          "completed": false
+        },
+        {
+          "userId": "usr_022",
+          "name": "Bùi Tùng Lâm",
+          "code": "HĐK207",
+          "completed": false
+        },
+        {
+          "userId": "usr_002",
+          "name": "Hà Quốc Việt",
+          "code": "PNKX019",
+          "completed": false
+        }
+      ],
+      "status": "upcoming",
+      "note": "",
+      "selectionMode": "automatic",
+      "savedAt": "2026-09-21T06:27:48.462Z",
+      "updatedAt": "2026-09-21T06:27:48.462Z"
+    },
+    {
+      "id": "water_20260917",
+      "year": 2026,
+      "month": 9,
+      "weekIndex": 3,
+      "date": "17/09/2026",
+      "time": "14:00",
+      "requiredPeople": 5,
+      "participants": [
+        {
+          "userId": "usr_1789204311678",
+          "name": "Nhân viên hệ thống",
+          "code": "HDK111",
+          "completed": false
+        },
+        {
+          "userId": "usr_019",
+          "name": "Phạm Hoàng Sơn",
+          "code": "PNKX351",
+          "completed": false
+        },
+        {
+          "userId": "usr_024",
+          "name": "Trịnh Phúc Lương",
+          "code": "HĐK181",
+          "completed": false
+        },
+        {
+          "userId": "usr_017",
+          "name": "Nguyễn Minh Sang",
+          "code": "PNKX346",
+          "completed": false
+        },
+        {
+          "userId": "usr_013",
+          "name": "Phan Thành Nam",
+          "code": "PNKX036",
+          "completed": false
+        }
+      ],
+      "status": "upcoming",
+      "note": "",
+      "selectionMode": "automatic",
+      "savedAt": "2026-09-21T06:27:52.465Z",
+      "updatedAt": "2026-09-21T06:28:06.835Z"
     }
   ]
 }
