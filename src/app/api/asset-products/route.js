@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
+import crypto from "node:crypto";
 import {
   appendAuditLog,
   getAssets,
@@ -8,15 +9,8 @@ import {
 
 const secret = process.env.NEXTAUTH_SECRET;
 const canManage = (token) => ["admin", "assistant"].includes(token?.role);
-const slug = (value) =>
-  String(value || "")
-    .trim()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/đ/gi, "d")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "_")
-    .replace(/^_+|_+$/g, "");
+const createProductId = () =>
+  `product_${Date.now().toString(36)}_${crypto.randomBytes(8).toString("hex")}`;
 
 export async function POST(req) {
   const token = await getToken({ req, secret });
@@ -32,7 +26,7 @@ export async function POST(req) {
       .toUpperCase();
     const name = String(body.name || "").trim();
     const unit = String(body.unit || "").trim();
-    if (!code || !name || !unit)
+    if ((!code && !body.id) || !name || !unit)
       return NextResponse.json(
         { error: "Mã, tên và đơn vị tính là bắt buộc" },
         { status: 400 },
@@ -46,19 +40,24 @@ export async function POST(req) {
         { error: "Đơn vị tính không có trong cấu hình sản phẩm" },
         { status: 400 },
       );
-    const existing = products.find((item) => item.code === code);
-    if (existing && !body.id)
+    const existingByCode = code
+      ? products.find((item) => item.code === code)
+      : null;
+    const existingById = body.id
+      ? products.find((item) => item.id === body.id)
+      : null;
+    if (existingByCode && !body.id)
       return NextResponse.json(
         { error: "Mã sản phẩm đã tồn tại" },
         { status: 409 },
       );
-    if (body.id && existing && existing.id !== body.id)
+    if (body.id && existingByCode && existingByCode.id !== body.id)
       return NextResponse.json(
         { error: "Mã sản phẩm đã tồn tại" },
         { status: 409 },
       );
     const product = {
-      id: body.id || `product_${slug(code) || Date.now()}`,
+      id: body.id || createProductId(),
       code,
       name,
       categoryId: String(body.categoryId || "").trim(),
@@ -66,7 +65,7 @@ export async function POST(req) {
       description: String(body.description || "").trim(),
       location: String(body.location || "").trim(),
       active: body.active !== false,
-      createdAt: existing?.createdAt || new Date().toISOString(),
+      createdAt: existingById?.createdAt || new Date().toISOString(),
     };
     await saveAssetProduct(product);
     return NextResponse.json(product, { status: body.id ? 200 : 201 });
@@ -95,23 +94,50 @@ export async function PUT(req) {
         { status: 400 },
       );
 
-    const { products: currentProducts = [] } = await getAssets();
+    const {
+      products: currentProducts = [],
+      categories = [],
+      units = [],
+    } = await getAssets();
     const currentByCode = new Map(
-      currentProducts.map((item) => [item.code.toUpperCase(), item]),
+      currentProducts
+        .filter((item) => item.code)
+        .map((item) => [item.code.toUpperCase(), item]),
+    );
+    const currentByName = new Map(
+      currentProducts.map((item) => [item.name.toLocaleLowerCase("vi"), item]),
     );
     const incomingByCode = new Map();
 
-    for (const row of body.products) {
-      const code = String(row.code || "")
+    for (const [rowIndex, row] of body.products.entries()) {
+      let code = String(row.code || "")
         .trim()
         .toUpperCase();
       const name = String(row.name || "").trim();
-      if (!code || !name) continue;
-      incomingByCode.set(code, {
-        code,
+      if (!name) continue;
+      const requestedCategoryId = String(row.categoryId || "").trim();
+      const requestedCategoryName = String(row.categoryName || "").trim();
+      const category = categories.find(
+        (item) =>
+          item.id === requestedCategoryId ||
+          item.name.toLocaleLowerCase("vi") ===
+            requestedCategoryName.toLocaleLowerCase("vi"),
+      );
+      const requestedUnit = String(row.unit || "Cái").trim() || "Cái";
+      const unit = units.find(
+        (item) =>
+          item.name.toLocaleLowerCase("vi") ===
+          requestedUnit.toLocaleLowerCase("vi"),
+      );
+      if (!unit)
+        throw new Error(
+          `Đơn vị tính "${requestedUnit}" của sản phẩm ${code || name} chưa được cấu hình`,
+        );
+      incomingByCode.set(code || `__empty_code_${rowIndex}`, {
+        code: code || "",
         name,
-        categoryId: String(row.categoryId || "").trim(),
-        unit: String(row.unit || "Cái").trim() || "Cái",
+        categoryId: category?.id || "",
+        unit: unit.name,
         description: String(row.description || "").trim(),
         location: String(row.location || "").trim(),
         active: row.active !== false,
@@ -120,18 +146,20 @@ export async function PUT(req) {
 
     if (!incomingByCode.size)
       return NextResponse.json(
-        { error: "Không tìm thấy dòng có đủ Mã và Tên sản phẩm" },
+        { error: "Không tìm thấy dòng có Tên sản phẩm" },
         { status: 400 },
       );
 
     let added = 0;
     let updated = 0;
     for (const item of incomingByCode.values()) {
-      const existing = currentByCode.get(item.code);
+      const existing = item.code
+        ? currentByCode.get(item.code)
+        : currentByName.get(item.name.toLocaleLowerCase("vi"));
       await saveAssetProduct({
         ...existing,
         ...item,
-        id: existing?.id || `product_${slug(item.code) || Date.now()}`,
+        id: existing?.id || createProductId(),
         active: item.active,
         createdAt: existing?.createdAt || new Date().toISOString(),
       });

@@ -568,20 +568,20 @@ export async function getAssets() {
     SELECT CONCAT('asset_category_', LEFT(MD5(category_name), 16)),
            category_name, NOW(3)
     FROM (
-      SELECT TRIM(asset_type) AS category_name
+      SELECT TRIM(category_name_snapshot) AS category_name
       FROM asset_transactions
-      WHERE asset_type IS NOT NULL AND TRIM(asset_type) <> ''
-      GROUP BY TRIM(asset_type)
+      WHERE category_name_snapshot IS NOT NULL AND TRIM(category_name_snapshot) <> ''
+      GROUP BY TRIM(category_name_snapshot)
     ) legacy_categories
   `);
   await query(`
     UPDATE asset_products product
     JOIN (
-      SELECT asset_code, MAX(TRIM(asset_type)) AS category_name
+      SELECT product_code_snapshot, MAX(TRIM(category_name_snapshot)) AS category_name
       FROM asset_transactions
-      WHERE asset_type IS NOT NULL AND TRIM(asset_type) <> ''
-      GROUP BY asset_code
-    ) legacy ON legacy.asset_code = product.code
+      WHERE category_name_snapshot IS NOT NULL AND TRIM(category_name_snapshot) <> ''
+      GROUP BY product_code_snapshot
+    ) legacy ON legacy.product_code_snapshot = product.code
     JOIN asset_product_categories category ON category.name = legacy.category_name
     SET product.category_id = category.id
     WHERE product.category_id IS NULL OR product.category_id = ''
@@ -594,28 +594,28 @@ export async function getAssets() {
   ]);
   const map = (row) => ({
     id: row.id,
-    code: row.asset_code,
-    name: row.name,
-    category: row.asset_type || "",
-    unit: row.unit || "",
-    description: row.description || "",
+    code: row.product_code_snapshot,
+    name: row.product_name_snapshot,
+    category: row.category_name_snapshot || "",
+    unit: row.unit_name_snapshot || "",
+    description: row.product_description_snapshot || "",
     date: toDateOnly(row.transaction_date),
     quantity: row.quantity === null ? null : Number(row.quantity),
-    location: row.location || "",
-    person: row.person || "",
-    issuedTo: row.issued_to || "",
+    location: row.location_snapshot || "",
+    person: row.document_person_name || "",
+    issuedTo: row.recipient_name || "",
     note: row.note || "",
-    voucherCode: row.voucher_code || "",
-    performedBy: row.performed_by || "",
+    documentCode: row.document_code || "",
+    performedBy: row.performed_by_user_id || "",
     createdAt: toIso(row.created_at),
     updatedAt: toIso(row.updated_at),
   });
   return {
-    imports: rows.filter((row) => row.type === "import").map(map),
-    exports: rows.filter((row) => row.type === "export").map(map),
+    imports: rows.filter((row) => row.transaction_type === "import").map(map),
+    exports: rows.filter((row) => row.transaction_type === "export").map(map),
     products: productRows.map((row) => ({
       id: row.id,
-      code: row.code,
+      code: row.code || "",
       name: row.name,
       categoryId: row.category_id || "",
       unit: row.unit,
@@ -653,7 +653,7 @@ export async function saveAssetProduct(product) {
     "INSERT INTO asset_products (id,code,name,category_id,unit,description,location,active,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE code=VALUES(code),name=VALUES(name),category_id=VALUES(category_id),unit=VALUES(unit),description=VALUES(description),location=VALUES(location),active=VALUES(active),updated_at=VALUES(updated_at)",
     [
       product.id,
-      product.code,
+      product.code || null,
       product.name,
       product.categoryId || null,
       product.unit,
@@ -751,7 +751,7 @@ export async function deleteAssetUnit(id) {
 
 const assetTransactionValues = (item, type) => [
   item.id,
-  item.voucherCode || null,
+  item.documentCode || null,
   type,
   item.code,
   item.name,
@@ -777,7 +777,7 @@ export async function createAssetTransaction(type, item) {
     return true;
   }
   await query(
-    "INSERT INTO asset_transactions (id,voucher_code,type,asset_code,name,asset_type,description,transaction_date,quantity,unit,location,person,issued_to,performed_by,note,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+    "INSERT INTO asset_transactions (id,document_code,transaction_type,product_code_snapshot,product_name_snapshot,category_name_snapshot,product_description_snapshot,transaction_date,quantity,unit_name_snapshot,location_snapshot,document_person_name,recipient_name,performed_by_user_id,note,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
     assetTransactionValues(item, type),
   );
   return true;
@@ -794,9 +794,9 @@ export async function updateAssetTransaction(type, item) {
     return true;
   }
   await query(
-    "UPDATE asset_transactions SET voucher_code=?,asset_code=?,name=?,asset_type=?,description=?,transaction_date=?,quantity=?,unit=?,location=?,person=?,issued_to=?,performed_by=?,note=?,updated_at=? WHERE id=? AND type=?",
+    "UPDATE asset_transactions SET document_code=?,product_code_snapshot=?,product_name_snapshot=?,category_name_snapshot=?,product_description_snapshot=?,transaction_date=?,quantity=?,unit_name_snapshot=?,location_snapshot=?,document_person_name=?,recipient_name=?,performed_by_user_id=?,note=?,updated_at=? WHERE id=? AND transaction_type=?",
     [
-      item.voucherCode || null,
+      item.documentCode || null,
       item.code,
       item.name,
       item.category || null,
@@ -829,7 +829,7 @@ export async function deleteAssetTransaction(type, id) {
     });
     return true;
   }
-  await query("DELETE FROM asset_transactions WHERE id=? AND type=?", [
+  await query("DELETE FROM asset_transactions WHERE id=? AND transaction_type=?", [
     id,
     type,
   ]);
@@ -847,10 +847,10 @@ export async function saveAssets(data) {
     ])
       for (const item of records)
         await connection.execute(
-          "INSERT INTO asset_transactions (id,voucher_code,type,asset_code,name,asset_type,description,transaction_date,quantity,unit,location,person,issued_to,performed_by,note,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+          "INSERT INTO asset_transactions (id,document_code,transaction_type,product_code_snapshot,product_name_snapshot,category_name_snapshot,product_description_snapshot,transaction_date,quantity,unit_name_snapshot,location_snapshot,document_person_name,recipient_name,performed_by_user_id,note,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
           [
             item.id,
-            item.voucherCode || null,
+            item.documentCode || null,
             type,
             item.code,
             item.name,

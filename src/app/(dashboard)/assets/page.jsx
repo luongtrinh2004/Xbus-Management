@@ -1003,9 +1003,9 @@ function ProductDialog({
           }}
         >
           <CustomTextField
-            label="Mã sản phẩm *"
+            label={product ? "Mã sản phẩm" : "Mã sản phẩm *"}
             value={form.code}
-            disabled={Boolean(product) || readOnly}
+            disabled={Boolean(product?.code) || readOnly}
             onChange={(e) => setForm({ ...form, code: e.target.value })}
           />
           <CustomTextField
@@ -1075,7 +1075,9 @@ function ProductDialog({
           <Button
             variant="contained"
             disabled={
-              !form.code.trim() || !form.name.trim() || !form.unit.trim()
+              (!product && !form.code.trim()) ||
+              !form.name.trim() ||
+              !form.unit.trim()
             }
             onClick={save}
           >
@@ -1442,36 +1444,48 @@ export default function AssetsPage() {
         type: "array",
         cellDates: false,
       });
+      const activeSheet = workbook.Sheets[workbook.SheetNames[0]];
+      if (!activeSheet) throw new Error("File Excel không có sheet dữ liệu");
       if (excelImportType === "products") {
-        const productSheetName = workbook.SheetNames.find(
-          (item) =>
-            normalizeSearchText(item).replace(/\s+/g, "") === "danhsachsanpham",
-        );
-        const productSheet =
-          workbook.Sheets[productSheetName || workbook.SheetNames[0]];
         const products = XLSX.utils
-          .sheet_to_json(productSheet, { defval: "", raw: true })
+          .sheet_to_json(activeSheet, { defval: "", raw: true })
           .filter((row) =>
             Object.values(row).some((value) => String(value || "").trim()),
           )
-          .map((row) => ({
-            code: pick(row, ["masanpham", "masp", "ma", "code"]),
-            name: pick(row, ["tensanpham", "tensp", "ten", "name"]),
-            categoryId: pick(row, ["maloaisanpham", "categoryid"]),
-            unit: pick(row, ["donvitinh", "donvi", "loaisp", "unit"]) || "Cái",
-            description: pick(row, ["motasanpham", "mota", "description"]),
-            location: pick(row, ["vitri", "location"]),
-            active: ![
+          .map((row) => {
+            const categoryName = String(
+              pick(row, ["loaisanpham", "loaisp", "category"]),
+            ).trim();
+            const explicitCategoryId = String(
+              pick(row, ["maloaisanpham", "categoryid"]),
+            ).trim();
+            const matchedCategory = (data.categories || []).find(
+              (item) =>
+                normalizeSearchText(item.name) ===
+                normalizeSearchText(categoryName),
+            );
+            return {
+              code: pick(row, ["masanpham", "masp", "ma", "code"]),
+              name: pick(row, ["tensanpham", "tensp", "ten", "name"]),
+              categoryId: explicitCategoryId || matchedCategory?.id || "",
+              categoryName,
+              unit: pick(row, ["donvitinh", "donvi", "unit"]) || "Cái",
+              description: pick(row, ["motasanpham", "mota", "description"]),
+              location: pick(row, ["vitri", "location"]),
+              active: ![
               "inactive",
               "ngung su dung",
               "ngung hoat dong",
               "khong hoat dong",
               "false",
               "0",
-            ].includes(
-              normalizeSearchText(pick(row, ["trangthai", "status", "active"])),
-            ),
-          }));
+              ].includes(
+                normalizeSearchText(
+                  pick(row, ["trangthai", "status", "active"]),
+                ),
+              ),
+            };
+          });
         if (!products.length) throw new Error("File không có dữ liệu sản phẩm");
 
         const response = await fetch("/api/asset-products", {
@@ -1488,42 +1502,6 @@ export default function AssetsPage() {
         );
         return;
       }
-      if (excelImportType === "stock") {
-        const stockSheetName = workbook.SheetNames.find(
-          (item) => normalizeSearchText(item).replace(/\s+/g, "") === "tonkho",
-        );
-        const stockSheet =
-          workbook.Sheets[stockSheetName || workbook.SheetNames[0]];
-        const stock = XLSX.utils
-          .sheet_to_json(stockSheet, { defval: "", raw: true })
-          .filter((row) =>
-            Object.values(row).some((value) => String(value || "").trim()),
-          )
-          .map((row) => ({
-            code: pick(row, ["masanpham", "masp", "ma", "code"]),
-            quantity: Number(pick(row, ["tonkho", "soluong", "quantity"])),
-          }));
-        if (!stock.length) throw new Error("File không có dữ liệu tồn kho");
-        const response = await fetch("/api/assets", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ stock }),
-        });
-        const result = await response.json();
-        if (!response.ok) throw new Error(result.error);
-        await loadData();
-        setTab("stock");
-        toast.success(
-          `Đã điều chỉnh tồn kho cho ${result.summary?.updated || 0} sản phẩm`,
-        );
-        return;
-      }
-      const findSheet = (expected) => {
-        const name = workbook.SheetNames.find(
-          (item) => normalizeSearchText(item).replace(/\s+/g, "") === expected,
-        );
-        return workbook.Sheets[name || workbook.SheetNames[0]];
-      };
       const mapRows = (sheet, type) =>
         XLSX.utils
           .sheet_to_json(sheet, { defval: "", raw: true })
@@ -1560,10 +1538,7 @@ export default function AssetsPage() {
           }));
       const transactionType =
         excelImportType === "export" ? "export" : "import";
-      const sheet = findSheet(
-        transactionType === "import" ? "nhapkho" : "xuatkho",
-      );
-      const rows = mapRows(sheet, transactionType);
+      const rows = mapRows(activeSheet, transactionType);
       if (!rows.length) throw new Error("File không có dữ liệu");
       const response = await fetch("/api/assets", {
         method: "PUT",
@@ -1699,18 +1674,20 @@ export default function AssetsPage() {
                 >
                   Xuất danh sách hiện tại
                 </Button>
-                <Button
-                  variant="tonal"
-                  color="warning"
-                  startIcon={<i className="tabler-file-upload" />}
-                  disabled={importingExcel}
-                  onClick={() => {
-                    setExcelImportType(tab);
-                    excelInputRef.current?.click();
-                  }}
-                >
-                  {importingExcel ? "Đang import…" : "Import danh sách mới"}
-                </Button>
+                {tab !== "stock" && (
+                  <Button
+                    variant="tonal"
+                    color="warning"
+                    startIcon={<i className="tabler-file-upload" />}
+                    disabled={importingExcel}
+                    onClick={() => {
+                      setExcelImportType(tab);
+                      excelInputRef.current?.click();
+                    }}
+                  >
+                    {importingExcel ? "Đang import…" : "Import danh sách mới"}
+                  </Button>
+                )}
                 {tab === "products" && (
                   <Button
                     variant="contained"

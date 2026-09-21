@@ -21,6 +21,7 @@ const accessControl: Record<Role, string[]> = {
     "/assets",
     "/afternoon-tea",
     "/audit-logs",
+    "/edit-database",
   ],
   admin: ["*"], // Admin có thể truy cập tất cả (bao gồm /audit-logs)
 };

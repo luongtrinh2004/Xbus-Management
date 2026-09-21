@@ -230,7 +230,9 @@ export async function PUT(req) {
         ),
       );
       const productByCode = new Map(
-        current.products.map((item) => [item.code.toUpperCase(), item]),
+        current.products
+          .filter((item) => item.code)
+          .map((item) => [item.code.toUpperCase(), item]),
       );
       const now = new Date();
       const date = now.toISOString().slice(0, 10);
@@ -284,15 +286,55 @@ export async function PUT(req) {
         summary: { added: updated, updated },
       });
     }
+    const productByCode = new Map(
+      current.products.map((item) => [normalizeText(item.code).toUpperCase(), item]),
+    );
+    const categoryById = new Map(
+      current.categories.map((item) => [item.id, item.name]),
+    );
+    const categoryNames = new Set(
+      current.categories.map((item) => normalizeText(item.name).toLocaleLowerCase("vi")),
+    );
+    const unitNames = new Map(
+      current.units.map((item) => [
+        normalizeText(item.name).toLocaleLowerCase("vi"),
+        item.name,
+      ]),
+    );
+    const normalizeImportedRows = (rows, type) =>
+      rows.map((item) => {
+        const requestedCode = normalizeText(item.code).toUpperCase();
+        const product = productByCode.get(requestedCode);
+        const requestedCategory = normalizeText(item.category);
+        const requestedUnit = normalizeText(item.unit);
+        return {
+          ...item,
+          code: product?.code || "",
+          name: product?.name || normalizeText(item.name),
+          category: product
+            ? categoryById.get(product.categoryId) || ""
+            : categoryNames.has(requestedCategory.toLocaleLowerCase("vi"))
+              ? requestedCategory
+              : "",
+          unit: product?.unit ||
+            unitNames.get(requestedUnit.toLocaleLowerCase("vi")) ||
+            "",
+          description: product?.description || normalizeText(item.description),
+          location: product?.location || normalizeText(item.location),
+          issuedTo: type === "export" ? item.issuedTo : "",
+        };
+      });
+    const importedRows = normalizeImportedRows(body.imports || [], "import");
+    const exportedRows = normalizeImportedRows(body.exports || [], "export");
     const importResult = mergeTransactions(
       current.imports,
-      body.imports || [],
+      importedRows,
       "import",
       token,
     );
     const exportResult = mergeTransactions(
       current.exports,
-      body.exports || [],
+      exportedRows,
       "export",
       token,
     );

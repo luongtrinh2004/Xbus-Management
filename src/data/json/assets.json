@@ -13,7 +13,8 @@
       "issuedTo": "",
       "performedBy": "usr_admin_001",
       "note": "á á á",
-      "createdAt": "2026-09-21T02:50:26.054Z"
+      "createdAt": "2026-09-21T02:50:26.054Z",
+      "unit": "Cái"
     },
     {
       "id": "import_1789959025972_54wg",
@@ -28,7 +29,8 @@
       "issuedTo": "",
       "performedBy": "usr_admin_001",
       "note": "á á á",
-      "createdAt": "2026-09-21T02:50:25.972Z"
+      "createdAt": "2026-09-21T02:50:25.972Z",
+      "unit": "Cái"
     },
     {
       "id": "import_1789959025945_7fww",
@@ -43,7 +45,8 @@
       "issuedTo": "",
       "performedBy": "usr_admin_001",
       "note": "á á á",
-      "createdAt": "2026-09-21T02:50:25.945Z"
+      "createdAt": "2026-09-21T02:50:25.945Z",
+      "unit": "Cái"
     },
     {
       "id": "import_001",
@@ -55,7 +58,9 @@
       "person": "Dữ liệu ban đầu",
       "note": "Máy cấp cho DEV Web/App",
       "createdAt": "2026-09-01T08:00:00.000Z",
-      "updatedAt": "2026-09-14T14:12:56.390Z"
+      "updatedAt": "2026-09-14T14:12:56.390Z",
+      "category": "",
+      "unit": "Cái"
     },
     {
       "id": "import_002",
@@ -66,7 +71,9 @@
       "location": "Phòng ban",
       "person": "Dữ liệu ban đầu",
       "note": "Màn hình mở rộng",
-      "createdAt": "2026-09-02T08:00:00.000Z"
+      "createdAt": "2026-09-02T08:00:00.000Z",
+      "category": "",
+      "unit": "Cái"
     },
     {
       "id": "import_003",
@@ -77,7 +84,9 @@
       "location": "Phòng ban",
       "person": "Dữ liệu ban đầu",
       "note": "Phục vụ mô phỏng và chạy AP",
-      "createdAt": "2026-09-03T08:00:00.000Z"
+      "createdAt": "2026-09-03T08:00:00.000Z",
+      "category": "",
+      "unit": "Cái"
     },
     {
       "id": "import_004",
@@ -88,7 +97,9 @@
       "location": "Phòng ban",
       "person": "Dữ liệu ban đầu",
       "note": "Trong kho phòng ban",
-      "createdAt": "2026-09-01T08:00:00.000Z"
+      "createdAt": "2026-09-01T08:00:00.000Z",
+      "category": "",
+      "unit": "Cái"
     },
     {
       "code": "CB-001",
@@ -101,7 +112,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_0_tl63",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-001",
@@ -114,7 +126,8 @@
       "person": "Quybd",
       "note": "mang đi test hcm về",
       "id": "import_excel_1789699061141_1_g1ju",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-002",
@@ -127,7 +140,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_2_cpgc",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-002",
@@ -140,7 +154,8 @@
       "person": "QuyenNTH",
       "note": "Test xong nhập lại",
       "id": "import_excel_1789699061141_3_jm12",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-003",
@@ -153,7 +168,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_4_iseo",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-004",
@@ -166,7 +182,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_5_k7rl",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-005",
@@ -179,7 +196,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_6_18cu",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-006",
@@ -192,7 +210,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_7_axfe",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-007",
@@ -205,7 +224,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_8_r3hn",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-007",
@@ -218,7 +238,8 @@
       "person": "QuyênNTH",
       "note": "Anh khâm test xong nhập lại",
       "id": "import_excel_1789699061141_9_aqts",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-008",
@@ -231,7 +252,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_10_8dm5",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-009",
@@ -244,12 +266,13 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_11_y8lf",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-010",
       "name": "Adapter Camera Leopard 2 port A,B",
-      "category": "Cảm biến",
+      "category": "Cái",
       "description": "",
       "date": "2026-03-04",
       "quantity": 1,
@@ -257,7 +280,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_12_d0nv",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-011",
@@ -270,7 +294,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_13_iqba",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-012",
@@ -283,7 +308,8 @@
       "person": "",
       "note": "cũ nhập lại",
       "id": "import_excel_1789699061141_14_fo29",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-013",
@@ -296,7 +322,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_15_nnvd",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-014",
@@ -309,7 +336,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_16_tqg0",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-015",
@@ -322,7 +350,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_17_rzzt",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-016",
@@ -335,7 +364,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_18_cyin",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-017",
@@ -348,7 +378,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_19_5on3",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-018",
@@ -361,7 +392,8 @@
       "person": "QuyBD",
       "note": "nhập sót lại",
       "id": "import_excel_1789699061141_20_98j5",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-019",
@@ -374,7 +406,8 @@
       "person": "QuyênNTH",
       "note": "anh Khâm chuyển nhập kho",
       "id": "import_excel_1789699061141_21_ct5t",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-020",
@@ -387,7 +420,8 @@
       "person": "QuyênNTH",
       "note": "anh Khâm chuyển nhập kho",
       "id": "import_excel_1789699061141_22_c90e",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-021",
@@ -400,7 +434,8 @@
       "person": "QuyênNTH",
       "note": "anh Khâm chuyển nhập kho",
       "id": "import_excel_1789699061141_23_z5xm",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-022",
@@ -413,7 +448,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_24_jc90",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-023",
@@ -426,7 +462,8 @@
       "person": "QuyênNTH",
       "note": "mang đi test hcm",
       "id": "import_excel_1789699061141_25_zyzm",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-024",
@@ -439,7 +476,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_26_tmqk",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-024",
@@ -452,12 +490,13 @@
       "person": "QuyenNTH",
       "note": "",
       "id": "import_excel_1789699061141_27_5d4k",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-025",
       "name": "AC_ISX031-H120",
-      "category": "Cảm biến",
+      "category": "Cái",
       "description": "",
       "date": "2026-03-23",
       "quantity": 11,
@@ -465,12 +504,13 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_28_5syu",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-025",
       "name": "AC_ISX031-H120",
-      "category": "Cảm biến",
+      "category": "Cái",
       "description": "",
       "date": "2026-04-02",
       "quantity": 9,
@@ -478,7 +518,8 @@
       "person": "QuyenNTH",
       "note": "",
       "id": "import_excel_1789699061141_29_2lof",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-026",
@@ -491,7 +532,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_30_pktu",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-027",
@@ -504,7 +546,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_31_26kg",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-028",
@@ -517,7 +560,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_32_9zd3",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-031",
@@ -530,7 +574,8 @@
       "person": "Quybd",
       "note": "nhập mới",
       "id": "import_excel_1789699061141_33_44fo",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-031",
@@ -543,7 +588,8 @@
       "person": "QuyenNTH",
       "note": "Anh Khâm test xong nhập lại",
       "id": "import_excel_1789699061141_34_rtsd",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK001",
@@ -556,7 +602,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_35_a4rb",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK002",
@@ -569,12 +616,13 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_36_hwdk",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK003",
       "name": "Adapter Camera Orin",
-      "category": "Máy tính nhúng & Phụ kiện",
+      "category": "Cái",
       "description": "",
       "date": "2026-03-04",
       "quantity": 1,
@@ -582,7 +630,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_37_yjkh",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK004",
@@ -595,7 +644,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_38_5thj",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK005",
@@ -608,7 +658,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_39_3z20",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK005",
@@ -621,7 +672,8 @@
       "person": "QuyenNTH",
       "note": "",
       "id": "import_excel_1789699061141_40_74t2",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK006",
@@ -634,7 +686,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_41_cwlb",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK007",
@@ -647,12 +700,13 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_42_e6v6",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK007",
       "name": "nuvo-10108GC-10G-5049",
-      "category": "Phụ kiện & Máy tính",
+      "category": "Máy tính nhúng & Phụ kiện",
       "description": "",
       "date": "2026-03-26",
       "quantity": 2,
@@ -660,7 +714,8 @@
       "person": "QuyenNTH",
       "note": "Test xong nhập lại",
       "id": "import_excel_1789699061141_43_su31",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK009",
@@ -673,7 +728,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_44_dzqh",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK010",
@@ -686,7 +742,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_45_9xut",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK011",
@@ -699,7 +756,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_46_hcsm",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK012",
@@ -712,7 +770,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_47_gfxm",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK013",
@@ -725,7 +784,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_48_yw52",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK014",
@@ -738,7 +798,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_49_dyli",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK015",
@@ -751,7 +812,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_50_zsmy",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK016",
@@ -764,7 +826,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_51_9kyb",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK017",
@@ -777,7 +840,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_52_k0zg",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK018",
@@ -790,7 +854,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_53_8axv",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK019",
@@ -803,7 +868,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_54_ma05",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK020",
@@ -816,7 +882,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_55_1r3e",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK021",
@@ -829,7 +896,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_56_uiyw",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK022",
@@ -842,7 +910,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_57_dwhf",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK023",
@@ -855,7 +924,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_58_9zaa",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK024",
@@ -868,7 +938,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_59_b0vd",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK025",
@@ -881,7 +952,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_60_a2d4",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK026",
@@ -894,7 +966,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_61_ei6f",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK027",
@@ -907,7 +980,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_62_d6qu",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK028",
@@ -920,7 +994,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_63_j4v7",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK029",
@@ -933,7 +1008,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_64_0zrj",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK030",
@@ -946,7 +1022,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_65_k8id",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK030",
@@ -959,7 +1036,8 @@
       "person": "QuyênNTH",
       "note": "Mang đi test SG đưa về",
       "id": "import_excel_1789699061141_66_4mr3",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK030",
@@ -972,7 +1050,8 @@
       "person": "QuyênNTH",
       "note": "anh Lâm về trả",
       "id": "import_excel_1789699061141_67_6kjb",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK031",
@@ -985,7 +1064,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_68_u4fd",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK031",
@@ -998,7 +1078,8 @@
       "person": "QuyênNTH",
       "note": "Mang đi test SG đưa về",
       "id": "import_excel_1789699061141_69_fjzp",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK031",
@@ -1011,7 +1092,8 @@
       "person": "QuyênNTH",
       "note": "anh Lâm về trả",
       "id": "import_excel_1789699061141_70_tq70",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK032",
@@ -1024,7 +1106,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_71_kzvt",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK032",
@@ -1037,7 +1120,8 @@
       "person": "QuyênNTH",
       "note": "Mang đi test SG đưa về",
       "id": "import_excel_1789699061141_72_g3es",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK032",
@@ -1050,7 +1134,8 @@
       "person": "QuyênNTH",
       "note": "anh Lâm về trả",
       "id": "import_excel_1789699061141_73_e10n",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK033",
@@ -1063,7 +1148,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_74_741k",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK034",
@@ -1076,7 +1162,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_75_ets1",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK035",
@@ -1089,7 +1176,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_76_d5lz",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK035",
@@ -1102,7 +1190,8 @@
       "person": "QuyênNTH",
       "note": "Mang đi test SG đưa về",
       "id": "import_excel_1789699061141_77_g7qi",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK035",
@@ -1115,7 +1204,8 @@
       "person": "QuyênNTH",
       "note": "anh Lâm về trả",
       "id": "import_excel_1789699061141_78_9nc2",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK036",
@@ -1128,7 +1218,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_79_rcug",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK036",
@@ -1141,7 +1232,8 @@
       "person": "QuyênNTH",
       "note": "anh Long k dùng trả lại",
       "id": "import_excel_1789699061141_80_up33",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK036",
@@ -1154,7 +1246,8 @@
       "person": "QuyênNTH",
       "note": "Mang đi test SG đưa về",
       "id": "import_excel_1789699061141_81_wvl1",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK037",
@@ -1167,7 +1260,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_82_abct",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK037",
@@ -1180,7 +1274,8 @@
       "person": "QuyenNTH",
       "note": "Test xong nhập lại",
       "id": "import_excel_1789699061141_83_mxmx",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK045",
@@ -1193,7 +1288,8 @@
       "person": "QuyenNTH",
       "note": "",
       "id": "import_excel_1789699061141_84_tryq",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK046",
@@ -1206,7 +1302,8 @@
       "person": "QuyenNTH",
       "note": "",
       "id": "import_excel_1789699061141_85_j2cb",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK051",
@@ -1219,7 +1316,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_86_psd9",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK052",
@@ -1232,7 +1330,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_87_1ii0",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK053",
@@ -1245,7 +1344,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_88_kerh",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK054",
@@ -1258,7 +1358,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_89_72yd",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK055",
@@ -1271,7 +1372,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_90_9txg",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK056",
@@ -1284,7 +1386,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_91_yv1p",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK057",
@@ -1297,7 +1400,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_92_s32p",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK058",
@@ -1310,7 +1414,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_93_wq5f",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK059",
@@ -1323,7 +1428,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_94_t0sp",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK060",
@@ -1336,7 +1442,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_95_33y0",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK061",
@@ -1349,7 +1456,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_96_wb4j",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK062",
@@ -1362,7 +1470,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_97_78mh",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK063",
@@ -1375,7 +1484,8 @@
       "person": "QuyênNTH",
       "note": "Quốc Anh trả lại",
       "id": "import_excel_1789699061141_98_sa7s",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK064",
@@ -1388,7 +1498,8 @@
       "person": "QuyênNTH",
       "note": "anh Long k dùng trả lại",
       "id": "import_excel_1789699061141_99_iwdt",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK065",
@@ -1401,7 +1512,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_100_gc8u",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "PS001",
@@ -1414,7 +1526,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_101_2ud0",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "PS002",
@@ -1427,7 +1540,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_102_monr",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "PS003",
@@ -1440,7 +1554,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_103_208n",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "PS004",
@@ -1453,7 +1568,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_104_4bfi",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "PS005",
@@ -1466,7 +1582,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_105_u2eh",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "SC001",
@@ -1479,7 +1596,8 @@
       "person": "QuyBD",
       "note": "200k( phôi+gói)",
       "id": "import_excel_1789699061141_106_0cid",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "TBĐ-000",
@@ -1492,7 +1610,8 @@
       "person": "Quybd",
       "note": "nhập mới",
       "id": "import_excel_1789699061141_107_unms",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "TBĐ-001",
@@ -1505,7 +1624,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_108_h8p7",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "TBĐ-002",
@@ -1518,7 +1638,8 @@
       "person": "Quybd",
       "note": "mua từ hcm mang về",
       "id": "import_excel_1789699061141_109_wpv3",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "TBĐ-003",
@@ -1531,7 +1652,8 @@
       "person": "Quybd",
       "note": "mua từ hcm mang về",
       "id": "import_excel_1789699061141_110_azel",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "TBĐ004",
@@ -1544,7 +1666,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_111_upx2",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "TBĐ005",
@@ -1557,7 +1680,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_112_b51o",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "TBĐ006",
@@ -1570,7 +1694,8 @@
       "person": "QuyenNTH",
       "note": "Nhập mới",
       "id": "import_excel_1789699061141_113_4uf4",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "TBLT001",
@@ -1583,7 +1708,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_114_cuid",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "TBLT002",
@@ -1596,7 +1722,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_115_acrz",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "TBLT002",
@@ -1609,7 +1736,8 @@
       "person": "QuyênNTH",
       "note": "anh Khâm chuyển nhập kho",
       "id": "import_excel_1789699061141_116_3mz5",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "TBLT003",
@@ -1622,7 +1750,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_117_mq84",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "TBLT005",
@@ -1635,7 +1764,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_118_mi4j",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "TBLT005",
@@ -1648,7 +1778,8 @@
       "person": "QuyênNTH",
       "note": "Nhập mới ( trả 10 ổ, nhập vè 2 ổ)\nĐang dùng ở máy mô phỏng",
       "id": "import_excel_1789699061141_119_cnbv",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "",
@@ -1661,7 +1792,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_120_gkrh",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -1674,7 +1806,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_121_sfid",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -1687,7 +1820,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_122_w0wy",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -1700,7 +1834,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_123_omiq",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "MT&PK005",
@@ -1713,7 +1848,8 @@
       "person": "QuyênNTH",
       "note": "Anh Khâm test xong trả lại",
       "id": "import_excel_1789699061141_124_cmud",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "",
@@ -1726,7 +1862,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_125_t634",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -1739,7 +1876,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_126_6e76",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -1752,7 +1890,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_127_frt6",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -1765,7 +1904,8 @@
       "person": "QuyênNTH",
       "note": "Anh Lâm k dùng trả lại",
       "id": "import_excel_1789699061141_128_f359",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -1778,7 +1918,8 @@
       "person": "QuyênNTH",
       "note": "Bị vỡ nhập lại ( B_3-4)",
       "id": "import_excel_1789699061141_129_weqe",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -1791,7 +1932,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_130_7znb",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -1804,7 +1946,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_131_z54f",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "MT&PK031",
@@ -1817,7 +1960,8 @@
       "person": "QuyênNTH",
       "note": "Anh Lâm trả",
       "id": "import_excel_1789699061141_132_3nei",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK030",
@@ -1830,7 +1974,8 @@
       "person": "QuyênNTH",
       "note": "Anh Lâm trả",
       "id": "import_excel_1789699061141_133_l9pt",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK035",
@@ -1843,7 +1988,8 @@
       "person": "QuyênNTH",
       "note": "Anh Lâm trả",
       "id": "import_excel_1789699061141_134_q5wy",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "",
@@ -1856,12 +2002,13 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_135_fas9",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "CB-016",
       "name": "Lidar M1 Plus + hub",
-      "category": "",
+      "category": "Cảm biến",
       "description": "",
       "date": "2026-05-06",
       "quantity": 1,
@@ -1869,7 +2016,8 @@
       "person": "QuyênNTH",
       "note": "Bảo trả lại",
       "id": "import_excel_1789699061141_136_fsr4",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": "Cái"
     },
     {
       "code": "",
@@ -1882,7 +2030,8 @@
       "person": "QuyênNTH",
       "note": "B-1-0",
       "id": "import_excel_1789699061141_137_9jiy",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -1895,7 +2044,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_138_4x3w",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -1908,7 +2058,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_139_4641",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -1921,7 +2072,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_140_1d87",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -1934,7 +2086,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_141_4w8n",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -1947,7 +2100,8 @@
       "person": "QuyênNTH",
       "note": "Anh Lâm trả",
       "id": "import_excel_1789699061141_142_mjiz",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -1960,7 +2114,8 @@
       "person": "QuyênNTH",
       "note": "Anh Lâm trả",
       "id": "import_excel_1789699061141_143_c1o0",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -1973,7 +2128,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_144_hcqm",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -1986,7 +2142,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_145_e6lu",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -1999,7 +2156,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_146_ngfl",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2012,7 +2170,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_147_23az",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2025,7 +2184,8 @@
       "person": "QuyênNTH",
       "note": "Kiểm định",
       "id": "import_excel_1789699061141_148_hr6u",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2038,7 +2198,8 @@
       "person": "QuyênNTH",
       "note": "Kiểm định",
       "id": "import_excel_1789699061141_149_vjsu",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2051,7 +2212,8 @@
       "person": "QuyênNTH",
       "note": "Kiểm định",
       "id": "import_excel_1789699061141_150_4qju",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2064,7 +2226,8 @@
       "person": "QuyênNTH",
       "note": "Nhập từ VF8 cũ",
       "id": "import_excel_1789699061141_151_i7ya",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2077,7 +2240,8 @@
       "person": "QuyênNTH",
       "note": "K có dây",
       "id": "import_excel_1789699061141_152_rp9k",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2090,7 +2254,8 @@
       "person": "QuyênNTH",
       "note": "K có dây",
       "id": "import_excel_1789699061141_153_o69h",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2103,7 +2268,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_154_12bn",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2116,7 +2282,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_155_bk1k",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2129,7 +2296,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_156_bkmu",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2142,7 +2310,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_157_i2ss",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2155,7 +2324,8 @@
       "person": "QuyênNTH",
       "note": "Anh Kiên trả lại( anh Dũng mượn)",
       "id": "import_excel_1789699061141_158_mzb3",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2168,7 +2338,8 @@
       "person": "",
       "note": "Anh Khâm trả lại",
       "id": "import_excel_1789699061141_159_5wv7",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2181,7 +2352,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_160_d0hl",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2194,7 +2366,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_161_uzcm",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2207,7 +2380,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_162_ah64",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2220,7 +2394,8 @@
       "person": "QuyênNTH",
       "note": "Anh Lâm trả về",
       "id": "import_excel_1789699061141_163_96c6",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2233,7 +2408,8 @@
       "person": "QuyênNTH",
       "note": "Anh Long trả",
       "id": "import_excel_1789699061141_164_8lqm",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2246,7 +2422,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_165_axww",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2259,7 +2436,8 @@
       "person": "QuyênNTH",
       "note": "Anh Bình Mượn 1 hub, k lấy cảm biến (4/6)",
       "id": "import_excel_1789699061141_166_umhu",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2272,7 +2450,8 @@
       "person": "QuyênNTH",
       "note": "Nhập lại",
       "id": "import_excel_1789699061141_167_03ft",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2285,7 +2464,8 @@
       "person": "QuyênNTH",
       "note": "",
       "id": "import_excel_1789699061141_168_ycep",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2298,7 +2478,8 @@
       "person": "QuyênNTH",
       "note": "Anh Khâm nhập",
       "id": "import_excel_1789699061141_169_r8e3",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2311,7 +2492,8 @@
       "person": "",
       "note": "Anh Kiên nhập",
       "id": "import_excel_1789699061141_170_bgua",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2324,7 +2506,8 @@
       "person": "",
       "note": "Anh Kiên nhập",
       "id": "import_excel_1789699061141_171_twhk",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2337,7 +2520,8 @@
       "person": "",
       "note": "Anh Kiên nhập",
       "id": "import_excel_1789699061141_172_db3x",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2350,7 +2534,8 @@
       "person": "",
       "note": "Anh Kiên nhập",
       "id": "import_excel_1789699061141_173_jd6x",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2363,7 +2548,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_174_4tet",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2376,7 +2562,8 @@
       "person": "",
       "note": "Anh Kiên nhập",
       "id": "import_excel_1789699061141_175_pb4v",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2389,7 +2576,8 @@
       "person": "",
       "note": "Sơn mang lên nhập",
       "id": "import_excel_1789699061141_176_ynnz",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2402,7 +2590,8 @@
       "person": "",
       "note": "Anh Nam nhập lại",
       "id": "import_excel_1789699061141_177_g5nm",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2415,7 +2604,8 @@
       "person": "",
       "note": "Anh Đại trả lại",
       "id": "import_excel_1789699061141_178_ws59",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2428,7 +2618,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_179_blzf",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2441,7 +2632,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_180_ki9j",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2454,7 +2646,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_181_pfj5",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2467,7 +2660,8 @@
       "person": "",
       "note": "Anh Kiên mang từ nhà máy về",
       "id": "import_excel_1789699061141_182_e7xn",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2480,7 +2674,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_183_zuuj",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2493,7 +2688,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_184_aw1b",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2506,7 +2702,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_185_lqq2",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2519,7 +2716,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_186_menl",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2532,7 +2730,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_187_42mp",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2545,7 +2744,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_188_znbz",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2558,7 +2758,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_189_niu3",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2571,7 +2772,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_190_16u8",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2584,7 +2786,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_191_cjtn",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2597,7 +2800,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_192_2154",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2610,7 +2814,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_193_vj7s",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2623,7 +2828,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_194_7r7e",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2636,7 +2842,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_195_qkra",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2649,7 +2856,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_196_xups",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2662,7 +2870,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_197_locu",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2675,7 +2884,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_198_tu82",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2688,7 +2898,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_199_gc4r",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2701,7 +2912,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_200_zgrh",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2714,7 +2926,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_201_lvap",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2727,7 +2940,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_202_7obd",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2740,7 +2954,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_203_r7ny",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2753,7 +2968,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_204_e120",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2766,7 +2982,8 @@
       "person": "",
       "note": "Anh Đại trả lại",
       "id": "import_excel_1789699061141_205_ecmm",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2779,7 +2996,8 @@
       "person": "",
       "note": "Anh Đại trả lại",
       "id": "import_excel_1789699061141_206_x9zz",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2792,7 +3010,8 @@
       "person": "",
       "note": "Anh Đại trả lại",
       "id": "import_excel_1789699061141_207_m2dm",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2805,7 +3024,8 @@
       "person": "",
       "note": "Anh Đại trả lại",
       "id": "import_excel_1789699061141_208_k1yh",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2818,7 +3038,8 @@
       "person": "",
       "note": "Anh Đại trả lại",
       "id": "import_excel_1789699061141_209_zmpl",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2831,7 +3052,8 @@
       "person": "",
       "note": "Sơn tháo từ VF6 nhập vào",
       "id": "import_excel_1789699061141_210_hkpc",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2844,7 +3066,8 @@
       "person": "",
       "note": "Nhập mới",
       "id": "import_excel_1789699061141_211_kqg7",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2857,7 +3080,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_212_1yjt",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2870,7 +3094,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_213_l6kc",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2883,7 +3108,8 @@
       "person": "",
       "note": "Sơn nhập lại",
       "id": "import_excel_1789699061141_214_f6ip",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2896,7 +3122,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_215_b4qe",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2909,7 +3136,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_216_oqji",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2922,7 +3150,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_217_o42f",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -2935,7 +3164,8 @@
       "person": "",
       "note": "",
       "id": "import_excel_1789699061141_218_src4",
-      "createdAt": "2026-09-18T02:37:41.141Z"
+      "createdAt": "2026-09-18T02:37:41.141Z",
+      "unit": ""
     }
   ],
   "exports": [
@@ -2948,7 +3178,9 @@
       "location": "Phòng ban",
       "person": "Quản trị viên Hệ thống",
       "note": "",
-      "createdAt": "2026-09-14T14:13:36.394Z"
+      "createdAt": "2026-09-14T14:13:36.394Z",
+      "category": "",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK009",
@@ -2961,7 +3193,8 @@
       "person": "Nguyễn Thị Hồng Quyên",
       "note": "Đã chuyển cho anh Khâm",
       "id": "export_excel_1789699061142_0_biot",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK062",
@@ -2974,7 +3207,8 @@
       "person": "Trần Hoàng Hà",
       "note": "",
       "id": "export_excel_1789699061142_1_nkol",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK019",
@@ -2987,7 +3221,8 @@
       "person": "Trần Hoàng Hà",
       "note": "",
       "id": "export_excel_1789699061142_2_k7wy",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK026",
@@ -3000,7 +3235,8 @@
       "person": "Trần Việt Dũng",
       "note": "",
       "id": "export_excel_1789699061142_3_u888",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK026",
@@ -3013,7 +3249,8 @@
       "person": "Trần Việt Dũng",
       "note": "",
       "id": "export_excel_1789699061142_4_j2be",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK027",
@@ -3026,7 +3263,8 @@
       "person": "Trần Việt Dũng",
       "note": "",
       "id": "export_excel_1789699061142_5_e3zr",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK012",
@@ -3039,7 +3277,8 @@
       "person": "Nguyễn Trung Kiên",
       "note": "",
       "id": "export_excel_1789699061142_6_ls1g",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "",
@@ -3052,7 +3291,8 @@
       "person": "Nguyễn Hữu Lâm",
       "note": "mang đi test sweeper hcm",
       "id": "export_excel_1789699061142_7_2nfo",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "MT&PK035",
@@ -3065,7 +3305,8 @@
       "person": "Nguyễn Hữu Lâm",
       "note": "mang đi test sweeper hcm",
       "id": "export_excel_1789699061142_8_c4cv",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK032",
@@ -3078,7 +3319,8 @@
       "person": "Nguyễn Hữu Lâm",
       "note": "mang đi test sweeper hcm",
       "id": "export_excel_1789699061142_9_al9n",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK036",
@@ -3091,7 +3333,8 @@
       "person": "Nguyễn Hữu Lâm",
       "note": "mang đi test sweeper hcm",
       "id": "export_excel_1789699061142_10_57p3",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK031",
@@ -3104,7 +3347,8 @@
       "person": "Nguyễn Hữu Lâm",
       "note": "mang đi test sweeper hcm",
       "id": "export_excel_1789699061142_11_b0a6",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK009",
@@ -3117,7 +3361,8 @@
       "person": "Đặng Đình Khánh",
       "note": "mang đi test sweeper hcm",
       "id": "export_excel_1789699061142_12_h357",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-012",
@@ -3130,7 +3375,8 @@
       "person": "Bùi Đình Quý",
       "note": "thay sweeper hcm",
       "id": "export_excel_1789699061142_13_xj4z",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-018",
@@ -3143,7 +3389,8 @@
       "person": "Bùi Đình Quý",
       "note": "thay sweeper hcm",
       "id": "export_excel_1789699061142_14_w36p",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-001",
@@ -3156,7 +3403,8 @@
       "person": "Bùi Đình Quý",
       "note": "thay sweeper hcm",
       "id": "export_excel_1789699061142_15_mjk7",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "TBLT002",
@@ -3169,7 +3417,8 @@
       "person": "Bùi Đình Quý",
       "note": "lắp thêm sweeper hcm",
       "id": "export_excel_1789699061142_16_8xq6",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "SC001",
@@ -3182,7 +3431,8 @@
       "person": "Bùi Đình Quý",
       "note": "mang đi test sweeper hcm",
       "id": "export_excel_1789699061142_17_f09k",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK026",
@@ -3195,7 +3445,8 @@
       "person": "Nguyễn Hữu Thái Minh",
       "note": "",
       "id": "export_excel_1789699061142_18_z8l8",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK033",
@@ -3208,7 +3459,8 @@
       "person": "Vũ Hoàng Dũng",
       "note": "set up mạng tầng 30",
       "id": "export_excel_1789699061142_19_00cd",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK034",
@@ -3221,7 +3473,8 @@
       "person": "Vũ Hoàng Dũng",
       "note": "set up mạng tầng 30",
       "id": "export_excel_1789699061142_20_muy4",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK022",
@@ -3234,7 +3487,8 @@
       "person": "Phan Thành Nam",
       "note": "",
       "id": "export_excel_1789699061142_21_25mn",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK028",
@@ -3247,7 +3501,8 @@
       "person": "Vũ Hoàng Dũng",
       "note": "",
       "id": "export_excel_1789699061142_22_y0yw",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-016",
@@ -3260,7 +3515,8 @@
       "person": "Vũ Hoàng Dũng",
       "note": "Cho mượn",
       "id": "export_excel_1789699061142_23_tfl2",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "TBLT005",
@@ -3273,7 +3529,8 @@
       "person": "Hoàng Duy Lộc",
       "note": "",
       "id": "export_excel_1789699061142_24_qpq8",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK026",
@@ -3286,7 +3543,8 @@
       "person": "Trần Hoàng Hà",
       "note": "",
       "id": "export_excel_1789699061142_25_lvzu",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK015",
@@ -3299,7 +3557,8 @@
       "person": "Trần Hoàng Hà",
       "note": "",
       "id": "export_excel_1789699061142_26_0vd5",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK026",
@@ -3312,7 +3571,8 @@
       "person": "Bùi Văn Quốc Anh",
       "note": "",
       "id": "export_excel_1789699061142_27_0u3v",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK022",
@@ -3325,7 +3585,8 @@
       "person": "Nguyễn Hữu Thái Minh",
       "note": "",
       "id": "export_excel_1789699061142_28_3crg",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-022",
@@ -3338,7 +3599,8 @@
       "person": "Vũ Hoàng Dũng",
       "note": "lắp cho sweeper2",
       "id": "export_excel_1789699061142_29_t455",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-005",
@@ -3351,7 +3613,8 @@
       "person": "Vũ Hoàng Dũng",
       "note": "lắp cho sweeper2",
       "id": "export_excel_1789699061142_30_zz43",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-007",
@@ -3364,7 +3627,8 @@
       "person": "Vũ Hoàng Dũng",
       "note": "lắp cho sweeper2",
       "id": "export_excel_1789699061142_31_4hvb",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK064",
@@ -3377,7 +3641,8 @@
       "person": "Phan Thành Nam",
       "note": "Chuyển qua cho máy mô phỏng",
       "id": "export_excel_1789699061142_32_azl7",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK063",
@@ -3390,7 +3655,8 @@
       "person": "Phan Thành Nam",
       "note": "Chuyển qua cho máy mô phỏng",
       "id": "export_excel_1789699061142_33_0nmv",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-007",
@@ -3403,7 +3669,8 @@
       "person": "Trần Cao Khâm",
       "note": "test",
       "id": "export_excel_1789699061142_34_31cg",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "TBĐ005",
@@ -3416,7 +3683,8 @@
       "person": "Vũ Hoàng Dũng",
       "note": "",
       "id": "export_excel_1789699061142_35_ibi1",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "TBĐ004",
@@ -3429,7 +3697,8 @@
       "person": "Vũ Hoàng Dũng",
       "note": "",
       "id": "export_excel_1789699061142_36_vetx",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK007",
@@ -3442,7 +3711,8 @@
       "person": "Vũ Hoàng Dũng",
       "note": "",
       "id": "export_excel_1789699061142_37_nczc",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK027",
@@ -3455,7 +3725,8 @@
       "person": "Vũ Hoàng Dũng",
       "note": "",
       "id": "export_excel_1789699061142_38_ahh2",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-002",
@@ -3468,12 +3739,13 @@
       "person": "Trần Cao Khâm",
       "note": "Test",
       "id": "export_excel_1789699061142_39_hmn8",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-027",
       "name": "cảm biến E1R + hub",
-      "category": "cảm biến",
+      "category": "Cảm biến",
       "description": "",
       "date": "2026-03-30",
       "quantity": 3,
@@ -3481,12 +3753,13 @@
       "person": "Bùi Đình Quý",
       "note": "xuất cho anh Đại có 3 bộ dây kèm theo thử nghiệm VF8 Factory",
       "id": "export_excel_1789699061142_40_fes7",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-016",
       "name": "Lidar M1 Plus",
-      "category": "cảm biến",
+      "category": "Cảm biến",
       "description": "",
       "date": "2026-03-30",
       "quantity": 1,
@@ -3494,7 +3767,8 @@
       "person": "Bùi Đình Quý",
       "note": "xuất cho anh Đại thử nghiệm VF8 Factory",
       "id": "export_excel_1789699061142_41_4aqz",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-031",
@@ -3507,7 +3781,8 @@
       "person": "Trần Cao Khâm",
       "note": "Xuất đi test",
       "id": "export_excel_1789699061142_42_3wds",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK005",
@@ -3520,7 +3795,8 @@
       "person": "Trần Cao Khâm",
       "note": "Xuất đi test",
       "id": "export_excel_1789699061142_43_qilq",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK035",
@@ -3533,7 +3809,8 @@
       "person": "Nguyễn Hữu Lâm",
       "note": "Xuất cho anh Lâm mang đi",
       "id": "export_excel_1789699061142_44_ve37",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK032",
@@ -3546,7 +3823,8 @@
       "person": "Nguyễn Hữu Lâm",
       "note": "Xuất cho anh Lâm mang đi",
       "id": "export_excel_1789699061142_45_5nhk",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK031",
@@ -3559,7 +3837,8 @@
       "person": "Nguyễn Hữu Lâm",
       "note": "Xuất cho anh Lâm mang đi",
       "id": "export_excel_1789699061142_46_hm98",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK030",
@@ -3572,12 +3851,13 @@
       "person": "Nguyễn Hữu Lâm",
       "note": "Xuất cho anh Lâm mang đi",
       "id": "export_excel_1789699061142_47_vmla",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "TBĐ-000",
       "name": "dây cảm biến rada ARS 408",
-      "category": "",
+      "category": "dây cảm biến",
       "description": "",
       "date": "2026-04-06",
       "quantity": 2,
@@ -3585,7 +3865,8 @@
       "person": "Bùi Đình Quý",
       "note": "xuất cho C Chung",
       "id": "export_excel_1789699061142_48_mako",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "TBLT005",
@@ -3598,7 +3879,8 @@
       "person": "Hoàng Duy Lộc",
       "note": "xuất trả lại bên bán",
       "id": "export_excel_1789699061142_49_4486",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK005",
@@ -3611,7 +3893,8 @@
       "person": "Trần Cao Khâm",
       "note": "Xuất cho anh Khâm",
       "id": "export_excel_1789699061142_50_tueb",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK057",
@@ -3624,7 +3907,8 @@
       "person": "Nguyễn Hữu Lâm",
       "note": "Xuất cho Hải dùng",
       "id": "export_excel_1789699061142_51_xkwk",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK031",
@@ -3637,7 +3921,8 @@
       "person": "Nguyễn Hữu Lâm",
       "note": "Xuất cho anh Lâm mang đi",
       "id": "export_excel_1789699061142_52_u4aa",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK030",
@@ -3650,7 +3935,8 @@
       "person": "Nguyễn Hữu Lâm",
       "note": "Xuất cho anh Lâm mang đi",
       "id": "export_excel_1789699061142_53_3md7",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK035",
@@ -3663,7 +3949,8 @@
       "person": "Nguyễn Hữu Lâm",
       "note": "Xuất cho anh Lâm mang đi",
       "id": "export_excel_1789699061142_54_4zs6",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK032",
@@ -3676,7 +3963,8 @@
       "person": "Nguyễn Hữu Lâm",
       "note": "Xuất cho anh Lâm mang đi",
       "id": "export_excel_1789699061142_55_h1ji",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK006",
@@ -3689,7 +3977,8 @@
       "person": "Nguyễn Trung Kiên",
       "note": "Anh Kiên xuất xuống xường",
       "id": "export_excel_1789699061142_56_o707",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK055",
@@ -3702,7 +3991,8 @@
       "person": "Hoàng Duy Lộc",
       "note": "Xuất cho anh Lộc",
       "id": "export_excel_1789699061142_57_nksu",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK017",
@@ -3715,7 +4005,8 @@
       "person": "Phan Thành Nam",
       "note": "",
       "id": "export_excel_1789699061142_58_vzaz",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "TBĐ-000",
@@ -3728,7 +4019,8 @@
       "person": "Vũ Hoàng Dũng",
       "note": "Xuất cho anh Đại test xe VF6_1",
       "id": "export_excel_1789699061142_59_40bt",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "",
@@ -3741,7 +4033,8 @@
       "person": "Vũ Hoàng Dũng",
       "note": "Xuất cho anh Đại test xe VF6_1",
       "id": "export_excel_1789699061142_60_u06w",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -3754,7 +4047,8 @@
       "person": "Vũ Hoàng Dũng",
       "note": "Xuất cho anh Đại test xe VF6_1",
       "id": "export_excel_1789699061142_61_cjfi",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -3767,12 +4061,13 @@
       "person": "Vũ Hoàng Dũng",
       "note": "Xuất cho anh Đại test xe VF6_1",
       "id": "export_excel_1789699061142_62_aw3y",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "CB-031",
       "name": "rada ARS 408",
-      "category": "",
+      "category": "Cảm biến",
       "description": "",
       "date": "2026-04-16",
       "quantity": 4,
@@ -3780,12 +4075,13 @@
       "person": "Vũ Hoàng Dũng",
       "note": "Xuất cho anh Đại test xe VF6_1",
       "id": "export_excel_1789699061142_63_jmuu",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-002",
       "name": "Altos + Dây + Hub",
-      "category": "",
+      "category": "Cảm biến",
       "description": "",
       "date": "2026-04-16",
       "quantity": 1,
@@ -3793,12 +4089,13 @@
       "person": "Vũ Hoàng Dũng",
       "note": "Xuất cho anh Đại test xe VF6_1",
       "id": "export_excel_1789699061142_64_bdkm",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK052",
       "name": "Hub USB type-C 5 trong 2",
-      "category": "",
+      "category": "Phụ kiện & Máy tính",
       "description": "",
       "date": "2026-04-20",
       "quantity": 1,
@@ -3806,7 +4103,8 @@
       "person": "Nguyễn Thị Hồng Quyên",
       "note": "Xuất dùng cho máy",
       "id": "export_excel_1789699061142_65_icgy",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "",
@@ -3819,12 +4117,13 @@
       "person": "Bùi Đình Quý",
       "note": "Xuất cho anh Đại test xe VF6_1",
       "id": "export_excel_1789699061142_66_sbi9",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "MT&PK052",
       "name": "Hub USB type-C 5 trong 2",
-      "category": "",
+      "category": "Phụ kiện & Máy tính",
       "description": "",
       "date": "2026-04-21",
       "quantity": 1,
@@ -3832,12 +4131,13 @@
       "person": "Nguyễn Hữu Lâm",
       "note": "Xuất dùng cho máy",
       "id": "export_excel_1789699061142_67_1lbi",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK045",
       "name": "Cáp chuyển đổi Displayport qua HDMI dài 5m Ugreen",
-      "category": "",
+      "category": "Phụ kiện & Máy tính",
       "description": "",
       "date": "2026-04-21",
       "quantity": 1,
@@ -3845,12 +4145,13 @@
       "person": "Vũ Hoàng Dũng",
       "note": "Xuất cho Hà",
       "id": "export_excel_1789699061142_68_hsje",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK055",
       "name": "Đọc ổ cứng 2,5/3.5 inches",
-      "category": "",
+      "category": "Phụ kiện & Máy tính",
       "description": "",
       "date": "2026-05-04",
       "quantity": 2,
@@ -3858,7 +4159,8 @@
       "person": "Hoàng Duy Lộc",
       "note": "Xuất cho anh Lộc",
       "id": "export_excel_1789699061142_69_ldnq",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "",
@@ -3871,12 +4173,13 @@
       "person": "Hoàng Duy Lộc",
       "note": "Xuất cho anh Lộc",
       "id": "export_excel_1789699061142_70_xdy3",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "CB-016",
       "name": "Lidar M1 Plus",
-      "category": "",
+      "category": "Cảm biến",
       "description": "",
       "date": "2026-05-04",
       "quantity": 1,
@@ -3884,7 +4187,8 @@
       "person": "Vũ Hoàng Dũng",
       "note": "Xuất cho Bảo ( k có dây)",
       "id": "export_excel_1789699061142_71_t8ay",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "",
@@ -3897,12 +4201,13 @@
       "person": "Vũ Hoàng Dũng",
       "note": "Xuất cho anh Đại test xe VF8 nhà máy",
       "id": "export_excel_1789699061142_72_pxis",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "CB-027",
       "name": "cảm biến E1R + hub",
-      "category": "",
+      "category": "Cảm biến",
       "description": "",
       "date": "2026-05-04",
       "quantity": 3,
@@ -3910,12 +4215,13 @@
       "person": "Vũ Hoàng Dũng",
       "note": "Xuất cho anh Đại test xe VF8 nhà máy",
       "id": "export_excel_1789699061142_73_ac29",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK016",
       "name": "CAT8 10M",
-      "category": "",
+      "category": "Phụ kiện & Máy tính",
       "description": "",
       "date": "2026-05-04",
       "quantity": 2,
@@ -3923,12 +4229,13 @@
       "person": "Vũ Hoàng Dũng",
       "note": "Xuất cho anh Đại test xe VF8 nhà máy",
       "id": "export_excel_1789699061142_74_b2lf",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK017",
       "name": "CAT8 2M",
-      "category": "",
+      "category": "Phụ kiện & Máy tính",
       "description": "",
       "date": "2026-05-04",
       "quantity": 2,
@@ -3936,7 +4243,8 @@
       "person": "Vũ Hoàng Dũng",
       "note": "Xuất cho anh Đại test xe VF8 nhà máy",
       "id": "export_excel_1789699061142_75_6yem",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK035",
@@ -3949,7 +4257,8 @@
       "person": "Nguyễn Hữu Lâm",
       "note": "Xuất cho anh Lâm mang đi HP",
       "id": "export_excel_1789699061142_76_ctk1",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK031",
@@ -3962,7 +4271,8 @@
       "person": "Nguyễn Hữu Lâm",
       "note": "Xuất cho anh Lâm mang đi HP",
       "id": "export_excel_1789699061142_77_6nhj",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK030",
@@ -3975,7 +4285,8 @@
       "person": "Nguyễn Hữu Lâm",
       "note": "Xuất cho anh Lâm mang đi HP",
       "id": "export_excel_1789699061142_78_1r16",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK022",
@@ -3988,12 +4299,13 @@
       "person": "Phan Thành Nam",
       "note": "Xuất cho anh Nam dùng",
       "id": "export_excel_1789699061142_79_068n",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK007",
       "name": "nuvo-10108GC-10G-5049",
-      "category": "",
+      "category": "Máy tính nhúng & Phụ kiện",
       "description": "",
       "date": "2026-05-06",
       "quantity": 1,
@@ -4001,7 +4313,8 @@
       "person": "",
       "note": "Xuất cho anh Đại",
       "id": "export_excel_1789699061142_80_lbnz",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "",
@@ -4014,12 +4327,13 @@
       "person": "",
       "note": "Xuất cho anh Đại",
       "id": "export_excel_1789699061142_81_rras",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "CB-027",
       "name": "cảm biến E1R + hub",
-      "category": "",
+      "category": "Cảm biến",
       "description": "",
       "date": "2026-05-06",
       "quantity": 4,
@@ -4027,12 +4341,13 @@
       "person": "",
       "note": "Xuất cho anh Đại",
       "id": "export_excel_1789699061142_82_afw1",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-024",
       "name": "AC_ISX031-H60",
-      "category": "",
+      "category": "Cảm biến",
       "description": "",
       "date": "2026-05-06",
       "quantity": 4,
@@ -4040,12 +4355,13 @@
       "person": "",
       "note": "Xuất cho anh Đại",
       "id": "export_excel_1789699061142_83_bskf",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-025",
       "name": "AC_ISX031-H120",
-      "category": "",
+      "category": "Cái",
       "description": "",
       "date": "2026-05-06",
       "quantity": 4,
@@ -4053,12 +4369,13 @@
       "person": "",
       "note": "Xuất cho anh Đại",
       "id": "export_excel_1789699061142_84_sw0w",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-026",
       "name": "AC_ISX031-H190",
-      "category": "",
+      "category": "Cảm biến",
       "description": "",
       "date": "2026-05-06",
       "quantity": 4,
@@ -4066,12 +4383,13 @@
       "person": "",
       "note": "Xuất cho anh Đại",
       "id": "export_excel_1789699061142_85_gtd1",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "TBĐ004",
       "name": "FK-FF-Cable-15M",
-      "category": "",
+      "category": "phụ kiện của cảm biến",
       "description": "",
       "date": "2026-05-06",
       "quantity": 12,
@@ -4079,12 +4397,13 @@
       "person": "",
       "note": "Xuất cho anh Đại",
       "id": "export_excel_1789699061142_86_6q1y",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-031",
       "name": "rada ARS 408",
-      "category": "",
+      "category": "Cảm biến",
       "description": "",
       "date": "2026-05-06",
       "quantity": 4,
@@ -4092,12 +4411,13 @@
       "person": "",
       "note": "Xuất cho anh Đại",
       "id": "export_excel_1789699061142_87_1rzm",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "TBĐ-000",
       "name": "dây cảm biến rada ARS 408",
-      "category": "",
+      "category": "dây cảm biến",
       "description": "",
       "date": "2026-05-06",
       "quantity": 4,
@@ -4105,12 +4425,13 @@
       "person": "",
       "note": "Xuất cho anh Đại",
       "id": "export_excel_1789699061142_88_805o",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-002",
       "name": "Altos + Dây + Hub",
-      "category": "",
+      "category": "Cảm biến",
       "description": "",
       "date": "2026-05-06",
       "quantity": 1,
@@ -4118,12 +4439,13 @@
       "person": "",
       "note": "Xuất cho anh Đại",
       "id": "export_excel_1789699061142_89_jfqq",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-003",
       "name": "CGI-230",
-      "category": "",
+      "category": "Cảm biến",
       "description": "",
       "date": "2026-05-06",
       "quantity": 1,
@@ -4131,7 +4453,8 @@
       "person": "",
       "note": "Xuất cho anh Đại",
       "id": "export_excel_1789699061142_90_uicq",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "",
@@ -4144,7 +4467,8 @@
       "person": "",
       "note": "Xuất cho anh Đại",
       "id": "export_excel_1789699061142_91_vvo7",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -4157,7 +4481,8 @@
       "person": "",
       "note": "Xuất cho anh Đại",
       "id": "export_excel_1789699061142_92_4byr",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -4170,7 +4495,8 @@
       "person": "",
       "note": "Xuất cho anh Đại",
       "id": "export_excel_1789699061142_93_gxmv",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -4183,7 +4509,8 @@
       "person": "Trần Cao Khâm",
       "note": "Anh Khâm xuất dùng cho sweeper2",
       "id": "export_excel_1789699061142_94_coqd",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -4196,7 +4523,8 @@
       "person": "Trần Cao Khâm",
       "note": "Anh Khâm xuất dùng cho sweeper3",
       "id": "export_excel_1789699061142_95_ujqu",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -4209,12 +4537,13 @@
       "person": "Trần Cao Khâm",
       "note": "Anh Khâm xuất trả lại",
       "id": "export_excel_1789699061142_96_ao0p",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "MT&PK058",
       "name": "Bàn phím Logitech K400",
-      "category": "",
+      "category": "Phụ kiện & Máy tính",
       "description": "",
       "date": "2026-05-12",
       "quantity": 1,
@@ -4222,12 +4551,13 @@
       "person": "Vũ Hoàng Dũng",
       "note": "",
       "id": "export_excel_1789699061142_97_cnpx",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK057",
       "name": "View Sonic VA1655-3",
-      "category": "",
+      "category": "Phụ kiện & Máy tính",
       "description": "",
       "date": "2026-05-19",
       "quantity": 2,
@@ -4235,12 +4565,13 @@
       "person": "Vũ Hoàng Dũng",
       "note": "Xuất cho VF6_2",
       "id": "export_excel_1789699061142_98_j7di",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK058",
       "name": "Bàn phím Logitech K400",
-      "category": "",
+      "category": "Phụ kiện & Máy tính",
       "description": "",
       "date": "2026-05-19",
       "quantity": 1,
@@ -4248,12 +4579,13 @@
       "person": "Vũ Hoàng Dũng",
       "note": "Xuất cho VF6_2",
       "id": "export_excel_1789699061142_99_gzp2",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK058",
       "name": "Bàn phím Logitech K400",
-      "category": "",
+      "category": "Phụ kiện & Máy tính",
       "description": "",
       "date": "2026-05-19",
       "quantity": 2,
@@ -4261,12 +4593,13 @@
       "person": "Vũ Hoàng Dũng",
       "note": "Xuất cho máy mô phỏng",
       "id": "export_excel_1789699061142_100_7ie4",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK058",
       "name": "Bàn phím Logitech K400",
-      "category": "",
+      "category": "Phụ kiện & Máy tính",
       "description": "",
       "date": "2026-05-20",
       "quantity": 1,
@@ -4274,12 +4607,13 @@
       "person": "Lê Tuấn Long",
       "note": "Xuất cho VF6_1",
       "id": "export_excel_1789699061142_101_puq1",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK031",
       "name": "Pin sạc dự phòng  ugreen",
-      "category": "",
+      "category": "Phụ kiện & Máy tính",
       "description": "",
       "date": "2026-05-20",
       "quantity": 1,
@@ -4287,12 +4621,13 @@
       "person": "Lê Tuấn Long",
       "note": "Xuất cho VF6_1",
       "id": "export_excel_1789699061142_102_8oeu",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK057",
       "name": "View Sonic VA1655-3",
-      "category": "",
+      "category": "Phụ kiện & Máy tính",
       "description": "",
       "date": "2026-05-20",
       "quantity": 1,
@@ -4300,12 +4635,13 @@
       "person": "",
       "note": "Xuất cho anh Khánh dùng",
       "id": "export_excel_1789699061142_103_3egk",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK025",
       "name": "Sim Vinaphone",
-      "category": "",
+      "category": "Phụ kiện & Máy tính",
       "description": "",
       "date": "2026-05-21",
       "quantity": 1,
@@ -4313,12 +4649,13 @@
       "person": "Trần Cao Khâm",
       "note": "Sim số 7 - Xuất cho VF6_logData",
       "id": "export_excel_1789699061142_104_caf4",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-011",
       "name": "IMU Xsen MTi100",
-      "category": "",
+      "category": "Cảm biến",
       "description": "",
       "date": "2026-05-21",
       "quantity": 1,
@@ -4326,7 +4663,8 @@
       "person": "Vũ Hoàng Dũng",
       "note": "VF6_1 + VF6_2",
       "id": "export_excel_1789699061142_105_y4cm",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "",
@@ -4339,12 +4677,13 @@
       "person": "Vũ Hoàng Dũng",
       "note": "Xuất VF6-02",
       "id": "export_excel_1789699061142_106_1xhx",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "MT&PK058",
       "name": "Bàn phím Logitech K400",
-      "category": "",
+      "category": "Phụ kiện & Máy tính",
       "description": "",
       "date": "2026-05-25",
       "quantity": 1,
@@ -4352,7 +4691,8 @@
       "person": "Vũ Hoàng Dũng",
       "note": "Xuất cho anh Đại",
       "id": "export_excel_1789699061142_107_k273",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "",
@@ -4365,7 +4705,8 @@
       "person": "Vũ Hoàng Dũng",
       "note": "Xuất cho anh Đại",
       "id": "export_excel_1789699061142_108_bmiz",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -4378,7 +4719,8 @@
       "person": "Vũ Hoàng Dũng",
       "note": "Vào SG",
       "id": "export_excel_1789699061142_109_zj5q",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -4391,7 +4733,8 @@
       "person": "Vũ Hoàng Dũng",
       "note": "VF6_01 , 02",
       "id": "export_excel_1789699061142_110_bgfd",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -4404,7 +4747,8 @@
       "person": "",
       "note": "Anh Bình Mượn 1 hub, k lấy cảm biến",
       "id": "export_excel_1789699061142_111_jv2o",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -4417,7 +4761,8 @@
       "person": "Hoàng Duy Lộc",
       "note": "",
       "id": "export_excel_1789699061142_112_3moy",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -4430,7 +4775,8 @@
       "person": "",
       "note": "Xuất cho anh Khâm",
       "id": "export_excel_1789699061142_113_jx19",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -4443,7 +4789,8 @@
       "person": "Trần Cao Khâm",
       "note": "Xuất cho anh Khâm",
       "id": "export_excel_1789699061142_114_iwbe",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -4456,7 +4803,8 @@
       "person": "Vũ Hoàng Dũng",
       "note": "Xuất cho server training",
       "id": "export_excel_1789699061142_115_iiay",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -4469,7 +4817,8 @@
       "person": "Vũ Hoàng Dũng",
       "note": "",
       "id": "export_excel_1789699061142_116_w16b",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -4482,12 +4831,13 @@
       "person": "Vũ Hoàng Dũng",
       "note": "Anh Khâm xuất",
       "id": "export_excel_1789699061142_117_hfp1",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "CB-027",
       "name": "cảm biến E1R + hub",
-      "category": "",
+      "category": "Cảm biến",
       "description": "",
       "date": "2026-06-11",
       "quantity": 1,
@@ -4495,7 +4845,8 @@
       "person": "Vũ Hoàng Dũng",
       "note": "Xuất cho anh Đại Sw2",
       "id": "export_excel_1789699061142_118_625c",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "",
@@ -4508,7 +4859,8 @@
       "person": "Vũ Hoàng Dũng",
       "note": "Xuất cho Quý SW2",
       "id": "export_excel_1789699061142_119_0e02",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -4521,7 +4873,8 @@
       "person": "Nguyễn Trung Kiên",
       "note": "",
       "id": "export_excel_1789699061142_120_wbmp",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -4534,7 +4887,8 @@
       "person": "Vũ Hoàng Dũng",
       "note": "Xuất cho Robotic mượn",
       "id": "export_excel_1789699061142_121_n0za",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -4547,7 +4901,8 @@
       "person": "Nguyễn Trung Kiên",
       "note": "",
       "id": "export_excel_1789699061142_122_vhv5",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -4560,12 +4915,13 @@
       "person": "Nguyễn Hữu Lâm",
       "note": "",
       "id": "export_excel_1789699061142_123_3h37",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "MT&PK007",
       "name": "nuvo-10108GC-10G-5049",
-      "category": "",
+      "category": "Máy tính nhúng & Phụ kiện",
       "description": "",
       "date": "2026-06-25",
       "quantity": 1,
@@ -4573,12 +4929,13 @@
       "person": "Trần Cao Khâm",
       "note": "Xuất cho dự án L4",
       "id": "export_excel_1789699061142_124_7bjt",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-031",
       "name": "rada ARS 408",
-      "category": "",
+      "category": "Cảm biến",
       "description": "",
       "date": "2026-07-01",
       "quantity": 4,
@@ -4586,12 +4943,13 @@
       "person": "",
       "note": "Xuất cho anh Đại",
       "id": "export_excel_1789699061142_125_a9mx",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-002",
       "name": "Altos + Dây + Hub",
-      "category": "",
+      "category": "Cảm biến",
       "description": "",
       "date": "2026-07-01",
       "quantity": 1,
@@ -4599,12 +4957,13 @@
       "person": "",
       "note": "Xuất cho anh Đại",
       "id": "export_excel_1789699061142_126_p7yb",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-003",
       "name": "CGI-230",
-      "category": "",
+      "category": "Cảm biến",
       "description": "",
       "date": "2026-07-01",
       "quantity": 1,
@@ -4612,7 +4971,8 @@
       "person": "",
       "note": "Xuất cho anh Đại",
       "id": "export_excel_1789699061142_127_oi5n",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "",
@@ -4625,12 +4985,13 @@
       "person": "",
       "note": "Xuất cho anh Đại",
       "id": "export_excel_1789699061142_128_smle",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "CB-028",
       "name": "cảm biến  BP",
-      "category": "",
+      "category": "Cảm biến",
       "description": "",
       "date": "2026-07-01",
       "quantity": 3,
@@ -4638,7 +4999,8 @@
       "person": "",
       "note": "Xuất cho anh Đại",
       "id": "export_excel_1789699061143_129_7pnz",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "",
@@ -4651,7 +5013,8 @@
       "person": "",
       "note": "Xuất cho anh Đại",
       "id": "export_excel_1789699061143_130_pg64",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -4664,7 +5027,8 @@
       "person": "",
       "note": "Xuất cho anh Đại",
       "id": "export_excel_1789699061143_131_z7zr",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -4677,12 +5041,13 @@
       "person": "",
       "note": "Xuất cho anh Đại",
       "id": "export_excel_1789699061143_132_tbvi",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "CB-024",
       "name": "AC_ISX031-H60",
-      "category": "",
+      "category": "Cảm biến",
       "description": "",
       "date": "2026-07-01",
       "quantity": 4,
@@ -4690,12 +5055,13 @@
       "person": "",
       "note": "Xuất cho anh Đại",
       "id": "export_excel_1789699061143_133_b3vf",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-025",
       "name": "AC_ISX031-H120",
-      "category": "",
+      "category": "Cái",
       "description": "",
       "date": "2026-07-01",
       "quantity": 4,
@@ -4703,12 +5069,13 @@
       "person": "",
       "note": "Xuất cho anh Đại",
       "id": "export_excel_1789699061143_134_a3ra",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-026",
       "name": "AC_ISX031-H190",
-      "category": "",
+      "category": "Cảm biến",
       "description": "",
       "date": "2026-07-01",
       "quantity": 4,
@@ -4716,12 +5083,13 @@
       "person": "",
       "note": "Xuất cho anh Đại",
       "id": "export_excel_1789699061143_135_s3e0",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "TBĐ004",
       "name": "FK-FF-Cable-15M",
-      "category": "",
+      "category": "phụ kiện của cảm biến",
       "description": "",
       "date": "2026-07-01",
       "quantity": 12,
@@ -4729,7 +5097,8 @@
       "person": "",
       "note": "Xuất cho anh Đại",
       "id": "export_excel_1789699061143_136_a1vy",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "",
@@ -4742,7 +5111,8 @@
       "person": "",
       "note": "Xuất cho anh Đại",
       "id": "export_excel_1789699061143_137_po68",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -4755,7 +5125,8 @@
       "person": "",
       "note": "Xuất cho anh Đại",
       "id": "export_excel_1789699061143_138_3qab",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -4768,7 +5139,8 @@
       "person": "",
       "note": "Xuất VF6 01, 02",
       "id": "export_excel_1789699061143_139_kt9w",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -4781,7 +5153,8 @@
       "person": "",
       "note": "Xuất cho anh Bình",
       "id": "export_excel_1789699061143_140_3tgd",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -4794,7 +5167,8 @@
       "person": "",
       "note": "Xuất cho anh Bình",
       "id": "export_excel_1789699061143_141_w756",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -4807,12 +5181,13 @@
       "person": "",
       "note": "Xuất cho anh Bình",
       "id": "export_excel_1789699061143_142_85rc",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "CB-027",
       "name": "cảm biến E1R + hub",
-      "category": "",
+      "category": "Cảm biến",
       "description": "",
       "date": "2026-07-01",
       "quantity": 3,
@@ -4820,7 +5195,8 @@
       "person": "",
       "note": "Xuất cho anh Bình",
       "id": "export_excel_1789699061143_143_i393",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "",
@@ -4833,12 +5209,13 @@
       "person": "",
       "note": "Xuất cho anh Bình",
       "id": "export_excel_1789699061143_144_doew",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "CB-001",
       "name": "Ublox C102-F9R",
-      "category": "",
+      "category": "Cảm biến",
       "description": "",
       "date": "2026-07-01",
       "quantity": 1,
@@ -4846,7 +5223,8 @@
       "person": "",
       "note": "Xuất cho anh Bình",
       "id": "export_excel_1789699061143_145_zelo",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "",
@@ -4859,7 +5237,8 @@
       "person": "",
       "note": "Xuất cho anh Bình",
       "id": "export_excel_1789699061143_146_e3l1",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -4872,12 +5251,13 @@
       "person": "",
       "note": "Xuất cho anh Bình",
       "id": "export_excel_1789699061143_147_gkql",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "CB-031",
       "name": "rada ARS 408",
-      "category": "",
+      "category": "Cảm biến",
       "description": "",
       "date": "2026-07-02",
       "quantity": 3,
@@ -4885,12 +5265,13 @@
       "person": "",
       "note": "Xuất bổ sung cho anh Đại( VF6-02)",
       "id": "export_excel_1789699061143_148_b9v2",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-024",
       "name": "AC_ISX031-H60",
-      "category": "",
+      "category": "Cảm biến",
       "description": "",
       "date": "2026-07-02",
       "quantity": 2,
@@ -4898,12 +5279,13 @@
       "person": "",
       "note": "Xuất bổ sung cho anh Đại( VF6-02)",
       "id": "export_excel_1789699061143_149_754y",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-025",
       "name": "AC_ISX031-H120",
-      "category": "",
+      "category": "Cái",
       "description": "",
       "date": "2026-07-02",
       "quantity": 3,
@@ -4911,12 +5293,13 @@
       "person": "",
       "note": "Xuất bổ sung cho anh Đại( VF6-02)",
       "id": "export_excel_1789699061143_150_lyr7",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "TBĐ004",
       "name": "FK-FF-Cable-15M",
-      "category": "",
+      "category": "phụ kiện của cảm biến",
       "description": "",
       "date": "2026-07-02",
       "quantity": 5,
@@ -4924,7 +5307,8 @@
       "person": "",
       "note": "Xuất bổ sung cho anh Đại( VF6-02)",
       "id": "export_excel_1789699061143_151_tux4",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "",
@@ -4937,12 +5321,13 @@
       "person": "",
       "note": "",
       "id": "export_excel_1789699061143_152_8lan",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "TBĐ-000",
       "name": "dây cảm biến rada ARS 408",
-      "category": "",
+      "category": "dây cảm biến",
       "description": "",
       "date": "2026-07-03",
       "quantity": 3,
@@ -4950,7 +5335,8 @@
       "person": "",
       "note": "",
       "id": "export_excel_1789699061143_153_jlt2",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "",
@@ -4963,12 +5349,13 @@
       "person": "",
       "note": "Xuất bổ sung cho anh Đại( VF6-02)",
       "id": "export_excel_1789699061143_154_ub0c",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "CB-024",
       "name": "AC_ISX031-H60",
-      "category": "",
+      "category": "Cảm biến",
       "description": "",
       "date": "2026-07-07",
       "quantity": 1,
@@ -4976,12 +5363,13 @@
       "person": "",
       "note": "Xuất bổ sung cho anh Đại",
       "id": "export_excel_1789699061143_155_nvy6",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK032",
       "name": "Cáp, bộ chuyển đổi typeC  ugreen",
-      "category": "",
+      "category": "Phụ kiện & Máy tính",
       "description": "",
       "date": "2026-07-10",
       "quantity": 1,
@@ -4989,12 +5377,13 @@
       "person": "Bùi Văn Quốc Anh",
       "note": "",
       "id": "export_excel_1789699061143_156_cqjp",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK031",
       "name": "Pin sạc dự phòng  ugreen",
-      "category": "",
+      "category": "Phụ kiện & Máy tính",
       "description": "",
       "date": "2026-07-10",
       "quantity": 2,
@@ -5002,12 +5391,13 @@
       "person": "",
       "note": "Xuất cho Long mang đi",
       "id": "export_excel_1789699061143_157_36h2",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK030",
       "name": "Bộ phát 4G tp-link",
-      "category": "",
+      "category": "Phụ kiện & Máy tính",
       "description": "",
       "date": "2026-07-10",
       "quantity": 1,
@@ -5015,7 +5405,8 @@
       "person": "",
       "note": "Xuất cho Long mang đi",
       "id": "export_excel_1789699061143_158_17sf",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "",
@@ -5028,7 +5419,8 @@
       "person": "",
       "note": "Xuất cho anh Đại",
       "id": "export_excel_1789699061143_159_0smx",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -5041,12 +5433,13 @@
       "person": "",
       "note": "Xuất cho anh Đại",
       "id": "export_excel_1789699061143_160_nkrp",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "MT&PK011",
       "name": "View Sonic VA1650",
-      "category": "",
+      "category": "Phụ kiện & Máy tính",
       "description": "",
       "date": "2026-07-24",
       "quantity": 1,
@@ -5054,7 +5447,8 @@
       "person": "",
       "note": "Xuất cho anh kiên dùng cho Vf8_04",
       "id": "export_excel_1789699061143_161_i9va",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "",
@@ -5067,7 +5461,8 @@
       "person": "",
       "note": "Xuất cho anh Khâm",
       "id": "export_excel_1789699061143_162_fr6x",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -5080,12 +5475,13 @@
       "person": "",
       "note": "Xuất dùng cho máy Thành",
       "id": "export_excel_1789699061143_163_vyot",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "MT&PK011",
       "name": "View Sonic VA1650",
-      "category": "",
+      "category": "Phụ kiện & Máy tính",
       "description": "",
       "date": null,
       "quantity": 1,
@@ -5093,12 +5489,13 @@
       "person": "",
       "note": "xuất cho Hà",
       "id": "export_excel_1789699061143_164_bl82",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "CB-005",
       "name": "Antenna GNSS CUAV",
-      "category": "",
+      "category": "Cảm biến",
       "description": "",
       "date": "2026-07-31",
       "quantity": 1,
@@ -5106,7 +5503,8 @@
       "person": "",
       "note": "Anh Bình Xuất cho VF8",
       "id": "export_excel_1789699061143_165_f5xn",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "",
@@ -5119,7 +5517,8 @@
       "person": "",
       "note": "Anh Bình Xuất cho VF8",
       "id": "export_excel_1789699061143_166_hxy0",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -5132,12 +5531,13 @@
       "person": "",
       "note": "Anh Bình Xuất cho VF8",
       "id": "export_excel_1789699061143_167_6b2c",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "CB-027",
       "name": "cảm biến E1R + hub",
-      "category": "",
+      "category": "Cảm biến",
       "description": "",
       "date": "2026-07-31",
       "quantity": 3,
@@ -5145,7 +5545,8 @@
       "person": "",
       "note": "3 Hub + Dây 8m x6\nAnh Bình Xuất cho VF8",
       "id": "export_excel_1789699061143_168_77gi",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "",
@@ -5158,7 +5559,8 @@
       "person": "",
       "note": "Anh Bình Xuất cho VF8",
       "id": "export_excel_1789699061143_169_i4q6",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -5171,7 +5573,8 @@
       "person": "",
       "note": "Anh Bình Xuất cho VF8",
       "id": "export_excel_1789699061143_170_0glj",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -5184,7 +5587,8 @@
       "person": "",
       "note": "Anh Bình Xuất cho VF8",
       "id": "export_excel_1789699061143_171_vfdy",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -5197,12 +5601,13 @@
       "person": "",
       "note": "Anh Bình Xuất cho VF8",
       "id": "export_excel_1789699061143_172_3r1x",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "MT&PK057",
       "name": "View Sonic VA1655-3",
-      "category": "",
+      "category": "Phụ kiện & Máy tính",
       "description": "",
       "date": "2026-08-11",
       "quantity": 1,
@@ -5210,12 +5615,13 @@
       "person": "",
       "note": "Xuất cho sơn dùng trên VF8",
       "id": "export_excel_1789699061143_173_zmoh",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "MT&PK046",
       "name": "Cáp dữ liệu Video HDMI 8M Ugreen",
-      "category": "",
+      "category": "Phụ kiện & Máy tính",
       "description": "",
       "date": "2026-08-11",
       "quantity": 1,
@@ -5223,7 +5629,8 @@
       "person": "",
       "note": "Xuất cho sơn dùng trên VF8",
       "id": "export_excel_1789699061143_174_fcki",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "",
@@ -5236,7 +5643,8 @@
       "person": "",
       "note": "Xuất cho anh lộc",
       "id": "export_excel_1789699061143_175_upzf",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -5249,12 +5657,13 @@
       "person": "",
       "note": "Xuất cho anh Đại thay VF8_01, 02",
       "id": "export_excel_1789699061143_176_8k11",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "MT&PK007",
       "name": "nuvo-10108GC-10G-5049",
-      "category": "",
+      "category": "Máy tính nhúng & Phụ kiện",
       "description": "",
       "date": "2026-08-12",
       "quantity": 1,
@@ -5262,7 +5671,8 @@
       "person": "",
       "note": "Anh Đại trả lại",
       "id": "export_excel_1789699061143_177_rxfn",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "",
@@ -5275,7 +5685,8 @@
       "person": "",
       "note": "Sơn xuất cho VF6",
       "id": "export_excel_1789699061143_178_ebfo",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -5288,7 +5699,8 @@
       "person": "",
       "note": "Test cho SW_2",
       "id": "export_excel_1789699061143_179_8ih8",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -5301,7 +5713,8 @@
       "person": "",
       "note": "Xuất cho anh Khánh",
       "id": "export_excel_1789699061143_180_lvuc",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -5314,7 +5727,8 @@
       "person": "",
       "note": "Xuất cho 2 con VF8",
       "id": "export_excel_1789699061143_181_wpgg",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -5327,12 +5741,13 @@
       "person": "",
       "note": "Xuất cho anh Lâm_ Factory",
       "id": "export_excel_1789699061143_182_t66z",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "MT&PK027",
       "name": "Bàn Phím Chuột MK200",
-      "category": "",
+      "category": "Phụ kiện & Máy tính",
       "description": "",
       "date": null,
       "quantity": 1,
@@ -5340,7 +5755,8 @@
       "person": "",
       "note": "Trần Việt Dũng xuất",
       "id": "export_excel_1789699061143_183_wmeg",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": "Cái"
     },
     {
       "code": "",
@@ -5353,7 +5769,8 @@
       "person": "",
       "note": "Xuất cho Sơn -VF8",
       "id": "export_excel_1789699061143_184_bx9a",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -5366,7 +5783,8 @@
       "person": "",
       "note": "Xuất cho Sơn -VF8",
       "id": "export_excel_1789699061143_185_eaj3",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -5379,7 +5797,8 @@
       "person": "",
       "note": "Xuất cho Sơn -VF8",
       "id": "export_excel_1789699061143_186_m2t3",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -5392,7 +5811,8 @@
       "person": "",
       "note": "Xuất cho anh Lâm",
       "id": "export_excel_1789699061143_187_3ibz",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -5405,7 +5825,8 @@
       "person": "",
       "note": "Xuất cho anh Lâm",
       "id": "export_excel_1789699061143_188_fanq",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -5418,7 +5839,8 @@
       "person": "",
       "note": "Xuất cho anh Lâm",
       "id": "export_excel_1789699061143_189_uoft",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -5431,7 +5853,8 @@
       "person": "",
       "note": "Xuất cho anh Lâm",
       "id": "export_excel_1789699061143_190_6o9t",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -5444,7 +5867,8 @@
       "person": "",
       "note": "Xuất cho anh Khâm",
       "id": "export_excel_1789699061143_191_bztm",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     },
     {
       "code": "",
@@ -5457,7 +5881,8 @@
       "person": "",
       "note": "",
       "id": "export_excel_1789699061143_192_5a9h",
-      "createdAt": "2026-09-18T02:37:41.142Z"
+      "createdAt": "2026-09-18T02:37:41.142Z",
+      "unit": ""
     }
   ],
   "products": [

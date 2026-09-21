@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
+import crypto from "node:crypto";
 import {
   deleteAssetUnit,
   getAssets,
@@ -8,14 +9,8 @@ import {
 
 const secret = process.env.NEXTAUTH_SECRET;
 const canManage = (token) => ["admin", "assistant"].includes(token?.role);
-const slug = (value) =>
-  String(value || "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/đ/gi, "d")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "_")
-    .replace(/^_+|_+$/g, "");
+const createUnitId = () =>
+  `asset_unit_${Date.now().toString(36)}_${crypto.randomBytes(6).toString("hex")}`;
 
 export async function GET(req) {
   const token = await getToken({ req, secret });
@@ -41,7 +36,7 @@ export async function POST(req) {
   if (duplicate)
     return NextResponse.json({ error: "Đơn vị tính đã tồn tại" }, { status: 409 });
   const unit = {
-    id: body.id || `asset_unit_${slug(name) || Date.now()}`,
+    id: body.id || createUnitId(),
     name,
     createdAt: current?.createdAt || new Date().toISOString(),
   };
