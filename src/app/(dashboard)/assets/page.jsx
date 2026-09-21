@@ -1373,6 +1373,10 @@ export default function AssetsPage() {
         .reduce((sum, entry) => sum + Number(entry.quantity || 0), 0),
     }));
   }, [data, stockByCode]);
+  const stockProducts = useMemo(
+    () => products.filter((item) => Number(item.quantity) > 0),
+    [products],
+  );
   const activeRows =
     tab === "import"
       ? data.imports
@@ -1380,7 +1384,7 @@ export default function AssetsPage() {
         ? data.exports
         : tab === "products"
           ? products
-          : products;
+          : stockProducts;
   const filteredRows = useMemo(
     () =>
       activeRows.filter((row) => {
@@ -1759,7 +1763,7 @@ export default function AssetsPage() {
         >
           <Tab value="import" label={`Nhập kho (${data.imports.length})`} />
           <Tab value="export" label={`Xuất kho (${data.exports.length})`} />
-          <Tab value="stock" label={`Tồn kho (${products.length})`} />
+          <Tab value="stock" label={`Tồn kho (${stockProducts.length})`} />
           <Tab
             value="products"
             label={`Danh sách sản phẩm (${products.length})`}
