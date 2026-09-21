@@ -12,6 +12,7 @@ import {
 import {
   getWeeksOfMonth,
   getEligibleWaterUsers,
+  getEligibleTrashUsers,
   getTrashSchedulesForMonth,
 } from "@/libs/waterScheduler";
 import { toVietnamDateKey } from "@/libs/dateTime";
@@ -48,6 +49,29 @@ export async function GET(req) {
     const today = new Date(Date.UTC(todayYear, todayMonth - 1, todayDay));
     const shouldGenerateTrash = today >= activationDate;
     let trashOverrides = settings.trashScheduleOverrides || {};
+    const generationKey = `${year}-${String(month).padStart(2, "0")}`;
+    const isFutureMonth =
+      year > todayYear || (year === todayYear && month > todayMonth);
+    const trashGenerationMeta = {
+      ...(settings.trashScheduleGenerationMeta || {}),
+    };
+    const trashFingerprint = [
+      Number(settings.trashScheduleRevision || 0),
+      ...getEligibleTrashUsers(allUsers, exemptUserIds).map(
+        (user) => `${user.id}:${Number(user.schedulingPoints || 0)}`,
+      ),
+    ].join("|");
+    if (
+      shouldGenerateTrash &&
+      isFutureMonth &&
+      trashGenerationMeta[generationKey] !== trashFingerprint
+    ) {
+      trashOverrides = Object.fromEntries(
+        Object.entries(trashOverrides).filter(
+          ([dateKey]) => !dateKey.startsWith(`${generationKey}-`),
+        ),
+      );
+    }
     let trashSchedules = getTrashSchedulesForMonth(
       allUsers,
       exemptUserIds,
@@ -68,9 +92,11 @@ export async function GET(req) {
         }
       if (changed) {
         trashOverrides = frozenOverrides;
+        trashGenerationMeta[generationKey] = trashFingerprint;
         await saveSettings({
           ...settings,
           trashScheduleOverrides: frozenOverrides,
+          trashScheduleGenerationMeta: trashGenerationMeta,
         });
         trashSchedules = getTrashSchedulesForMonth(
           allUsers,

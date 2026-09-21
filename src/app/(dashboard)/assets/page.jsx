@@ -34,6 +34,7 @@ import ConfirmDialog from "@components/ConfirmDialog";
 import DataTableToolbar from "@components/DataTableToolbar";
 import TablePaginationComponent from "@components/TablePaginationComponent";
 import { formatVietnamDate, toVietnamDateKey } from "@/libs/dateTime";
+import { resolveAvatar } from "@/utils/getDefaultAvatar";
 
 const emptyForm = {
   code: "",
@@ -44,6 +45,7 @@ const emptyForm = {
   quantity: 1,
   location: "",
   person: "",
+  issuedTo: "",
   note: "",
 };
 const makeImportLine = (currentName = "") => ({
@@ -69,6 +71,7 @@ const columns = {
     "Mã sản phẩm",
     "Tên sản phẩm",
     "Người mượn tài sản",
+    "Xuất cho",
     "Số lượng",
     "Ghi chú",
   ],
@@ -103,7 +106,8 @@ const normalizeSearchText = (value) =>
 
 const filterAssetOptions = (options, inputValue) => {
   const query = normalizeSearchText(inputValue);
-  if (!query) return options.slice(0, 5);
+  if (!query)
+    return [...options].sort((a, b) => a.name.localeCompare(b.name, "vi"));
 
   const queryWords = query.split(/\s+/).filter(Boolean);
   return options
@@ -126,8 +130,15 @@ const filterAssetOptions = (options, inputValue) => {
       (a, b) =>
         a.score - b.score || a.item.name.localeCompare(b.item.name, "vi"),
     )
-    .slice(0, 5)
     .map(({ item }) => item);
+};
+
+const filterPeopleOptions = (options, inputValue) => {
+  const query = normalizeSearchText(inputValue);
+  if (!query) return options;
+  return options.filter((person) =>
+    normalizeSearchText(`${person.name} ${person.code}`).includes(query),
+  );
 };
 
 function AssetTable({ rows, type, canManage, onView, onEdit, onDelete }) {
@@ -181,6 +192,7 @@ function AssetTable({ rows, type, canManage, onView, onEdit, onDelete }) {
                     </TableCell>
                     <TableCell>{row.name || "—"}</TableCell>
                     <TableCell>{row.person || "—"}</TableCell>
+                    <TableCell>{row.issuedTo || "—"}</TableCell>
                     <TableCell>{row.quantity ?? "—"}</TableCell>
                     <TableCell>{row.note || "—"}</TableCell>
                   </>
@@ -296,7 +308,7 @@ function TransactionDialog({
   const [importLines, setImportLines] = useState([makeImportLine()]);
   const [saving, setSaving] = useState(false);
   const [people, setPeople] = useState([]);
-  const isBulkImport = type === "import" && !editingItem;
+  const isBulkTransaction = !editingItem;
   useEffect(() => {
     if (!open) return;
     fetch("/api/users?status=able&limit=500")
@@ -332,7 +344,9 @@ function TransactionDialog({
   };
   const updateImportLine = (clientId, values) =>
     setImportLines((rows) =>
-      rows.map((row) => (row.clientId === clientId ? { ...row, ...values } : row)),
+      rows.map((row) =>
+        row.clientId === clientId ? { ...row, ...values } : row,
+      ),
     );
   const selectImportLineProduct = (clientId, code) =>
     updateImportLine(clientId, productFields(code));
@@ -359,32 +373,56 @@ function TransactionDialog({
   const quantity = Number(form.quantity);
   const quantityError =
     type === "export" && Boolean(form.code) && quantity > availableForExport;
+  const stockForCode = (code) =>
+    imports
+      .filter((item) => item.code === code)
+      .reduce((sum, item) => sum + Number(item.quantity || 0), 0) -
+    exports
+      .filter((item) => item.code === code)
+      .reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+  const requestedForCode = (code) =>
+    importLines
+      .filter((item) => item.code === code)
+      .reduce((sum, item) => sum + Number(item.quantity || 0), 0);
   const validImportLines = importLines.filter(
     (row) =>
       row.code?.trim() &&
-      row.date &&
-      row.person?.trim() &&
       Number.isInteger(Number(row.quantity)) &&
       Number(row.quantity) > 0,
   );
-  const bulkImportInvalid =
-    isBulkImport && validImportLines.length !== importLines.length;
+  const bulkTransactionInvalid =
+    isBulkTransaction &&
+    (!form.date ||
+      !form.person?.trim() ||
+      validImportLines.length !== importLines.length ||
+      (type === "export" && importLines.some((row) => !row.issuedTo?.trim())) ||
+      (type === "export" &&
+        importLines.some(
+          (row) => requestedForCode(row.code) > stockForCode(row.code),
+        )));
   const submit = async () => {
-    if (quantityError || bulkImportInvalid) return;
+    if (quantityError || bulkTransactionInvalid) return;
     setSaving(true);
     try {
-      if (isBulkImport) {
+      if (isBulkTransaction) {
         for (const row of importLines) {
           const { clientId, ...payload } = row;
           const response = await fetch("/api/assets", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ ...payload, type: "import" }),
+            body: JSON.stringify({
+              ...payload,
+              date: form.date,
+              person: form.person,
+              note: form.note,
+              type,
+            }),
           });
           const result = await response.json();
           if (!response.ok)
             return toast.error(
-              result.error || `Không thể lưu phiếu nhập ${row.code}`,
+              result.error ||
+                `Không thể lưu phiếu ${type === "import" ? "nhập" : "xuất"} ${row.code}`,
             );
         }
       } else {
@@ -398,13 +436,13 @@ function TransactionDialog({
           return toast.error(result.error || "Không thể lưu giao dịch");
       }
       toast.success(
-        isBulkImport
-          ? `Đã ghi nhận ${importLines.length} phiếu nhập tài sản`
+        isBulkTransaction
+          ? `Đã ghi nhận ${importLines.length} sản phẩm trong phiếu ${type === "import" ? "nhập" : "xuất"}`
           : editingItem
-          ? "Đã cập nhật giao dịch tài sản"
-          : type === "import"
-            ? "Đã ghi nhận nhập tài sản"
-            : "Đã ghi nhận xuất tài sản",
+            ? "Đã cập nhật giao dịch tài sản"
+            : type === "import"
+              ? "Đã ghi nhận nhập tài sản"
+              : "Đã ghi nhận xuất tài sản",
       );
       onSaved();
       onClose();
@@ -415,7 +453,12 @@ function TransactionDialog({
     }
   };
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth={isBulkImport ? "lg" : "sm"}>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      fullWidth
+      maxWidth={isBulkTransaction ? "lg" : "sm"}
+    >
       <DialogTitle>
         {editingItem
           ? `Chỉnh sửa phiếu ${type === "import" ? "nhập" : "xuất"}`
@@ -424,20 +467,68 @@ function TransactionDialog({
             : "Xuất tài sản"}
       </DialogTitle>
       <DialogContent dividers>
-        {isBulkImport ? (
-          <Box sx={{ display: "grid", gap: 2, pt: 1 }}>
-            <Box display="flex" alignItems="center" justifyContent="space-between" gap={2}>
-              <Typography variant="body2" color="text.secondary">
-                Có thể nhập nhiều sản phẩm trong cùng một ngày; mỗi dòng sẽ tạo một phiếu nhập riêng.
-              </Typography>
-              <Button
-                variant="tonal"
-                startIcon={<i className="tabler-plus" />}
-                onClick={addImportLine}
-              >
-                Thêm dòng
-              </Button>
+        {isBulkTransaction ? (
+          <Box sx={{ display: "grid", gap: 2.5, pt: 1 }}>
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  md: "160px minmax(240px, 1fr) minmax(280px, 1.5fr)",
+                },
+                gap: 2,
+                p: 2.5,
+                bgcolor: "action.hover",
+                borderRadius: 2,
+              }}
+            >
+              <CustomTextField
+                type="date"
+                label={type === "import" ? "Ngày nhập *" : "Ngày xuất *"}
+                value={form.date}
+                onChange={(event) =>
+                  setForm({ ...form, date: event.target.value })
+                }
+                slotProps={{ inputLabel: { shrink: true } }}
+              />
+              <Autocomplete
+                freeSolo
+                options={people}
+                inputValue={form.person}
+                onInputChange={(_, value) =>
+                  setForm({ ...form, person: value })
+                }
+                onChange={(_, person) => {
+                  if (person && typeof person !== "string")
+                    setForm({ ...form, person: person.name });
+                }}
+                getOptionLabel={(person) =>
+                  typeof person === "string" ? person : person.name || ""
+                }
+                renderInput={(params) => (
+                  <CustomTextField
+                    {...params}
+                    label={
+                      type === "import"
+                        ? "Người nhập kho *"
+                        : "Người mượn tài sản *"
+                    }
+                    placeholder="Gõ tên hoặc chọn nhân sự"
+                  />
+                )}
+              />
+              <CustomTextField
+                label="Ghi chú chung"
+                value={form.note}
+                onChange={(event) =>
+                  setForm({ ...form, note: event.target.value })
+                }
+                placeholder="Áp dụng cho toàn bộ sản phẩm trong phiếu"
+              />
             </Box>
+            <Typography variant="body2" color="text.secondary">
+              Chọn các sản phẩm trong phiếu {type === "import" ? "nhập" : "xuất"}
+            </Typography>
             {importLines.map((row, index) => (
               <Box
                 key={row.clientId}
@@ -445,7 +536,10 @@ function TransactionDialog({
                   display: "grid",
                   gridTemplateColumns: {
                     xs: "1fr",
-                    md: "minmax(220px,1.3fr) 130px 110px minmax(150px,1fr) minmax(150px,1fr) minmax(160px,1fr) 44px",
+                    md:
+                      type === "export"
+                        ? "minmax(260px,1.5fr) 135px 120px 120px minmax(240px,1.3fr) 88px"
+                        : "minmax(300px,1.8fr) 150px minmax(140px,1fr) minmax(140px,1fr) 88px",
                   },
                   gap: 2,
                   p: 2,
@@ -457,15 +551,22 @@ function TransactionDialog({
               >
                 <Autocomplete
                   options={assetOptions}
-                  value={assetOptions.find((item) => item.code === row.code) || null}
+                  value={
+                    assetOptions.find((item) => item.code === row.code) || null
+                  }
                   onChange={(_, item) =>
                     selectImportLineProduct(row.clientId, item?.code || "")
                   }
                   getOptionLabel={(item) => `${item.code} — ${item.name}`}
-                  isOptionEqualToValue={(option, value) => option.code === value?.code}
+                  isOptionEqualToValue={(option, value) =>
+                    option.code === value?.code
+                  }
                   filterOptions={(options, state) =>
                     filterAssetOptions(options, state.inputValue)
                   }
+                  ListboxProps={{
+                    style: { maxHeight: 240, overflowY: "auto" },
+                  }}
                   noOptionsText="Không tìm thấy sản phẩm tương tự"
                   renderInput={(params) => (
                     <CustomTextField
@@ -476,65 +577,113 @@ function TransactionDialog({
                   )}
                 />
                 <CustomTextField
-                  type="date"
-                  label="Ngày nhập *"
-                  value={row.date}
-                  onChange={(e) =>
-                    updateImportLine(row.clientId, { date: e.target.value })
-                  }
-                  slotProps={{ inputLabel: { shrink: true } }}
-                />
-                <CustomTextField
                   type="number"
                   label="Số lượng *"
                   value={row.quantity}
                   onChange={(e) =>
                     updateImportLine(row.clientId, { quantity: e.target.value })
                   }
-                  inputProps={{ min: 1 }}
-                />
-                <CustomTextField label="Đơn vị tính" value={row.category} disabled />
-                <CustomTextField label="Vị trí" value={row.location} disabled />
-                <Autocomplete
-                  freeSolo
-                  options={people}
-                  inputValue={row.person}
-                  onInputChange={(_, value) =>
-                    updateImportLine(row.clientId, { person: value })
+                  error={
+                    type === "export" &&
+                    Boolean(row.code) &&
+                    requestedForCode(row.code) > stockForCode(row.code)
                   }
-                  onChange={(_, person) => {
-                    if (person && typeof person !== "string")
-                      updateImportLine(row.clientId, { person: person.name });
+                  helperText={
+                    type === "export" && row.code
+                      ? `Tồn kho: ${stockForCode(row.code)} · Đang xuất: ${requestedForCode(row.code)}`
+                      : ""
+                  }
+                  inputProps={{
+                    min: 1,
+                    ...(type === "export"
+                      ? { max: stockForCode(row.code) }
+                      : {}),
                   }}
-                  getOptionLabel={(person) =>
-                    typeof person === "string" ? person : person.name || ""
-                  }
-                  renderInput={(params) => (
-                    <CustomTextField
-                      {...params}
-                      label="Người nhập kho *"
-                      placeholder="Tên nhân sự"
-                    />
-                  )}
                 />
-                <IconButton
-                  color="error"
-                  disabled={importLines.length === 1}
-                  onClick={() => removeImportLine(row.clientId)}
-                  sx={{ mt: 4 }}
-                  aria-label="Xóa dòng nhập"
-                >
-                  <i className="tabler-trash" />
-                </IconButton>
                 <CustomTextField
-                  sx={{ gridColumn: { md: "1 / -1" } }}
-                  label="Ghi chú"
-                  value={row.note}
-                  onChange={(e) =>
-                    updateImportLine(row.clientId, { note: e.target.value })
-                  }
-                  placeholder="Ghi chú riêng cho phiếu này"
+                  label="Đơn vị tính"
+                  value={row.category}
+                  disabled
                 />
+                <CustomTextField label="Vị trí" value={row.location} disabled />
+                {type === "export" && (
+                  <Autocomplete
+                    options={people}
+                    value={
+                      people.find((person) => person.name === row.issuedTo) ||
+                      null
+                    }
+                    onChange={(_, person) =>
+                      updateImportLine(row.clientId, {
+                        issuedTo: person?.name || "",
+                      })
+                    }
+                    getOptionLabel={(person) =>
+                      `${person.name || ""} (${person.code || "—"})`
+                    }
+                    isOptionEqualToValue={(option, value) =>
+                      option.id === value?.id
+                    }
+                    filterOptions={(options, state) =>
+                      filterPeopleOptions(options, state.inputValue)
+                    }
+                    ListboxProps={{
+                      style: { maxHeight: 280, overflowY: "auto" },
+                    }}
+                    noOptionsText="Không tìm thấy nhân sự"
+                    renderOption={(props, person) => {
+                      const { key, ...optionProps } = props;
+                      return (
+                        <Box
+                          component="li"
+                          key={key}
+                          {...optionProps}
+                          sx={{ display: "flex", gap: 1.5 }}
+                        >
+                          <Avatar
+                            src={resolveAvatar(person)}
+                            alt={person.name}
+                            sx={{ width: 36, height: 36 }}
+                          />
+                          <Typography variant="body2" fontWeight={600}>
+                            {person.name}{" "}
+                            <Typography
+                              component="span"
+                              variant="caption"
+                              color="text.secondary"
+                            >
+                              ({person.code || "Chưa có mã"})
+                            </Typography>
+                          </Typography>
+                        </Box>
+                      );
+                    }}
+                    renderInput={(params) => (
+                      <CustomTextField
+                        {...params}
+                        label="Xuất cho *"
+                        placeholder="Tìm tên hoặc mã nhân sự"
+                      />
+                    )}
+                  />
+                )}
+                <Box display="flex" alignItems="center" sx={{ mt: 0.75 }}>
+                  <IconButton
+                    color="primary"
+                    onClick={addImportLine}
+                    aria-label="Thêm sản phẩm"
+                  >
+                    <i className="tabler-plus" />
+                  </IconButton>
+                  <IconButton
+                    color="error"
+                    disabled={importLines.length === 1}
+                    onClick={() => removeImportLine(row.clientId)}
+                    aria-label="Xóa sản phẩm"
+                  >
+                    <i className="tabler-trash" />
+                  </IconButton>
+                </Box>
               </Box>
             ))}
           </Box>
@@ -547,144 +696,210 @@ function TransactionDialog({
               pt: 1,
             }}
           >
-          {type === "export" ? (
-            <Autocomplete
-              options={assetOptions}
-              value={
-                assetOptions.find((item) => item.code === form.code) || null
-              }
-              onChange={(_, item) => selectProduct(item?.code || "")}
-              getOptionLabel={(item) => `${item.code} — ${item.name}`}
-              isOptionEqualToValue={(option, value) =>
-                option.code === value.code
-              }
-              filterOptions={(options, state) => {
-                const query = state.inputValue.trim().toLowerCase();
-                return options.filter((item) =>
-                  `${item.code} ${item.name}`.toLowerCase().includes(query),
-                );
-              }}
-              noOptionsText="Không tìm thấy tài sản phù hợp"
-              renderInput={(params) => (
-                <CustomTextField
-                  {...params}
-                  label="Tìm tài sản *"
-                  placeholder="Nhập mã hoặc tên tài sản"
-                />
-              )}
-            />
-          ) : (
-            <Autocomplete
-              options={assetOptions}
-              value={
-                assetOptions.find((item) => item.code === form.code) || null
-              }
-              onChange={(_, item) => selectProduct(item?.code || "")}
-              getOptionLabel={(item) => `${item.code} — ${item.name}`}
-              isOptionEqualToValue={(option, value) =>
-                option.code === value?.code
-              }
-              filterOptions={(options, state) =>
-                filterAssetOptions(options, state.inputValue)
-              }
-              noOptionsText="Không tìm thấy tài sản tương tự"
-              renderOption={(props, item) => {
-                const { key, ...optionProps } = props;
+            {type === "export" ? (
+              <Autocomplete
+                options={assetOptions}
+                value={
+                  assetOptions.find((item) => item.code === form.code) || null
+                }
+                onChange={(_, item) => selectProduct(item?.code || "")}
+                getOptionLabel={(item) => `${item.code} — ${item.name}`}
+                isOptionEqualToValue={(option, value) =>
+                  option.code === value.code
+                }
+                filterOptions={(options, state) => {
+                  const query = state.inputValue.trim().toLowerCase();
+                  return options.filter((item) =>
+                    `${item.code} ${item.name}`.toLowerCase().includes(query),
+                  );
+                }}
+                noOptionsText="Không tìm thấy tài sản phù hợp"
+                renderInput={(params) => (
+                  <CustomTextField
+                    {...params}
+                    label="Tìm tài sản *"
+                    placeholder="Nhập mã hoặc tên tài sản"
+                  />
+                )}
+              />
+            ) : (
+              <Autocomplete
+                options={assetOptions}
+                value={
+                  assetOptions.find((item) => item.code === form.code) || null
+                }
+                onChange={(_, item) => selectProduct(item?.code || "")}
+                getOptionLabel={(item) => `${item.code} — ${item.name}`}
+                isOptionEqualToValue={(option, value) =>
+                  option.code === value?.code
+                }
+                filterOptions={(options, state) =>
+                  filterAssetOptions(options, state.inputValue)
+                }
+                noOptionsText="Không tìm thấy tài sản tương tự"
+                renderOption={(props, item) => {
+                  const { key, ...optionProps } = props;
 
-                return (
-                  <Box component="li" key={key} {...optionProps}>
-                    <Box>
-                      <Typography variant="body2" fontWeight={600}>
-                        {item.name}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {item.code} · {item.location}
-                      </Typography>
+                  return (
+                    <Box component="li" key={key} {...optionProps}>
+                      <Box>
+                        <Typography variant="body2" fontWeight={600}>
+                          {item.name}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {item.code} · {item.location}
+                        </Typography>
+                      </Box>
                     </Box>
-                  </Box>
-                );
-              }}
-              renderInput={(params) => (
-                <CustomTextField
-                  {...params}
-                  label="Chọn sản phẩm *"
-                  placeholder="Tìm mã/tên; chưa có thì thêm sản phẩm trước"
-                />
-              )}
-            />
-          )}
-          <CustomTextField label="Đơn vị tính" value={form.category} disabled />
-          <CustomTextField
-            label="Mô tả sản phẩm"
-            value={form.description}
-            disabled
-          />
-          <CustomTextField
-            type="date"
-            label={type === "import" ? "Ngày nhập *" : "Ngày xuất *"}
-            value={form.date}
-            onChange={(e) => setForm({ ...form, date: e.target.value })}
-            slotProps={{ inputLabel: { shrink: true } }}
-          />
-          <CustomTextField
-            type="number"
-            label="Số lượng *"
-            value={form.quantity}
-            onChange={(e) => setForm({ ...form, quantity: e.target.value })}
-            error={quantityError}
-            helperText={
-              type === "export" && form.code
-                ? quantityError
-                  ? `Số lượng vượt quá tồn kho (${availableForExport})`
-                  : `Có thể xuất tối đa ${availableForExport}`
-                : ""
-            }
-            inputProps={{
-              min: 1,
-              ...(type === "export" ? { max: availableForExport } : {}),
-            }}
-          />
-          <CustomTextField label="Vị trí *" value={form.location} disabled />
-          <Autocomplete
-            freeSolo
-            options={people}
-            inputValue={form.person}
-            onInputChange={(_, value) => setForm({ ...form, person: value })}
-            onChange={(_, person) => {
-              if (person && typeof person !== "string")
-                setForm({ ...form, person: person.name });
-            }}
-            getOptionLabel={(person) =>
-              typeof person === "string" ? person : person.name || ""
-            }
-            renderOption={(props, person) => (
-              <Box component="li" {...props} key={person.id}>
-                <Box>
-                  <Typography variant="body2" fontWeight={600}>
-                    {person.name}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {person.code || "—"} · {person.email || "—"}
-                  </Typography>
-                </Box>
-              </Box>
-            )}
-            renderInput={(params) => (
-              <CustomTextField
-                {...params}
-                label={type === "import" ? "Người nhận *" : "Người nhận *"}
-                placeholder="Gõ tên hoặc chọn nhân sự"
+                  );
+                }}
+                renderInput={(params) => (
+                  <CustomTextField
+                    {...params}
+                    label="Chọn sản phẩm *"
+                    placeholder="Tìm mã/tên; chưa có thì thêm sản phẩm trước"
+                  />
+                )}
               />
             )}
-          />
-          <CustomTextField
-            sx={{ gridColumn: { sm: "1 / -1" } }}
-            multiline
-            minRows={3}
-            label="Ghi chú"
-            value={form.note}
-            onChange={(e) => setForm({ ...form, note: e.target.value })}
-          />
+            <CustomTextField
+              label="Đơn vị tính"
+              value={form.category}
+              disabled
+            />
+            <CustomTextField
+              label="Mô tả sản phẩm"
+              value={form.description}
+              disabled
+            />
+            <CustomTextField
+              type="date"
+              label={type === "import" ? "Ngày nhập *" : "Ngày xuất *"}
+              value={form.date}
+              onChange={(e) => setForm({ ...form, date: e.target.value })}
+              slotProps={{ inputLabel: { shrink: true } }}
+            />
+            <CustomTextField
+              type="number"
+              label="Số lượng *"
+              value={form.quantity}
+              onChange={(e) => setForm({ ...form, quantity: e.target.value })}
+              error={quantityError}
+              helperText={
+                type === "export" && form.code
+                  ? quantityError
+                    ? `Số lượng vượt quá tồn kho (${availableForExport})`
+                    : `Có thể xuất tối đa ${availableForExport}`
+                  : ""
+              }
+              inputProps={{
+                min: 1,
+                ...(type === "export" ? { max: availableForExport } : {}),
+              }}
+            />
+            <CustomTextField label="Vị trí *" value={form.location} disabled />
+            <Autocomplete
+              freeSolo
+              options={people}
+              inputValue={form.person}
+              onInputChange={(_, value) => setForm({ ...form, person: value })}
+              onChange={(_, person) => {
+                if (person && typeof person !== "string")
+                  setForm({ ...form, person: person.name });
+              }}
+              getOptionLabel={(person) =>
+                typeof person === "string" ? person : person.name || ""
+              }
+              renderOption={(props, person) => (
+                <Box component="li" {...props} key={person.id}>
+                  <Box>
+                    <Typography variant="body2" fontWeight={600}>
+                      {person.name}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {person.code || "—"} · {person.email || "—"}
+                    </Typography>
+                  </Box>
+                </Box>
+              )}
+              renderInput={(params) => (
+                <CustomTextField
+                  {...params}
+                  label={
+                    type === "import"
+                      ? "Người nhập kho *"
+                      : "Người mượn tài sản *"
+                  }
+                  placeholder="Gõ tên hoặc chọn nhân sự"
+                />
+              )}
+            />
+            {type === "export" && (
+              <Autocomplete
+                options={people}
+                value={
+                  people.find((person) => person.name === form.issuedTo) || null
+                }
+                onChange={(_, person) =>
+                  setForm({ ...form, issuedTo: person?.name || "" })
+                }
+                getOptionLabel={(person) =>
+                  `${person.name || ""} (${person.code || "—"})`
+                }
+                isOptionEqualToValue={(option, value) =>
+                  option.id === value?.id
+                }
+                filterOptions={(options, state) =>
+                  filterPeopleOptions(options, state.inputValue)
+                }
+                ListboxProps={{
+                  style: { maxHeight: 240, overflowY: "auto" },
+                }}
+                noOptionsText="Không tìm thấy nhân sự"
+                renderOption={(props, person) => {
+                  const { key, ...optionProps } = props;
+                  return (
+                    <Box
+                      component="li"
+                      key={key}
+                      {...optionProps}
+                      sx={{ display: "flex", gap: 1.5 }}
+                    >
+                      <Avatar
+                        src={resolveAvatar(person)}
+                        alt={person.name}
+                        sx={{ width: 36, height: 36 }}
+                      />
+                      <Typography variant="body2" fontWeight={600}>
+                        {person.name}{" "}
+                        <Typography
+                          component="span"
+                          variant="caption"
+                          color="text.secondary"
+                        >
+                          ({person.code || "Chưa có mã"})
+                        </Typography>
+                      </Typography>
+                    </Box>
+                  );
+                }}
+                renderInput={(params) => (
+                  <CustomTextField
+                    {...params}
+                    label="Xuất cho *"
+                    placeholder="Tìm theo tên hoặc mã nhân sự"
+                  />
+                )}
+              />
+            )}
+            <CustomTextField
+              sx={{ gridColumn: { sm: "1 / -1" } }}
+              multiline
+              minRows={3}
+              label="Ghi chú"
+              value={form.note}
+              onChange={(e) => setForm({ ...form, note: e.target.value })}
+            />
           </Box>
         )}
       </DialogContent>
@@ -696,8 +911,8 @@ function TransactionDialog({
           variant="contained"
           disabled={
             saving ||
-            (isBulkImport
-              ? bulkImportInvalid
+            (isBulkTransaction
+              ? bulkTransactionInvalid
               : quantityError || !Number.isInteger(quantity) || quantity <= 0)
           }
           onClick={submit}
@@ -874,7 +1089,9 @@ function CategoryManagerDialog({ open, categories, onClose, onChanged }) {
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error);
-      toast.success(editing ? "Đã cập nhật loại sản phẩm" : "Đã thêm loại sản phẩm");
+      toast.success(
+        editing ? "Đã cập nhật loại sản phẩm" : "Đã thêm loại sản phẩm",
+      );
       setEditing(null);
       setName("");
       await onChanged();
@@ -919,30 +1136,71 @@ function CategoryManagerDialog({ open, categories, onClose, onChanged }) {
             value={name}
             onChange={(event) => setName(event.target.value)}
           />
-          <Button variant="contained" disabled={saving || !name.trim()} onClick={save}>
+          <Button
+            variant="contained"
+            disabled={saving || !name.trim()}
+            onClick={save}
+          >
             {editing ? "Lưu" : "Thêm"}
           </Button>
           {editing && (
-            <Button color="secondary" onClick={() => { setEditing(null); setName(""); }}>
+            <Button
+              color="secondary"
+              onClick={() => {
+                setEditing(null);
+                setName("");
+              }}
+            >
               Hủy
             </Button>
           )}
         </Box>
         <Box display="grid" gap={1}>
-          {visibleCategories.length ? visibleCategories.map((category) => (
-            <Box key={`${category.id}:${category.name}`} display="flex" alignItems="center" sx={{ p: 1.5, border: "1px solid", borderColor: "divider", borderRadius: 1.5 }}>
-              <Typography sx={{ flex: 1 }} fontWeight={600}>{category.name}</Typography>
-              <IconButton color="primary" size="small" onClick={() => { setEditing(category); setName(category.name); }}>
-                <i className="tabler-edit" />
-              </IconButton>
-              <IconButton color="error" size="small" onClick={() => remove(category)}>
-                <i className="tabler-trash" />
-              </IconButton>
-            </Box>
-          )) : <Typography color="text.secondary" textAlign="center" py={3}>Chưa có loại sản phẩm</Typography>}
+          {visibleCategories.length ? (
+            visibleCategories.map((category) => (
+              <Box
+                key={`${category.id}:${category.name}`}
+                display="flex"
+                alignItems="center"
+                sx={{
+                  p: 1.5,
+                  border: "1px solid",
+                  borderColor: "divider",
+                  borderRadius: 1.5,
+                }}
+              >
+                <Typography sx={{ flex: 1 }} fontWeight={600}>
+                  {category.name}
+                </Typography>
+                <IconButton
+                  color="primary"
+                  size="small"
+                  onClick={() => {
+                    setEditing(category);
+                    setName(category.name);
+                  }}
+                >
+                  <i className="tabler-edit" />
+                </IconButton>
+                <IconButton
+                  color="error"
+                  size="small"
+                  onClick={() => remove(category)}
+                >
+                  <i className="tabler-trash" />
+                </IconButton>
+              </Box>
+            ))
+          ) : (
+            <Typography color="text.secondary" textAlign="center" py={3}>
+              Chưa có loại sản phẩm
+            </Typography>
+          )}
         </Box>
       </DialogContent>
-      <DialogActions><Button onClick={onClose}>Đóng</Button></DialogActions>
+      <DialogActions>
+        <Button onClick={onClose}>Đóng</Button>
+      </DialogActions>
     </Dialog>
   );
 }
@@ -969,7 +1227,6 @@ export default function AssetsPage() {
   const [productStatus, setProductStatus] = useState("all");
   const [limit, setLimit] = useState(10);
   const [page, setPage] = useState(1);
-  const [excelWarningOpen, setExcelWarningOpen] = useState(false);
   const [excelImportType, setExcelImportType] = useState(null);
   const [importingExcel, setImportingExcel] = useState(false);
   const excelInputRef = useRef(null);
@@ -1038,26 +1295,23 @@ export default function AssetsPage() {
     });
     return rows;
   }, [data]);
-  const products = useMemo(
-    () => {
-      const categoryNames = new Map(
-        (data.categories || []).map((item) => [item.id, item.name]),
-      );
-      return (data.products || []).map((item) => ({
-        ...item,
-        categoryName: categoryNames.get(item.categoryId) || "",
-        location: stockByCode.get(item.code)?.location || item.location || "",
-        quantity: stockByCode.get(item.code)?.quantity || 0,
-        totalImport: data.imports
-          .filter((entry) => entry.code === item.code)
-          .reduce((sum, entry) => sum + Number(entry.quantity || 0), 0),
-        totalExport: data.exports
-          .filter((entry) => entry.code === item.code)
-          .reduce((sum, entry) => sum + Number(entry.quantity || 0), 0),
-      }));
-    },
-    [data, stockByCode],
-  );
+  const products = useMemo(() => {
+    const categoryNames = new Map(
+      (data.categories || []).map((item) => [item.id, item.name]),
+    );
+    return (data.products || []).map((item) => ({
+      ...item,
+      categoryName: categoryNames.get(item.categoryId) || "",
+      location: stockByCode.get(item.code)?.location || item.location || "",
+      quantity: stockByCode.get(item.code)?.quantity || 0,
+      totalImport: data.imports
+        .filter((entry) => entry.code === item.code)
+        .reduce((sum, entry) => sum + Number(entry.quantity || 0), 0),
+      totalExport: data.exports
+        .filter((entry) => entry.code === item.code)
+        .reduce((sum, entry) => sum + Number(entry.quantity || 0), 0),
+    }));
+  }, [data, stockByCode]);
   const activeRows =
     tab === "import"
       ? data.imports
@@ -1072,7 +1326,7 @@ export default function AssetsPage() {
         const matchesSearch = normalizeSearchText(
           tab === "products"
             ? `${row.code} ${row.name}`
-            : `${row.code} ${row.name} ${row.location} ${row.person} ${row.note}`,
+            : `${row.code} ${row.name} ${row.location} ${row.person} ${row.issuedTo} ${row.note}`,
         ).includes(normalizeSearchText(search));
         const matchesStatus =
           tab !== "products" ||
@@ -1160,19 +1414,42 @@ export default function AssetsPage() {
         );
         return;
       }
+      if (excelImportType === "stock") {
+        const stockSheetName = workbook.SheetNames.find(
+          (item) => normalizeSearchText(item).replace(/\s+/g, "") === "tonkho",
+        );
+        const stockSheet =
+          workbook.Sheets[stockSheetName || workbook.SheetNames[0]];
+        const stock = XLSX.utils
+          .sheet_to_json(stockSheet, { defval: "", raw: true })
+          .filter((row) =>
+            Object.values(row).some((value) => String(value || "").trim()),
+          )
+          .map((row) => ({
+            code: pick(row, ["masanpham", "masp", "ma", "code"]),
+            quantity: Number(pick(row, ["tonkho", "soluong", "quantity"])),
+          }));
+        if (!stock.length) throw new Error("File không có dữ liệu tồn kho");
+        const response = await fetch("/api/assets", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ stock }),
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error);
+        await loadData();
+        setTab("stock");
+        toast.success(
+          `Đã điều chỉnh tồn kho cho ${result.summary?.updated || 0} sản phẩm`,
+        );
+        return;
+      }
       const findSheet = (expected) => {
         const name = workbook.SheetNames.find(
           (item) => normalizeSearchText(item).replace(/\s+/g, "") === expected,
         );
-        return name ? workbook.Sheets[name] : null;
+        return workbook.Sheets[name || workbook.SheetNames[0]];
       };
-      const importSheet = findSheet("nhapkho");
-      const exportSheet = findSheet("xuatkho");
-      const stockSheet = findSheet("tonkho");
-      if (!importSheet || !exportSheet || !stockSheet)
-        throw new Error(
-          "File phải có đủ 3 sheet: Nhập kho, Xuất kho và Tồn kho",
-        );
       const mapRows = (sheet, type) =>
         XLSX.utils
           .sheet_to_json(sheet, { defval: "", raw: true })
@@ -1200,19 +1477,30 @@ export default function AssetsPage() {
               "nguoithuchien",
               "person",
             ]),
+            issuedTo:
+              type === "export"
+                ? pick(row, ["xuatchoai", "nguoinhan", "issuedto"])
+                : "",
             note: pick(row, ["ghichu", "note"]),
           }));
-      const imports = mapRows(importSheet, "import");
-      const exports = mapRows(exportSheet, "export");
+      const transactionType =
+        excelImportType === "export" ? "export" : "import";
+      const sheet = findSheet(
+        transactionType === "import" ? "nhapkho" : "xuatkho",
+      );
+      const rows = mapRows(sheet, transactionType);
+      if (!rows.length) throw new Error("File không có dữ liệu");
       const response = await fetch("/api/assets", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ imports, exports }),
+        body: JSON.stringify({
+          [transactionType === "import" ? "imports" : "exports"]: rows,
+        }),
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error);
-      setData(result);
-      setTab("products");
+      await loadData();
+      setTab(transactionType);
       toast.success(
         `Đã thêm ${result.summary?.added || 0} và cập nhật ${result.summary?.updated || 0} giao dịch từ Excel`,
       );
@@ -1242,6 +1530,7 @@ export default function AssetsPage() {
       "Mã sản phẩm": item.code,
       "Tên sản phẩm": item.name,
       "Người mượn tài sản": item.person,
+      "Xuất cho": item.issuedTo || "",
       "Số lượng": item.quantity,
       "Ghi chú": item.note || "",
     }));
@@ -1264,27 +1553,23 @@ export default function AssetsPage() {
       "Vị trí": item.location || "",
       "Trạng thái": item.active ? "Hoạt động" : "Ngừng sử dụng",
     }));
+    const sheets = {
+      import: { rows: importRows, name: "Nhập kho", file: "nhap_kho" },
+      export: { rows: exportRows, name: "Xuất kho", file: "xuat_kho" },
+      stock: { rows: stockRows, name: "Tồn kho", file: "ton_kho" },
+      products: {
+        rows: productRows,
+        name: "Danh sách sản phẩm",
+        file: "danh_sach_san_pham",
+      },
+    };
+    const current = sheets[tab];
     XLSX.utils.book_append_sheet(
       workbook,
-      XLSX.utils.json_to_sheet(importRows),
-      "Nhập kho",
+      XLSX.utils.json_to_sheet(current.rows),
+      current.name,
     );
-    XLSX.utils.book_append_sheet(
-      workbook,
-      XLSX.utils.json_to_sheet(exportRows),
-      "Xuất kho",
-    );
-    XLSX.utils.book_append_sheet(
-      workbook,
-      XLSX.utils.json_to_sheet(stockRows),
-      "Tồn kho",
-    );
-    XLSX.utils.book_append_sheet(
-      workbook,
-      XLSX.utils.json_to_sheet(productRows),
-      "Danh sách sản phẩm",
-    );
-    XLSX.writeFile(workbook, `danh_sach_tai_san_${toVietnamDateKey()}.xlsx`);
+    XLSX.writeFile(workbook, `${current.file}_${toVietnamDateKey()}.xlsx`);
   };
   const pagedRows = filteredRows.slice((page - 1) * limit, page * limit);
   if (status === "loading" || loading)
@@ -1318,7 +1603,12 @@ export default function AssetsPage() {
           }
           action={
             canManage ? (
-              <Box display="flex" gap={2} flexWrap="wrap" justifyContent="flex-end">
+              <Box
+                display="flex"
+                gap={2}
+                flexWrap="wrap"
+                justifyContent="flex-end"
+              >
                 <Button
                   variant="outlined"
                   startIcon={<i className="tabler-download" />}
@@ -1331,22 +1621,46 @@ export default function AssetsPage() {
                   color="warning"
                   startIcon={<i className="tabler-file-upload" />}
                   disabled={importingExcel}
-                  onClick={() => setExcelWarningOpen(true)}
+                  onClick={() => {
+                    setExcelImportType(tab);
+                    excelInputRef.current?.click();
+                  }}
                 >
-                  {importingExcel ? "Đang import…" : "Import Excel"}
+                  {importingExcel ? "Đang import…" : "Import danh sách mới"}
                 </Button>
                 {tab === "products" && (
-                  <Button variant="contained" startIcon={<i className="tabler-plus" />} onClick={() => { setEditingProduct(null); setProductDialog(true); }}>
+                  <Button
+                    variant="contained"
+                    startIcon={<i className="tabler-plus" />}
+                    onClick={() => {
+                      setEditingProduct(null);
+                      setProductDialog(true);
+                    }}
+                  >
                     Thêm sản phẩm
                   </Button>
                 )}
                 {tab === "import" && (
-                  <Button variant="contained" startIcon={<i className="tabler-package-import" />} onClick={() => { setEditingItem(null); setDialog("import"); }}>
+                  <Button
+                    variant="contained"
+                    startIcon={<i className="tabler-package-import" />}
+                    onClick={() => {
+                      setEditingItem(null);
+                      setDialog("import");
+                    }}
+                  >
                     Nhập tài sản
                   </Button>
                 )}
                 {tab === "export" && (
-                  <Button variant="contained" startIcon={<i className="tabler-package-export" />} onClick={() => { setEditingItem(null); setDialog("export"); }}>
+                  <Button
+                    variant="contained"
+                    startIcon={<i className="tabler-package-export" />}
+                    onClick={() => {
+                      setEditingItem(null);
+                      setDialog("export");
+                    }}
+                  >
                     Xuất tài sản
                   </Button>
                 )}
@@ -1501,62 +1815,6 @@ export default function AssetsPage() {
           accept=".xlsx,.xls"
           onChange={importExcel}
         />
-        <Dialog
-          open={excelWarningOpen}
-          onClose={() => setExcelWarningOpen(false)}
-          fullWidth
-          maxWidth="sm"
-        >
-          <DialogTitle>Import dữ liệu tài sản từ Excel</DialogTitle>
-          <DialogContent dividers>
-            <Typography color="text.secondary" mb={3}>
-              Chọn loại dữ liệu bạn muốn import. Dữ liệu trùng sẽ được cập nhật,
-              dữ liệu mới sẽ được bổ sung.
-            </Typography>
-            <Box display="grid" gap={2}>
-              <Button
-                variant="outlined"
-                size="large"
-                startIcon={<i className="tabler-list-details" />}
-                onClick={() => {
-                  setExcelImportType("products");
-                  setExcelWarningOpen(false);
-                  excelInputRef.current?.click();
-                }}
-              >
-                Import danh sách sản phẩm
-              </Button>
-              <Typography variant="caption" color="text.secondary">
-                Cột hỗ trợ: Mã sản phẩm, Tên sản phẩm, Đơn vị tính, Mô tả, Vị
-                trí. Đơn vị mặc định là Cái.
-              </Typography>
-              <Button
-                variant="outlined"
-                color="warning"
-                size="large"
-                startIcon={<i className="tabler-arrows-exchange" />}
-                onClick={() => {
-                  setExcelImportType("transactions");
-                  setExcelWarningOpen(false);
-                  excelInputRef.current?.click();
-                }}
-              >
-                Import danh sách nhập / xuất / tồn hiện tại
-              </Button>
-              <Typography variant="caption" color="text.secondary">
-                File cần có đủ 3 sheet: Nhập kho, Xuất kho và Tồn kho.
-              </Typography>
-            </Box>
-          </DialogContent>
-          <DialogActions>
-            <Button
-              color="secondary"
-              onClick={() => setExcelWarningOpen(false)}
-            >
-              Hủy
-            </Button>
-          </DialogActions>
-        </Dialog>
       </Card>
     </Box>
   );

@@ -98,6 +98,7 @@ function InfoRow({ icon, label, value, chip, chipColor }) {
 
 export default function ProfilePage() {
   const { data: session, update: updateSession } = useSession();
+  const canEditName = ["admin", "assistant"].includes(session?.user?.role);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -154,7 +155,7 @@ export default function ProfilePage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Lỗi cập nhật");
       setProfile(data);
-      await updateSession({ name: data.name });
+      if (canEditName) await updateSession({ name: data.name });
       showSnack("Cập nhật thông tin thành công!");
     } catch (err) {
       showSnack(err.message || "Lỗi hệ thống", "error");
@@ -432,9 +433,9 @@ export default function ProfilePage() {
                   "& .MuiChip-icon": { color: "white" },
                 }}
               />
-              {TYPE_LABEL[profile.typeId] && (
+              {(profile.departmentName || TYPE_LABEL[profile.typeId]) && (
                 <Chip
-                  label={TYPE_LABEL[profile.typeId]}
+                  label={profile.departmentName || TYPE_LABEL[profile.typeId]}
                   size="small"
                   icon={<i className="tabler-building text-white" />}
                   sx={{
@@ -548,7 +549,11 @@ export default function ProfilePage() {
               <InfoRow
                 icon="tabler-building"
                 label="Bộ phận"
-                value={TYPE_LABEL[profile.typeId] || profile.typeId}
+                value={
+                  profile.departmentName ||
+                  TYPE_LABEL[profile.typeId] ||
+                  profile.typeId
+                }
               />
               <Divider />
               <InfoRow
@@ -640,7 +645,7 @@ export default function ProfilePage() {
                       Thông tin cá nhân
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      Cập nhật họ tên, ngày sinh và thông tin liên hệ
+                      Cập nhật ngày sinh và thông tin liên hệ
                     </Typography>
                   </Box>
                 </Box>
@@ -650,11 +655,17 @@ export default function ProfilePage() {
                     <TextField
                       label="Họ và tên"
                       value={form.name}
+                      disabled={!canEditName}
                       onChange={(e) =>
                         setForm((p) => ({ ...p, name: e.target.value }))
                       }
                       fullWidth
                       required
+                      helperText={
+                        canEditName
+                          ? ""
+                          : "Tên do quản trị viên quản lý và không thể tự thay đổi"
+                      }
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">

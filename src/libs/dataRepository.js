@@ -528,7 +528,8 @@ export async function getAssets() {
       if (item.code && item.category && !latestCategoryByCode.has(item.code))
         latestCategoryByCode.set(
           item.code,
-          categoryByName.get(String(item.category).trim().toLowerCase())?.id || "",
+          categoryByName.get(String(item.category).trim().toLowerCase())?.id ||
+            "",
         );
     const products = (data.products || []).map((item) => ({
       ...item,
@@ -584,6 +585,7 @@ export async function getAssets() {
     quantity: row.quantity === null ? null : Number(row.quantity),
     location: row.location || "",
     person: row.person || "",
+    issuedTo: row.issued_to || "",
     note: row.note || "",
     voucherCode: row.voucher_code || "",
     performedBy: row.performed_by || "",
@@ -686,6 +688,7 @@ const assetTransactionValues = (item, type) => [
   item.quantity === null || item.quantity === "" ? null : Number(item.quantity),
   item.location || null,
   item.person || null,
+  item.issuedTo || null,
   item.performedBy || null,
   item.note || null,
   item.createdAt ? new Date(item.createdAt) : new Date(),
@@ -700,7 +703,7 @@ export async function createAssetTransaction(type, item) {
     return true;
   }
   await query(
-    "INSERT INTO asset_transactions (id,voucher_code,type,asset_code,name,asset_type,description,transaction_date,quantity,location,person,performed_by,note,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+    "INSERT INTO asset_transactions (id,voucher_code,type,asset_code,name,asset_type,description,transaction_date,quantity,location,person,issued_to,performed_by,note,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
     assetTransactionValues(item, type),
   );
   return true;
@@ -717,7 +720,7 @@ export async function updateAssetTransaction(type, item) {
     return true;
   }
   await query(
-    "UPDATE asset_transactions SET voucher_code=?,asset_code=?,name=?,asset_type=?,description=?,transaction_date=?,quantity=?,location=?,person=?,performed_by=?,note=?,updated_at=? WHERE id=? AND type=?",
+    "UPDATE asset_transactions SET voucher_code=?,asset_code=?,name=?,asset_type=?,description=?,transaction_date=?,quantity=?,location=?,person=?,issued_to=?,performed_by=?,note=?,updated_at=? WHERE id=? AND type=?",
     [
       item.voucherCode || null,
       item.code,
@@ -730,6 +733,7 @@ export async function updateAssetTransaction(type, item) {
         : Number(item.quantity),
       item.location || null,
       item.person || null,
+      item.issuedTo || null,
       item.performedBy || null,
       item.note || null,
       new Date(),
@@ -768,7 +772,7 @@ export async function saveAssets(data) {
     ])
       for (const item of records)
         await connection.execute(
-          "INSERT INTO asset_transactions (id,voucher_code,type,asset_code,name,asset_type,description,transaction_date,quantity,location,person,performed_by,note,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+          "INSERT INTO asset_transactions (id,voucher_code,type,asset_code,name,asset_type,description,transaction_date,quantity,location,person,issued_to,performed_by,note,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
           [
             item.id,
             item.voucherCode || null,
@@ -783,6 +787,7 @@ export async function saveAssets(data) {
               : Number(item.quantity),
             item.location || null,
             item.person || null,
+            item.issuedTo || null,
             item.performedBy || null,
             item.note || null,
             item.createdAt ? new Date(item.createdAt) : new Date(),

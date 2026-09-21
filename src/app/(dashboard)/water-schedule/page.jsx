@@ -29,9 +29,9 @@ export default function WaterSchedulePage() {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const loadData = useCallback(async () => {
+  const loadData = useCallback(async ({ showLoading = false } = {}) => {
     try {
-      setLoading(true);
+      if (showLoading) setLoading(true);
       const res = await fetch(
         `/api/water-schedules?month=${month}&year=${year}`,
       );
@@ -53,7 +53,7 @@ export default function WaterSchedulePage() {
   }, [month, year]);
 
   useEffect(() => {
-    loadData();
+    loadData({ showLoading: true });
   }, [loadData]);
 
   if (status === "loading" || loading) {
@@ -90,7 +90,7 @@ export default function WaterSchedulePage() {
           trashAssignableUsers={trashAssignableUsers}
           exemptUserIds={exemptUserIds}
           trashSchedules={trashSchedules}
-          onRefresh={loadData}
+          onRefresh={() => loadData()}
         />
       </Box>
     );

@@ -137,7 +137,7 @@ export async function PUT(req) {
       adminEmail: token.email || "",
       action: "UPSERT_ASSET_PRODUCTS_FROM_EXCEL",
       targetType: "ASSET_PRODUCT",
-      details: `Import Excel: thêm ${added}, cập nhật ${updated} sản phẩm`,
+      details: `Import danh sách mới: thêm ${added}, cập nhật ${updated} sản phẩm`,
     });
 
     return NextResponse.json({ summary: { added, updated } });

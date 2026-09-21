@@ -1,6 +1,51 @@
 {
   "imports": [
     {
+      "id": "import_1789959026054_nq9c",
+      "code": "MT&PK003",
+      "name": "Adapter Camera Orin",
+      "category": "Cái",
+      "description": "",
+      "date": "2026-09-21",
+      "quantity": 1,
+      "location": "",
+      "person": "Quản trị viên Hệ thống",
+      "issuedTo": "",
+      "performedBy": "usr_admin_001",
+      "note": "á á á",
+      "createdAt": "2026-09-21T02:50:26.054Z"
+    },
+    {
+      "id": "import_1789959025972_54wg",
+      "code": "CB-010",
+      "name": "Adapter Camera Leopard 2 port A,B",
+      "category": "Cái",
+      "description": "",
+      "date": "2026-09-21",
+      "quantity": 1,
+      "location": "",
+      "person": "Quản trị viên Hệ thống",
+      "issuedTo": "",
+      "performedBy": "usr_admin_001",
+      "note": "á á á",
+      "createdAt": "2026-09-21T02:50:25.972Z"
+    },
+    {
+      "id": "import_1789959025945_7fww",
+      "code": "CB-025",
+      "name": "AC_ISX031-H120",
+      "category": "Cái",
+      "description": "",
+      "date": "2026-09-21",
+      "quantity": 1,
+      "location": "A-1-0",
+      "person": "Quản trị viên Hệ thống",
+      "issuedTo": "",
+      "performedBy": "usr_admin_001",
+      "note": "á á á",
+      "createdAt": "2026-09-21T02:50:25.945Z"
+    },
+    {
       "id": "import_001",
       "code": "DEV-MAC-01",
       "name": "MacBook Pro M2 16GB",
@@ -5524,7 +5569,7 @@
       "active": true,
       "id": "product_cb_010",
       "createdAt": "2026-09-18T03:18:53.887Z",
-      "categoryId": "asset_category_50d5c47695c25f8c6288"
+      "categoryId": "asset_category_1e0c315f51c3e43ba154"
     },
     {
       "code": "CB-011",
@@ -5689,7 +5734,7 @@
       "active": true,
       "id": "product_cb_025",
       "createdAt": "2026-09-18T03:18:53.904Z",
-      "categoryId": "asset_category_50d5c47695c25f8c6288"
+      "categoryId": "asset_category_1e0c315f51c3e43ba154"
     },
     {
       "code": "CB-026",
@@ -5810,7 +5855,7 @@
       "active": true,
       "id": "product_mt_pk003",
       "createdAt": "2026-09-18T03:18:53.930Z",
-      "categoryId": "asset_category_24acf55712108605b994"
+      "categoryId": "asset_category_1e0c315f51c3e43ba154"
     },
     {
       "code": "MT&PK004",
@@ -6605,6 +6650,11 @@
       "id": "asset_category_5d6f58efe7e772048283",
       "name": "Thiết bị lưu trữ",
       "createdAt": "2026-09-18T08:38:31.929Z"
+    },
+    {
+      "id": "asset_category_1e0c315f51c3e43ba154",
+      "name": "Cái",
+      "createdAt": "2026-09-21T02:50:25.971Z"
     }
   ]
 }

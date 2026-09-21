@@ -1,6 +1,90 @@
 {
   "auditLogs": [
     {
+      "id": "log_1789960024128_muge",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "DELETE_USER",
+      "targetType": "USER",
+      "targetId": "usr_1789710244406",
+      "details": "Xóa nhân sự Nguyễn Thanh Hải (HĐK076 - haint1@phenikaa-x.com)",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-21T03:07:04.128Z"
+    },
+    {
+      "id": "log_1789960021688_cxmr",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "DELETE_USER",
+      "targetType": "USER",
+      "targetId": "usr_008",
+      "details": "Xóa nhân sự Nguyễn Hữu Lâm (PNKX283 - lamnh@phenikaa-x.com)",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-21T03:07:01.688Z"
+    },
+    {
+      "id": "log_1789960020285_rh6g",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "UPDATE_USER",
+      "targetType": "USER",
+      "targetId": "usr_008",
+      "details": "Cập nhật thông tin nhân sự Nguyễn Hữu Lâm (PNKX283): name, code, phone, gender, role, typeId, categoryId, status, birthday, citizenId, citizenIssuedDate, address, position, jiraAccount, joinedDate, avatarUrl, schedulingPoints",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-21T03:07:00.285Z"
+    },
+    {
+      "id": "log_1789959983043_7ddu",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "FILL_EMPTY_TRASH_SCHEDULE",
+      "targetType": "trash_schedule",
+      "targetId": "2026-09",
+      "details": "Random 3 ô lịch đổ rác còn trống từ 2026-09-21",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-21T03:06:23.043Z"
+    },
+    {
+      "id": "log_1789959026056_qhqp",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "IMPORT_ASSET",
+      "targetType": "ASSET",
+      "targetId": "import_1789959026054_nq9c",
+      "details": "Nhập 1 Adapter Camera Orin (MT&PK003)",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-21T02:50:26.056Z"
+    },
+    {
+      "id": "log_1789959025974_7c61",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "IMPORT_ASSET",
+      "targetType": "ASSET",
+      "targetId": "import_1789959025972_54wg",
+      "details": "Nhập 1 Adapter Camera Leopard 2 port A,B (CB-010)",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-21T02:50:25.974Z"
+    },
+    {
+      "id": "log_1789959025950_g3lv",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "IMPORT_ASSET",
+      "targetType": "ASSET",
+      "targetId": "import_1789959025945_7fww",
+      "details": "Nhập 1 AC_ISX031-H120 (CB-025)",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-21T02:50:25.950Z"
+    },
+    {
       "id": "log_1789720722435_tfg4",
       "adminId": "usr_admin_001",
       "adminName": "Quản trị viên Hệ thống",

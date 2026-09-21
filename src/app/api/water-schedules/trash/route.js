@@ -9,7 +9,10 @@ import {
   getWaterExemptions,
   saveSettings,
 } from "@/libs/dataRepository";
-import { getTrashSchedules } from "@/libs/waterScheduler";
+import {
+  getTrashSchedules,
+  getTrashSchedulesForMonth,
+} from "@/libs/waterScheduler";
 import { toVietnamDateKey } from "@/libs/dateTime";
 
 const secret = process.env.NEXTAUTH_SECRET;
@@ -59,6 +62,55 @@ export async function PATCH(req) {
     );
 
   const body = await req.json();
+  if (body.action === "fill_empty") {
+    const [users, exemptUserIds, settings] = await Promise.all([
+      getUsers(),
+      getWaterExemptions(),
+      getSettings(),
+    ]);
+    const todayKey = toVietnamDateKey();
+    const [todayYear, todayMonth] = todayKey.split("-").map(Number);
+    const year = Number(body.year) || todayYear;
+    const month = Number(body.month) || todayMonth;
+    const startKey = year === todayYear && month === todayMonth
+      ? todayKey
+      : `${year}-${String(month).padStart(2, "0")}-01`;
+    const overrides = { ...(settings.trashScheduleOverrides || {}) };
+    const defaults = getTrashSchedulesForMonth(
+      users,
+      exemptUserIds,
+      year,
+      month,
+      {},
+      true,
+    );
+    let assigned = 0;
+    for (const item of defaults) {
+      if (
+        item.dateKey >= startKey &&
+        !overrides[item.dateKey] &&
+        item.userId
+      ) {
+        overrides[item.dateKey] = item.userId;
+        assigned += 1;
+      }
+    }
+    await saveSettings({
+      ...settings,
+      trashScheduleOverrides: overrides,
+      trashScheduleRevision: Number(settings.trashScheduleRevision || 0) + 1,
+    });
+    await appendAuditLog({
+      adminId: token.id,
+      adminName: token.name || "Người dùng",
+      adminEmail: token.email || "",
+      action: "FILL_EMPTY_TRASH_SCHEDULE",
+      targetType: "trash_schedule",
+      targetId: `${year}-${String(month).padStart(2, "0")}`,
+      details: `Random ${assigned} ô lịch đổ rác còn trống từ ${startKey}`,
+    });
+    return NextResponse.json({ success: true, assigned });
+  }
   if (body.action === "complete") {
     const current = await loadWeek(normalizeOffset(body.weekOffset));
     const schedule = current.schedules.find(
@@ -100,9 +152,17 @@ export async function PATCH(req) {
       ...(current.settings.trashScheduleOverrides || {}),
       [body.dateKey]: body.userId || null,
     };
+    const [currentYear, currentMonth] = toVietnamDateKey()
+      .split("-")
+      .map(Number);
+    const nextMonthStart = `${currentMonth === 12 ? currentYear + 1 : currentYear}-${String(currentMonth === 12 ? 1 : currentMonth + 1).padStart(2, "0")}-01`;
+    const affectsFuturePlan = String(body.dateKey || "") < nextMonthStart;
     await saveSettings({
       ...current.settings,
       trashScheduleOverrides: overrides,
+      trashScheduleRevision:
+        Number(current.settings.trashScheduleRevision || 0) +
+        Number(affectsFuturePlan),
     });
     return NextResponse.json({ success: true });
   }

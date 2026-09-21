@@ -58,6 +58,7 @@ const mergeTransactions = (current, incoming, type, token) => {
       quantity,
       location: normalizeText(item.location),
       person: normalizeText(item.person),
+      issuedTo: normalizeText(item.issuedTo),
       note: normalizeText(item.note),
     };
     const baseKey = transactionBaseKey(normalized);
@@ -110,7 +111,12 @@ export async function POST(req) {
     const type = body.type === "export" ? "export" : "import";
     const quantity = Number(body.quantity);
     const normalizedCode = body.code?.trim().toUpperCase();
-    if (!body.code?.trim() || !body.date || !body.person?.trim()) {
+    if (
+      !body.code?.trim() ||
+      !body.date ||
+      !body.person?.trim() ||
+      (type === "export" && !body.issuedTo?.trim())
+    ) {
       return NextResponse.json(
         { error: "Vui lòng nhập đầy đủ các trường bắt buộc" },
         { status: 400 },
@@ -158,6 +164,7 @@ export async function POST(req) {
       quantity,
       location: product.location || "",
       person: body.person.trim(),
+      issuedTo: type === "export" ? normalizeText(body.issuedTo) : "",
       performedBy: token.id || "",
       note: body.note?.trim() || "",
       createdAt: new Date().toISOString(),
@@ -193,13 +200,82 @@ export async function PUT(req) {
     const body = await req.json();
     if (
       (!Array.isArray(body.imports) || !body.imports.length) &&
-      (!Array.isArray(body.exports) || !body.exports.length)
+      (!Array.isArray(body.exports) || !body.exports.length) &&
+      (!Array.isArray(body.stock) || !body.stock.length)
     )
       return NextResponse.json(
         { error: "File Excel không có dữ liệu nhập kho" },
         { status: 400 },
       );
     const current = normalizeData(await getAssets());
+    if (Array.isArray(body.stock) && body.stock.length) {
+      const balances = new Map();
+      current.imports.forEach((item) =>
+        balances.set(
+          normalizeText(item.code).toUpperCase(),
+          (balances.get(normalizeText(item.code).toUpperCase()) || 0) +
+            Number(item.quantity || 0),
+        ),
+      );
+      current.exports.forEach((item) =>
+        balances.set(
+          normalizeText(item.code).toUpperCase(),
+          (balances.get(normalizeText(item.code).toUpperCase()) || 0) -
+            Number(item.quantity || 0),
+        ),
+      );
+      const productByCode = new Map(
+        current.products.map((item) => [item.code.toUpperCase(), item]),
+      );
+      const now = new Date();
+      const date = now.toISOString().slice(0, 10);
+      let updated = 0;
+      for (const [index, item] of body.stock.entries()) {
+        const code = normalizeText(item.code).toUpperCase();
+        const desired = Number(item.quantity);
+        const product = productByCode.get(code);
+        if (!product || !Number.isInteger(desired) || desired < 0) continue;
+        const difference = desired - (balances.get(code) || 0);
+        if (!difference) continue;
+        const type = difference > 0 ? "import" : "export";
+        const record = {
+          id: `${type}_stock_${Date.now()}_${index}`,
+          code,
+          name: product.name,
+          category: product.unit || "",
+          description: product.description || "",
+          date,
+          quantity: Math.abs(difference),
+          location: product.location || "",
+          person: token.name || "Import danh sách mới",
+          issuedTo: "",
+          performedBy: token.id || "",
+          note: "Điều chỉnh tồn kho từ Excel",
+          createdAt: now.toISOString(),
+        };
+        current[type === "import" ? "imports" : "exports"].push(record);
+        balances.set(code, desired);
+        updated += 1;
+      }
+      if (!updated)
+        return NextResponse.json(
+          { error: "Không có dòng tồn kho hợp lệ cần điều chỉnh" },
+          { status: 400 },
+        );
+      await saveAssets(current);
+      await appendAuditLog({
+        adminId: token.id,
+        adminName: token.name || "Người dùng",
+        adminEmail: token.email || "",
+        action: "ADJUST_ASSET_STOCK_FROM_EXCEL",
+        targetType: "ASSET",
+        details: `Import danh sách mới: điều chỉnh tồn kho ${updated} sản phẩm`,
+      });
+      return NextResponse.json({
+        ...current,
+        summary: { added: updated, updated },
+      });
+    }
     const importResult = mergeTransactions(
       current.imports,
       body.imports || [],
@@ -213,6 +289,7 @@ export async function PUT(req) {
       token,
     );
     const merged = {
+      ...current,
       imports: importResult.records,
       exports: exportResult.records,
     };
@@ -223,7 +300,7 @@ export async function PUT(req) {
       adminEmail: token.email || "",
       action: "UPSERT_ASSETS_FROM_EXCEL",
       targetType: "ASSET",
-      details: `Import Excel: thêm ${importResult.added + exportResult.added}, cập nhật ${importResult.updated + exportResult.updated} giao dịch`,
+      details: `Import danh sách mới: thêm ${importResult.added + exportResult.added}, cập nhật ${importResult.updated + exportResult.updated} giao dịch`,
     });
     return NextResponse.json({
       ...merged,
@@ -234,7 +311,7 @@ export async function PUT(req) {
     });
   } catch (error) {
     return NextResponse.json(
-      { error: error.message || "Không thể import Excel" },
+      { error: error.message || "Không thể Import danh sách mới" },
       { status: 400 },
     );
   }
@@ -262,7 +339,12 @@ export async function PATCH(req) {
         { error: "Không tìm thấy phiếu tài sản" },
         { status: 404 },
       );
-    if (!normalizedCode || !body.date || !body.person?.trim())
+    if (
+      !normalizedCode ||
+      !body.date ||
+      !body.person?.trim() ||
+      (type === "export" && !body.issuedTo?.trim())
+    )
       return NextResponse.json(
         { error: "Vui lòng nhập đầy đủ các trường bắt buộc" },
         { status: 400 },
@@ -299,6 +381,7 @@ export async function PATCH(req) {
       location: product.location || "",
       performedBy: previous.performedBy || token.id || "",
       person: body.person.trim(),
+      issuedTo: type === "export" ? normalizeText(body.issuedTo) : "",
       note: body.note?.trim() || "",
       updatedAt: new Date().toISOString(),
     };

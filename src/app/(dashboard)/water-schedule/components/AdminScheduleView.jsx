@@ -197,72 +197,24 @@ export default function AdminScheduleView({
   };
 
   const randomFullSchedule = async (date) => {
-    const [d, m, y] = date.split("/");
-    const dateKey = `${y}-${pad(m)}-${pad(d)}`;
-    const schedule = byDate.get(date) || makeSchedule(date);
     setBusyId(date);
     try {
-      // 1. Phân công ngẫu nhiên bê nước: từ nhóm không miễn, xét điểm rèn luyện thấp nhất
-      const fixedParticipants = (schedule.participants || []).slice(0, 5);
-      const response = await fetch("/api/water-schedules/random", {
-        method: "POST",
+      const response = await fetch("/api/water-schedules/trash", {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          month,
-          year,
-          mode: "single_week",
-          requiredPeople: 5,
-          fixedParticipants,
-        }),
+        body: JSON.stringify({ action: "fill_empty", month, year }),
       });
       const result = await response.json();
       if (!response.ok)
-        return toast.error(
-          result.error || "Không thể phân công ngẫu nhiên bê nước",
-        );
-
-      await saveSchedule(
-        { ...schedule, participants: result.participants || fixedParticipants },
-        "Đã phân công ngẫu nhiên bê nước",
-      );
-
-      // 2. Phân công ngẫu nhiên đổ rác: từ nhóm trong danh sách miễn, xét điểm thấp nhất
-      let trashCandidates = eligibleUsers.filter(
-        (user) => exemptIds.includes(user.id) && user.status === "able",
-      );
-      if (!trashCandidates.length) {
-        trashCandidates = eligibleUsers.filter(
-          (user) => user.status === "able",
-        );
-      }
-      if (trashCandidates.length > 0) {
-        const minPoints = Math.min(
-          ...trashCandidates.map((user) => Number(user.schedulingPoints) || 0),
-        );
-        const pool = trashCandidates.filter(
-          (user) => (Number(user.schedulingPoints) || 0) === minPoints,
-        );
-        const selected = pool[Math.floor(Math.random() * pool.length)];
-        if (selected) {
-          await fetch("/api/water-schedules/trash", {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              action: "assign",
-              dateKey,
-              userId: selected.id,
-              weekOffset: 0,
-            }),
-          });
-        }
-      }
-
+        return toast.error(result.error || "Không thể random lịch đổ rác");
       toast.success(
-        `Đã phân công ngẫu nhiên cả bê nước và đổ rác ngày ${date}`,
+        result.assigned
+          ? `Đã phân công ${result.assigned} ô đổ rác còn trống đến cuối tháng`
+          : "Không còn ô đổ rác trống cần phân công",
       );
       await onRefresh?.();
     } catch {
-      toast.error("Không thể phân công ngẫu nhiên");
+      toast.error("Không thể random lịch đổ rác");
     } finally {
       setBusyId(null);
     }
@@ -658,7 +610,7 @@ export default function AdminScheduleView({
                                     </IconButton>
                                   )}
                                   <IconButton
-                                    title="Phân công ngẫu nhiên cả bê nước và đổ rác"
+                                    title="Random toàn bộ ô đổ rác còn trống đến cuối tháng"
                                     color="primary"
                                     size="small"
                                     disabled={busyId === cell.date}

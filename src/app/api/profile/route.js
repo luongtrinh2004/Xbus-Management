@@ -1,8 +1,23 @@
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
-import { getUsers, saveUsers, appendAuditLog } from "@/libs/dataRepository";
+import {
+  getUsers,
+  getTypes,
+  saveUsers,
+  appendAuditLog,
+} from "@/libs/dataRepository";
 
 const secret = process.env.NEXTAUTH_SECRET;
+
+async function withDepartmentName(user) {
+  const departments = await getTypes();
+  return {
+    ...user,
+    departmentName:
+      departments.find((department) => department.id === user.typeId)?.name ||
+      "",
+  };
+}
 
 export async function GET(req) {
   try {
@@ -17,7 +32,7 @@ export async function GET(req) {
         { status: 404 },
       );
     const { password, ...safeUser } = user;
-    return NextResponse.json(safeUser);
+    return NextResponse.json(await withDepartmentName(safeUser));
   } catch (error) {
     console.error("[API Profile] GET:", error);
     return NextResponse.json({ error: "Loi he thong" }, { status: 500 });
@@ -38,7 +53,9 @@ export async function PATCH(req) {
         { status: 404 },
       );
     const oldUser = users[index];
-    const allowedFields = ["name", "phone", "gender", "birthday"];
+    const allowedFields = ["phone", "gender", "birthday"];
+    if (["admin", "assistant"].includes(token.role))
+      allowedFields.unshift("name");
     const updates = {};
     for (const field of allowedFields) {
       if (Object.prototype.hasOwnProperty.call(body, field))
@@ -65,7 +82,7 @@ export async function PATCH(req) {
         .join(", ")}`,
     });
     const { password, ...safeUser } = updatedUser;
-    return NextResponse.json(safeUser);
+    return NextResponse.json(await withDepartmentName(safeUser));
   } catch (error) {
     console.error("[API Profile] PATCH:", error);
     return NextResponse.json({ error: "Loi he thong" }, { status: 500 });
