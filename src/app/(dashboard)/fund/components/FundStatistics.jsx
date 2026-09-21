@@ -122,7 +122,10 @@ export default function FundStatistics({ period, revision }) {
       <Tabs
         value={activeTab}
         onChange={(_, value) => setActiveTab(value)}
-        sx={{ px: 3, borderBottom: "1px solid", borderColor: "divider" }}
+        variant="scrollable"
+        scrollButtons="auto"
+        allowScrollButtonsMobile
+        sx={{ px: { xs: 1, sm: 3 }, borderBottom: "1px solid", borderColor: "divider" }}
       >
         <Tab label="Thống kê cả đội" />
         <Tab label="Thống kê cá nhân" />

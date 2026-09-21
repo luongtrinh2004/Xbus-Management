@@ -12,7 +12,10 @@ const dialog = skin => ({
             }),
         [theme.breakpoints.down('sm')]: {
           '&:not(.MuiDialog-paperFullScreen)': {
-            margin: theme.spacing(6)
+            margin: theme.spacing(3),
+            inlineSize: 'calc(100% - 1.5rem)',
+            maxInlineSize: 'calc(100% - 1.5rem)',
+            maxBlockSize: 'calc(100% - 1.5rem)'
           }
         }
       }),
@@ -28,6 +31,7 @@ const dialog = skin => ({
     styleOverrides: {
       root: ({ theme }) => ({
         padding: theme.spacing(6),
+        [theme.breakpoints.down('sm')]: { padding: theme.spacing(4) },
         '& + .MuiDialogActions-root': {
           paddingTop: 0
         }
@@ -38,6 +42,7 @@ const dialog = skin => ({
     styleOverrides: {
       root: ({ theme }) => ({
         padding: theme.spacing(6),
+        [theme.breakpoints.down('sm')]: { padding: theme.spacing(4) },
         '& + .MuiDialogContent-root, & + .MuiDialogActions-root': {
           paddingTop: 0
         }
@@ -48,8 +53,15 @@ const dialog = skin => ({
     styleOverrides: {
       root: ({ theme }) => ({
         padding: theme.spacing(6),
+        flexWrap: 'wrap',
+        gap: theme.spacing(2),
         '& .MuiButtonBase-root:not(:first-of-type)': {
-          marginInlineStart: theme.spacing(4)
+          marginInlineStart: theme.spacing(4),
+          [theme.breakpoints.down('sm')]: { marginInlineStart: 0 }
+        },
+        [theme.breakpoints.down('sm')]: {
+          padding: theme.spacing(4),
+          '& .MuiButtonBase-root': { flex: '1 1 auto' }
         },
         '&:where(.dialog-actions-dense)': {
           padding: theme.spacing(3),

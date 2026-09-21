@@ -16,15 +16,16 @@ export default function DataTableToolbar({
   return (
     <Box
       sx={{
-        p: 3,
+        p: { xs: 2, sm: 3 },
         display: "flex",
         justifyContent: "space-between",
-        alignItems: "center",
+        alignItems: { xs: "stretch", sm: "center" },
         gap: 2,
         flexWrap: "wrap",
+        flexDirection: { xs: "column", sm: "row" },
       }}
     >
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, width: { xs: "100%", sm: "auto" } }}>
         <Typography variant="body2" color="text.secondary">
           Hiển thị
         </Typography>
@@ -49,6 +50,8 @@ export default function DataTableToolbar({
           alignItems: "center",
           gap: 1.5,
           flexWrap: "wrap",
+          width: { xs: "100%", sm: "auto" },
+          "& > .MuiButton-root": { flex: { xs: "1 1 auto", sm: "0 0 auto" } },
         }}
       >
         <CustomTextField
@@ -57,7 +60,7 @@ export default function DataTableToolbar({
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder={placeholder}
-          sx={{ minWidth: 260 }}
+          sx={{ minWidth: 0, width: { xs: "100%", sm: 260 } }}
           InputProps={{
             startAdornment: <i className="tabler-search text-gray-400 mr-2" />,
           }}

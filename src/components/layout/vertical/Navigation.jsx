@@ -88,7 +88,7 @@ const Navigation = (props) => {
     <VerticalNav
       customStyles={navigationCustomStyles(verticalNavOptions, theme)}
       collapsedWidth={71}
-      breakpoint={false}
+      breakpoint="lg"
       backgroundColor="var(--mui-palette-background-paper)"
       // eslint-disable-next-line lines-around-comment
       // The following condition adds the data-dark attribute to the VerticalNav component

@@ -535,14 +535,35 @@ export async function getAssets() {
       ...item,
       categoryId: latestCategoryByCode.get(item.code) || item.categoryId || "",
     }));
+    const unitNames = new Set(
+      [...(data.units || []).map((item) => item.name), "Cái", "Chiếc"]
+        .map((name) => String(name || "").trim())
+        .filter(Boolean),
+    );
+    products.forEach((item) => {
+      const name = String(item.unit || "").trim();
+      if (name) unitNames.add(name);
+    });
+    const existingUnits = new Map(
+      (data.units || []).map((item) => [String(item.name).toLocaleLowerCase("vi"), item]),
+    );
+    const units = [...unitNames].map((name) =>
+      existingUnits.get(name.toLocaleLowerCase("vi")) || {
+        id: `asset_unit_${crypto.createHash("sha256").update(name.toLocaleLowerCase("vi")).digest("hex").slice(0, 20)}`,
+        name,
+        createdAt: new Date().toISOString(),
+      },
+    );
     const normalized = {
       ...data,
       categories,
       products,
+      units,
     };
     if (
       JSON.stringify(data.categories || []) !== JSON.stringify(categories) ||
-      JSON.stringify(data.products || []) !== JSON.stringify(products)
+      JSON.stringify(data.products || []) !== JSON.stringify(products) ||
+      JSON.stringify(data.units || []) !== JSON.stringify(units)
     )
       await json.saveAssets(normalized);
     return normalized;
@@ -570,10 +591,11 @@ export async function getAssets() {
     SET product.category_id = category.id
     WHERE product.category_id IS NULL OR product.category_id = ''
   `);
-  const [[rows], [productRows], [categoryRows]] = await Promise.all([
+  const [[rows], [productRows], [categoryRows], [unitRows]] = await Promise.all([
     query("SELECT * FROM asset_transactions ORDER BY created_at DESC, id DESC"),
     query("SELECT * FROM asset_products ORDER BY name"),
     query("SELECT * FROM asset_product_categories ORDER BY name"),
+    query("SELECT * FROM asset_product_units ORDER BY name"),
   ]);
   const map = (row) => ({
     id: row.id,
@@ -608,6 +630,12 @@ export async function getAssets() {
       updatedAt: toIso(row.updated_at),
     })),
     categories: categoryRows.map((row) => ({
+      id: row.id,
+      name: row.name,
+      createdAt: toIso(row.created_at),
+      updatedAt: toIso(row.updated_at),
+    })),
+    units: unitRows.map((row) => ({
       id: row.id,
       name: row.name,
       createdAt: toIso(row.created_at),
@@ -673,6 +701,55 @@ export async function deleteAssetCategory(id) {
     });
   }
   await query("DELETE FROM asset_product_categories WHERE id=?", [id]);
+  return true;
+}
+
+export async function saveAssetUnit(unit, previousName = "") {
+  if (!mysqlEnabled()) {
+    const data = await json.getAssets();
+    const units = Array.isArray(data.units) ? data.units : [];
+    const index = units.findIndex((item) => item.id === unit.id);
+    if (index >= 0) units[index] = unit;
+    else units.push(unit);
+    const products = (data.products || []).map((product) =>
+      previousName && product.unit === previousName
+        ? { ...product, unit: unit.name }
+        : product,
+    );
+    return json.saveAssets({ ...data, units, products });
+  }
+  const db = getMysqlPool();
+  const connection = await db.getConnection();
+  try {
+    await connection.beginTransaction();
+    if (previousName && previousName !== unit.name)
+      await connection.execute("UPDATE asset_products SET unit=? WHERE unit=?", [
+        unit.name,
+        previousName,
+      ]);
+    await connection.execute(
+      "INSERT INTO asset_product_units (id,name,created_at,updated_at) VALUES (?,?,?,?) ON DUPLICATE KEY UPDATE name=VALUES(name),updated_at=VALUES(updated_at)",
+      [unit.id, unit.name, unit.createdAt ? new Date(unit.createdAt) : new Date(), new Date()],
+    );
+    await connection.commit();
+    return true;
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
+}
+
+export async function deleteAssetUnit(id) {
+  if (!mysqlEnabled()) {
+    const data = await json.getAssets();
+    return json.saveAssets({
+      ...data,
+      units: (data.units || []).filter((item) => item.id !== id),
+    });
+  }
+  await query("DELETE FROM asset_product_units WHERE id=?", [id]);
   return true;
 }
 

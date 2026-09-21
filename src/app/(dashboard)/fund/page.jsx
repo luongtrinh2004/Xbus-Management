@@ -558,7 +558,7 @@ export default function FundPage() {
             </Box>
           }
           action={
-            <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+            <Box sx={{ display: "flex", gap: 1, alignItems: "center", width: { xs: "100%", sm: "auto" } }}>
               <CustomTextField
                 type="month"
                 size="small"
@@ -579,7 +579,7 @@ export default function FundPage() {
                     toast.error(error.message);
                   }
                 }}
-                sx={{ minWidth: 180 }}
+                sx={{ minWidth: { xs: "100%", sm: 180 } }}
               />
             </Box>
           }
@@ -621,7 +621,14 @@ export default function FundPage() {
                   }
                   action={
                     <Box
-                      sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1.5,
+                        flexWrap: "wrap",
+                        width: { xs: "100%", sm: "auto" },
+                        "& .MuiButton-root": { flex: { xs: "1 1 auto", sm: "0 0 auto" } },
+                      }}
                     >
                       <CustomTextField
                         select
@@ -631,7 +638,7 @@ export default function FundPage() {
                         onChange={(event) =>
                           setIncomeFilter(event.target.value)
                         }
-                        sx={{ minWidth: 190 }}
+                        sx={{ minWidth: { xs: "100%", sm: 190 }, flex: 1 }}
                       >
                         <MenuItem value="all">Tất cả nguồn thu</MenuItem>
                         {incomeTypes.map(([key, label]) => (

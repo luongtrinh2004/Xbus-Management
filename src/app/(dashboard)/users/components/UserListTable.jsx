@@ -442,15 +442,16 @@ const UserListTable = ({
         {/* Thanh công cụ Tìm kiếm & Action */}
         <Box
           sx={{
-            p: 4,
+            p: { xs: 2, sm: 4 },
             display: "flex",
             justifyContent: "space-between",
-            alignItems: "center",
+            alignItems: { xs: "stretch", sm: "center" },
             flexWrap: "wrap",
             gap: 3,
+            flexDirection: { xs: "column", sm: "row" },
           }}
         >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2, width: { xs: "100%", sm: "auto" } }}>
             <Typography variant="body2" color="text.secondary">
               Hiển thị
             </Typography>
@@ -479,6 +480,8 @@ const UserListTable = ({
               alignItems: "center",
               gap: 2,
               flexWrap: "wrap",
+              width: { xs: "100%", sm: "auto" },
+              "& > .MuiButton-root": { flex: { xs: "1 1 auto", sm: "0 0 auto" } },
             }}
           >
             <CustomTextField
@@ -490,7 +493,7 @@ const UserListTable = ({
               placeholder="Tìm theo tên, email, mã NV..."
               value={globalFilter}
               onChange={(e) => setGlobalFilter(e.target.value)}
-              sx={{ minWidth: 260 }}
+              sx={{ minWidth: 0, width: { xs: "100%", sm: 260 } }}
               InputProps={{
                 autoComplete: "off",
                 startAdornment: (

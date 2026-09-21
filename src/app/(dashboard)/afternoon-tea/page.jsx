@@ -558,7 +558,7 @@ export default function AfternoonTeaPage() {
                     placeholder="Ví dụ: TocoToco, Mixue, Phúc Long..."
                     value={shop}
                     onChange={(event) => setShop(event.target.value)}
-                    sx={{ minWidth: 260 }}
+                    sx={{ minWidth: { xs: "100%", sm: 260 }, flex: 1 }}
                   />
                   <Button
                     component="label"
@@ -1268,7 +1268,10 @@ export default function AfternoonTeaPage() {
                   onChange={(e, val) => setFoodCategoryTab(val)}
                   textColor="primary"
                   indicatorColor="primary"
-                  sx={{ minHeight: 44 }}
+                  variant="scrollable"
+                  scrollButtons="auto"
+                  allowScrollButtonsMobile
+                  sx={{ minHeight: 44, maxWidth: "100%" }}
                 >
                   <Tab
                     value="all"

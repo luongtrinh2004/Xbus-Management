@@ -375,7 +375,16 @@ export default function AdminScheduleView({
             </Box>
           }
           action={
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+                flexWrap: "wrap",
+                width: { xs: "100%", sm: "auto" },
+                "& > .MuiButton-root:first-of-type": { flex: { xs: "1 1 100%", sm: "0 0 auto" } },
+              }}
+            >
               <Button
                 variant="tonal"
                 color="error"

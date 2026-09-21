@@ -140,7 +140,11 @@ function WaterSchedule({ schedules, trashSchedules, isAdmin }) {
           <Box
             sx={{
               display: "grid",
-              gridTemplateColumns: "repeat(5, minmax(0, 1fr))",
+              gridTemplateColumns: {
+                xs: "1fr",
+                sm: "repeat(2, minmax(0, 1fr))",
+                md: "repeat(5, minmax(0, 1fr))",
+              },
               border: "1px solid",
               borderColor: "divider",
               borderRadius: 2,
@@ -152,7 +156,16 @@ function WaterSchedule({ schedules, trashSchedules, isAdmin }) {
                 key={schedule.id}
                 sx={{
                   minWidth: 0,
-                  borderLeft: index ? "1px solid" : 0,
+                  borderLeft: {
+                    xs: 0,
+                    sm: index % 2 ? "1px solid" : 0,
+                    md: index ? "1px solid" : 0,
+                  },
+                  borderTop: {
+                    xs: index ? "1px solid" : 0,
+                    sm: index > 1 ? "1px solid" : 0,
+                    md: 0,
+                  },
                   borderColor: "divider",
                 }}
               >

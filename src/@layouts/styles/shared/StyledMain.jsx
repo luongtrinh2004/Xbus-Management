@@ -9,6 +9,11 @@ import { commonLayoutClasses } from '@layouts/utils/layoutClasses'
 
 const StyledMain = styled.main`
   padding: ${themeConfig.layoutPadding}px;
+
+  @media (max-width: 599.95px) {
+    padding: 12px;
+  }
+
   ${({ isContentCompact }) =>
     isContentCompact &&
     `

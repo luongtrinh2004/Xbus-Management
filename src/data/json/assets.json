@@ -6593,6 +6593,17 @@
       "id": "product_tbd006",
       "createdAt": "2026-09-18T03:18:54.018Z",
       "categoryId": "asset_category_b732e4cc44def5256718"
+    },
+    {
+      "id": "product_aaaa",
+      "code": "AAAA",
+      "name": "aaa",
+      "categoryId": "asset_category_9f0c0732dca7cf809587",
+      "unit": "Chiếc",
+      "description": "sadsad",
+      "location": "sad",
+      "active": true,
+      "createdAt": "2026-09-21T05:58:33.286Z"
     }
   ],
   "categories": [
@@ -6655,6 +6666,23 @@
       "id": "asset_category_1e0c315f51c3e43ba154",
       "name": "Cái",
       "createdAt": "2026-09-21T02:50:25.971Z"
+    }
+  ],
+  "units": [
+    {
+      "id": "asset_unit_1e0c315f51c3e43ba154",
+      "name": "Cái",
+      "createdAt": "2026-09-21T05:51:34.295Z"
+    },
+    {
+      "id": "asset_unit_03ce5fc7ce6183b00552",
+      "name": "Chiếc",
+      "createdAt": "2026-09-21T05:51:34.295Z"
+    },
+    {
+      "id": "asset_unit_chuc",
+      "name": "Chục",
+      "createdAt": "2026-09-21T05:59:26.951Z"
     }
   ]
 }

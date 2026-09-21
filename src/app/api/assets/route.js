@@ -18,6 +18,7 @@ const normalizeData = (data) => ({
   exports: Array.isArray(data.exports) ? data.exports : [],
   products: Array.isArray(data.products) ? data.products : [],
   categories: Array.isArray(data.categories) ? data.categories : [],
+  units: Array.isArray(data.units) ? data.units : [],
 });
 
 const normalizeText = (value) => String(value || "").trim();

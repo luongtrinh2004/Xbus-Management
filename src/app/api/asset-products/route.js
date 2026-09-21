@@ -37,7 +37,15 @@ export async function POST(req) {
         { error: "Mã, tên và đơn vị tính là bắt buộc" },
         { status: 400 },
       );
-    const { products = [] } = await getAssets();
+    const { products = [], units = [] } = await getAssets();
+    const configuredUnit = units.find(
+      (item) => item.name.toLocaleLowerCase("vi") === unit.toLocaleLowerCase("vi"),
+    );
+    if (!configuredUnit)
+      return NextResponse.json(
+        { error: "Đơn vị tính không có trong cấu hình sản phẩm" },
+        { status: 400 },
+      );
     const existing = products.find((item) => item.code === code);
     if (existing && !body.id)
       return NextResponse.json(
@@ -54,7 +62,7 @@ export async function POST(req) {
       code,
       name,
       categoryId: String(body.categoryId || "").trim(),
-      unit,
+      unit: configuredUnit.name,
       description: String(body.description || "").trim(),
       location: String(body.location || "").trim(),
       active: body.active !== false,

@@ -934,6 +934,7 @@ function ProductDialog({
   open,
   product,
   categories,
+  units,
   readOnly = false,
   onClose,
   onSaved,
@@ -1019,11 +1020,18 @@ function ProductDialog({
             ))}
           </CustomTextField>
           <CustomTextField
+            select
             label="Đơn vị tính *"
             value={form.unit}
             disabled={readOnly}
             onChange={(e) => setForm({ ...form, unit: e.target.value })}
-          />
+          >
+            {(units || []).map((unit) => (
+              <MenuItem key={unit.id} value={unit.name}>
+                {unit.name}
+              </MenuItem>
+            ))}
+          </CustomTextField>
           <CustomTextField
             label="Vị trí"
             value={form.location}
@@ -1070,71 +1078,124 @@ function ProductDialog({
   );
 }
 
-function CategoryManagerDialog({ open, categories, onClose, onChanged }) {
+function ProductConfigurationDialog({
+  open,
+  categories,
+  units,
+  onClose,
+  onChanged,
+}) {
+  const [section, setSection] = useState("categories");
   const [search, setSearch] = useState("");
   const [editing, setEditing] = useState(null);
   const [name, setName] = useState("");
   const [saving, setSaving] = useState(false);
-  const visibleCategories = (categories || []).filter((item) =>
+  const isCategory = section === "categories";
+  const items = isCategory ? categories || [] : units || [];
+  const visibleItems = items.filter((item) =>
     normalizeSearchText(item.name).includes(normalizeSearchText(search)),
   );
+  const resetEditor = () => {
+    setEditing(null);
+    setName("");
+  };
   const save = async () => {
     if (!name.trim()) return;
     setSaving(true);
     try {
-      const response = await fetch("/api/asset-categories", {
+      const response = await fetch(
+        isCategory ? "/api/asset-categories" : "/api/asset-units",
+        {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: editing?.id, name }),
-      });
+        },
+      );
       const result = await response.json();
       if (!response.ok) throw new Error(result.error);
       toast.success(
-        editing ? "Đã cập nhật loại sản phẩm" : "Đã thêm loại sản phẩm",
+        editing
+          ? `Đã cập nhật ${isCategory ? "loại sản phẩm" : "đơn vị tính"}`
+          : `Đã thêm ${isCategory ? "loại sản phẩm" : "đơn vị tính"}`,
       );
-      setEditing(null);
-      setName("");
+      resetEditor();
       await onChanged();
     } catch (error) {
-      toast.error(error.message || "Không thể lưu loại sản phẩm");
+      toast.error(
+        error.message ||
+          `Không thể lưu ${isCategory ? "loại sản phẩm" : "đơn vị tính"}`,
+      );
     } finally {
       setSaving(false);
     }
   };
-  const remove = async (category) => {
+  const remove = async (item) => {
     try {
-      const response = await fetch("/api/asset-categories", {
+      const response = await fetch(
+        isCategory ? "/api/asset-categories" : "/api/asset-units",
+        {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: category.id }),
-      });
+        body: JSON.stringify({ id: item.id }),
+        },
+      );
       const result = await response.json();
       if (!response.ok) throw new Error(result.error);
-      toast.success("Đã xóa loại sản phẩm");
+      toast.success(`Đã xóa ${isCategory ? "loại sản phẩm" : "đơn vị tính"}`);
       await onChanged();
     } catch (error) {
-      toast.error(error.message || "Không thể xóa loại sản phẩm");
+      toast.error(
+        error.message ||
+          `Không thể xóa ${isCategory ? "loại sản phẩm" : "đơn vị tính"}`,
+      );
     }
   };
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle>
-        Quản lý loại sản phẩm ({(categories || []).length})
-      </DialogTitle>
+      <DialogTitle>Cấu hình sản phẩm</DialogTitle>
       <DialogContent dividers>
+        <Tabs
+          value={section}
+          onChange={(_, value) => {
+            setSection(value);
+            setSearch("");
+            resetEditor();
+          }}
+          variant="fullWidth"
+          sx={{ mb: 3 }}
+        >
+          <Tab
+            value="categories"
+            label={`Loại sản phẩm (${(categories || []).length})`}
+          />
+          <Tab value="units" label={`Đơn vị tính (${(units || []).length})`} />
+        </Tabs>
         <CustomTextField
           fullWidth
           value={search}
-          placeholder="Tìm loại sản phẩm"
+          placeholder={isCategory ? "Tìm loại sản phẩm" : "Tìm đơn vị tính"}
           onChange={(event) => setSearch(event.target.value)}
           sx={{ mb: 3 }}
+          InputProps={{
+            startAdornment: <i className="tabler-search text-gray-400 mr-2" />,
+          }}
         />
-        <Box display="flex" gap={1.5} mb={3}>
+        <Box display="flex" gap={1.5} mb={3} flexWrap="wrap">
           <CustomTextField
             fullWidth
-            label={editing ? "Sửa tên loại" : "Tên loại sản phẩm mới"}
+            label={
+              editing
+                ? `Sửa ${isCategory ? "tên loại" : "đơn vị tính"}`
+                : isCategory
+                  ? "Tên loại sản phẩm mới"
+                  : "Tên đơn vị tính mới"
+            }
             value={name}
             onChange={(event) => setName(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") save();
+            }}
+            sx={{ flex: "1 1 240px" }}
           />
           <Button
             variant="contained"
@@ -1147,8 +1208,7 @@ function CategoryManagerDialog({ open, categories, onClose, onChanged }) {
             <Button
               color="secondary"
               onClick={() => {
-                setEditing(null);
-                setName("");
+                resetEditor();
               }}
             >
               Hủy
@@ -1156,10 +1216,10 @@ function CategoryManagerDialog({ open, categories, onClose, onChanged }) {
           )}
         </Box>
         <Box display="grid" gap={1}>
-          {visibleCategories.length ? (
-            visibleCategories.map((category) => (
+          {visibleItems.length ? (
+            visibleItems.map((item) => (
               <Box
-                key={`${category.id}:${category.name}`}
+                key={`${item.id}:${item.name}`}
                 display="flex"
                 alignItems="center"
                 sx={{
@@ -1170,14 +1230,14 @@ function CategoryManagerDialog({ open, categories, onClose, onChanged }) {
                 }}
               >
                 <Typography sx={{ flex: 1 }} fontWeight={600}>
-                  {category.name}
+                  {item.name}
                 </Typography>
                 <IconButton
                   color="primary"
                   size="small"
                   onClick={() => {
-                    setEditing(category);
-                    setName(category.name);
+                    setEditing(item);
+                    setName(item.name);
                   }}
                 >
                   <i className="tabler-edit" />
@@ -1185,7 +1245,7 @@ function CategoryManagerDialog({ open, categories, onClose, onChanged }) {
                 <IconButton
                   color="error"
                   size="small"
-                  onClick={() => remove(category)}
+                  onClick={() => remove(item)}
                 >
                   <i className="tabler-trash" />
                 </IconButton>
@@ -1193,7 +1253,7 @@ function CategoryManagerDialog({ open, categories, onClose, onChanged }) {
             ))
           ) : (
             <Typography color="text.secondary" textAlign="center" py={3}>
-              Chưa có loại sản phẩm
+              {isCategory ? "Chưa có loại sản phẩm" : "Chưa có đơn vị tính"}
             </Typography>
           )}
         </Box>
@@ -1213,13 +1273,14 @@ export default function AssetsPage() {
     exports: [],
     products: [],
     categories: [],
+    units: [],
   });
   const [tab, setTab] = useState("import");
   const [dialog, setDialog] = useState(null);
   const [productDialog, setProductDialog] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [viewingProduct, setViewingProduct] = useState(null);
-  const [categoryManagerOpen, setCategoryManagerOpen] = useState(false);
+  const [productConfigurationOpen, setProductConfigurationOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -1608,6 +1669,10 @@ export default function AssetsPage() {
                 gap={2}
                 flexWrap="wrap"
                 justifyContent="flex-end"
+                sx={{
+                  width: { xs: "100%", sm: "auto" },
+                  "& .MuiButton-root": { flex: { xs: "1 1 100%", sm: "0 0 auto" } },
+                }}
               >
                 <Button
                   variant="outlined"
@@ -1687,7 +1752,10 @@ export default function AssetsPage() {
         <Tabs
           value={tab}
           onChange={(_, value) => setTab(value)}
-          sx={{ px: 5, mt: 2 }}
+          variant="scrollable"
+          scrollButtons="auto"
+          allowScrollButtonsMobile
+          sx={{ px: { xs: 2, sm: 5 }, mt: 2 }}
         >
           <Tab value="import" label={`Nhập kho (${data.imports.length})`} />
           <Tab value="export" label={`Xuất kho (${data.exports.length})`} />
@@ -1699,23 +1767,27 @@ export default function AssetsPage() {
         </Tabs>
         {tab === "products" && (
           <Box
-            px={5}
-            py={2}
-            display="flex"
-            justifyContent="flex-end"
-            alignItems="center"
-            gap={2}
+            sx={{
+              px: { xs: 2, sm: 5 },
+              py: 2,
+              display: "flex",
+              justifyContent: "flex-end",
+              alignItems: "center",
+              gap: 2,
+              flexWrap: "wrap",
+              "& .MuiButton-root": { flex: { xs: "1 1 100%", sm: "0 0 auto" } },
+            }}
           >
             {canManage && (
               <Button
                 variant="tonal"
-                startIcon={<i className="tabler-category-plus" />}
-                onClick={() => setCategoryManagerOpen(true)}
+                startIcon={<i className="tabler-settings" />}
+                onClick={() => setProductConfigurationOpen(true)}
               >
-                Thêm loại sản phẩm
+                Cấu hình sản phẩm
               </Button>
             )}
-            <Box sx={{ minWidth: 190 }}>
+            <Box sx={{ minWidth: { xs: "100%", sm: 190 } }}>
               <CustomTextField
                 select
                 fullWidth
@@ -1774,6 +1846,7 @@ export default function AssetsPage() {
           open={productDialog}
           product={editingProduct}
           categories={data.categories || []}
+          units={data.units || []}
           onClose={() => {
             setProductDialog(false);
             setEditingProduct(null);
@@ -1784,14 +1857,16 @@ export default function AssetsPage() {
           open={Boolean(viewingProduct)}
           product={viewingProduct}
           categories={data.categories || []}
+          units={data.units || []}
           readOnly
           onClose={() => setViewingProduct(null)}
           onSaved={loadData}
         />
-        <CategoryManagerDialog
-          open={categoryManagerOpen}
+        <ProductConfigurationDialog
+          open={productConfigurationOpen}
           categories={data.categories || []}
-          onClose={() => setCategoryManagerOpen(false)}
+          units={data.units || []}
+          onClose={() => setProductConfigurationOpen(false)}
           onChanged={loadData}
         />
         <ConfirmDialog

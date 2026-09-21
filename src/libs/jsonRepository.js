@@ -131,6 +131,7 @@ export function getAssets() {
     exports: [],
     products: [],
     categories: [],
+    units: [],
   });
 }
 
