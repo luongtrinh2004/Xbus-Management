@@ -40,6 +40,7 @@ const emptyForm = {
   code: "",
   name: "",
   category: "",
+  unit: "",
   description: "",
   date: toVietnamDateKey(),
   quantity: 1,
@@ -62,6 +63,7 @@ const columns = {
     "Mô tả sản phẩm",
     "Người nhập kho",
     "Số lượng",
+    "Đơn vị tính",
     "Vị trí",
     "Ghi chú",
   ],
@@ -73,6 +75,7 @@ const columns = {
     "Người mượn tài sản",
     "Xuất cho",
     "Số lượng",
+    "Đơn vị tính",
     "Ghi chú",
   ],
   stock: [
@@ -176,6 +179,7 @@ function AssetTable({ rows, type, canManage, onView, onEdit, onDelete }) {
                     <TableCell>{row.description || "—"}</TableCell>
                     <TableCell>{row.person || "—"}</TableCell>
                     <TableCell>{row.quantity ?? "—"}</TableCell>
+                    <TableCell>{row.unit || "—"}</TableCell>
                     <TableCell>{row.location || "—"}</TableCell>
                     <TableCell>{row.note || "—"}</TableCell>
                   </>
@@ -194,6 +198,7 @@ function AssetTable({ rows, type, canManage, onView, onEdit, onDelete }) {
                     <TableCell>{row.person || "—"}</TableCell>
                     <TableCell>{row.issuedTo || "—"}</TableCell>
                     <TableCell>{row.quantity ?? "—"}</TableCell>
+                    <TableCell>{row.unit || "—"}</TableCell>
                     <TableCell>{row.note || "—"}</TableCell>
                   </>
                 ) : type === "stock" ? (
@@ -299,6 +304,7 @@ function TransactionDialog({
   imports,
   exports,
   products,
+  categories,
   currentName,
   editingItem,
   onClose,
@@ -331,7 +337,10 @@ function TransactionDialog({
     return {
       code,
       name: item?.name || "",
-      category: item?.unit || "",
+      category:
+        categories.find((category) => category.id === item?.categoryId)?.name ||
+        "",
+      unit: item?.unit || "",
       description: item?.description || "",
       location: item?.location || "",
     };
@@ -602,7 +611,7 @@ function TransactionDialog({
                 />
                 <CustomTextField
                   label="Đơn vị tính"
-                  value={row.category}
+                  value={row.unit}
                   disabled
                 />
                 <CustomTextField label="Vị trí" value={row.location} disabled />
@@ -764,7 +773,7 @@ function TransactionDialog({
             )}
             <CustomTextField
               label="Đơn vị tính"
-              value={form.category}
+              value={form.unit}
               disabled
             />
             <CustomTextField
@@ -1525,6 +1534,7 @@ export default function AssetsPage() {
             code: pick(row, ["masanpham", "masp", "ma", "code"]),
             name: pick(row, ["tensanpham", "tensp", "ten", "name"]),
             category: pick(row, ["loaisp", "loaisanpham", "category"]),
+            unit: pick(row, ["donvitinh", "donvi", "unit"]),
             description: pick(row, ["motasanpham", "mota", "description"]),
             date: normalizeExcelDate(
               pick(row, [
@@ -1586,6 +1596,7 @@ export default function AssetsPage() {
       "Mô tả sản phẩm": item.description || "",
       "Người nhập kho": item.person,
       "Số lượng": item.quantity,
+      "Đơn vị tính": item.unit || "",
       "Vị trí": item.location,
       "Ghi chú": item.note || "",
     }));
@@ -1597,12 +1608,15 @@ export default function AssetsPage() {
       "Người mượn tài sản": item.person,
       "Xuất cho": item.issuedTo || "",
       "Số lượng": item.quantity,
+      "Đơn vị tính": item.unit || "",
       "Ghi chú": item.note || "",
     }));
     const stockRows = products.map((item) => ({
       "Mã SP": item.code,
       "Tên SP": item.name,
+      "Loại sản phẩm": item.categoryName || "",
       "Đơn vị tính": item.unit || "",
+      "Vị trí": item.location || "",
       "Tổng nhập": item.totalImport,
       "Tổng xuất": item.totalExport,
       "Tồn kho": item.quantity,
@@ -1838,6 +1852,7 @@ export default function AssetsPage() {
           imports={data.imports}
           exports={data.exports}
           products={data.products || []}
+          categories={data.categories || []}
           editingItem={editingItem}
           currentName={session?.user?.name}
           onClose={() => {

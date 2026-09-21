@@ -509,31 +509,9 @@ export async function getAssets() {
         });
     }
     const categories = [...categoriesByName.values()];
-    const categoryByName = new Map(
-      categories.map((item) => [String(item.name).trim().toLowerCase(), item]),
-    );
-    for (const item of data.imports || []) {
-      const name = String(item.category || "").trim();
-      if (!name || categoryByName.has(name.toLowerCase())) continue;
-      const category = {
-        id: categoryIdFor(name),
-        name,
-        createdAt: new Date().toISOString(),
-      };
-      categories.push(category);
-      categoryByName.set(name.toLowerCase(), category);
-    }
-    const latestCategoryByCode = new Map();
-    for (const item of data.imports || [])
-      if (item.code && item.category && !latestCategoryByCode.has(item.code))
-        latestCategoryByCode.set(
-          item.code,
-          categoryByName.get(String(item.category).trim().toLowerCase())?.id ||
-            "",
-        );
     const products = (data.products || []).map((item) => ({
       ...item,
-      categoryId: latestCategoryByCode.get(item.code) || item.categoryId || "",
+      categoryId: item.categoryId || "",
     }));
     const unitNames = new Set(
       [...(data.units || []).map((item) => item.name), "Cái", "Chiếc"]
@@ -554,8 +532,23 @@ export async function getAssets() {
         createdAt: new Date().toISOString(),
       },
     );
+    const productsByCode = new Map(products.map((item) => [item.code, item]));
+    const categoryNames = new Map(categories.map((item) => [item.id, item.name]));
+    const normalizeTransaction = (item) => {
+      const product = productsByCode.get(item.code);
+      if (!product) return { ...item, unit: item.unit || "" };
+      return {
+        ...item,
+        category: categoryNames.get(product.categoryId) || "",
+        unit: product.unit || item.unit || "",
+      };
+    };
+    const imports = (data.imports || []).map(normalizeTransaction);
+    const exports = (data.exports || []).map(normalizeTransaction);
     const normalized = {
       ...data,
+      imports,
+      exports,
       categories,
       products,
       units,
@@ -563,7 +556,9 @@ export async function getAssets() {
     if (
       JSON.stringify(data.categories || []) !== JSON.stringify(categories) ||
       JSON.stringify(data.products || []) !== JSON.stringify(products) ||
-      JSON.stringify(data.units || []) !== JSON.stringify(units)
+      JSON.stringify(data.units || []) !== JSON.stringify(units) ||
+      JSON.stringify(data.imports || []) !== JSON.stringify(imports) ||
+      JSON.stringify(data.exports || []) !== JSON.stringify(exports)
     )
       await json.saveAssets(normalized);
     return normalized;
@@ -602,6 +597,7 @@ export async function getAssets() {
     code: row.asset_code,
     name: row.name,
     category: row.asset_type || "",
+    unit: row.unit || "",
     description: row.description || "",
     date: toDateOnly(row.transaction_date),
     quantity: row.quantity === null ? null : Number(row.quantity),
@@ -763,6 +759,7 @@ const assetTransactionValues = (item, type) => [
   item.description || null,
   item.date,
   item.quantity === null || item.quantity === "" ? null : Number(item.quantity),
+  item.unit || null,
   item.location || null,
   item.person || null,
   item.issuedTo || null,
@@ -780,7 +777,7 @@ export async function createAssetTransaction(type, item) {
     return true;
   }
   await query(
-    "INSERT INTO asset_transactions (id,voucher_code,type,asset_code,name,asset_type,description,transaction_date,quantity,location,person,issued_to,performed_by,note,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+    "INSERT INTO asset_transactions (id,voucher_code,type,asset_code,name,asset_type,description,transaction_date,quantity,unit,location,person,issued_to,performed_by,note,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
     assetTransactionValues(item, type),
   );
   return true;
@@ -797,7 +794,7 @@ export async function updateAssetTransaction(type, item) {
     return true;
   }
   await query(
-    "UPDATE asset_transactions SET voucher_code=?,asset_code=?,name=?,asset_type=?,description=?,transaction_date=?,quantity=?,location=?,person=?,issued_to=?,performed_by=?,note=?,updated_at=? WHERE id=? AND type=?",
+    "UPDATE asset_transactions SET voucher_code=?,asset_code=?,name=?,asset_type=?,description=?,transaction_date=?,quantity=?,unit=?,location=?,person=?,issued_to=?,performed_by=?,note=?,updated_at=? WHERE id=? AND type=?",
     [
       item.voucherCode || null,
       item.code,
@@ -808,6 +805,7 @@ export async function updateAssetTransaction(type, item) {
       item.quantity === null || item.quantity === ""
         ? null
         : Number(item.quantity),
+      item.unit || null,
       item.location || null,
       item.person || null,
       item.issuedTo || null,
@@ -849,7 +847,7 @@ export async function saveAssets(data) {
     ])
       for (const item of records)
         await connection.execute(
-          "INSERT INTO asset_transactions (id,voucher_code,type,asset_code,name,asset_type,description,transaction_date,quantity,location,person,issued_to,performed_by,note,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+          "INSERT INTO asset_transactions (id,voucher_code,type,asset_code,name,asset_type,description,transaction_date,quantity,unit,location,person,issued_to,performed_by,note,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
           [
             item.id,
             item.voucherCode || null,
@@ -862,6 +860,7 @@ export async function saveAssets(data) {
             item.quantity === null || item.quantity === ""
               ? null
               : Number(item.quantity),
+            item.unit || null,
             item.location || null,
             item.person || null,
             item.issuedTo || null,

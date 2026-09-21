@@ -54,6 +54,7 @@ const mergeTransactions = (current, incoming, type, token) => {
       code,
       name,
       category: normalizeText(item.category),
+      unit: normalizeText(item.unit),
       description: normalizeText(item.description),
       date: /^\d{4}-\d{2}-\d{2}$/.test(item.date || "") ? item.date : null,
       quantity,
@@ -142,6 +143,8 @@ export async function POST(req) {
         { error: "Sản phẩm đã ngừng sử dụng" },
         { status: 400 },
       );
+    const categoryName =
+      data.categories.find((item) => item.id === product.categoryId)?.name || "";
     if (type === "export") {
       const imported = data.imports
         .filter((item) => item.code?.trim().toUpperCase() === normalizedCode)
@@ -159,7 +162,8 @@ export async function POST(req) {
       id: `${type}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
       code: normalizedCode,
       name: product.name,
-      category: product.unit,
+      category: categoryName,
+      unit: product.unit,
       description: product.description || "",
       date: body.date,
       quantity,
@@ -243,7 +247,10 @@ export async function PUT(req) {
           id: `${type}_stock_${Date.now()}_${index}`,
           code,
           name: product.name,
-          category: product.unit || "",
+          category:
+            current.categories.find((item) => item.id === product.categoryId)
+              ?.name || "",
+          unit: product.unit || "",
           description: product.description || "",
           date,
           quantity: Math.abs(difference),
@@ -369,13 +376,16 @@ export async function PATCH(req) {
         { error: "Sản phẩm đã ngừng sử dụng" },
         { status: 400 },
       );
+    const categoryName =
+      data.categories.find((item) => item.id === product.categoryId)?.name || "";
 
     const previous = collection[index];
     const updated = {
       ...previous,
       code: normalizedCode,
       name: product.name,
-      category: product.unit,
+      category: categoryName,
+      unit: product.unit,
       description: product.description || "",
       date: body.date,
       quantity,
