@@ -102,7 +102,7 @@ const RowEditor = ({ open, mode, row, columns, onClose, onSaved, table }) => {
               return (
                 <CustomTextField
                   key={column.name}
-                  label={`${column.name} · ${column.columnType}`}
+                  label={`${column.label || column.name} (${column.name}) · ${column.columnType}`}
                   value={values[column.name] ?? ""}
                   disabled={mode === "edit" && column.columnKey === "PRI"}
                   multiline={multiline}
@@ -433,10 +433,10 @@ export default function DatabaseEditorPage() {
                     {columns.map((column) => (
                       <TableCell key={column.name}>
                         <Typography variant="caption" fontWeight={700} fontFamily="monospace">
-                          {column.name}
+                          {column.label || column.name}
                         </Typography>
                         <Typography display="block" variant="caption" color="text.disabled">
-                          {column.columnType}
+                          {column.name} · {column.columnType}
                         </Typography>
                       </TableCell>
                     ))}

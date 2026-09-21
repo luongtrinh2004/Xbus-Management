@@ -1,5 +1,5 @@
 import * as json from "./jsonRepository.js";
-import crypto from "node:crypto";
+import { assetCategoryIdFromName, assetUnitIdFromName } from "@/libs/assetIds";
 import { applyFundBalances } from "./fundRules.js";
 import { getMysqlPool, isMysqlEnabled } from "./mysql.js";
 
@@ -490,12 +490,7 @@ export async function saveFunds(funds) {
 export async function getAssets() {
   if (!mysqlEnabled()) {
     const data = await json.getAssets();
-    const categoryIdFor = (name) =>
-      `asset_category_${crypto
-        .createHash("sha256")
-        .update(String(name).trim().toLocaleLowerCase("vi"))
-        .digest("hex")
-        .slice(0, 20)}`;
+    const categoryIdFor = assetCategoryIdFromName;
     const categoriesByName = new Map();
     for (const item of data.categories || []) {
       const name = String(item.name || "").trim();
@@ -523,17 +518,23 @@ export async function getAssets() {
       if (name) unitNames.add(name);
     });
     const existingUnits = new Map(
-      (data.units || []).map((item) => [String(item.name).toLocaleLowerCase("vi"), item]),
+      (data.units || []).map((item) => [
+        String(item.name).toLocaleLowerCase("vi"),
+        item,
+      ]),
     );
-    const units = [...unitNames].map((name) =>
-      existingUnits.get(name.toLocaleLowerCase("vi")) || {
-        id: `asset_unit_${crypto.createHash("sha256").update(name.toLocaleLowerCase("vi")).digest("hex").slice(0, 20)}`,
-        name,
-        createdAt: new Date().toISOString(),
-      },
+    const units = [...unitNames].map(
+      (name) =>
+        existingUnits.get(name.toLocaleLowerCase("vi")) || {
+          id: assetUnitIdFromName(name),
+          name,
+          createdAt: new Date().toISOString(),
+        },
     );
     const productsByCode = new Map(products.map((item) => [item.code, item]));
-    const categoryNames = new Map(categories.map((item) => [item.id, item.name]));
+    const categoryNames = new Map(
+      categories.map((item) => [item.id, item.name]),
+    );
     const normalizeTransaction = (item) => {
       const product = productsByCode.get(item.code);
       if (!product) return { ...item, unit: item.unit || "" };
@@ -565,44 +566,80 @@ export async function getAssets() {
   }
   await query(`
     INSERT IGNORE INTO asset_product_categories (id, name, created_at)
-    SELECT CONCAT('asset_category_', LEFT(MD5(category_name), 16)),
+    SELECT CONCAT('asset_category_', LEFT(MD5(product_category_name), 16)),
            category_name, NOW(3)
     FROM (
-      SELECT TRIM(category_name_snapshot) AS category_name
+      SELECT TRIM(product_category_name) AS category_name
       FROM asset_transactions
-      WHERE category_name_snapshot IS NOT NULL AND TRIM(category_name_snapshot) <> ''
-      GROUP BY TRIM(category_name_snapshot)
+      WHERE product_category_name IS NOT NULL AND TRIM(product_category_name) <> ''
+      GROUP BY TRIM(product_category_name)
     ) legacy_categories
   `);
   await query(`
     UPDATE asset_products product
     JOIN (
-      SELECT product_code_snapshot, MAX(TRIM(category_name_snapshot)) AS category_name
+      SELECT product_code, MAX(TRIM(product_category_name)) AS category_name
       FROM asset_transactions
-      WHERE category_name_snapshot IS NOT NULL AND TRIM(category_name_snapshot) <> ''
-      GROUP BY product_code_snapshot
-    ) legacy ON legacy.product_code_snapshot = product.code
+      WHERE product_category_name IS NOT NULL AND TRIM(product_category_name) <> ''
+      GROUP BY product_code
+    ) legacy ON legacy.product_code = product.code
     JOIN asset_product_categories category ON category.name = legacy.category_name
-    SET product.category_id = category.id
-    WHERE product.category_id IS NULL OR product.category_id = ''
+    SET product.product_category_id = category.id
+    WHERE product.product_category_id IS NULL OR product.product_category_id = ''
   `);
-  const [[rows], [productRows], [categoryRows], [unitRows]] = await Promise.all([
-    query("SELECT * FROM asset_transactions ORDER BY created_at DESC, id DESC"),
-    query("SELECT * FROM asset_products ORDER BY name"),
-    query("SELECT * FROM asset_product_categories ORDER BY name"),
-    query("SELECT * FROM asset_product_units ORDER BY name"),
+  // Dữ liệu được tạo ở các phiên bản cũ dùng hash hoặc timestamp. Chuẩn hóa
+  // lại theo tên để ID có thể đọc được và đồng nhất với ID tạo mới.
+  const [[storedCategories], [storedUnits]] = await Promise.all([
+    query("SELECT id, name FROM asset_product_categories"),
+    query("SELECT id, name FROM asset_product_units"),
   ]);
+  const categoryIds = new Set(storedCategories.map((item) => item.id));
+  for (const category of storedCategories) {
+    const nextId = assetCategoryIdFromName(category.name);
+    if (!nextId || nextId === category.id || categoryIds.has(nextId)) continue;
+    await query(
+      "UPDATE asset_products SET product_category_id=? WHERE product_category_id=?",
+      [nextId, category.id],
+    );
+    await query("UPDATE asset_product_categories SET id=? WHERE id=?", [
+      nextId,
+      category.id,
+    ]);
+    categoryIds.delete(category.id);
+    categoryIds.add(nextId);
+  }
+  const unitIds = new Set(storedUnits.map((item) => item.id));
+  for (const unit of storedUnits) {
+    const nextId = assetUnitIdFromName(unit.name);
+    if (!nextId || nextId === unit.id || unitIds.has(nextId)) continue;
+    await query("UPDATE asset_product_units SET id=? WHERE id=?", [
+      nextId,
+      unit.id,
+    ]);
+    unitIds.delete(unit.id);
+    unitIds.add(nextId);
+  }
+  const [[rows], [productRows], [categoryRows], [unitRows]] = await Promise.all(
+    [
+      query(
+        "SELECT * FROM asset_transactions ORDER BY created_at DESC, id DESC",
+      ),
+      query("SELECT * FROM asset_products ORDER BY name"),
+      query("SELECT * FROM asset_product_categories ORDER BY name"),
+      query("SELECT * FROM asset_product_units ORDER BY name"),
+    ],
+  );
   const map = (row) => ({
     id: row.id,
-    code: row.product_code_snapshot,
-    name: row.product_name_snapshot,
-    category: row.category_name_snapshot || "",
-    unit: row.unit_name_snapshot || "",
-    description: row.product_description_snapshot || "",
+    code: row.product_code,
+    name: row.product_name,
+    category: row.product_category_name || "",
+    unit: row.unit_name || "",
+    description: row.product_description || "",
     date: toDateOnly(row.transaction_date),
     quantity: row.quantity === null ? null : Number(row.quantity),
-    location: row.location_snapshot || "",
-    person: row.document_person_name || "",
+    location: row.storage_location || "",
+    person: row.counterparty_name || "",
     issuedTo: row.recipient_name || "",
     note: row.note || "",
     documentCode: row.document_code || "",
@@ -617,10 +654,10 @@ export async function getAssets() {
       id: row.id,
       code: row.code || "",
       name: row.name,
-      categoryId: row.category_id || "",
-      unit: row.unit,
+      categoryId: row.product_category_id || "",
+      unit: row.unit_name,
       description: row.description || "",
-      location: row.location || "",
+      location: row.storage_location || "",
       active: Boolean(row.active),
       createdAt: toIso(row.created_at),
       updatedAt: toIso(row.updated_at),
@@ -650,7 +687,7 @@ export async function saveAssetProduct(product) {
     return json.saveAssets({ ...data, products });
   }
   await query(
-    "INSERT INTO asset_products (id,code,name,category_id,unit,description,location,active,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE code=VALUES(code),name=VALUES(name),category_id=VALUES(category_id),unit=VALUES(unit),description=VALUES(description),location=VALUES(location),active=VALUES(active),updated_at=VALUES(updated_at)",
+    "INSERT INTO asset_products (id,code,name,product_category_id,unit_name,description,storage_location,active,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE code=VALUES(code),name=VALUES(name),product_category_id=VALUES(product_category_id),unit_name=VALUES(unit_name),description=VALUES(description),storage_location=VALUES(storage_location),active=VALUES(active),updated_at=VALUES(updated_at)",
     [
       product.id,
       product.code || null,
@@ -719,13 +756,18 @@ export async function saveAssetUnit(unit, previousName = "") {
   try {
     await connection.beginTransaction();
     if (previousName && previousName !== unit.name)
-      await connection.execute("UPDATE asset_products SET unit=? WHERE unit=?", [
-        unit.name,
-        previousName,
-      ]);
+      await connection.execute(
+        "UPDATE asset_products SET unit_name=? WHERE unit_name=?",
+        [unit.name, previousName],
+      );
     await connection.execute(
       "INSERT INTO asset_product_units (id,name,created_at,updated_at) VALUES (?,?,?,?) ON DUPLICATE KEY UPDATE name=VALUES(name),updated_at=VALUES(updated_at)",
-      [unit.id, unit.name, unit.createdAt ? new Date(unit.createdAt) : new Date(), new Date()],
+      [
+        unit.id,
+        unit.name,
+        unit.createdAt ? new Date(unit.createdAt) : new Date(),
+        new Date(),
+      ],
     );
     await connection.commit();
     return true;
@@ -777,7 +819,7 @@ export async function createAssetTransaction(type, item) {
     return true;
   }
   await query(
-    "INSERT INTO asset_transactions (id,document_code,transaction_type,product_code_snapshot,product_name_snapshot,category_name_snapshot,product_description_snapshot,transaction_date,quantity,unit_name_snapshot,location_snapshot,document_person_name,recipient_name,performed_by_user_id,note,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+    "INSERT INTO asset_transactions (id,document_code,transaction_type,product_code,product_name,product_category_name,product_description,transaction_date,quantity,unit_name,storage_location,counterparty_name,recipient_name,performed_by_user_id,note,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
     assetTransactionValues(item, type),
   );
   return true;
@@ -794,7 +836,7 @@ export async function updateAssetTransaction(type, item) {
     return true;
   }
   await query(
-    "UPDATE asset_transactions SET document_code=?,product_code_snapshot=?,product_name_snapshot=?,category_name_snapshot=?,product_description_snapshot=?,transaction_date=?,quantity=?,unit_name_snapshot=?,location_snapshot=?,document_person_name=?,recipient_name=?,performed_by_user_id=?,note=?,updated_at=? WHERE id=? AND transaction_type=?",
+    "UPDATE asset_transactions SET document_code=?,product_code=?,product_name=?,product_category_name=?,product_description=?,transaction_date=?,quantity=?,unit_name=?,storage_location=?,counterparty_name=?,recipient_name=?,performed_by_user_id=?,note=?,updated_at=? WHERE id=? AND transaction_type=?",
     [
       item.documentCode || null,
       item.code,
@@ -829,10 +871,10 @@ export async function deleteAssetTransaction(type, id) {
     });
     return true;
   }
-  await query("DELETE FROM asset_transactions WHERE id=? AND transaction_type=?", [
-    id,
-    type,
-  ]);
+  await query(
+    "DELETE FROM asset_transactions WHERE id=? AND transaction_type=?",
+    [id, type],
+  );
   return true;
 }
 export async function saveAssets(data) {
@@ -847,7 +889,7 @@ export async function saveAssets(data) {
     ])
       for (const item of records)
         await connection.execute(
-          "INSERT INTO asset_transactions (id,document_code,transaction_type,product_code_snapshot,product_name_snapshot,category_name_snapshot,product_description_snapshot,transaction_date,quantity,unit_name_snapshot,location_snapshot,document_person_name,recipient_name,performed_by_user_id,note,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+          "INSERT INTO asset_transactions (id,document_code,transaction_type,product_code,product_name,product_category_name,product_description,transaction_date,quantity,unit_name,storage_location,counterparty_name,recipient_name,performed_by_user_id,note,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
           [
             item.id,
             item.documentCode || null,

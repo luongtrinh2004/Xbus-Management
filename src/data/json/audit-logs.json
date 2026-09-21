@@ -1,6 +1,18 @@
 {
   "auditLogs": [
     {
+      "id": "log_1790006634916_puml",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "UPDATE_EXTRACURRICULAR_POINTS",
+      "targetType": "USER",
+      "targetId": "usr_admin_001",
+      "details": "Quản trị viên Hệ thống đã tăng 13 điểm rèn luyện cho Quản trị viên Hệ thống (ADM001).",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-21T16:03:54.916Z"
+    },
+    {
       "id": "log_1789972086802_928b",
       "adminId": "usr_admin_001",
       "adminName": "Quản trị viên Hệ thống",

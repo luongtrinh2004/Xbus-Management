@@ -28,6 +28,52 @@ const tableDescriptions = {
   water_schedules: "Lịch bê nước theo ngày, tuần và tháng",
 };
 
+const columnLabels = {
+  asset_transactions: {
+    id: "Mã giao dịch",
+    document_code: "Số chứng từ",
+    transaction_type: "Loại giao dịch",
+    product_code: "Mã sản phẩm",
+    product_name: "Tên sản phẩm",
+    product_category_name: "Loại sản phẩm",
+    product_description: "Mô tả sản phẩm",
+    transaction_date: "Ngày giao dịch",
+    quantity: "Số lượng",
+    unit_name: "Đơn vị tính",
+    storage_location: "Vị trí lưu kho",
+    counterparty_name: "Đối tác giao dịch",
+    recipient_name: "Người nhận",
+    performed_by_user_id: "Mã người thực hiện",
+    note: "Ghi chú",
+    created_at: "Ngày tạo",
+    updated_at: "Ngày cập nhật",
+  },
+  asset_products: {
+    id: "Mã bản ghi",
+    code: "Mã sản phẩm",
+    name: "Tên sản phẩm",
+    product_category_id: "Mã loại sản phẩm",
+    unit_name: "Đơn vị tính",
+    description: "Mô tả",
+    storage_location: "Vị trí lưu kho",
+    active: "Đang sử dụng",
+    created_at: "Ngày tạo",
+    updated_at: "Ngày cập nhật",
+  },
+  asset_product_categories: {
+    id: "Mã loại sản phẩm",
+    name: "Tên loại sản phẩm",
+    created_at: "Ngày tạo",
+    updated_at: "Ngày cập nhật",
+  },
+  asset_product_units: {
+    id: "Mã đơn vị tính",
+    name: "Tên đơn vị tính",
+    created_at: "Ngày tạo",
+    updated_at: "Ngày cập nhật",
+  },
+};
+
 const serializeValue = (value) => {
   if (typeof value === "bigint") return value.toString();
   if (Buffer.isBuffer(value)) return value.toString("base64");
@@ -52,7 +98,8 @@ const getTableMetadata = async (table) => {
      WHERE TABLE_SCHEMA=? AND TABLE_NAME=? AND TABLE_TYPE='BASE TABLE'`,
     [schema, table],
   );
-  if (!tableRows.length) throw new Error("Bảng không tồn tại trong database ứng dụng");
+  if (!tableRows.length)
+    throw new Error("Bảng không tồn tại trong database ứng dụng");
   const [columns] = await pool.query(
     `SELECT COLUMN_NAME AS name, DATA_TYPE AS dataType, COLUMN_TYPE AS columnType,
             IS_NULLABLE AS isNullable, COLUMN_DEFAULT AS defaultValue,
@@ -62,7 +109,10 @@ const getTableMetadata = async (table) => {
      ORDER BY ORDINAL_POSITION`,
     [schema, table],
   );
-  return columns;
+  return columns.map((column) => ({
+    ...column,
+    label: columnLabels[table]?.[column.name] || column.name,
+  }));
 };
 
 const normalizeWriteValue = (value, column) => {
@@ -70,10 +120,21 @@ const normalizeWriteValue = (value, column) => {
   if (value === "" && column.isNullable === "YES") return null;
   if (column.dataType === "bigint") {
     if (value === "") return column.defaultValue ?? 0;
-    if (!/^-?\d+$/.test(String(value))) throw new Error(`${column.name} phải là số nguyên`);
+    if (!/^-?\d+$/.test(String(value)))
+      throw new Error(`${column.name} phải là số nguyên`);
     return String(value);
   }
-  if (["tinyint", "smallint", "mediumint", "int", "decimal", "float", "double"].includes(column.dataType)) {
+  if (
+    [
+      "tinyint",
+      "smallint",
+      "mediumint",
+      "int",
+      "decimal",
+      "float",
+      "double",
+    ].includes(column.dataType)
+  ) {
     if (value === "") return column.defaultValue ?? 0;
     const numeric = Number(value);
     if (!Number.isFinite(numeric)) throw new Error(`${column.name} phải là số`);
@@ -87,7 +148,8 @@ const normalizeWriteValue = (value, column) => {
 const adminToken = async (req) => {
   const token = await getToken({ req, secret });
   if (!isAdmin(token)) return null;
-  if (!isMysqlEnabled()) throw new Error("Database Editor chỉ hỗ trợ DATA_SOURCE=mysql");
+  if (!isMysqlEnabled())
+    throw new Error("Database Editor chỉ hỗ trợ DATA_SOURCE=mysql");
   return token;
 };
 
@@ -95,7 +157,10 @@ export async function GET(req) {
   try {
     const token = await adminToken(req);
     if (!token)
-      return NextResponse.json({ error: "Chỉ admin được truy cập" }, { status: 403 });
+      return NextResponse.json(
+        { error: "Chỉ admin được truy cập" },
+        { status: 403 },
+      );
     const pool = getMysqlPool();
     const schema = await getSchema();
     const table = req.nextUrl.searchParams.get("table");
@@ -124,14 +189,18 @@ export async function GET(req) {
     }
     const columns = await getTableMetadata(table);
     const page = Math.max(1, Number(req.nextUrl.searchParams.get("page")) || 1);
-    const limit = Math.min(100, Math.max(10, Number(req.nextUrl.searchParams.get("limit")) || 25));
+    const limit = Math.min(
+      100,
+      Math.max(10, Number(req.nextUrl.searchParams.get("limit")) || 25),
+    );
     const search = String(req.nextUrl.searchParams.get("search") || "").trim();
     const searchableColumns = columns.filter(
       (column) => !["blob", "binary", "varbinary"].includes(column.dataType),
     );
-    const where = search && searchableColumns.length
-      ? ` WHERE CONCAT_WS(' ', ${searchableColumns.map((column) => `CAST(${quoteIdentifier(column.name)} AS CHAR)`).join(", ")}) LIKE ?`
-      : "";
+    const where =
+      search && searchableColumns.length
+        ? ` WHERE CONCAT_WS(' ', ${searchableColumns.map((column) => `CAST(${quoteIdentifier(column.name)} AS CHAR)`).join(", ")}) LIKE ?`
+        : "";
     const params = where ? [`%${search}%`] : [];
     const [[countRow]] = await pool.query(
       `SELECT COUNT(*) AS total FROM ${quoteIdentifier(table)}${where}`,
@@ -150,14 +219,22 @@ export async function GET(req) {
       table,
       columns,
       rows: rows.map((row) =>
-        Object.fromEntries(Object.entries(row).map(([key, value]) => [key, serializeValue(value)])),
+        Object.fromEntries(
+          Object.entries(row).map(([key, value]) => [
+            key,
+            serializeValue(value),
+          ]),
+        ),
       ),
       pagination: { page, limit, total: Number(countRow.total || 0) },
       editable: primaryKeys.length > 0,
     });
   } catch (error) {
     console.error("[Database Editor GET]", error);
-    return NextResponse.json({ error: error.message || "Không thể đọc database" }, { status: 400 });
+    return NextResponse.json(
+      { error: error.message || "Không thể đọc database" },
+      { status: 400 },
+    );
   }
 }
 
@@ -165,14 +242,20 @@ export async function POST(req) {
   try {
     const token = await adminToken(req);
     if (!token)
-      return NextResponse.json({ error: "Chỉ admin được truy cập" }, { status: 403 });
+      return NextResponse.json(
+        { error: "Chỉ admin được truy cập" },
+        { status: 403 },
+      );
     const { table, values = {} } = await req.json();
     const columns = await getTableMetadata(table);
     const writable = columns.filter(
-      (column) => column.extra !== "auto_increment" && Object.hasOwn(values, column.name),
+      (column) =>
+        column.extra !== "auto_increment" && Object.hasOwn(values, column.name),
     );
     if (!writable.length) throw new Error("Không có dữ liệu hợp lệ để thêm");
-    const params = writable.map((column) => normalizeWriteValue(values[column.name], column));
+    const params = writable.map((column) =>
+      normalizeWriteValue(values[column.name], column),
+    );
     await getMysqlPool().query(
       `INSERT INTO ${quoteIdentifier(table)} (${writable.map((column) => quoteIdentifier(column.name)).join(", ")}) VALUES (${writable.map(() => "?").join(", ")})`,
       params,
@@ -189,7 +272,10 @@ export async function POST(req) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("[Database Editor POST]", error);
-    return NextResponse.json({ error: error.message || "Không thể thêm dữ liệu" }, { status: 400 });
+    return NextResponse.json(
+      { error: error.message || "Không thể thêm dữ liệu" },
+      { status: 400 },
+    );
   }
 }
 
@@ -197,23 +283,33 @@ export async function PATCH(req) {
   try {
     const token = await adminToken(req);
     if (!token)
-      return NextResponse.json({ error: "Chỉ admin được truy cập" }, { status: 403 });
+      return NextResponse.json(
+        { error: "Chỉ admin được truy cập" },
+        { status: 403 },
+      );
     const { table, key = {}, values = {} } = await req.json();
     const columns = await getTableMetadata(table);
     const primaryKeys = columns.filter((column) => column.columnKey === "PRI");
-    if (!primaryKeys.length || primaryKeys.some((column) => !Object.hasOwn(key, column.name)))
+    if (
+      !primaryKeys.length ||
+      primaryKeys.some((column) => !Object.hasOwn(key, column.name))
+    )
       throw new Error("Bảng hoặc dòng không có khóa chính hợp lệ");
     const writable = columns.filter(
-      (column) => column.columnKey !== "PRI" && Object.hasOwn(values, column.name),
+      (column) =>
+        column.columnKey !== "PRI" && Object.hasOwn(values, column.name),
     );
     if (!writable.length) throw new Error("Không có trường nào để cập nhật");
-    const setValues = writable.map((column) => normalizeWriteValue(values[column.name], column));
+    const setValues = writable.map((column) =>
+      normalizeWriteValue(values[column.name], column),
+    );
     const keyValues = primaryKeys.map((column) => key[column.name]);
     const [result] = await getMysqlPool().query(
       `UPDATE ${quoteIdentifier(table)} SET ${writable.map((column) => `${quoteIdentifier(column.name)}=?`).join(", ")} WHERE ${primaryKeys.map((column) => `${quoteIdentifier(column.name)}=?`).join(" AND ")} LIMIT 1`,
       [...setValues, ...keyValues],
     );
-    if (!result.affectedRows) throw new Error("Không tìm thấy dòng cần cập nhật");
+    if (!result.affectedRows)
+      throw new Error("Không tìm thấy dòng cần cập nhật");
     if (table !== "audit_logs")
       await appendAuditLog({
         adminId: token.id,
@@ -226,7 +322,10 @@ export async function PATCH(req) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("[Database Editor PATCH]", error);
-    return NextResponse.json({ error: error.message || "Không thể cập nhật dữ liệu" }, { status: 400 });
+    return NextResponse.json(
+      { error: error.message || "Không thể cập nhật dữ liệu" },
+      { status: 400 },
+    );
   }
 }
 
@@ -234,7 +333,10 @@ export async function DELETE(req) {
   try {
     const token = await adminToken(req);
     if (!token)
-      return NextResponse.json({ error: "Chỉ admin được truy cập" }, { status: 403 });
+      return NextResponse.json(
+        { error: "Chỉ admin được truy cập" },
+        { status: 403 },
+      );
     const { table, key = {}, clearAll = false } = await req.json();
     const columns = await getTableMetadata(table);
     if (clearAll) {
@@ -256,7 +358,10 @@ export async function DELETE(req) {
       });
     }
     const primaryKeys = columns.filter((column) => column.columnKey === "PRI");
-    if (!primaryKeys.length || primaryKeys.some((column) => !Object.hasOwn(key, column.name)))
+    if (
+      !primaryKeys.length ||
+      primaryKeys.some((column) => !Object.hasOwn(key, column.name))
+    )
       throw new Error("Bảng hoặc dòng không có khóa chính hợp lệ");
     const [result] = await getMysqlPool().query(
       `DELETE FROM ${quoteIdentifier(table)} WHERE ${primaryKeys.map((column) => `${quoteIdentifier(column.name)}=?`).join(" AND ")} LIMIT 1`,
@@ -275,6 +380,9 @@ export async function DELETE(req) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("[Database Editor DELETE]", error);
-    return NextResponse.json({ error: error.message || "Không thể xóa dữ liệu" }, { status: 400 });
+    return NextResponse.json(
+      { error: error.message || "Không thể xóa dữ liệu" },
+      { status: 400 },
+    );
   }
 }
