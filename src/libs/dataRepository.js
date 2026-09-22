@@ -1,5 +1,9 @@
 import * as json from "./jsonRepository.js";
-import { assetCategoryIdFromName, assetUnitIdFromName } from "@/libs/assetIds";
+import {
+  assetCategoryIdFromName,
+  assetDocumentCodeFromName,
+  assetUnitIdFromName,
+} from "@/libs/assetIds";
 import { applyFundBalances } from "./fundRules.js";
 import { getMysqlPool, isMysqlEnabled } from "./mysql.js";
 
@@ -330,24 +334,44 @@ export async function getFunds() {
       reminderDaysBefore: asJson(fund.reminder_days_before, []),
       emailReminderEnabled: Boolean(fund.email_reminder_enabled),
       updatedAt: toIso(fund.updated_at),
-      members: payments
-        .filter((item) => item.fund_period_id === fund.id)
-        .map((item) => ({
-          userId: item.user_id,
-          ...(metadata.get(fund.id)?.members?.[item.user_id] || {}),
-          paid: Boolean(item.paid),
-          amount: Number(item.amount || 0),
-          paidAt: toIso(item.paid_at),
-          paymentStatus: item.payment_status || undefined,
-          orderCode: item.order_code ? Number(item.order_code) : undefined,
-          paymentLinkId: item.payment_link_id || undefined,
-          checkoutUrl: item.checkout_url || undefined,
-          paymentReference: item.payment_reference || undefined,
-          approvedBy: item.approved_by || undefined,
-          paymentChannelId: metadata.get(fund.id)?.members?.[item.user_id]
-            ?.paymentChannelId,
-          updatedAt: toIso(item.updated_at),
-        })),
+      members: [
+        // Snapshot-only members have an obligation but no payment record yet.
+        ...Object.entries(metadata.get(fund.id)?.members || {})
+          .filter(
+            ([userId]) =>
+              names.has(userId) &&
+              !payments.some(
+                (item) =>
+                  item.fund_period_id === fund.id && item.user_id === userId,
+              ),
+          )
+          .map(([userId, member]) => ({
+            ...member,
+            userId,
+            paid: false,
+            amount: 0,
+            paidAt: null,
+          })),
+        ...payments
+          .filter((item) => item.fund_period_id === fund.id)
+          .map((item) => ({
+            ...(metadata.get(fund.id)?.members?.[item.user_id] || {}),
+            // Relational identity must not be overridden by legacy metadata.
+            userId: item.user_id,
+            paid: Boolean(item.paid),
+            amount: Number(item.amount || 0),
+            paidAt: toIso(item.paid_at),
+            paymentStatus: item.payment_status || undefined,
+            orderCode: item.order_code ? Number(item.order_code) : undefined,
+            paymentLinkId: item.payment_link_id || undefined,
+            checkoutUrl: item.checkout_url || undefined,
+            paymentReference: item.payment_reference || undefined,
+            approvedBy: item.approved_by || undefined,
+            paymentChannelId: metadata.get(fund.id)?.members?.[item.user_id]
+              ?.paymentChannelId,
+            updatedAt: toIso(item.updated_at),
+          })),
+      ],
       incomes: transactions
         .filter(
           (item) => item.fund_period_id === fund.id && item.kind === "income",
@@ -379,37 +403,96 @@ export async function getFunds() {
           userName: names.get(item.user_id) || "",
           spentAt: toIso(item.occurred_at),
           createdBy: item.created_by || "",
+          createdByName: names.get(item.created_by) || "",
           createdAt: toIso(item.created_at),
           updatedAt: toIso(item.updated_at),
         })),
     })),
   );
 }
-export async function saveFunds(funds) {
+const fundMemberMetadata = (fund) => {
+  return Object.fromEntries(
+    (fund.members || []).map((item) => [
+      item.userId,
+      {
+        requiredAmount: item.requiredAmount,
+        baseAmount: item.baseAmount,
+        rosterHidden: item.rosterHidden,
+        voluntarySurplus: item.voluntarySurplus,
+        categoryId: item.categoryId,
+        memberName: item.memberName,
+        obligationCancelled: item.obligationCancelled || false,
+        cancellationReason: item.cancellationReason || "",
+        cancelledAt: item.cancelledAt,
+        cancelledBy: item.cancelledBy,
+        paymentChannelId: item.paymentChannelId,
+      },
+    ]),
+  );
+};
+
+// Reading a period may initialize its roster/rates, but must never rewrite
+// payment or income/expense records (including records for deleted users).
+export async function saveFundSnapshots(funds) {
   applyFundBalances(funds);
   if (!mysqlEnabled()) return json.saveFunds(funds);
   const connection = await getMysqlPool().getConnection();
   try {
     await connection.beginTransaction();
     for (const fund of funds) {
-      const memberMetadata = Object.fromEntries(
-        (fund.members || []).map((item) => [
-          item.userId,
-          {
-            requiredAmount: item.requiredAmount,
-            baseAmount: item.baseAmount,
-            rosterHidden: item.rosterHidden,
-            voluntarySurplus: item.voluntarySurplus,
-            categoryId: item.categoryId,
-            memberName: item.memberName,
-            obligationCancelled: item.obligationCancelled || false,
-            cancellationReason: item.cancellationReason || "",
-            cancelledAt: item.cancelledAt,
-            cancelledBy: item.cancelledBy,
-            paymentChannelId: item.paymentChannelId,
-          },
-        ]),
+      await connection.execute(
+        "INSERT INTO fund_periods (id,year,month,opening_balance,payment_deadline,reminder_days_before,email_reminder_enabled,updated_at) VALUES (?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE id=id",
+        [
+          fund.id,
+          fund.year,
+          fund.month,
+          Number(fund.openingBalance || 0),
+          fund.paymentDeadline || null,
+          JSON.stringify(fund.reminderDaysBefore || []),
+          Boolean(fund.emailReminderEnabled),
+          new Date(),
+        ],
       );
+      await connection.execute(
+        "INSERT INTO app_documents (document_key,document_value,updated_at) VALUES (?,?,?) ON DUPLICATE KEY UPDATE document_value=VALUES(document_value),updated_at=VALUES(updated_at)",
+        [
+          `fund-meta:${fund.id}`,
+          JSON.stringify({
+            contributionSnapshot: fund.contributionSnapshot,
+            members: fundMemberMetadata(fund),
+          }),
+          new Date(),
+        ],
+      );
+    }
+    await connection.commit();
+    return true;
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
+}
+
+export async function saveFunds(funds) {
+  applyFundBalances(funds);
+  if (!mysqlEnabled()) return json.saveFunds(funds);
+  const connection = await getMysqlPool().getConnection();
+  try {
+    await connection.beginTransaction();
+    const [userRows] = await connection.query("SELECT id FROM users");
+    const validUserIds = new Set(userRows.map((item) => item.id));
+    for (const fund of funds) {
+      // Old fund metadata may outlive a deleted user. Never turn that stale
+      // metadata back into a relational payment row with an invalid user_id.
+      const validMembers = (fund.members || []).filter((item) =>
+        validUserIds.has(item.userId),
+      );
+      const memberMetadata = fundMemberMetadata({
+        ...fund,
+        members: validMembers,
+      });
       await connection.execute(
         "INSERT INTO app_documents (document_key,document_value,updated_at) VALUES (?,?,?) ON DUPLICATE KEY UPDATE document_value=VALUES(document_value),updated_at=VALUES(updated_at)",
         [
@@ -442,7 +525,7 @@ export async function saveFunds(funds) {
         "DELETE FROM fund_transactions WHERE fund_period_id=?",
         [fund.id],
       );
-      for (const item of fund.members || [])
+      for (const item of validMembers)
         await connection.execute(
           "INSERT INTO fund_member_payments (fund_period_id,user_id,paid,amount,paid_at,payment_status,order_code,payment_link_id,checkout_url,payment_reference,approved_by,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
           [
@@ -540,15 +623,23 @@ export async function getAssets() {
           createdAt: new Date().toISOString(),
         },
     );
-    const productsByCode = new Map(products.map((item) => [item.code, item]));
+    const productsByCode = new Map(
+      products.filter((item) => item.code).map((item) => [item.code, item]),
+    );
     const categoryNames = new Map(
       categories.map((item) => [item.id, item.name]),
     );
     const normalizeTransaction = (item) => {
       const product = productsByCode.get(item.code);
-      if (!product) return { ...item, unit: item.unit || "" };
+      if (!product)
+        return {
+          ...item,
+          documentCode: assetDocumentCodeFromName(item.name),
+          unit: item.unit || "",
+        };
       return {
         ...item,
+        documentCode: assetDocumentCodeFromName(product.name),
         category: categoryNames.get(product.categoryId) || "",
         unit: product.unit || item.unit || "",
       };
@@ -637,6 +728,17 @@ export async function getAssets() {
       query("SELECT * FROM asset_product_categories ORDER BY name"),
       query("SELECT * FROM asset_product_units ORDER BY name"),
     ],
+  );
+  await Promise.all(
+    rows.map(async (row) => {
+      const documentCode = assetDocumentCodeFromName(row.product_name);
+      if (!documentCode || row.document_code === documentCode) return;
+      await query("UPDATE asset_transactions SET document_code=? WHERE id=?", [
+        documentCode,
+        row.id,
+      ]);
+      row.document_code = documentCode;
+    }),
   );
   const map = (row) => ({
     id: row.id,
@@ -802,7 +904,7 @@ export async function deleteAssetUnit(id) {
 
 const assetTransactionValues = (item, type) => [
   item.id,
-  item.documentCode || null,
+  assetDocumentCodeFromName(item.name) || null,
   type,
   item.code,
   item.name,
@@ -847,7 +949,7 @@ export async function updateAssetTransaction(type, item) {
   await query(
     "UPDATE asset_transactions SET document_code=?,product_code=?,product_name=?,product_category_name=?,product_description=?,transaction_date=?,quantity=?,unit_name=?,storage_location=?,counterparty_name=?,recipient_name=?,performed_by_user_id=?,note=?,updated_at=? WHERE id=? AND transaction_type=?",
     [
-      item.documentCode || null,
+      assetDocumentCodeFromName(item.name) || null,
       item.code,
       item.name,
       item.category || null,
@@ -901,7 +1003,7 @@ export async function saveAssets(data) {
           "INSERT INTO asset_transactions (id,document_code,transaction_type,product_code,product_name,product_category_name,product_description,transaction_date,quantity,unit_name,storage_location,counterparty_name,recipient_name,performed_by_user_id,note,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
           [
             item.id,
-            item.documentCode || null,
+            assetDocumentCodeFromName(item.name) || null,
             type,
             item.code,
             item.name,

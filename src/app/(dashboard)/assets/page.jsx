@@ -34,9 +34,12 @@ import ConfirmDialog from "@components/ConfirmDialog";
 import DataTableToolbar from "@components/DataTableToolbar";
 import TablePaginationComponent from "@components/TablePaginationComponent";
 import { formatVietnamDate, toVietnamDateKey } from "@/libs/dateTime";
+import { assetDocumentCodeFromName } from "@/libs/assetIds";
 import { resolveAvatar } from "@/utils/getDefaultAvatar";
 
 const emptyForm = {
+  productId: "",
+  documentCode: "",
   code: "",
   name: "",
   category: "",
@@ -327,15 +330,20 @@ function TransactionDialog({
       setForm(
         editingItem
           ? { ...emptyForm, ...editingItem }
-          : { ...emptyForm, person: currentName || "" },
+          : {
+              ...emptyForm,
+              person: currentName || "",
+            },
       );
       setImportLines([makeImportLine(currentName)]);
     }
-  }, [open, currentName, editingItem]);
-  const productFields = (code) => {
-    const item = products.find((entry) => entry.code === code);
+  }, [open, type, currentName, editingItem]);
+  const productFields = (productId) => {
+    const item = products.find((entry) => entry.id === productId);
     return {
-      code,
+      productId: item?.id || "",
+      documentCode: assetDocumentCodeFromName(item?.name),
+      code: item?.code || "",
       name: item?.name || "",
       category:
         categories.find((category) => category.id === item?.categoryId)?.name ||
@@ -345,10 +353,10 @@ function TransactionDialog({
       location: item?.location || "",
     };
   };
-  const selectProduct = (code) => {
+  const selectProduct = (productId) => {
     setForm((value) => ({
       ...value,
-      ...productFields(code),
+      ...productFields(productId),
     }));
   };
   const updateImportLine = (clientId, values) =>
@@ -357,8 +365,8 @@ function TransactionDialog({
         row.clientId === clientId ? { ...row, ...values } : row,
       ),
     );
-  const selectImportLineProduct = (clientId, code) =>
-    updateImportLine(clientId, productFields(code));
+  const selectImportLineProduct = (clientId, productId) =>
+    updateImportLine(clientId, productFields(productId));
   const addImportLine = () =>
     setImportLines((rows) => [...rows, makeImportLine(currentName)]);
   const removeImportLine = (clientId) =>
@@ -366,36 +374,45 @@ function TransactionDialog({
       rows.length > 1 ? rows.filter((row) => row.clientId !== clientId) : rows,
     );
   const assetOptions = products.filter((item) => item.active);
-  const selectedStock = form.code
+  const transactionKey = (item) =>
+    item.documentCode || assetDocumentCodeFromName(item.name);
+  const productKey = (item) =>
+    item.documentCode ||
+    assetDocumentCodeFromName(
+      products.find((product) => product.id === item.productId)?.name ||
+        item.name,
+    );
+  const selectedKey = productKey(form);
+  const selectedStock = selectedKey
     ? imports
-        .filter((item) => item.code === form.code)
+        .filter((item) => transactionKey(item) === selectedKey)
         .reduce((sum, item) => sum + Number(item.quantity || 0), 0) -
       exports
-        .filter((item) => item.code === form.code)
+        .filter((item) => transactionKey(item) === selectedKey)
         .reduce((sum, item) => sum + Number(item.quantity || 0), 0)
     : 0;
   const availableForExport =
     selectedStock +
-    (type === "export" && editingItem?.code === form.code
-      ? Number(editingItem.quantity || 0)
+    (type === "export" && transactionKey(editingItem || {}) === selectedKey
+      ? Number(editingItem?.quantity || 0)
       : 0);
   const quantity = Number(form.quantity);
   const quantityError =
-    type === "export" && Boolean(form.code) && quantity > availableForExport;
-  const stockForCode = (code) =>
+    type === "export" && Boolean(selectedKey) && quantity > availableForExport;
+  const stockForProduct = (product) =>
     imports
-      .filter((item) => item.code === code)
+      .filter((item) => transactionKey(item) === productKey(product))
       .reduce((sum, item) => sum + Number(item.quantity || 0), 0) -
     exports
-      .filter((item) => item.code === code)
+      .filter((item) => transactionKey(item) === productKey(product))
       .reduce((sum, item) => sum + Number(item.quantity || 0), 0);
-  const requestedForCode = (code) =>
+  const requestedForProduct = (product) =>
     importLines
-      .filter((item) => item.code === code)
+      .filter((item) => productKey(item) === productKey(product))
       .reduce((sum, item) => sum + Number(item.quantity || 0), 0);
   const validImportLines = importLines.filter(
     (row) =>
-      row.code?.trim() &&
+      productKey(row) &&
       Number.isInteger(Number(row.quantity)) &&
       Number(row.quantity) > 0,
   );
@@ -407,7 +424,7 @@ function TransactionDialog({
       (type === "export" && importLines.some((row) => !row.issuedTo?.trim())) ||
       (type === "export" &&
         importLines.some(
-          (row) => requestedForCode(row.code) > stockForCode(row.code),
+          (row) => requestedForProduct(row) > stockForProduct(row),
         )));
   const submit = async () => {
     if (quantityError || bulkTransactionInvalid) return;
@@ -536,7 +553,8 @@ function TransactionDialog({
               />
             </Box>
             <Typography variant="body2" color="text.secondary">
-              Chọn các sản phẩm trong phiếu {type === "import" ? "nhập" : "xuất"}
+              Chọn các sản phẩm trong phiếu{" "}
+              {type === "import" ? "nhập" : "xuất"}
             </Typography>
             {importLines.map((row, index) => (
               <Box
@@ -561,14 +579,21 @@ function TransactionDialog({
                 <Autocomplete
                   options={assetOptions}
                   value={
-                    assetOptions.find((item) => item.code === row.code) || null
+                    assetOptions.find(
+                      (item) =>
+                        item.id === row.productId ||
+                        assetDocumentCodeFromName(item.name) ===
+                          productKey(row),
+                    ) || null
                   }
                   onChange={(_, item) =>
-                    selectImportLineProduct(row.clientId, item?.code || "")
+                    selectImportLineProduct(row.clientId, item?.id || "")
                   }
-                  getOptionLabel={(item) => `${item.code} — ${item.name}`}
+                  getOptionLabel={(item) =>
+                    `${item.code ? `${item.code} — ` : ""}${item.name}`
+                  }
                   isOptionEqualToValue={(option, value) =>
-                    option.code === value?.code
+                    option.id === value?.id
                   }
                   filterOptions={(options, state) =>
                     filterAssetOptions(options, state.inputValue)
@@ -594,19 +619,17 @@ function TransactionDialog({
                   }
                   error={
                     type === "export" &&
-                    Boolean(row.code) &&
-                    requestedForCode(row.code) > stockForCode(row.code)
+                    Boolean(productKey(row)) &&
+                    requestedForProduct(row) > stockForProduct(row)
                   }
                   helperText={
-                    type === "export" && row.code
-                      ? `Tồn kho: ${stockForCode(row.code)} · Đang xuất: ${requestedForCode(row.code)}`
+                    type === "export" && productKey(row)
+                      ? `Tồn kho: ${stockForProduct(row)} · Đang xuất: ${requestedForProduct(row)}`
                       : ""
                   }
                   inputProps={{
                     min: 1,
-                    ...(type === "export"
-                      ? { max: stockForCode(row.code) }
-                      : {}),
+                    ...(type === "export" ? { max: stockForProduct(row) } : {}),
                   }}
                 />
                 <CustomTextField
@@ -709,13 +732,17 @@ function TransactionDialog({
               <Autocomplete
                 options={assetOptions}
                 value={
-                  assetOptions.find((item) => item.code === form.code) || null
+                  assetOptions.find(
+                    (item) =>
+                      item.id === form.productId ||
+                      assetDocumentCodeFromName(item.name) === productKey(form),
+                  ) || null
                 }
-                onChange={(_, item) => selectProduct(item?.code || "")}
-                getOptionLabel={(item) => `${item.code} — ${item.name}`}
-                isOptionEqualToValue={(option, value) =>
-                  option.code === value.code
+                onChange={(_, item) => selectProduct(item?.id || "")}
+                getOptionLabel={(item) =>
+                  `${item.code ? `${item.code} — ` : ""}${item.name}`
                 }
+                isOptionEqualToValue={(option, value) => option.id === value.id}
                 filterOptions={(options, state) => {
                   const query = state.inputValue.trim().toLowerCase();
                   return options.filter((item) =>
@@ -735,12 +762,18 @@ function TransactionDialog({
               <Autocomplete
                 options={assetOptions}
                 value={
-                  assetOptions.find((item) => item.code === form.code) || null
+                  assetOptions.find(
+                    (item) =>
+                      item.id === form.productId ||
+                      assetDocumentCodeFromName(item.name) === productKey(form),
+                  ) || null
                 }
-                onChange={(_, item) => selectProduct(item?.code || "")}
-                getOptionLabel={(item) => `${item.code} — ${item.name}`}
+                onChange={(_, item) => selectProduct(item?.id || "")}
+                getOptionLabel={(item) =>
+                  `${item.code ? `${item.code} — ` : ""}${item.name}`
+                }
                 isOptionEqualToValue={(option, value) =>
-                  option.code === value?.code
+                  option.id === value?.id
                 }
                 filterOptions={(options, state) =>
                   filterAssetOptions(options, state.inputValue)
@@ -771,11 +804,7 @@ function TransactionDialog({
                 )}
               />
             )}
-            <CustomTextField
-              label="Đơn vị tính"
-              value={form.unit}
-              disabled
-            />
+            <CustomTextField label="Đơn vị tính" value={form.unit} disabled />
             <CustomTextField
               label="Mô tả sản phẩm"
               value={form.description}
@@ -1117,9 +1146,9 @@ function ProductConfigurationDialog({
       const response = await fetch(
         isCategory ? "/api/asset-categories" : "/api/asset-units",
         {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: editing?.id, name }),
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: editing?.id, name }),
         },
       );
       const result = await response.json();
@@ -1145,9 +1174,9 @@ function ProductConfigurationDialog({
       const response = await fetch(
         isCategory ? "/api/asset-categories" : "/api/asset-units",
         {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: item.id }),
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: item.id }),
         },
       );
       const result = await response.json();
@@ -1291,7 +1320,8 @@ export default function AssetsPage() {
   const [productDialog, setProductDialog] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [viewingProduct, setViewingProduct] = useState(null);
-  const [productConfigurationOpen, setProductConfigurationOpen] = useState(false);
+  const [productConfigurationOpen, setProductConfigurationOpen] =
+    useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -1336,11 +1366,12 @@ export default function AssetsPage() {
   const stockByCode = useMemo(() => {
     const rows = new Map();
     data.imports.forEach((item) => {
-      if (!item.code || item.quantity === null || item.quantity === undefined)
-        return;
-      const current = rows.get(item.code);
+      const key =
+        item.documentCode || assetDocumentCodeFromName(item.name || "");
+      if (!key || item.quantity === null || item.quantity === undefined) return;
+      const current = rows.get(key);
       rows.set(
-        item.code,
+        key,
         current
           ? {
               ...current,
@@ -1351,15 +1382,16 @@ export default function AssetsPage() {
       );
     });
     data.exports.forEach((item) => {
-      if (!item.code || item.quantity === null || item.quantity === undefined)
-        return;
-      const current = rows.get(item.code) || {
+      const key =
+        item.documentCode || assetDocumentCodeFromName(item.name || "");
+      if (!key || item.quantity === null || item.quantity === undefined) return;
+      const current = rows.get(key) || {
         ...item,
         totalImport: 0,
         totalExport: 0,
         quantity: 0,
       };
-      rows.set(item.code, {
+      rows.set(key, {
         ...current,
         totalExport: current.totalExport + Number(item.quantity),
         quantity: current.quantity - Number(item.quantity),
@@ -1371,21 +1403,34 @@ export default function AssetsPage() {
     const categoryNames = new Map(
       (data.categories || []).map((item) => [item.id, item.name]),
     );
-    return (data.products || []).map((item) => ({
-      ...item,
-      categoryName: categoryNames.get(item.categoryId) || "",
-      location: stockByCode.get(item.code)?.location || item.location || "",
-      quantity: stockByCode.get(item.code)?.quantity || 0,
-      totalImport: data.imports
-        .filter((entry) => entry.code === item.code)
-        .reduce((sum, entry) => sum + Number(entry.quantity || 0), 0),
-      totalExport: data.exports
-        .filter((entry) => entry.code === item.code)
-        .reduce((sum, entry) => sum + Number(entry.quantity || 0), 0),
-    }));
+    return (data.products || []).map((item) => {
+      const documentCode = assetDocumentCodeFromName(item.name);
+      const matchesProduct = (entry) =>
+        (entry.documentCode || assetDocumentCodeFromName(entry.name || "")) ===
+        documentCode;
+      return {
+        ...item,
+        documentCode,
+        categoryName: categoryNames.get(item.categoryId) || "",
+        location:
+          stockByCode.get(documentCode)?.location || item.location || "",
+        quantity: stockByCode.get(documentCode)?.quantity ?? 0,
+        totalImport: data.imports
+          .filter(matchesProduct)
+          .reduce((sum, entry) => sum + Number(entry.quantity || 0), 0),
+        totalExport: data.exports
+          .filter(matchesProduct)
+          .reduce((sum, entry) => sum + Number(entry.quantity || 0), 0),
+      };
+    });
   }, [data, stockByCode]);
   const stockProducts = useMemo(
-    () => products.filter((item) => Number(item.quantity) > 0),
+    () =>
+      [
+        ...new Map(products.map((item) => [item.documentCode, item])).values(),
+      ].sort((left, right) =>
+        String(left.name || "").localeCompare(String(right.name || ""), "vi"),
+      ),
     [products],
   );
   const activeRows =
@@ -1402,7 +1447,7 @@ export default function AssetsPage() {
         const matchesSearch = normalizeSearchText(
           tab === "products"
             ? `${row.code} ${row.name}`
-            : `${row.code} ${row.name} ${row.location} ${row.person} ${row.issuedTo} ${row.note}`,
+            : `${row.documentCode} ${row.code} ${row.name} ${row.location} ${row.person} ${row.issuedTo} ${row.note}`,
         ).includes(normalizeSearchText(search));
         const matchesStatus =
           tab !== "products" ||
@@ -1473,12 +1518,12 @@ export default function AssetsPage() {
               description: pick(row, ["motasanpham", "mota", "description"]),
               location: pick(row, ["vitri", "location"]),
               active: ![
-              "inactive",
-              "ngung su dung",
-              "ngung hoat dong",
-              "khong hoat dong",
-              "false",
-              "0",
+                "inactive",
+                "ngung su dung",
+                "ngung hoat dong",
+                "khong hoat dong",
+                "false",
+                "0",
               ].includes(
                 normalizeSearchText(
                   pick(row, ["trangthai", "status", "active"]),
@@ -1509,6 +1554,7 @@ export default function AssetsPage() {
             Object.values(row).some((value) => String(value || "").trim()),
           )
           .map((row) => ({
+            documentCode: pick(row, ["sochungtu", "machungtu", "documentcode"]),
             code: pick(row, ["masanpham", "masp", "ma", "code"]),
             name: pick(row, ["tensanpham", "tensp", "ten", "name"]),
             category: pick(row, ["loaisp", "loaisanpham", "category"]),
@@ -1545,6 +1591,7 @@ export default function AssetsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           [transactionType === "import" ? "imports" : "exports"]: rows,
+          replaceExcelRows: true,
         }),
       });
       const result = await response.json();
@@ -1564,6 +1611,7 @@ export default function AssetsPage() {
   const exportCurrentList = () => {
     const workbook = XLSX.utils.book_new();
     const importRows = data.imports.map((item) => ({
+      "Số chứng từ": item.documentCode || "",
       "Ngày nhập": item.date,
       "Loại SP": item.category || "",
       "Mã sản phẩm": item.code,
@@ -1576,6 +1624,7 @@ export default function AssetsPage() {
       "Ghi chú": item.note || "",
     }));
     const exportRows = data.exports.map((item) => ({
+      "Số chứng từ": item.documentCode || "",
       "Ngày xuất": item.date,
       "Loại SP": item.category || "",
       "Mã sản phẩm": item.code,
@@ -1664,7 +1713,9 @@ export default function AssetsPage() {
                 justifyContent="flex-end"
                 sx={{
                   width: { xs: "100%", sm: "auto" },
-                  "& .MuiButton-root": { flex: { xs: "1 1 100%", sm: "0 0 auto" } },
+                  "& .MuiButton-root": {
+                    flex: { xs: "1 1 100%", sm: "0 0 auto" },
+                  },
                 }}
               >
                 <Button

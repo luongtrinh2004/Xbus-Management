@@ -1,0 +1,156 @@
+-- Import 46 fund expenses from the supplied sheet (February-September 2026).
+-- Safe to rerun: stable transaction IDs replace the same imported rows.
+-- Executor: Nguyen Thi Hong Quyen, resolved by email.
+SET NAMES utf8mb4;
+
+DROP TEMPORARY TABLE IF EXISTS tmp_fund_expenses_2026;
+CREATE TEMPORARY TABLE tmp_fund_expenses_2026 (
+  row_no INT PRIMARY KEY,
+  occurred_on DATE NOT NULL,
+  category VARCHAR(64) NOT NULL,
+  amount BIGINT NOT NULL,
+  note VARCHAR(500) NOT NULL
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+INSERT INTO tmp_fund_expenses_2026
+  (row_no, occurred_on, category, amount, note)
+VALUES
+  (1,  '2026-02-24', 'food_drink', 656000, CONVERT(0xC490E1BAB774206EC6B0E1BB9B63204C6F6E672028333438292C20517579C3AA6E202833303829 USING utf8mb4)),
+  (2,  '2026-02-27', 'food_drink', 455000, CONVERT(0xC490E1BAB774206EC6B0E1BB9B63204C6F6E672028313935292C20517579C3AA6E202832363029 USING utf8mb4)),
+  (3,  '2026-03-08', 'food_drink', 230000, CONVERT(0xC490E1BAB774206EC6B0E1BB9B63 USING utf8mb4)),
+  (4,  '2026-03-08', 'food_drink', 583560, CONVERT(0xC4906920C4836E206D616C61202874E1BB956E6720352E3038332E3536302C207175E1BBB92062E1BB8F203538332E35363029 USING utf8mb4)),
+  (5,  '2026-03-13', 'food_drink', 444000, CONVERT(0xC490E1BAB774206EC6B0E1BB9B63 USING utf8mb4)),
+  (6,  '2026-03-18', 'food_drink', 190000, CONVERT(0xC490E1BAB774206EC6B0E1BB9B63 USING utf8mb4)),
+  (7,  '2026-03-27', 'food_drink', 605000, CONVERT(0xC490E1BAB774206EC6B0E1BB9B63 USING utf8mb4)),
+  (8,  '2026-03-31', 'office',     120000, CONVERT(0x4769E1BAA579202831322067C3B36929 USING utf8mb4)),
+  (9,  '2026-04-02', 'food_drink', 310000, CONVERT(0xC490E1BAB774206368C3A8 USING utf8mb4)),
+  (10, '2026-04-04', 'food_drink', 420000, CONVERT(0xC490E1BAB77420C491E1BB9320C4836E USING utf8mb4)),
+  (11, '2026-04-07', 'event',      200000, CONVERT(0xE1BBA96E67207175E1BBB92063E1BB8D63207068C3B26E672048C3B2612042C3AC6E68 USING utf8mb4)),
+  (12, '2026-04-10', 'food_drink', 650000, CONVERT(0xC490E1BAB774206EC6B0E1BB9B63 USING utf8mb4)),
+  (13, '2026-04-17', 'food_drink', 350000, CONVERT(0xC490E1BAB77420C491E1BB9320C4836E USING utf8mb4)),
+  (14, '2026-04-24', 'food_drink', 473000, CONVERT(0xC490E1BAB77420C491E1BB9320C4836E USING utf8mb4)),
+  (15, '2026-05-08', 'food_drink', 410000, CONVERT(0xC490E1BAB774206368C3A8 USING utf8mb4)),
+  (16, '2026-05-12', 'support',   1000000, CONVERT(0x67E1BBAD69207469E1BB816E207669E1BABF6E672063686F2067C49120616E68204E616D USING utf8mb4)),
+  (17, '2026-05-15', 'food_drink', 560000, CONVERT(0xC490E1BAB77420686F61207175E1BAA3202B20C491E1BB9320C4836E USING utf8mb4)),
+  (18, '2026-05-20', 'office',     127000, CONVERT(0xC490E1BAB774206769E1BAA57920C4836E USING utf8mb4)),
+  (19, '2026-05-22', 'food_drink', 608000, CONVERT(0xC490E1BAB77420C491E1BB9320C4836E USING utf8mb4)),
+  (20, '2026-05-29', 'food_drink', 500000, CONVERT(0xC490E1BAB77420C491E1BB9320C4836E USING utf8mb4)),
+  (21, '2026-06-01', 'food_drink', 333000, CONVERT(0x4D75612062C3A16E68202B20C491E1BB9320C4836E USING utf8mb4)),
+  (22, '2026-06-01', 'food_drink', 344000, CONVERT(0xC490E1BAB774206368C3A820616E68204C6F6E67 USING utf8mb4)),
+  (23, '2026-06-05', 'food_drink', 556000, CONVERT(0xC490E1BAB77420C491E1BB9320C4836E USING utf8mb4)),
+  (24, '2026-06-12', 'food_drink', 423000, CONVERT(0xC490E1BAB77420C491E1BB9320C4836E USING utf8mb4)),
+  (25, '2026-06-15', 'support',   1000000, CONVERT(0x47E1BBAD69207469E1BB816E207669E1BABF6E672063686F2067C4912043C6B0E1BB9D6E67 USING utf8mb4)),
+  (26, '2026-06-19', 'food_drink', 500000, CONVERT(0xC490E1BAB77420C491E1BB9320C4836E USING utf8mb4)),
+  (27, '2026-06-19', 'support',    200000, CONVERT(0x43687579E1BB836E2063686F20616E68204CC3A26D USING utf8mb4)),
+  (28, '2026-06-25', 'office',      25000, CONVERT(0xC490E1BAB7742074C3BA692072C3A163 USING utf8mb4)),
+  (29, '2026-06-26', 'food_drink', 924000, CONVERT(0xC490E1BAB774206EC6B0E1BB9B63 USING utf8mb4)),
+  (30, '2026-07-03', 'food_drink', 806000, CONVERT(0xC490E1BAB77420C491E1BB9320C4836E202B2062C3A16E68202B20686F61207175E1BAA3 USING utf8mb4)),
+  (31, '2026-07-09', 'food_drink', 820000, CONVERT(0xC490E1BAB774206EC6B0E1BB9B63 USING utf8mb4)),
+  (32, '2026-07-17', 'event',     1400000, CONVERT(0x43687579E1BB836E207469E1BB816E20C3A16F USING utf8mb4)),
+  (33, '2026-07-17', 'food_drink',1000000, CONVERT(0x436869207469E1BB816E20C4916920C4836E USING utf8mb4)),
+  (34, '2026-07-17', 'office',     130000, CONVERT(0xC490E1BAB774206769E1BAA579 USING utf8mb4)),
+  (35, '2026-07-24', 'food_drink', 469000, CONVERT(0x43687579E1BB836E2063686F204C696E6820C491E1BAB774206EC6B0E1BB9B63 USING utf8mb4)),
+  (36, '2026-07-31', 'food_drink', 926000, CONVERT(0x43687579E1BB836E207469E1BB816E2063686F206368E1BB8B2054687579E1BABF7420C491E1BAB77420C491E1BB9320C4836E USING utf8mb4)),
+  (37, '2026-08-07', 'food_drink', 600000, CONVERT(0xC490E1BAB774206EC6B0E1BB9B63 USING utf8mb4)),
+  (38, '2026-08-14', 'food_drink',1178000, CONVERT(0xC490E1BAB774206EC6B0E1BB9B63202B20C491E1BB9320C4836E USING utf8mb4)),
+  (39, '2026-08-18', 'office',      42000, CONVERT(0xC490E1BAB7742074C3BA692072C3A163 USING utf8mb4)),
+  (40, '2026-08-18', 'event',      400000, CONVERT(0xC490E1BAB7742062C3A16E682073696E68206E68E1BAAD74 USING utf8mb4)),
+  (41, '2026-08-21', 'food_drink', 667000, CONVERT(0x486F61207175E1BAA3202B20C491E1BB9320C4836E USING utf8mb4)),
+  (42, '2026-08-25', 'office',     160000, CONVERT(0xC490E1BAB774206769E1BAA579 USING utf8mb4)),
+  (43, '2026-08-28', 'food_drink', 620000, CONVERT(0xC490E1BAB77420C491E1BB9320C4836E USING utf8mb4)),
+  (44, '2026-09-05', 'food_drink', 600000, CONVERT(0xC490E1BAB774206EC6B0E1BB9B63 USING utf8mb4)),
+  (45, '2026-09-12', 'food_drink', 660000, CONVERT(0xC490E1BAB77420C491E1BB9320C4836E202B20686F61207175E1BAA3 USING utf8mb4)),
+  (46, '2026-09-18', 'food_drink', 800000, CONVERT(0xC490E1BAB77420C491E1BB9320C4836E202B20686F61207175E1BAA3 USING utf8mb4));
+
+START TRANSACTION;
+
+SET @executor_id = (
+  SELECT MIN(id)
+  FROM users
+  WHERE LOWER(TRIM(email)) = 'quyennth@phenikaa-x.com'
+);
+SET @executor_count = (
+  SELECT COUNT(*)
+  FROM users
+  WHERE LOWER(TRIM(email)) = 'quyennth@phenikaa-x.com'
+);
+SET @period_count = (
+  SELECT COUNT(*)
+  FROM fund_periods
+  WHERE year = 2026 AND month BETWEEN 2 AND 9
+);
+SET @import_ok = (@executor_count = 1 AND @period_count = 8);
+
+SELECT @executor_count AS executor_matches,
+       @period_count AS fund_periods_found,
+       @import_ok AS ready_to_import;
+
+-- Expected source totals before import.
+SELECT MONTH(occurred_on) AS month,
+       COUNT(*) AS expense_count,
+       SUM(amount) AS expense_total
+FROM tmp_fund_expenses_2026
+GROUP BY MONTH(occurred_on)
+ORDER BY month;
+
+INSERT INTO fund_transactions
+  (id, fund_period_id, kind, title, category, amount, note, user_id,
+   occurred_at, created_by, created_at, updated_at)
+SELECT
+  CONCAT('exp_sheet_2026_', LPAD(s.row_no, 3, '0')),
+  p.id,
+  'expense',
+  CASE s.category
+    WHEN 'food_drink' THEN CONVERT(0xC4826E2075E1BB916E67 USING utf8mb4)
+    WHEN 'office' THEN CONVERT(0x56C4836E207068C3B26E67 USING utf8mb4)
+    WHEN 'event' THEN CONVERT(0x53E1BBB1206B69E1BB876E USING utf8mb4)
+    WHEN 'support' THEN CONVERT(0x48E1BB97207472E1BBA3207468C3A06E68207669C3AA6E USING utf8mb4)
+    ELSE CONVERT(0x436869206B68C3A163 USING utf8mb4)
+  END,
+  s.category,
+  s.amount,
+  s.note,
+  NULL,
+  TIMESTAMP(s.occurred_on, '12:00:00'),
+  @executor_id,
+  NOW(3),
+  NOW(3)
+FROM tmp_fund_expenses_2026 AS s
+JOIN fund_periods AS p
+  ON p.year = 2026 AND p.month = MONTH(s.occurred_on)
+WHERE @import_ok = 1
+ON DUPLICATE KEY UPDATE
+  fund_period_id = VALUES(fund_period_id),
+  kind = VALUES(kind),
+  title = VALUES(title),
+  category = VALUES(category),
+  amount = VALUES(amount),
+  note = VALUES(note),
+  user_id = VALUES(user_id),
+  occurred_at = VALUES(occurred_at),
+  created_by = VALUES(created_by),
+  updated_at = NOW(3);
+
+-- Must show 46 verified rows and the same totals as the source summary.
+SELECT MONTH(s.occurred_on) AS month,
+       COUNT(*) AS source_count,
+       SUM(s.amount) AS source_total,
+       SUM(CASE WHEN t.amount = s.amount
+                 AND t.category = s.category
+                 AND DATE(t.occurred_at) = s.occurred_on
+                THEN 1 ELSE 0 END) AS verified_count,
+       SUM(t.amount) AS database_total
+FROM tmp_fund_expenses_2026 AS s
+LEFT JOIN fund_transactions AS t
+  ON t.id = CONCAT('exp_sheet_2026_', LPAD(s.row_no, 3, '0'))
+GROUP BY MONTH(s.occurred_on)
+ORDER BY month;
+
+SELECT category, COUNT(*) AS expense_count, SUM(amount) AS expense_total
+FROM fund_transactions
+WHERE id LIKE 'exp_sheet_2026_%'
+GROUP BY category
+ORDER BY category;
+
+-- If ready_to_import = 1 and verification matches, run COMMIT.
+-- Otherwise run ROLLBACK in this same connection.

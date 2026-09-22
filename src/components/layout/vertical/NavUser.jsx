@@ -155,18 +155,27 @@ const NavUser = () => {
         open={open}
         onClose={handleClose}
         anchorOrigin={{
-          vertical: "top",
+          vertical: isCollapsedNotHovered ? "bottom" : "top",
           horizontal: isCollapsedNotHovered ? "right" : "left",
         }}
         transformOrigin={{
           vertical: "bottom",
-          horizontal: "left",
+          horizontal: isCollapsedNotHovered ? "left" : "left",
         }}
         slotProps={{
           paper: {
             sx: {
-              minWidth: 220,
-              mt: -1,
+              width: isCollapsedNotHovered
+                ? 200
+                : anchorEl
+                  ? `${anchorEl.clientWidth}px`
+                  : 236,
+              minWidth: isCollapsedNotHovered
+                ? 200
+                : anchorEl
+                  ? `${anchorEl.clientWidth}px`
+                  : 236,
+              mb: 1,
               borderRadius: 2,
               boxShadow:
                 "var(--mui-customShadows-md, 0 4px 18px rgba(0,0,0,0.12))",
@@ -174,40 +183,9 @@ const NavUser = () => {
           },
         }}
       >
-        <Box
-          sx={{
-            px: 2,
-            py: 1.5,
-            display: "flex",
-            alignItems: "center",
-            gap: 1.5,
-          }}
-        >
-          <Avatar
-            alt={userName}
-            src={avatarSrc}
-            sx={{ width: 40, height: 40 }}
-          />
-          <Box sx={{ minWidth: 0, flex: 1 }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 600 }} noWrap>
-              {userName}
-            </Typography>
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              noWrap
-              display="block"
-            >
-              {userEmail}
-            </Typography>
-          </Box>
-        </Box>
-
-        <Divider sx={{ my: 0.5 }} />
-
         <MenuItem
           onClick={() => handleNavigate("/profile")}
-          sx={{ gap: 1.5, py: 1 }}
+          sx={{ gap: 1.5, py: 1.25, px: 2 }}
         >
           <i className="tabler-user text-lg" />
           <Typography variant="body2" color="text.primary">
@@ -215,21 +193,11 @@ const NavUser = () => {
           </Typography>
         </MenuItem>
 
-        <MenuItem
-          onClick={() => handleNavigate("/settings")}
-          sx={{ gap: 1.5, py: 1 }}
-        >
-          <i className="tabler-settings text-lg" />
-          <Typography variant="body2" color="text.primary">
-            Cài đặt
-          </Typography>
-        </MenuItem>
-
         <Divider sx={{ my: 0.5 }} />
 
         <MenuItem
           onClick={handleLogout}
-          sx={{ gap: 1.5, py: 1, color: "error.main" }}
+          sx={{ gap: 1.5, py: 1.25, px: 2, color: "error.main" }}
         >
           <i className="tabler-logout text-lg" />
           <Typography

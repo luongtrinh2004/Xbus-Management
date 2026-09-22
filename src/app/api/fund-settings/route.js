@@ -4,7 +4,7 @@ import {
   getSettings,
   saveSettings,
   getFunds,
-  saveFunds,
+  saveFundSnapshots,
   getUsers,
   appendAuditLog,
 } from "@/libs/dataRepository";
@@ -91,7 +91,10 @@ async function persist(req, operation) {
     const funds = await getFunds();
     const users = await getUsers();
     for (const fund of funds) snapshotFund(fund, users, settings);
-    await saveFunds(funds);
+    // Changing contribution rules only needs to freeze the current roster/rates.
+    // Rewriting payments here can resurrect metadata for a deleted user and fail
+    // the users foreign key, while no financial transaction is being changed.
+    await saveFundSnapshots(funds);
     let updatedRules;
     let updatedHistory = settings.fundContributionRuleHistory || [];
     let details;
