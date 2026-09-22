@@ -242,11 +242,32 @@ export async function GET(req) {
     const searchableColumns = columns.filter(
       (column) => !["blob", "binary", "varbinary"].includes(column.dataType),
     );
-    const where =
-      search && searchableColumns.length
-        ? ` WHERE CONCAT_WS(' ', ${searchableColumns.map((column) => `CAST(${quoteIdentifier(column.name)} AS CHAR)`).join(", ")}) LIKE ?`
-        : "";
-    const params = where ? [`%${search}%`] : [];
+    const transactionType =
+      req.nextUrl.searchParams.get("transactionType") || "";
+    const hasTransactionType = columns.some(
+      (c) => c.name === "transaction_type",
+    );
+    const filterType =
+      hasTransactionType && ["import", "export"].includes(transactionType)
+        ? transactionType
+        : null;
+
+    const conditions = [];
+    const params = [];
+
+    if (search && searchableColumns.length) {
+      conditions.push(
+        `CONCAT_WS(' ', ${searchableColumns.map((column) => `CAST(${quoteIdentifier(column.name)} AS CHAR)`).join(", ")}) LIKE ?`,
+      );
+      params.push(`%${search}%`);
+    }
+
+    if (filterType) {
+      conditions.push(`${quoteIdentifier("transaction_type")} = ?`);
+      params.push(filterType);
+    }
+
+    const where = conditions.length ? ` WHERE ${conditions.join(" AND ")}` : "";
     const [[countRow]] = await pool.query(
       `SELECT COUNT(*) AS total FROM ${quoteIdentifier(table)}${where}`,
       params,
@@ -384,24 +405,47 @@ export async function DELETE(req) {
         { error: "Chỉ admin được truy cập" },
         { status: 403 },
       );
-    const { table, key = {}, clearAll = false } = await req.json();
+    const {
+      table,
+      key = {},
+      clearAll = false,
+      scope = "all",
+    } = await req.json();
     const columns = await getTableMetadata(table);
     if (clearAll) {
-      const [result] = await getMysqlPool().query(
-        `DELETE FROM ${quoteIdentifier(table)}`,
-      );
+      let deleteSql = `DELETE FROM ${quoteIdentifier(table)}`;
+      const deleteParams = [];
+      let logAction = "DATABASE_CLEAR_TABLE";
+      let logDetail = `Xóa toàn bộ dòng khỏi bảng ${table}`;
+
+      if (
+        table === "asset_transactions" &&
+        ["import", "export"].includes(scope)
+      ) {
+        deleteSql += ` WHERE ${quoteIdentifier("transaction_type")} = ?`;
+        deleteParams.push(scope);
+        logAction =
+          scope === "import"
+            ? "DATABASE_CLEAR_IMPORTS"
+            : "DATABASE_CLEAR_EXPORTS";
+        logDetail = `Xóa dữ liệu ${scope === "import" ? "nhập kho (import)" : "xuất kho (export)"} khỏi bảng ${table}`;
+      }
+
+      const [result] = await getMysqlPool().query(deleteSql, deleteParams);
+      const deletedCount = Number(result.affectedRows || 0);
+
       if (table !== "audit_logs")
         await appendAuditLog({
           adminId: token.id,
           adminName: token.name || "Admin",
           adminEmail: token.email || "",
-          action: "DATABASE_CLEAR_TABLE",
+          action: logAction,
           targetType: table,
-          details: `Xóa toàn bộ ${Number(result.affectedRows || 0)} dòng khỏi bảng ${table}`,
+          details: `${logDetail} (${deletedCount} dòng)`,
         });
       return NextResponse.json({
         success: true,
-        deleted: Number(result.affectedRows || 0),
+        deleted: deletedCount,
       });
     }
     const primaryKeys = columns.filter((column) => column.columnKey === "PRI");

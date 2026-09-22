@@ -11,3 +11,5 @@ const toSlug = (value) =>
 export const assetCategoryIdFromName = (name) =>
   `asset_category_${toSlug(name)}`;
 export const assetUnitIdFromName = (name) => `asset_unit_${toSlug(name)}`;
+export const assetDocumentCodeFromName = (name) =>
+  toSlug(name).slice(0, 64).replace(/_+$/g, "");

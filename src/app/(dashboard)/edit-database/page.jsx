@@ -14,12 +14,15 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import Divider from "@mui/material/Divider";
+import FormControlLabel from "@mui/material/FormControlLabel";
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
 import MenuItem from "@mui/material/MenuItem";
+import Radio from "@mui/material/Radio";
+import RadioGroup from "@mui/material/RadioGroup";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -46,10 +49,14 @@ const RowEditor = ({ open, mode, row, columns, onClose, onSaved, table }) => {
     setValues(
       Object.fromEntries(
         columns
-          .filter((column) => mode === "edit" || column.extra !== "auto_increment")
+          .filter(
+            (column) => mode === "edit" || column.extra !== "auto_increment",
+          )
           .map((column) => [
             column.name,
-            mode === "edit" ? valueText(row?.[column.name]) : valueText(column.defaultValue),
+            mode === "edit"
+              ? valueText(row?.[column.name])
+              : valueText(column.defaultValue),
           ]),
       ),
     );
@@ -58,7 +65,9 @@ const RowEditor = ({ open, mode, row, columns, onClose, onSaved, table }) => {
   const submit = async () => {
     setSaving(true);
     try {
-      const primaryKeys = columns.filter((column) => column.columnKey === "PRI");
+      const primaryKeys = columns.filter(
+        (column) => column.columnKey === "PRI",
+      );
       const key = Object.fromEntries(
         primaryKeys.map((column) => [column.name, row?.[column.name]]),
       );
@@ -69,7 +78,9 @@ const RowEditor = ({ open, mode, row, columns, onClose, onSaved, table }) => {
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error);
-      toast.success(mode === "edit" ? "Đã cập nhật dòng dữ liệu" : "Đã thêm dòng dữ liệu");
+      toast.success(
+        mode === "edit" ? "Đã cập nhật dòng dữ liệu" : "Đã thêm dòng dữ liệu",
+      );
       await onSaved();
       onClose();
     } catch (error) {
@@ -94,11 +105,16 @@ const RowEditor = ({ open, mode, row, columns, onClose, onSaved, table }) => {
           }}
         >
           {columns
-            .filter((column) => mode === "edit" || column.extra !== "auto_increment")
+            .filter(
+              (column) => mode === "edit" || column.extra !== "auto_increment",
+            )
             .map((column) => {
-              const multiline = ["text", "longtext", "mediumtext", "json"].includes(
-                column.dataType,
-              );
+              const multiline = [
+                "text",
+                "longtext",
+                "mediumtext",
+                "json",
+              ].includes(column.dataType);
               return (
                 <CustomTextField
                   key={column.name}
@@ -147,12 +163,14 @@ export default function DatabaseEditorPage() {
   const [editable, setEditable] = useState(false);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [transactionFilter, setTransactionFilter] = useState("all");
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(25);
   const [total, setTotal] = useState(0);
   const [editor, setEditor] = useState(null);
   const [deleteRow, setDeleteRow] = useState(null);
   const [clearOpen, setClearOpen] = useState(false);
+  const [clearScope, setClearScope] = useState("all");
   const [clearConfirm, setClearConfirm] = useState("");
   const [clearing, setClearing] = useState(false);
 
@@ -175,6 +193,12 @@ export default function DatabaseEditorPage() {
         limit: String(limit),
         search,
       });
+      if (
+        selectedTable === "asset_transactions" &&
+        transactionFilter !== "all"
+      ) {
+        params.set("transactionType", transactionFilter);
+      }
       const response = await fetch(`/api/database-editor?${params}`);
       const result = await response.json();
       if (!response.ok) throw new Error(result.error);
@@ -187,7 +211,7 @@ export default function DatabaseEditorPage() {
     } finally {
       setLoading(false);
     }
-  }, [limit, page, search, selectedTable]);
+  }, [limit, page, search, selectedTable, transactionFilter]);
 
   useEffect(() => {
     loadTables().catch((error) => {
@@ -206,9 +230,12 @@ export default function DatabaseEditorPage() {
     [columns],
   );
   const rowKey = (row) =>
-    primaryKeys.map((column) => `${column.name}:${row[column.name]}`).join("|") ||
-    JSON.stringify(row);
-  const selectedTableInfo = tables.find((table) => table.name === selectedTable);
+    primaryKeys
+      .map((column) => `${column.name}:${row[column.name]}`)
+      .join("|") || JSON.stringify(row);
+  const selectedTableInfo = tables.find(
+    (table) => table.name === selectedTable,
+  );
 
   const remove = async () => {
     if (!deleteRow) return;
@@ -235,15 +262,28 @@ export default function DatabaseEditorPage() {
     if (!selectedTable || clearConfirm !== selectedTable) return;
     setClearing(true);
     try {
+      const scope = selectedTable === "asset_transactions" ? clearScope : "all";
       const response = await fetch("/api/database-editor", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ table: selectedTable, clearAll: true }),
+        body: JSON.stringify({
+          table: selectedTable,
+          clearAll: true,
+          scope,
+        }),
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error);
+      const scopeLabel =
+        selectedTable === "asset_transactions"
+          ? scope === "import"
+            ? " (dữ liệu nhập kho)"
+            : scope === "export"
+              ? " (dữ liệu xuất kho)"
+              : " (tất cả dữ liệu)"
+          : "";
       toast.success(
-        `Đã xóa ${Number(result.deleted || 0).toLocaleString("vi-VN")} dòng khỏi ${selectedTable}`,
+        `Đã xóa ${Number(result.deleted || 0).toLocaleString("vi-VN")} dòng${scopeLabel} khỏi ${selectedTable}`,
       );
       setClearOpen(false);
       setClearConfirm("");
@@ -252,7 +292,7 @@ export default function DatabaseEditorPage() {
     } catch (error) {
       toast.error(
         error.message ||
-          "Không thể xóa toàn bộ dữ liệu; hãy kiểm tra các bảng đang tham chiếu",
+          "Không thể xóa dữ liệu; hãy kiểm tra các bảng đang tham chiếu",
       );
     } finally {
       setClearing(false);
@@ -273,7 +313,8 @@ export default function DatabaseEditorPage() {
                   Database Editor
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Database: {database || "đang tải…"} · Chỉ dành cho quản trị viên
+                  Database: {database || "đang tải…"} · Chỉ dành cho quản trị
+                  viên
                 </Typography>
               </Box>
             </Box>
@@ -281,8 +322,9 @@ export default function DatabaseEditorPage() {
         />
       </Card>
       <Alert severity="warning">
-        Thay đổi tại đây tác động trực tiếp lên dữ liệu production và có thể ảnh hưởng
-        các chức năng đang chạy. Hãy kiểm tra khóa chính và quan hệ dữ liệu trước khi lưu.
+        Thay đổi tại đây tác động trực tiếp lên dữ liệu production và có thể ảnh
+        hưởng các chức năng đang chạy. Hãy kiểm tra khóa chính và quan hệ dữ
+        liệu trước khi lưu.
       </Alert>
       <Box
         sx={{
@@ -292,7 +334,9 @@ export default function DatabaseEditorPage() {
           alignItems: "start",
         }}
       >
-        <Card sx={{ maxHeight: { lg: "calc(100vh - 220px)" }, overflow: "auto" }}>
+        <Card
+          sx={{ maxHeight: { lg: "calc(100vh - 220px)" }, overflow: "auto" }}
+        >
           <Box sx={{ p: 2.5 }}>
             <Typography variant="overline" color="text.secondary">
               Tables ({tables.length})
@@ -307,6 +351,7 @@ export default function DatabaseEditorPage() {
                 onClick={() => {
                   setSelectedTable(table.name);
                   setSearch("");
+                  setTransactionFilter("all");
                   setPage(1);
                 }}
               >
@@ -314,20 +359,32 @@ export default function DatabaseEditorPage() {
                   primary={table.name}
                   secondary={
                     <>
-                      <Typography component="span" variant="caption" display="block">
+                      <Typography
+                        component="span"
+                        variant="caption"
+                        display="block"
+                      >
                         {table.total.toLocaleString("vi-VN")} dòng
                       </Typography>
                       <Typography
                         component="span"
                         variant="caption"
                         color="text.disabled"
-                        sx={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}
+                        sx={{
+                          display: "-webkit-box",
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: "vertical",
+                          overflow: "hidden",
+                        }}
                       >
                         {table.description}
                       </Typography>
                     </>
                   }
-                  primaryTypographyProps={{ fontFamily: "monospace", fontSize: 13 }}
+                  primaryTypographyProps={{
+                    fontFamily: "monospace",
+                    fontSize: 13,
+                  }}
                 />
               </ListItemButton>
             ))}
@@ -351,8 +408,13 @@ export default function DatabaseEditorPage() {
               <Typography variant="caption" color="text.secondary">
                 {total.toLocaleString("vi-VN")} dòng · {columns.length} cột
               </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                {selectedTableInfo?.description || "Chọn một bảng để xem dữ liệu"}
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ mt: 0.5 }}
+              >
+                {selectedTableInfo?.description ||
+                  "Chọn một bảng để xem dữ liệu"}
               </Typography>
             </Box>
             <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap" }}>
@@ -373,6 +435,22 @@ export default function DatabaseEditorPage() {
                 }}
                 sx={{ width: { xs: "100%", sm: 260 } }}
               />
+              {selectedTable === "asset_transactions" && (
+                <CustomTextField
+                  select
+                  size="small"
+                  value={transactionFilter}
+                  onChange={(event) => {
+                    setTransactionFilter(event.target.value);
+                    setPage(1);
+                  }}
+                  sx={{ width: { xs: "100%", sm: 180 } }}
+                >
+                  <MenuItem value="all">Tất cả giao dịch</MenuItem>
+                  <MenuItem value="import">Nhập kho (import)</MenuItem>
+                  <MenuItem value="export">Xuất kho (export)</MenuItem>
+                </CustomTextField>
+              )}
               <CustomTextField
                 select
                 size="small"
@@ -403,11 +481,12 @@ export default function DatabaseEditorPage() {
                 startIcon={<i className="tabler-trash-x" />}
                 disabled={!selectedTable || total === 0}
                 onClick={() => {
+                  setClearScope("all");
                   setClearConfirm("");
                   setClearOpen(true);
                 }}
               >
-                Xóa toàn bộ
+                Xóa
               </Button>
               <IconButton title="Tải lại" onClick={loadRows}>
                 <i className="tabler-refresh" />
@@ -417,8 +496,8 @@ export default function DatabaseEditorPage() {
           <Divider />
           {!editable && selectedTable && (
             <Alert severity="info" sx={{ m: 2 }}>
-              Bảng không có khóa chính nên chỉ hỗ trợ xem và thêm dòng, không thể sửa/xóa
-              an toàn.
+              Bảng không có khóa chính nên chỉ hỗ trợ xem và thêm dòng, không
+              thể sửa/xóa an toàn.
             </Alert>
           )}
           {loading ? (
@@ -427,20 +506,39 @@ export default function DatabaseEditorPage() {
             </Box>
           ) : (
             <TableContainer sx={{ maxHeight: "calc(100vh - 360px)" }}>
-              <Table stickyHeader size="small" sx={{ minWidth: Math.max(720, columns.length * 170) }}>
+              <Table
+                stickyHeader
+                size="small"
+                sx={{ minWidth: Math.max(720, columns.length * 170) }}
+              >
                 <TableHead>
                   <TableRow>
                     {columns.map((column) => (
                       <TableCell key={column.name}>
-                        <Typography variant="caption" fontWeight={700} fontFamily="monospace">
+                        <Typography
+                          variant="caption"
+                          fontWeight={700}
+                          fontFamily="monospace"
+                        >
                           {column.label || column.name}
                         </Typography>
-                        <Typography display="block" variant="caption" color="text.disabled">
+                        <Typography
+                          display="block"
+                          variant="caption"
+                          color="text.disabled"
+                        >
                           {column.name} · {column.columnType}
                         </Typography>
                       </TableCell>
                     ))}
-                    <TableCell align="center" sx={{ position: "sticky", right: 0, bgcolor: "background.paper" }}>
+                    <TableCell
+                      align="center"
+                      sx={{
+                        position: "sticky",
+                        right: 0,
+                        bgcolor: "background.paper",
+                      }}
+                    >
                       THAO TÁC
                     </TableCell>
                   </TableRow>
@@ -452,13 +550,27 @@ export default function DatabaseEditorPage() {
                         {columns.map((column) => (
                           <TableCell key={column.name} sx={{ maxWidth: 260 }}>
                             {row[column.name] === null ? (
-                              <Chip size="small" label="NULL" variant="outlined" />
+                              <Chip
+                                size="small"
+                                label="NULL"
+                                variant="outlined"
+                              />
                             ) : (
                               <Typography
                                 variant="body2"
-                                fontFamily={["json", "text", "longtext"].includes(column.dataType) ? "inherit" : "monospace"}
+                                fontFamily={
+                                  ["json", "text", "longtext"].includes(
+                                    column.dataType,
+                                  )
+                                    ? "inherit"
+                                    : "monospace"
+                                }
                                 title={valueText(row[column.name])}
-                                sx={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+                                sx={{
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  whiteSpace: "nowrap",
+                                }}
                               >
                                 {valueText(row[column.name]) || "(rỗng)"}
                               </Typography>
@@ -467,7 +579,11 @@ export default function DatabaseEditorPage() {
                         ))}
                         <TableCell
                           align="center"
-                          sx={{ position: "sticky", right: 0, bgcolor: "background.paper" }}
+                          sx={{
+                            position: "sticky",
+                            right: 0,
+                            bgcolor: "background.paper",
+                          }}
                         >
                           <IconButton
                             size="small"
@@ -535,14 +651,110 @@ export default function DatabaseEditorPage() {
         fullWidth
         maxWidth="sm"
       >
-        <DialogTitle color="error.main">Xóa toàn bộ dữ liệu bảng</DialogTitle>
+        <DialogTitle color="error.main">
+          {selectedTable === "asset_transactions"
+            ? "Xóa dữ liệu giao dịch kho"
+            : "Xóa toàn bộ dữ liệu bảng"}
+        </DialogTitle>
         <DialogContent dividers>
+          {selectedTable === "asset_transactions" && (
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600 }}>
+                Chọn phạm vi dữ liệu cần xóa:
+              </Typography>
+              <RadioGroup
+                value={clearScope}
+                onChange={(event) => setClearScope(event.target.value)}
+              >
+                <FormControlLabel
+                  value="import"
+                  control={<Radio color="error" />}
+                  label={
+                    <Box sx={{ py: 0.5 }}>
+                      <Typography variant="body2" fontWeight={600}>
+                        Dữ liệu nhập kho (import)
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        Chỉ xóa các bản ghi lịch sử nhập kho hàng hóa
+                      </Typography>
+                    </Box>
+                  }
+                  sx={{ mb: 1, alignItems: "flex-start" }}
+                />
+                <FormControlLabel
+                  value="export"
+                  control={<Radio color="error" />}
+                  label={
+                    <Box sx={{ py: 0.5 }}>
+                      <Typography variant="body2" fontWeight={600}>
+                        Dữ liệu xuất kho (export)
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        Chỉ xóa các bản ghi lịch sử xuất kho hàng hóa
+                      </Typography>
+                    </Box>
+                  }
+                  sx={{ mb: 1, alignItems: "flex-start" }}
+                />
+                <FormControlLabel
+                  value="all"
+                  control={<Radio color="error" />}
+                  label={
+                    <Box sx={{ py: 0.5 }}>
+                      <Typography
+                        variant="body2"
+                        fontWeight={600}
+                        color="error.main"
+                      >
+                        Tất cả dữ liệu (nhập và xuất)
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        Xóa toàn bộ giao dịch có trong bảng asset_transactions
+                      </Typography>
+                    </Box>
+                  }
+                  sx={{ alignItems: "flex-start" }}
+                />
+              </RadioGroup>
+              <Divider sx={{ my: 2 }} />
+            </Box>
+          )}
           <Alert severity="error" sx={{ mb: 3 }}>
-            Thao tác này xóa vĩnh viễn toàn bộ {total.toLocaleString("vi-VN")} dòng
-            trong bảng <strong>{selectedTable}</strong>. Cấu trúc bảng vẫn được giữ nguyên.
+            {selectedTable === "asset_transactions" ? (
+              clearScope === "import" ? (
+                <>
+                  Thao tác này sẽ xóa vĩnh viễn tất cả các bản ghi{" "}
+                  <strong>nhập kho (import)</strong> trong bảng{" "}
+                  <strong>asset_transactions</strong>. Dữ liệu xuất kho và danh
+                  mục sản phẩm không bị ảnh hưởng.
+                </>
+              ) : clearScope === "export" ? (
+                <>
+                  Thao tác này sẽ xóa vĩnh viễn tất cả các bản ghi{" "}
+                  <strong>xuất kho (export)</strong> trong bảng{" "}
+                  <strong>asset_transactions</strong>. Dữ liệu nhập kho và danh
+                  mục sản phẩm không bị ảnh hưởng.
+                </>
+              ) : (
+                <>
+                  Thao tác này xóa vĩnh viễn{" "}
+                  <strong>toàn bộ dữ liệu giao dịch</strong> trong bảng{" "}
+                  <strong>asset_transactions</strong>. Cấu trúc bảng vẫn được
+                  giữ nguyên.
+                </>
+              )
+            ) : (
+              <>
+                Thao tác này xóa vĩnh viễn toàn bộ{" "}
+                {total.toLocaleString("vi-VN")} dòng trong bảng{" "}
+                <strong>{selectedTable}</strong>. Cấu trúc bảng vẫn được giữ
+                nguyên.
+              </>
+            )}
           </Alert>
           <Typography variant="body2" sx={{ mb: 2 }}>
-            Nhập chính xác tên bảng <strong>{selectedTable}</strong> để xác nhận:
+            Nhập chính xác tên bảng <strong>{selectedTable}</strong> để xác
+            nhận:
           </Typography>
           <CustomTextField
             fullWidth
@@ -559,7 +771,11 @@ export default function DatabaseEditorPage() {
           />
         </DialogContent>
         <DialogActions>
-          <Button color="secondary" disabled={clearing} onClick={() => setClearOpen(false)}>
+          <Button
+            color="secondary"
+            disabled={clearing}
+            onClick={() => setClearOpen(false)}
+          >
             Hủy
           </Button>
           <Button
@@ -568,7 +784,15 @@ export default function DatabaseEditorPage() {
             disabled={clearing || clearConfirm !== selectedTable}
             onClick={clearTable}
           >
-            {clearing ? "Đang xóa…" : "Xóa toàn bộ dữ liệu"}
+            {clearing
+              ? "Đang xóa…"
+              : selectedTable === "asset_transactions"
+                ? clearScope === "import"
+                  ? "Xóa dữ liệu nhập kho"
+                  : clearScope === "export"
+                    ? "Xóa dữ liệu xuất kho"
+                    : "Xóa tất cả dữ liệu"
+                : "Xóa toàn bộ dữ liệu"}
           </Button>
         </DialogActions>
       </Dialog>

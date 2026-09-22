@@ -470,7 +470,35 @@ export default function HomePage() {
                         : "primary"
                   }
                   variant="tonal"
-                  label={`${user.schedulingPoints || 0} đ`}
+                  label={
+                    <Box
+                      component="span"
+                      sx={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 0.5,
+                      }}
+                    >
+                      <Typography
+                        component="span"
+                        variant="caption"
+                        fontWeight={700}
+                      >
+                        {user.schedulingPoints || 0}
+                      </Typography>
+                      <Box
+                        component="img"
+                        src="/images/icons/token.svg"
+                        alt=""
+                        sx={{
+                          width: 15,
+                          height: 15,
+                          display: "block",
+                          objectFit: "contain",
+                        }}
+                      />
+                    </Box>
+                  }
                 />
               </Box>
             ))}

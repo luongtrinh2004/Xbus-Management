@@ -160,11 +160,7 @@ export async function GET(req) {
         ? eligibleUsers
         : [],
       trashAssignableUsers: ["admin", "assistant"].includes(token?.role)
-        ? allUsers.filter(
-            (user) =>
-              user.status === "able" &&
-              ["user", "assistant", "admin"].includes(user.role),
-          )
+        ? getEligibleTrashUsers(allUsers)
         : [],
       exemptUserIds: ["admin", "assistant"].includes(token?.role)
         ? exemptUserIds

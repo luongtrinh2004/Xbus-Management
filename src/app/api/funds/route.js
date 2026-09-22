@@ -3,6 +3,7 @@ import { getToken } from "next-auth/jwt";
 import {
   getFunds,
   saveFunds,
+  saveFundSnapshots,
   getUsers,
   getSettings,
   saveUsers,
@@ -192,7 +193,7 @@ export async function GET(req) {
     }
     for (const item of allFunds)
       changed = snapshotFund(item, users, settings) || changed;
-    if (changed) await saveFunds(allFunds);
+    if (changed) await saveFundSnapshots(allFunds);
 
     if (allPeriods) return NextResponse.json(buildAllFundsResponse(allFunds));
 

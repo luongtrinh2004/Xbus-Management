@@ -17,8 +17,15 @@ const now = new Date();
 const year = Number(args.year || now.getFullYear());
 const month = Number(args.month || now.getMonth() + 1);
 
-if (!Number.isInteger(year) || !Number.isInteger(month) || month < 1 || month > 12)
-  throw new Error("Dùng: npm run trash:randomize-month -- --year=2026 --month=9");
+if (
+  !Number.isInteger(year) ||
+  !Number.isInteger(month) ||
+  month < 1 ||
+  month > 12
+)
+  throw new Error(
+    "Dùng: npm run trash:randomize-month -- --year=2026 --month=9",
+  );
 
 const shuffle = (items) => {
   const result = [...items];
@@ -63,8 +70,22 @@ for (const key of Object.keys(overrides))
   if (key.startsWith(`${year}-${String(month).padStart(2, "0")}-`))
     delete overrides[key];
 
+const projectedPoints = new Map(
+  randomizedPool.map((user) => [user.id, Number(user.schedulingPoints) || 0]),
+);
+const lastAssignedIndex = new Map();
 workingDateKeys.forEach((dateKey, index) => {
-  overrides[dateKey] = randomizedPool[index % randomizedPool.length].id;
+  const person = [...randomizedPool].sort(
+    (left, right) =>
+      (projectedPoints.get(left.id) || 0) -
+        (projectedPoints.get(right.id) || 0) ||
+      (lastAssignedIndex.get(left.id) ?? Number.NEGATIVE_INFINITY) -
+        (lastAssignedIndex.get(right.id) ?? Number.NEGATIVE_INFINITY) ||
+      randomizedPool.indexOf(left) - randomizedPool.indexOf(right),
+  )[0];
+  overrides[dateKey] = person.id;
+  projectedPoints.set(person.id, (projectedPoints.get(person.id) || 0) + 1);
+  lastAssignedIndex.set(person.id, index);
 });
 
 await saveSettings({

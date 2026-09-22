@@ -344,9 +344,22 @@ const UserListTable = ({
         header: "Điểm rèn luyện",
         meta: { sortable: true },
         cell: ({ row }) => (
-          <Typography variant="body2" fontWeight={600}>
-            {Number(row.original.schedulingPoints) || 0} điểm
-          </Typography>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Typography variant="body2" fontWeight={600}>
+              {Number(row.original.schedulingPoints) || 0}
+            </Typography>
+            <Box
+              component="img"
+              src="/images/icons/token.svg"
+              alt=""
+              sx={{
+                width: 18,
+                height: 18,
+                display: "block",
+                objectFit: "contain",
+              }}
+            />
+          </Box>
         ),
       }),
       columnHelper.accessor("action", {
@@ -451,7 +464,14 @@ const UserListTable = ({
             flexDirection: { xs: "column", sm: "row" },
           }}
         >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2, width: { xs: "100%", sm: "auto" } }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 2,
+              width: { xs: "100%", sm: "auto" },
+            }}
+          >
             <Typography variant="body2" color="text.secondary">
               Hiển thị
             </Typography>
@@ -481,7 +501,9 @@ const UserListTable = ({
               gap: 2,
               flexWrap: "wrap",
               width: { xs: "100%", sm: "auto" },
-              "& > .MuiButton-root": { flex: { xs: "1 1 auto", sm: "0 0 auto" } },
+              "& > .MuiButton-root": {
+                flex: { xs: "1 1 auto", sm: "0 0 auto" },
+              },
             }}
           >
             <CustomTextField

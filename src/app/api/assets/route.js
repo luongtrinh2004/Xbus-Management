@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
+import { assetDocumentCodeFromName } from "@/libs/assetIds";
 import {
   appendAuditLog,
   createAssetTransaction,
@@ -22,9 +23,23 @@ const normalizeData = (data) => ({
 });
 
 const normalizeText = (value) => String(value || "").trim();
+const stockKey = (item) =>
+  assetDocumentCodeFromName(item.name || item.productName);
+const findProduct = (products, input) => {
+  const productId = normalizeText(input.productId);
+  const code = normalizeText(input.code).toUpperCase();
+  const documentCode =
+    normalizeText(input.documentCode) || assetDocumentCodeFromName(input.name);
+  return products.find(
+    (item) =>
+      (productId && item.id === productId) ||
+      (code && normalizeText(item.code).toUpperCase() === code) ||
+      (documentCode && assetDocumentCodeFromName(item.name) === documentCode),
+  );
+};
 const transactionBaseKey = (item) =>
   [
-    normalizeText(item.code).toUpperCase(),
+    stockKey(item),
     normalizeText(item.date),
     normalizeText(item.person).toLocaleLowerCase("vi"),
   ].join("|");
@@ -51,6 +66,7 @@ const mergeTransactions = (current, incoming, type, token) => {
         : null;
 
     const normalized = {
+      documentCode: assetDocumentCodeFromName(name),
       code,
       name,
       category: normalizeText(item.category),
@@ -112,9 +128,9 @@ export async function POST(req) {
     const data = normalizeData(await getAssets());
     const type = body.type === "export" ? "export" : "import";
     const quantity = Number(body.quantity);
-    const normalizedCode = body.code?.trim().toUpperCase();
+    const product = findProduct(data.products || [], body);
     if (
-      !body.code?.trim() ||
+      !product ||
       !body.date ||
       !body.person?.trim() ||
       (type === "export" && !body.issuedTo?.trim())
@@ -130,27 +146,25 @@ export async function POST(req) {
         { status: 400 },
       );
     }
-    const product = (data.products || []).find(
-      (item) => item.code === normalizedCode,
-    );
-    if (!product)
-      return NextResponse.json(
-        { error: "Sản phẩm không tồn tại trong danh mục" },
-        { status: 400 },
-      );
     if (!product.active)
       return NextResponse.json(
         { error: "Sản phẩm đã ngừng sử dụng" },
         { status: 400 },
       );
     const categoryName =
-      data.categories.find((item) => item.id === product.categoryId)?.name || "";
+      data.categories.find((item) => item.id === product.categoryId)?.name ||
+      "";
+    const normalizedCode = normalizeText(product.code).toUpperCase();
     if (type === "export") {
       const imported = data.imports
-        .filter((item) => item.code?.trim().toUpperCase() === normalizedCode)
+        .filter(
+          (item) => stockKey(item) === assetDocumentCodeFromName(product.name),
+        )
         .reduce((sum, item) => sum + item.quantity, 0);
       const exported = data.exports
-        .filter((item) => item.code?.trim().toUpperCase() === normalizedCode)
+        .filter(
+          (item) => stockKey(item) === assetDocumentCodeFromName(product.name),
+        )
         .reduce((sum, item) => sum + item.quantity, 0);
       if (quantity > imported - exported)
         return NextResponse.json(
@@ -160,6 +174,7 @@ export async function POST(req) {
     }
     const record = {
       id: `${type}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+      documentCode: assetDocumentCodeFromName(product.name),
       code: normalizedCode,
       name: product.name,
       category: categoryName,
@@ -217,16 +232,14 @@ export async function PUT(req) {
       const balances = new Map();
       current.imports.forEach((item) =>
         balances.set(
-          normalizeText(item.code).toUpperCase(),
-          (balances.get(normalizeText(item.code).toUpperCase()) || 0) +
-            Number(item.quantity || 0),
+          stockKey(item),
+          (balances.get(stockKey(item)) || 0) + Number(item.quantity || 0),
         ),
       );
       current.exports.forEach((item) =>
         balances.set(
-          normalizeText(item.code).toUpperCase(),
-          (balances.get(normalizeText(item.code).toUpperCase()) || 0) -
-            Number(item.quantity || 0),
+          stockKey(item),
+          (balances.get(stockKey(item)) || 0) - Number(item.quantity || 0),
         ),
       );
       const productByCode = new Map(
@@ -242,11 +255,13 @@ export async function PUT(req) {
         const desired = Number(item.quantity);
         const product = productByCode.get(code);
         if (!product || !Number.isInteger(desired) || desired < 0) continue;
-        const difference = desired - (balances.get(code) || 0);
+        const documentCode = assetDocumentCodeFromName(product.name);
+        const difference = desired - (balances.get(documentCode) || 0);
         if (!difference) continue;
         const type = difference > 0 ? "import" : "export";
         const record = {
           id: `${type}_stock_${Date.now()}_${index}`,
+          documentCode,
           code,
           name: product.name,
           category:
@@ -264,7 +279,7 @@ export async function PUT(req) {
           createdAt: now.toISOString(),
         };
         current[type === "import" ? "imports" : "exports"].push(record);
-        balances.set(code, desired);
+        balances.set(documentCode, desired);
         updated += 1;
       }
       if (!updated)
@@ -287,13 +302,22 @@ export async function PUT(req) {
       });
     }
     const productByCode = new Map(
-      current.products.map((item) => [normalizeText(item.code).toUpperCase(), item]),
+      current.products
+        .filter((item) => normalizeText(item.code))
+        .map((item) => [normalizeText(item.code).toUpperCase(), item]),
+    );
+    const productByName = new Map(
+      current.products
+        .filter((item) => assetDocumentCodeFromName(item.name))
+        .map((item) => [assetDocumentCodeFromName(item.name), item]),
     );
     const categoryById = new Map(
       current.categories.map((item) => [item.id, item.name]),
     );
     const categoryNames = new Set(
-      current.categories.map((item) => normalizeText(item.name).toLocaleLowerCase("vi")),
+      current.categories.map((item) =>
+        normalizeText(item.name).toLocaleLowerCase("vi"),
+      ),
     );
     const unitNames = new Map(
       current.units.map((item) => [
@@ -304,36 +328,56 @@ export async function PUT(req) {
     const normalizeImportedRows = (rows, type) =>
       rows.map((item) => {
         const requestedCode = normalizeText(item.code).toUpperCase();
-        const product = productByCode.get(requestedCode);
+        const requestedName = normalizeText(item.name);
+        const product = requestedCode
+          ? productByCode.get(requestedCode)
+          : productByName.get(assetDocumentCodeFromName(requestedName));
         const requestedCategory = normalizeText(item.category);
         const requestedUnit = normalizeText(item.unit);
         return {
           ...item,
           code: product?.code || "",
-          name: product?.name || normalizeText(item.name),
+          name: product?.name || requestedName,
           category: product
             ? categoryById.get(product.categoryId) || ""
             : categoryNames.has(requestedCategory.toLocaleLowerCase("vi"))
               ? requestedCategory
               : "",
-          unit: product?.unit ||
+          unit:
+            product?.unit ||
             unitNames.get(requestedUnit.toLocaleLowerCase("vi")) ||
             "",
           description: product?.description || normalizeText(item.description),
-          location: product?.location || normalizeText(item.location),
+          // Vị trí trên dòng giao dịch trong Excel được ưu tiên. Chỉ dùng vị
+          // trí danh mục khi file không cung cấp giá trị.
+          location: normalizeText(item.location) || product?.location || "",
           issuedTo: type === "export" ? item.issuedTo : "",
         };
       });
     const importedRows = normalizeImportedRows(body.imports || [], "import");
     const exportedRows = normalizeImportedRows(body.exports || [], "export");
+    // File được coi là danh sách Excel hiện hành: thay các dòng được tạo từ
+    // lần import Excel trước, nhưng giữ nguyên giao dịch nhập tay.
+    const currentImports =
+      body.replaceExcelRows && Array.isArray(body.imports)
+        ? current.imports.filter(
+            (item) => !String(item.id || "").startsWith("import_excel_"),
+          )
+        : current.imports;
+    const currentExports =
+      body.replaceExcelRows && Array.isArray(body.exports)
+        ? current.exports.filter(
+            (item) => !String(item.id || "").startsWith("export_excel_"),
+          )
+        : current.exports;
     const importResult = mergeTransactions(
-      current.imports,
+      currentImports,
       importedRows,
       "import",
       token,
     );
     const exportResult = mergeTransactions(
-      current.exports,
+      currentExports,
       exportedRows,
       "export",
       token,
@@ -382,7 +426,7 @@ export async function PATCH(req) {
     const collection = type === "export" ? data.exports : data.imports;
     const index = collection.findIndex((item) => item.id === body.id);
     const quantity = Number(body.quantity);
-    const normalizedCode = body.code?.trim().toUpperCase();
+    const product = findProduct(data.products || [], body);
 
     if (index < 0)
       return NextResponse.json(
@@ -390,7 +434,7 @@ export async function PATCH(req) {
         { status: 404 },
       );
     if (
-      !normalizedCode ||
+      !product ||
       !body.date ||
       !body.person?.trim() ||
       (type === "export" && !body.issuedTo?.trim())
@@ -405,25 +449,20 @@ export async function PATCH(req) {
         { status: 400 },
       );
 
-    const product = (data.products || []).find(
-      (item) => item.code === normalizedCode,
-    );
-    if (!product)
-      return NextResponse.json(
-        { error: "Sản phẩm không tồn tại trong danh mục" },
-        { status: 400 },
-      );
     if (!product.active)
       return NextResponse.json(
         { error: "Sản phẩm đã ngừng sử dụng" },
         { status: 400 },
       );
     const categoryName =
-      data.categories.find((item) => item.id === product.categoryId)?.name || "";
+      data.categories.find((item) => item.id === product.categoryId)?.name ||
+      "";
+    const normalizedCode = normalizeText(product.code).toUpperCase();
 
     const previous = collection[index];
     const updated = {
       ...previous,
+      documentCode: assetDocumentCodeFromName(product.name),
       code: normalizedCode,
       name: product.name,
       category: categoryName,
@@ -442,14 +481,14 @@ export async function PATCH(req) {
 
     const balances = new Map();
     data.imports.forEach((item) => {
-      const code = item.code?.trim().toUpperCase();
+      const code = stockKey(item);
       balances.set(
         code,
         (balances.get(code) || 0) + Number(item.quantity || 0),
       );
     });
     data.exports.forEach((item) => {
-      const code = item.code?.trim().toUpperCase();
+      const code = stockKey(item);
       balances.set(
         code,
         (balances.get(code) || 0) - Number(item.quantity || 0),
@@ -508,12 +547,10 @@ export async function DELETE(req) {
       );
 
     const record = collection[index];
-    const normalizedCode = record.code?.trim().toUpperCase();
+    const normalizedCode = stockKey(record);
     if (
       type === "import" &&
-      data.exports.some(
-        (item) => item.code?.trim().toUpperCase() === normalizedCode,
-      )
+      data.exports.some((item) => stockKey(item) === normalizedCode)
     )
       return NextResponse.json(
         {

@@ -222,8 +222,7 @@ export default function AdminScheduleView({
               currentSchedule?.weekIndex ||
               weeks.findIndex((week) =>
                 week.some((cell) => cell?.date === date),
-              ) +
-                1,
+              ) + 1,
             requiredPeople,
             fixedParticipants,
           }),
@@ -272,13 +271,17 @@ export default function AdminScheduleView({
         fillTrash(),
       ]);
       if (waterOutcome.status === "rejected")
-        toast.error(waterOutcome.reason.message || "Không thể random lịch nước");
+        toast.error(
+          waterOutcome.reason.message || "Không thể random lịch nước",
+        );
       else if (!waterOutcome.value.skipped)
         toast.success(
           `Đã bổ sung ${waterOutcome.value.assigned} người vào lịch nước ngày ${date}`,
         );
       if (trashOutcome.status === "rejected")
-        toast.error(trashOutcome.reason.message || "Không thể random lịch đổ rác");
+        toast.error(
+          trashOutcome.reason.message || "Không thể random lịch đổ rác",
+        );
       else if (trashOutcome.value.assigned)
         toast.success(
           `Đã phân công ${trashOutcome.value.assigned} ô đổ rác còn trống đến cuối tháng`,
@@ -453,7 +456,9 @@ export default function AdminScheduleView({
                 gap: 1,
                 flexWrap: "wrap",
                 width: { xs: "100%", sm: "auto" },
-                "& > .MuiButton-root:first-of-type": { flex: { xs: "1 1 100%", sm: "0 0 auto" } },
+                "& > .MuiButton-root:first-of-type": {
+                  flex: { xs: "1 1 100%", sm: "0 0 auto" },
+                },
               }}
             >
               <Button
@@ -570,8 +575,27 @@ export default function AdminScheduleView({
                       <Typography variant="body2" fontWeight={600} noWrap>
                         {user.name}
                       </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {user.schedulingPoints || 0} điểm
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 0.5,
+                        }}
+                      >
+                        <span>{user.schedulingPoints || 0}</span>
+                        <Box
+                          component="img"
+                          src="/images/icons/token.svg"
+                          alt=""
+                          sx={{
+                            width: 14,
+                            height: 14,
+                            display: "block",
+                            objectFit: "contain",
+                          }}
+                        />
                         {exemptIds.includes(user.id) ? " · Miễn bê nước" : ""}
                       </Typography>
                     </Box>
@@ -1141,8 +1165,7 @@ export default function AdminScheduleView({
                 {trashAssignee
                   ? trashAssignableUsers.find(
                       (user) => user.id === trashAssignee,
-                    )
-                      ?.name || trashEdit?.name
+                    )?.name || trashEdit?.name
                   : "Chưa có"}
               </strong>
             </Typography>
@@ -1212,9 +1235,25 @@ export default function AdminScheduleView({
                 <Typography
                   variant="caption"
                   color="text.secondary"
-                  sx={{ ml: "auto" }}
+                  sx={{
+                    ml: "auto",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 0.5,
+                  }}
                 >
-                  {user.schedulingPoints || 0} điểm
+                  <span>{user.schedulingPoints || 0}</span>
+                  <Box
+                    component="img"
+                    src="/images/icons/token.svg"
+                    alt=""
+                    sx={{
+                      width: 14,
+                      height: 14,
+                      display: "block",
+                      objectFit: "contain",
+                    }}
+                  />
                 </Typography>
               </Box>
             ))}

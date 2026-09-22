@@ -40,12 +40,11 @@ export function getEligibleWaterUsers(users = []) {
   );
 }
 
-export function getEligibleTrashUsers(users = [], exemptUserIds = []) {
-  const exemptSet = new Set(exemptUserIds);
+export function getEligibleTrashUsers(users = []) {
   return users
     .filter(
       (user) =>
-        exemptSet.has(user.id) &&
+        ["user", "assistant", "admin"].includes(user.role) &&
         user.status === "able" &&
         !isOperationsUser(user),
     )
@@ -161,6 +160,14 @@ export function getTrashSchedulesForMonth(
   const anchor = Date.UTC(2026, 0, 5);
   const dayMs = 86400000;
   const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  const projectedPoints = new Map(
+    participants.map((person) => [
+      person.id,
+      Number(person.schedulingPoints || 0),
+    ]),
+  );
+  const lastAssignedIndex = new Map();
+  let workingIndexInMonth = 0;
 
   for (let day = 1; day <= daysInMonth; day += 1) {
     const date = new Date(Date.UTC(year, month - 1, day));
@@ -174,16 +181,31 @@ export function getTrashSchedulesForMonth(
     const elapsedDays = Math.floor((date.getTime() - anchor) / dayMs);
     const workingIndex =
       Math.floor(elapsedDays / 7) * 5 + Math.max(0, weekday - 1);
+    const rotationStart =
+      ((workingIndex % participants.length) + participants.length) %
+      participants.length;
+    const rotationRank = (person) =>
+      (participants.indexOf(person) - rotationStart + participants.length) %
+      participants.length;
     const defaultPerson =
       autoAssign && participants.length
-        ? participants[
-            ((workingIndex % participants.length) + participants.length) %
-              participants.length
-          ]
+        ? [...participants].sort(
+            (a, b) =>
+              (projectedPoints.get(a.id) || 0) -
+                (projectedPoints.get(b.id) || 0) ||
+              (lastAssignedIndex.get(a.id) ?? Number.NEGATIVE_INFINITY) -
+                (lastAssignedIndex.get(b.id) ?? Number.NEGATIVE_INFINITY) ||
+              rotationRank(a) - rotationRank(b) ||
+              String(a.name || "").localeCompare(String(b.name || ""), "vi"),
+          )[0]
         : null;
     const person = hasOverride
       ? usersById.get(overrides[dateKey]) || null
       : defaultPerson;
+    if (person && projectedPoints.has(person.id)) {
+      projectedPoints.set(person.id, (projectedPoints.get(person.id) || 0) + 1);
+      lastAssignedIndex.set(person.id, workingIndexInMonth);
+    }
     schedules.push({
       id: `trash_${year}${String(month).padStart(2, "0")}${String(day).padStart(2, "0")}`,
       date: `${String(day).padStart(2, "0")}/${String(month).padStart(2, "0")}/${year}`,
@@ -196,6 +218,7 @@ export function getTrashSchedulesForMonth(
       role: person?.role || "",
       gender: person?.gender || "",
     });
+    workingIndexInMonth += 1;
   }
   return schedules;
 }
