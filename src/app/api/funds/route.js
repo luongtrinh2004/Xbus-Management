@@ -77,6 +77,55 @@ const buildFundResponse = (fund, allFunds) => {
   };
 };
 
+const buildAllFundsResponse = (funds) => {
+  const incomes = funds.flatMap((fund) => [
+    ...(fund.incomes || []),
+    ...(fund.members || [])
+      .filter((member) => member.paid)
+      .map((member) => ({
+        id: `monthly-fund-${fund.id}-${member.userId}`,
+        title: "Quỹ tháng này",
+        category: "monthly_fund",
+        amount: member.amount || 0,
+        note: "",
+        userId: member.userId,
+        userName: member.userName || "",
+        receivedAt: member.paidAt,
+        createdAt: member.updatedAt,
+        locked: true,
+      })),
+  ]);
+  const expenses = funds.flatMap((fund) => fund.expenses || []);
+  const totalIncome = incomes.reduce(
+    (sum, item) => sum + (item.amount || 0),
+    0,
+  );
+  const totalExpense = expenses.reduce(
+    (sum, item) => sum + (item.amount || 0),
+    0,
+  );
+
+  return {
+    id: "all",
+    month: null,
+    year: null,
+    isAllPeriods: true,
+    members: [],
+    incomes,
+    expenses,
+    memberIncome: 0,
+    totalIncome,
+    totalExpense,
+    balance: totalIncome - totalExpense,
+    paidCount: 0,
+    totalMembers: 0,
+    availablePeriods: funds
+      .filter((item) => periodKey(item) <= periodKey(currentFundPeriod()))
+      .map((item) => ({ month: item.month, year: item.year }))
+      .sort((a, b) => b.year - a.year || b.month - a.month),
+  };
+};
+
 export async function GET(req) {
   try {
     const token = await getToken({ req, secret });
@@ -85,6 +134,7 @@ export async function GET(req) {
     const searchParams = req.nextUrl.searchParams;
     const month = searchParams.get("month") || null;
     const year = searchParams.get("year") || null;
+    const allPeriods = searchParams.get("all") === "1";
 
     const allFunds = await getFunds();
     const current = currentFundPeriod();
@@ -93,12 +143,13 @@ export async function GET(req) {
     const selected =
       month && year ? { month: Number(month), year: Number(year) } : current;
     if (
-      !Number.isInteger(selected.month) ||
-      selected.month < 1 ||
-      selected.month > 12 ||
-      !Number.isInteger(selected.year) ||
-      selected.year < 2000 ||
-      selected.year > 2100
+      !allPeriods &&
+      (!Number.isInteger(selected.month) ||
+        selected.month < 1 ||
+        selected.month > 12 ||
+        !Number.isInteger(selected.year) ||
+        selected.year < 2000 ||
+        selected.year > 2100)
     )
       return NextResponse.json({ error: "Kỳ không hợp lệ" }, { status: 400 });
     let changed = false;
@@ -143,6 +194,8 @@ export async function GET(req) {
       changed = snapshotFund(item, users, settings) || changed;
     if (changed) await saveFunds(allFunds);
 
+    if (allPeriods) return NextResponse.json(buildAllFundsResponse(allFunds));
+
     // Lấy quỹ hiện tại (mới nhất hoặc theo tháng/năm)
     let fund = null;
     if (month && year) {
@@ -186,7 +239,15 @@ export async function POST(req) {
       );
     }
 
-    const body = await req.json();
+    let body;
+    try {
+      body = await req.json();
+    } catch {
+      return NextResponse.json(
+        { error: "Dữ liệu import không hợp lệ hoặc request không có nội dung" },
+        { status: 400 },
+      );
+    }
     const amount = Number(body.amount);
     const month = Number(body.month);
     const year = Number(body.year);
@@ -285,7 +346,15 @@ export async function POST(req) {
     });
   } catch (error) {
     console.error("[API Funds] POST:", error);
-    return NextResponse.json({ error: "Lỗi hệ thống" }, { status: 500 });
+    return NextResponse.json(
+      {
+        error:
+          process.env.NODE_ENV === "development"
+            ? `Không thể lưu khoản import: ${error.message}`
+            : "Lỗi hệ thống",
+      },
+      { status: 500 },
+    );
   }
 }
 

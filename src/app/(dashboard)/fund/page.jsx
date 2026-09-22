@@ -1,5 +1,6 @@
 "use client";
 import VietnameseDateField from "@/components/VietnameseDateField";
+import * as XLSX from "xlsx";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
@@ -24,6 +25,7 @@ import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import InputBase from "@mui/material/InputBase";
 import MenuItem from "@mui/material/MenuItem";
+import Popover from "@mui/material/Popover";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -94,6 +96,10 @@ export default function FundPage() {
   const [fund, setFund] = useState(null);
   const [users, setUsers] = useState([]);
   const [period, setPeriod] = useState("");
+  const [importingExcel, setImportingExcel] = useState(false);
+  const importFileRef = useRef(null);
+  const [periodPickerAnchor, setPeriodPickerAnchor] = useState(null);
+  const [periodPickerYear, setPeriodPickerYear] = useState(2026);
   const [loading, setLoading] = useState(true);
   const [membersOpen, setMembersOpen] = useState(true);
   const [activeSection, setActiveSection] = useState("income");
@@ -154,9 +160,14 @@ export default function FundPage() {
   }, [searchParams]);
 
   const loadFund = async (selected) => {
+    const isAllPeriods = selected === "all";
     const [month, year] = selected ? selected.split("/") : [];
     const response = await fetch(
-      selected ? `/api/funds?month=${+month}&year=${+year}` : "/api/funds",
+      isAllPeriods
+        ? "/api/funds?all=1"
+        : selected
+          ? `/api/funds?month=${+month}&year=${+year}`
+          : "/api/funds",
     );
     if (!response.ok) throw new Error("Không thể tải dữ liệu quỹ");
     const data = await response.json();
@@ -328,6 +339,183 @@ export default function FundPage() {
     });
     return values;
   }, [fund]);
+
+  const periodOptions = useMemo(() => {
+    const available = fund?.availablePeriods || [];
+    const now = new Date();
+    const latestAvailable = available.reduce(
+      (latest, item) => Math.max(latest, item.year * 12 + item.month),
+      2025 * 12 + 1,
+    );
+    const latest = Math.max(
+      latestAvailable,
+      now.getFullYear() * 12 + now.getMonth() + 1,
+    );
+    const options = [];
+
+    for (let value = latest; value >= 2025 * 12 + 1; value -= 1) {
+      const year = Math.floor((value - 1) / 12);
+      const month = ((value - 1) % 12) + 1;
+      const label = `${String(month).padStart(2, "0")}/${year}`;
+      options.push({ value: label, label });
+    }
+
+    return [{ value: "all", label: "Tất cả kỳ" }, ...options];
+  }, [fund?.availablePeriods]);
+  const periodYears = useMemo(
+    () =>
+      [...new Set(periodOptions.slice(1).map((item) => item.value.slice(-4)))]
+        .map(Number)
+        .sort((a, b) => b - a),
+    [periodOptions],
+  );
+  const isAllPeriods = period === "all";
+
+  const choosePeriod = async (value) => {
+    setPeriod(value);
+    setPeriodPickerAnchor(null);
+    try {
+      await loadFund(value);
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  const importTransactions = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    if (isAllPeriods) return toast.error("Hãy chọn một kỳ trước khi import");
+    const importKind = activeSection === "expense" ? "expense" : "income";
+    const category = importKind === "income" ? incomeFilter : "other";
+    if (importKind === "income" && category === "all")
+      return toast.error("Hãy chọn loại nguồn thu trước khi import");
+    const compact = (value) =>
+      String(value || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/đ/g, "d")
+        .replace(/\s+/g, "")
+        .toLowerCase();
+    const pick = (row, keys) => {
+      const key = Object.keys(row).find((item) => keys.includes(compact(item)));
+      return key ? row[key] : "";
+    };
+    const dateValue = (value) => {
+      if (typeof value === "number") {
+        const parsed = XLSX.SSF.parse_date_code(value);
+        if (parsed)
+          return `${parsed.y}-${String(parsed.m).padStart(2, "0")}-${String(parsed.d).padStart(2, "0")}`;
+      }
+      const text = String(value || "").trim();
+      if (/^\d{4}-\d{2}-\d{2}$/.test(text)) return text;
+      const parts = text.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{2,4})$/);
+      if (!parts) return "";
+      const year = parts[3].length === 2 ? `20${parts[3]}` : parts[3];
+      return `${year}-${parts[2].padStart(2, "0")}-${parts[1].padStart(2, "0")}`;
+    };
+    try {
+      setImportingExcel(true);
+      const workbook = XLSX.read(await file.arrayBuffer(), {
+        type: "array",
+        cellDates: false,
+      });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(sheet, { defval: "", raw: true });
+      if (!rows.length) throw new Error("File Excel không có dữ liệu");
+      const preparedPeriods = new Set();
+      let imported = 0;
+      for (const [rowIndex, row] of rows.entries()) {
+        const personText = String(
+          pick(row, ["nguoinop", "nguoithuchien", "hoten", "email"]) || "",
+        ).trim();
+        const amount = Number(
+          String(pick(row, ["sotien", "amount"]) || "").replace(/[^\d-]/g, ""),
+        );
+        const date = dateValue(
+          pick(
+            row,
+            importKind === "income"
+              ? ["ngaythu", "thoigianthu", "thoigian", "ngay"]
+              : ["ngaychi", "thoigianchi", "thoigian", "ngay"],
+          ),
+        );
+        const note = String(pick(row, ["ghichu", "note"]) || "").trim();
+        if (!Number.isFinite(amount) || amount <= 0) continue;
+        if (!date)
+          throw new Error(
+            `Dòng ${rowIndex + 2} chưa có Ngày thu/Ngày chi hợp lệ`,
+          );
+        const [rowYear, rowMonth] = date.split("-").map(Number);
+        const rowPeriod = `${rowMonth}/${rowYear}`;
+        if (!preparedPeriods.has(rowPeriod)) {
+          const periodResponse = await fetch(
+            `/api/funds?month=${rowMonth}&year=${rowYear}`,
+          );
+          if (!periodResponse.ok)
+            throw new Error(
+              `Không thể tạo kỳ ${String(rowMonth).padStart(2, "0")}/${rowYear}`,
+            );
+          preparedPeriods.add(rowPeriod);
+        }
+        const person = users.find(
+          (user) =>
+            compact(user.email) === compact(personText) ||
+            compact(user.name) === compact(personText),
+        );
+        const needsPerson =
+          importKind === "income" && category !== "happy_hour";
+        if (needsPerson && !person)
+          throw new Error(
+            `Không tìm thấy người nộp: ${personText || "(trống)"}`,
+          );
+        if (category === "monthly_fund") {
+          const response = await fetch("/api/funds", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              kind: "member",
+              userId: person.id,
+              paid: true,
+              amount,
+              month: rowMonth,
+              year: rowYear,
+            }),
+          });
+          const result = await response.json();
+          if (!response.ok)
+            throw new Error(result.error || "Không thể import khoản đóng quỹ");
+          imported += 1;
+          continue;
+        }
+        const response = await fetch("/api/funds", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            kind: importKind,
+            category,
+            amount,
+            date,
+            note,
+            userId: person?.id || "",
+            month: rowMonth,
+            year: rowYear,
+          }),
+        });
+        const result = await response.json();
+        if (!response.ok)
+          throw new Error(result.error || "Không thể import giao dịch");
+        imported += 1;
+      }
+      if (!imported) throw new Error("Không có dòng hợp lệ để import");
+      await loadFund(period);
+      toast.success(`Đã import ${imported} khoản`);
+    } catch (error) {
+      toast.error(error.message || "Không thể đọc file Excel");
+    } finally {
+      setImportingExcel(false);
+    }
+  };
 
   const incomeRows = useMemo(
     () =>
@@ -558,33 +746,103 @@ export default function FundPage() {
             </Box>
           }
           action={
-            <Box sx={{ display: "flex", gap: 1, alignItems: "center", width: { xs: "100%", sm: "auto" } }}>
-              <CustomTextField
-                type="month"
-                size="small"
-                label="Kỳ theo dõi"
-                InputLabelProps={{ shrink: true }}
-                inputProps={{ min: "2000-01", max: "2100-12" }}
-                value={period.split("/").reverse().join("-")}
-                onChange={async (event) => {
-                  if (!/^\d{4}-\d{2}$/.test(event.target.value)) return;
-                  const value = event.target.value
-                    .split("-")
-                    .reverse()
-                    .join("/");
-                  setPeriod(value);
-                  try {
-                    await loadFund(value);
-                  } catch (error) {
-                    toast.error(error.message);
-                  }
+            <Box
+              sx={{
+                display: "flex",
+                gap: 1,
+                alignItems: "center",
+                width: { xs: "100%", sm: "auto" },
+              }}
+            >
+              <Button
+                variant="outlined"
+                color="inherit"
+                endIcon={<i className="tabler-chevron-down" />}
+                onClick={(event) => {
+                  const selectedYear = Number(period.split("/")[1]);
+                  setPeriodPickerYear(
+                    periodYears.includes(selectedYear)
+                      ? selectedYear
+                      : periodYears[0] || 2025,
+                  );
+                  setPeriodPickerAnchor(event.currentTarget);
                 }}
-                sx={{ minWidth: { xs: "100%", sm: 180 } }}
-              />
+                sx={{
+                  minWidth: { xs: "100%", sm: 180 },
+                  height: 40,
+                  justifyContent: "space-between",
+                  textTransform: "none",
+                }}
+              >
+                {period === "all" ? "Tất cả kỳ" : period || "Kỳ theo dõi"}
+              </Button>
+              <Popover
+                open={Boolean(periodPickerAnchor)}
+                anchorEl={periodPickerAnchor}
+                onClose={() => setPeriodPickerAnchor(null)}
+                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                transformOrigin={{ vertical: "top", horizontal: "right" }}
+                slotProps={{ paper: { sx: { mt: 1, p: 2, width: 300 } } }}
+              >
+                <CustomTextField
+                  select
+                  fullWidth
+                  size="small"
+                  label="Năm"
+                  value={periodPickerYear}
+                  onChange={(event) =>
+                    setPeriodPickerYear(Number(event.target.value))
+                  }
+                  sx={{ mb: 2 }}
+                >
+                  {periodYears.map((year) => (
+                    <MenuItem key={year} value={year}>
+                      {year}
+                    </MenuItem>
+                  ))}
+                </CustomTextField>
+                <Box
+                  sx={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+                    gap: 1,
+                  }}
+                >
+                  {Array.from({ length: 12 }, (_, index) => {
+                    const month = index + 1;
+                    const value = `${String(month).padStart(2, "0")}/${periodPickerYear}`;
+                    return (
+                      <Button
+                        key={value}
+                        variant={period === value ? "contained" : "tonal"}
+                        onClick={() => choosePeriod(value)}
+                        sx={{ minWidth: 0, aspectRatio: "1 / 1", p: 0 }}
+                      >
+                        {String(month).padStart(2, "0")}
+                      </Button>
+                    );
+                  })}
+                  <Button
+                    variant={isAllPeriods ? "contained" : "outlined"}
+                    onClick={() => choosePeriod("all")}
+                    sx={{ gridColumn: "span 4", textTransform: "none" }}
+                  >
+                    Tất cả kỳ
+                  </Button>
+                </Box>
+              </Popover>
             </Box>
           }
         />
       </Card>
+
+      <input
+        ref={importFileRef}
+        type="file"
+        accept=".xlsx,.xls"
+        hidden
+        onChange={importTransactions}
+      />
 
       {fund?.isFuture && (
         <Typography color="text.secondary" sx={{ mb: 3 }}>
@@ -627,7 +885,9 @@ export default function FundPage() {
                         gap: 1.5,
                         flexWrap: "wrap",
                         width: { xs: "100%", sm: "auto" },
-                        "& .MuiButton-root": { flex: { xs: "1 1 auto", sm: "0 0 auto" } },
+                        "& .MuiButton-root": {
+                          flex: { xs: "1 1 auto", sm: "0 0 auto" },
+                        },
                       }}
                     >
                       <CustomTextField
@@ -647,7 +907,18 @@ export default function FundPage() {
                           </MenuItem>
                         ))}
                       </CustomTextField>
-                      {canManage && (
+                      {canManage && !isAllPeriods && (
+                        <Button
+                          color="secondary"
+                          variant="tonal"
+                          startIcon={<i className="tabler-upload" />}
+                          disabled={importingExcel || incomeFilter === "all"}
+                          onClick={() => importFileRef.current?.click()}
+                        >
+                          Import Excel
+                        </Button>
+                      )}
+                      {canManage && !isAllPeriods && (
                         <Button
                           color="success"
                           variant="tonal"
@@ -799,7 +1070,7 @@ export default function FundPage() {
                                 </Typography>
                               </TableCell>
                               <TableCell align="center">
-                                {item.locked || !canManage ? (
+                                {item.locked || !canManage || isAllPeriods ? (
                                   "—"
                                 ) : (
                                   <Box
@@ -884,15 +1155,27 @@ export default function FundPage() {
                     </Box>
                   }
                   action={
-                    canManage && (
-                      <Button
-                        color="error"
-                        variant="tonal"
-                        startIcon={<i className="tabler-plus" />}
-                        onClick={() => openDialog("expense")}
-                      >
-                        Thêm khoản chi
-                      </Button>
+                    canManage &&
+                    !isAllPeriods && (
+                      <Box sx={{ display: "flex", gap: 1 }}>
+                        <Button
+                          color="secondary"
+                          variant="tonal"
+                          startIcon={<i className="tabler-upload" />}
+                          disabled={importingExcel}
+                          onClick={() => importFileRef.current?.click()}
+                        >
+                          Import Excel
+                        </Button>
+                        <Button
+                          color="error"
+                          variant="tonal"
+                          startIcon={<i className="tabler-plus" />}
+                          onClick={() => openDialog("expense")}
+                        >
+                          Thêm khoản chi
+                        </Button>
+                      </Box>
                     )
                   }
                 />
@@ -956,7 +1239,7 @@ export default function FundPage() {
                               </Typography>
                             </TableCell>
                             <TableCell align="center">
-                              {canManage ? (
+                              {canManage && !isAllPeriods ? (
                                 <Box
                                   sx={{
                                     display: "flex",
