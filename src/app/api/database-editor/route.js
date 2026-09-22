@@ -118,6 +118,44 @@ const getTableMetadata = async (table) => {
 const normalizeWriteValue = (value, column) => {
   if (value === null || value === undefined) return null;
   if (value === "" && column.isNullable === "YES") return null;
+  if (column.dataType === "date") {
+    const text = String(value).trim();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(text))
+      throw new Error(`${column.name} phải có dạng YYYY-MM-DD`);
+    const parsed = new Date(`${text}T00:00:00.000Z`);
+    if (
+      Number.isNaN(parsed.getTime()) ||
+      parsed.toISOString().slice(0, 10) !== text
+    )
+      throw new Error(`${column.name} không phải ngày hợp lệ`);
+    return text;
+  }
+  if (["datetime", "timestamp"].includes(column.dataType)) {
+    const text = String(value).trim();
+    // Giá trị đọc từ mysql2 được trả về dưới dạng ISO. Trả Date cho mysql2 để
+    // driver ghi lại đúng timezone đã cấu hình (+07:00).
+    if (
+      /^\d{4}-\d{2}-\d{2}T/.test(text) &&
+      /(?:Z|[+-]\d{2}:?\d{2})$/.test(text)
+    ) {
+      const parsed = new Date(text);
+      if (Number.isNaN(parsed.getTime()))
+        throw new Error(`${column.name} không phải ngày giờ hợp lệ`);
+      return parsed;
+    }
+    const mysqlDateTime = text.replace("T", " ");
+    if (
+      !/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(?:\.\d{1,6})?$/.test(mysqlDateTime)
+    )
+      throw new Error(`${column.name} phải có dạng YYYY-MM-DD HH:mm:ss`);
+    return mysqlDateTime;
+  }
+  if (column.dataType === "time") {
+    const text = String(value).trim();
+    if (!/^-?\d{1,3}:\d{2}:\d{2}(?:\.\d{1,6})?$/.test(text))
+      throw new Error(`${column.name} phải có dạng HH:mm:ss`);
+    return text;
+  }
   if (column.dataType === "bigint") {
     if (value === "") return column.defaultValue ?? 0;
     if (!/^-?\d+$/.test(String(value)))
@@ -140,8 +178,15 @@ const normalizeWriteValue = (value, column) => {
     if (!Number.isFinite(numeric)) throw new Error(`${column.name} phải là số`);
     return numeric;
   }
-  if (column.dataType === "json" && typeof value !== "string")
-    return JSON.stringify(value);
+  if (column.dataType === "json") {
+    try {
+      return JSON.stringify(
+        typeof value === "string" ? JSON.parse(value) : value,
+      );
+    } catch {
+      throw new Error(`${column.name} phải là JSON hợp lệ`);
+    }
+  }
   return value;
 };
 
@@ -303,7 +348,9 @@ export async function PATCH(req) {
     const setValues = writable.map((column) =>
       normalizeWriteValue(values[column.name], column),
     );
-    const keyValues = primaryKeys.map((column) => key[column.name]);
+    const keyValues = primaryKeys.map((column) =>
+      normalizeWriteValue(key[column.name], column),
+    );
     const [result] = await getMysqlPool().query(
       `UPDATE ${quoteIdentifier(table)} SET ${writable.map((column) => `${quoteIdentifier(column.name)}=?`).join(", ")} WHERE ${primaryKeys.map((column) => `${quoteIdentifier(column.name)}=?`).join(" AND ")} LIMIT 1`,
       [...setValues, ...keyValues],
@@ -365,7 +412,9 @@ export async function DELETE(req) {
       throw new Error("Bảng hoặc dòng không có khóa chính hợp lệ");
     const [result] = await getMysqlPool().query(
       `DELETE FROM ${quoteIdentifier(table)} WHERE ${primaryKeys.map((column) => `${quoteIdentifier(column.name)}=?`).join(" AND ")} LIMIT 1`,
-      primaryKeys.map((column) => key[column.name]),
+      primaryKeys.map((column) =>
+        normalizeWriteValue(key[column.name], column),
+      ),
     );
     if (!result.affectedRows) throw new Error("Không tìm thấy dòng cần xóa");
     if (table !== "audit_logs")

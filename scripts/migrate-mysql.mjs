@@ -4,6 +4,80 @@ import mysql from "mysql2/promise";
 
 const migrationsDir = path.join(process.cwd(), "database", "migrations");
 const initialEnvironment = new Set(Object.keys(process.env));
+
+// Tách câu lệnh mà không coi dấu chấm phẩy trong comment hoặc chuỗi là kết
+// thúc câu. Các migration có thể chứa nội dung mô tả và giá trị có dấu `;`.
+const splitSqlStatements = (sql) => {
+  const statements = [];
+  let statement = "";
+  let quote = null;
+  let lineComment = false;
+  let blockComment = false;
+
+  for (let index = 0; index < sql.length; index += 1) {
+    const char = sql[index];
+    const next = sql[index + 1];
+
+    if (lineComment) {
+      if (char === "\n") {
+        lineComment = false;
+        statement += char;
+      }
+      continue;
+    }
+    if (blockComment) {
+      if (char === "*" && next === "/") {
+        blockComment = false;
+        index += 1;
+      }
+      continue;
+    }
+    if (!quote && char === "-" && next === "-") {
+      lineComment = true;
+      index += 1;
+      continue;
+    }
+    if (!quote && char === "#") {
+      lineComment = true;
+      continue;
+    }
+    if (!quote && char === "/" && next === "*") {
+      blockComment = true;
+      index += 1;
+      continue;
+    }
+
+    if (quote) {
+      statement += char;
+      if (char === "\\" && index + 1 < sql.length) {
+        statement += sql[index + 1];
+        index += 1;
+      } else if (char === quote) {
+        if (sql[index + 1] === quote) {
+          statement += sql[index + 1];
+          index += 1;
+        } else {
+          quote = null;
+        }
+      }
+      continue;
+    }
+
+    if (char === "'" || char === '"' || char === "`") {
+      quote = char;
+      statement += char;
+    } else if (char === ";") {
+      if (statement.trim()) statements.push(statement.trim());
+      statement = "";
+    } else {
+      statement += char;
+    }
+  }
+
+  if (statement.trim()) statements.push(statement.trim());
+  return statements;
+};
+
 const loadEnvFile = (filename) => {
   const filepath = path.join(process.cwd(), filename);
   if (!fs.existsSync(filepath)) return;
@@ -47,10 +121,7 @@ try {
   for (const file of files) {
     if (completed.has(file)) continue;
     const sql = fs.readFileSync(path.join(migrationsDir, file), "utf8");
-    for (const statement of sql
-      .split(";")
-      .map((item) => item.trim())
-      .filter(Boolean)) {
+    for (const statement of splitSqlStatements(sql)) {
       try {
         await connection.query(statement);
       } catch (error) {

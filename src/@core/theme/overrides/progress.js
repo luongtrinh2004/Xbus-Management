@@ -13,6 +13,20 @@ const progress = {
         }
       })
     }
+  },
+  MuiCircularProgress: {
+    styleOverrides: {
+      root: {
+        animation: 'none !important',
+        backgroundImage: "url('/images/icons/loading.svg')",
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'center',
+        backgroundSize: 'contain',
+        '& .MuiCircularProgress-svg': {
+          display: 'none !important'
+        }
+      }
+    }
   }
 }
 

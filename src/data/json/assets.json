@@ -4,7 +4,7 @@
       "id": "import_1789959026054_nq9c",
       "code": "MT&PK003",
       "name": "Adapter Camera Orin",
-      "category": "Cái",
+      "category": "",
       "description": "",
       "date": "2026-09-21",
       "quantity": 1,
@@ -20,7 +20,7 @@
       "id": "import_1789959025972_54wg",
       "code": "CB-010",
       "name": "Adapter Camera Leopard 2 port A,B",
-      "category": "Cái",
+      "category": "",
       "description": "",
       "date": "2026-09-21",
       "quantity": 1,
@@ -36,7 +36,7 @@
       "id": "import_1789959025945_7fww",
       "code": "CB-025",
       "name": "AC_ISX031-H120",
-      "category": "Cái",
+      "category": "",
       "description": "",
       "date": "2026-09-21",
       "quantity": 1,
@@ -104,7 +104,7 @@
     {
       "code": "CB-001",
       "name": "Ublox C102-F9R",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 3,
@@ -118,7 +118,7 @@
     {
       "code": "CB-001",
       "name": "Ublox C102-F9R",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-03-26",
       "quantity": 1,
@@ -132,7 +132,7 @@
     {
       "code": "CB-002",
       "name": "Altos + Dây + Hub",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 3,
@@ -146,7 +146,7 @@
     {
       "code": "CB-002",
       "name": "Altos + Dây + Hub",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-04-01",
       "quantity": 1,
@@ -160,7 +160,7 @@
     {
       "code": "CB-003",
       "name": "CGI-230",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 6,
@@ -174,7 +174,7 @@
     {
       "code": "CB-004",
       "name": "POE Ethernet Adapter",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 3,
@@ -188,7 +188,7 @@
     {
       "code": "CB-005",
       "name": "Antenna GNSS CUAV",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 1,
@@ -202,7 +202,7 @@
     {
       "code": "CB-006",
       "name": "C-RTK 9P",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 1,
@@ -216,7 +216,7 @@
     {
       "code": "CB-007",
       "name": "GNSS (check lại cùng bộ IMU)",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 3,
@@ -230,7 +230,7 @@
     {
       "code": "CB-007",
       "name": "GNSS (check lại cùng bộ IMU)",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-03-25",
       "quantity": 1,
@@ -244,7 +244,7 @@
     {
       "code": "CB-008",
       "name": "Cam lùi Zestech",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 1,
@@ -258,7 +258,7 @@
     {
       "code": "CB-009",
       "name": "Camera Leopard Imaging FOV120",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 1,
@@ -272,7 +272,7 @@
     {
       "code": "CB-010",
       "name": "Adapter Camera Leopard 2 port A,B",
-      "category": "Cái",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 1,
@@ -286,7 +286,7 @@
     {
       "code": "CB-011",
       "name": "IMU Xsen MTi100",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 2,
@@ -300,7 +300,7 @@
     {
       "code": "CB-012",
       "name": "Lidar Airy (V)",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 4,
@@ -314,7 +314,7 @@
     {
       "code": "CB-013",
       "name": "Camera Leopard Imaging Adapter",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 1,
@@ -328,7 +328,7 @@
     {
       "code": "CB-014",
       "name": "Camera eCon-System",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 8,
@@ -342,7 +342,7 @@
     {
       "code": "CB-015",
       "name": "Camera Leopard FOV120",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 1,
@@ -356,7 +356,7 @@
     {
       "code": "CB-016",
       "name": "Lidar M1 Plus",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 3,
@@ -370,7 +370,7 @@
     {
       "code": "CB-017",
       "name": "Camera Ethernet Route CAM eConn",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 4,
@@ -384,7 +384,7 @@
     {
       "code": "CB-018",
       "name": "lidar Airy new",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-03-06",
       "quantity": 1,
@@ -398,7 +398,7 @@
     {
       "code": "CB-019",
       "name": "Camera eCon-System",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-03-10",
       "quantity": 5,
@@ -412,7 +412,7 @@
     {
       "code": "CB-020",
       "name": "Lens ArduCam",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-03-10",
       "quantity": 10,
@@ -426,7 +426,7 @@
     {
       "code": "CB-021",
       "name": "Camera Leopard Imaging FOV60",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-03-10",
       "quantity": 1,
@@ -440,7 +440,7 @@
     {
       "code": "CB-022",
       "name": "airy Roboshen(H)",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-03-12",
       "quantity": 2,
@@ -454,7 +454,7 @@
     {
       "code": "CB-023",
       "name": "lidar Airy",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-03-23",
       "quantity": 2,
@@ -468,7 +468,7 @@
     {
       "code": "CB-024",
       "name": "AC_ISX031-H60",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-03-23",
       "quantity": 15,
@@ -482,7 +482,7 @@
     {
       "code": "CB-024",
       "name": "AC_ISX031-H60",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-04-02",
       "quantity": 5,
@@ -496,7 +496,7 @@
     {
       "code": "CB-025",
       "name": "AC_ISX031-H120",
-      "category": "Cái",
+      "category": "",
       "description": "",
       "date": "2026-03-23",
       "quantity": 11,
@@ -510,7 +510,7 @@
     {
       "code": "CB-025",
       "name": "AC_ISX031-H120",
-      "category": "Cái",
+      "category": "",
       "description": "",
       "date": "2026-04-02",
       "quantity": 9,
@@ -524,7 +524,7 @@
     {
       "code": "CB-026",
       "name": "AC_ISX031-H190",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-03-23",
       "quantity": 20,
@@ -538,7 +538,7 @@
     {
       "code": "CB-027",
       "name": "cảm biến E1R + hub",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-03-23",
       "quantity": 16,
@@ -552,7 +552,7 @@
     {
       "code": "CB-028",
       "name": "cảm biến  BP",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-03-23",
       "quantity": 10,
@@ -566,7 +566,7 @@
     {
       "code": "CB-031",
       "name": "rada ARS 408",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-03-30",
       "quantity": 17,
@@ -580,7 +580,7 @@
     {
       "code": "CB-031",
       "name": "rada ARS 408",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-04-03",
       "quantity": 4,
@@ -594,7 +594,7 @@
     {
       "code": "MT&PK001",
       "name": "Nru51V+",
-      "category": "Máy tính nhúng & Phụ kiện",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 2,
@@ -608,7 +608,7 @@
     {
       "code": "MT&PK002",
       "name": "Bộ gá Nuvo",
-      "category": "Máy tính nhúng & Phụ kiện",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 1,
@@ -622,7 +622,7 @@
     {
       "code": "MT&PK003",
       "name": "Adapter Camera Orin",
-      "category": "Cái",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 1,
@@ -636,7 +636,7 @@
     {
       "code": "MT&PK004",
       "name": "Card PCI CAN",
-      "category": "Máy tính nhúng & Phụ kiện",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 1,
@@ -650,7 +650,7 @@
     {
       "code": "MT&PK005",
       "name": "Can Hub Kvaser",
-      "category": "Máy tính nhúng & Phụ kiện",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 1,
@@ -664,7 +664,7 @@
     {
       "code": "MT&PK005",
       "name": "Can Hub Kvaser",
-      "category": "Máy tính nhúng & Phụ kiện",
+      "category": "",
       "description": "",
       "date": "2026-04-03",
       "quantity": 1,
@@ -678,7 +678,7 @@
     {
       "code": "MT&PK006",
       "name": "Pcan-usb Pro",
-      "category": "Máy tính nhúng & Phụ kiện",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 1,
@@ -692,7 +692,7 @@
     {
       "code": "MT&PK007",
       "name": "nuvo-10108GC-10G-5049",
-      "category": "Máy tính nhúng & Phụ kiện",
+      "category": "",
       "description": "",
       "date": "2026-03-23",
       "quantity": 4,
@@ -706,7 +706,7 @@
     {
       "code": "MT&PK007",
       "name": "nuvo-10108GC-10G-5049",
-      "category": "Máy tính nhúng & Phụ kiện",
+      "category": "",
       "description": "",
       "date": "2026-03-26",
       "quantity": 2,
@@ -720,7 +720,7 @@
     {
       "code": "MT&PK009",
       "name": "Laptop L14",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 2,
@@ -734,7 +734,7 @@
     {
       "code": "MT&PK010",
       "name": "Máy In Brother L328",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 1,
@@ -748,7 +748,7 @@
     {
       "code": "MT&PK011",
       "name": "View Sonic VA1650",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 1,
@@ -762,7 +762,7 @@
     {
       "code": "MT&PK012",
       "name": "Logitech K400",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 1,
@@ -776,7 +776,7 @@
     {
       "code": "MT&PK013",
       "name": "Logitech G29",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 1,
@@ -790,7 +790,7 @@
     {
       "code": "MT&PK014",
       "name": "Shift G29",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 1,
@@ -804,7 +804,7 @@
     {
       "code": "MT&PK015",
       "name": "Converter DP to HDMI",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 1,
@@ -818,7 +818,7 @@
     {
       "code": "MT&PK016",
       "name": "CAT8 10M",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 6,
@@ -832,7 +832,7 @@
     {
       "code": "MT&PK017",
       "name": "CAT8 2M",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 5,
@@ -846,7 +846,7 @@
     {
       "code": "MT&PK018",
       "name": "View Sonic VA1650",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 1,
@@ -860,7 +860,7 @@
     {
       "code": "MT&PK019",
       "name": "Bàn phím Logitech",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 1,
@@ -874,7 +874,7 @@
     {
       "code": "MT&PK020",
       "name": "Dây Ethernet M8",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 1,
@@ -888,7 +888,7 @@
     {
       "code": "MT&PK021",
       "name": "Hub USB ORICO 7 port",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 1,
@@ -902,7 +902,7 @@
     {
       "code": "MT&PK022",
       "name": "Chuột Logitech B100",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 2,
@@ -916,7 +916,7 @@
     {
       "code": "MT&PK023",
       "name": "CAT6A 1M (Lidar)",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 2,
@@ -930,7 +930,7 @@
     {
       "code": "MT&PK024",
       "name": "Hub USB ACASIS 10 port",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 2,
@@ -944,7 +944,7 @@
     {
       "code": "MT&PK025",
       "name": "Sim Vinaphone",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 2,
@@ -958,7 +958,7 @@
     {
       "code": "MT&PK026",
       "name": "Màn hinh Acer EK241",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 6,
@@ -972,7 +972,7 @@
     {
       "code": "MT&PK027",
       "name": "Bàn Phím Chuột MK200",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 3,
@@ -986,7 +986,7 @@
     {
       "code": "MT&PK028",
       "name": "Màn Hiình WaveShare",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 1,
@@ -1000,7 +1000,7 @@
     {
       "code": "MT&PK029",
       "name": "Usb Hub",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 1,
@@ -1014,7 +1014,7 @@
     {
       "code": "MT&PK030",
       "name": "Bộ phát 4G tp-link",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-06",
       "quantity": 2,
@@ -1028,7 +1028,7 @@
     {
       "code": "MT&PK030",
       "name": "Bộ phát 4G tp-link",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": null,
       "quantity": 1,
@@ -1042,7 +1042,7 @@
     {
       "code": "MT&PK030",
       "name": "Bộ phát 4G tp-link",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-04-10",
       "quantity": 2,
@@ -1056,7 +1056,7 @@
     {
       "code": "MT&PK031",
       "name": "Pin sạc dự phòng  ugreen",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-06",
       "quantity": 4,
@@ -1070,7 +1070,7 @@
     {
       "code": "MT&PK031",
       "name": "Pin sạc dự phòng  ugreen",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": null,
       "quantity": 2,
@@ -1084,7 +1084,7 @@
     {
       "code": "MT&PK031",
       "name": "Pin sạc dự phòng  ugreen",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-04-10",
       "quantity": 2,
@@ -1098,7 +1098,7 @@
     {
       "code": "MT&PK032",
       "name": "Cáp, bộ chuyển đổi typeC  ugreen",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-06",
       "quantity": 3,
@@ -1112,7 +1112,7 @@
     {
       "code": "MT&PK032",
       "name": "Cáp, bộ chuyển đổi typeC  ugreen",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-23",
       "quantity": 3,
@@ -1126,7 +1126,7 @@
     {
       "code": "MT&PK032",
       "name": "Cáp, bộ chuyển đổi typeC  ugreen",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-04-10",
       "quantity": 2,
@@ -1140,7 +1140,7 @@
     {
       "code": "MT&PK033",
       "name": "Cáp mạng ugreen 1,5m",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-06",
       "quantity": 10,
@@ -1154,7 +1154,7 @@
     {
       "code": "MT&PK034",
       "name": "Thiết bị định tuyến Mikrotik ,RouterOSL6",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-06",
       "quantity": 1,
@@ -1168,7 +1168,7 @@
     {
       "code": "MT&PK035",
       "name": "Củ sạc nhanh 100W Ugreen",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-06",
       "quantity": 1,
@@ -1182,7 +1182,7 @@
     {
       "code": "MT&PK035",
       "name": "Củ sạc nhanh 100W Ugreen",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": null,
       "quantity": 1,
@@ -1196,7 +1196,7 @@
     {
       "code": "MT&PK035",
       "name": "Củ sạc nhanh 100W Ugreen",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-04-10",
       "quantity": 1,
@@ -1210,7 +1210,7 @@
     {
       "code": "MT&PK036",
       "name": "Sim mobifone",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-06",
       "quantity": 2,
@@ -1224,7 +1224,7 @@
     {
       "code": "MT&PK036",
       "name": "Chuột Logitech B100",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-11",
       "quantity": 1,
@@ -1238,7 +1238,7 @@
     {
       "code": "MT&PK036",
       "name": "Sim mobifone",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": null,
       "quantity": 1,
@@ -1252,7 +1252,7 @@
     {
       "code": "MT&PK037",
       "name": "Bàn phím Logitech MK200",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-13",
       "quantity": 2,
@@ -1266,7 +1266,7 @@
     {
       "code": "MT&PK037",
       "name": "Bàn Phím Chuột MK200",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-26",
       "quantity": 2,
@@ -1280,7 +1280,7 @@
     {
       "code": "MT&PK045",
       "name": "Cáp chuyển đổi Displayport qua HDMI dài 5m Ugreen",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-04-06",
       "quantity": 4,
@@ -1294,7 +1294,7 @@
     {
       "code": "MT&PK046",
       "name": "Cáp dữ liệu Video HDMI 8M Ugreen",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-04-06",
       "quantity": 2,
@@ -1308,7 +1308,7 @@
     {
       "code": "MT&PK051",
       "name": "Hub USB type-C 6 trong 1",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-04-13",
       "quantity": 2,
@@ -1322,7 +1322,7 @@
     {
       "code": "MT&PK052",
       "name": "Hub USB type-C 5 trong 2",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-04-13",
       "quantity": 2,
@@ -1336,7 +1336,7 @@
     {
       "code": "MT&PK053",
       "name": "Cáp USB 3.0 to USB Type-C",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-04-13",
       "quantity": 10,
@@ -1350,7 +1350,7 @@
     {
       "code": "MT&PK054",
       "name": "Cáp USB Type-C to USB Type-C",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-04-13",
       "quantity": 10,
@@ -1364,7 +1364,7 @@
     {
       "code": "MT&PK055",
       "name": "Đọc ổ cứng 2,5/3.5 inches",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-04-13",
       "quantity": 10,
@@ -1378,7 +1378,7 @@
     {
       "code": "MT&PK056",
       "name": "Cáp Displayport 2m Ugreen",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-04-13",
       "quantity": 5,
@@ -1392,7 +1392,7 @@
     {
       "code": "MT&PK057",
       "name": "View Sonic VA1655-3",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-04-13",
       "quantity": 15,
@@ -1406,7 +1406,7 @@
     {
       "code": "MT&PK058",
       "name": "Bàn phím Logitech K400",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-04-13",
       "quantity": 15,
@@ -1420,7 +1420,7 @@
     {
       "code": "MT&PK059",
       "name": "Cần số Logitech",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-04-13",
       "quantity": 3,
@@ -1434,7 +1434,7 @@
     {
       "code": "MT&PK060",
       "name": "Vô lăng Logitech G29",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-04-13",
       "quantity": 3,
@@ -1448,7 +1448,7 @@
     {
       "code": "MT&PK061",
       "name": "Bàn Phím Dagru",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 1,
@@ -1462,7 +1462,7 @@
     {
       "code": "MT&PK062",
       "name": "Chuột logitech",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 1,
@@ -1476,7 +1476,7 @@
     {
       "code": "MT&PK063",
       "name": "Chuột Logitech PNKX 110650",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-13",
       "quantity": 1,
@@ -1490,7 +1490,7 @@
     {
       "code": "MT&PK064",
       "name": "Bàn phím logitech k120",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-10",
       "quantity": 1,
@@ -1504,7 +1504,7 @@
     {
       "code": "MT&PK065",
       "name": "Bàn phím Fuhlen",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 1,
@@ -1518,7 +1518,7 @@
     {
       "code": "PS001",
       "name": "Nguồn 120W - 20V",
-      "category": "Power Supply",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 3,
@@ -1532,7 +1532,7 @@
     {
       "code": "PS002",
       "name": "Nguồn 600W - 24V",
-      "category": "Power Supply",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 2,
@@ -1546,7 +1546,7 @@
     {
       "code": "PS003",
       "name": "Nguồn 1000w - 24V",
-      "category": "Power Supply",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 1,
@@ -1560,7 +1560,7 @@
     {
       "code": "PS004",
       "name": "Nguồn MeanWell 480W - 24V (advantech)",
-      "category": "Power Supply",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 1,
@@ -1574,7 +1574,7 @@
     {
       "code": "PS005",
       "name": "Nguồn DC 12V + dây nguồn",
-      "category": "Power Supply",
+      "category": "",
       "description": "",
       "date": "2026-03-23",
       "quantity": 16,
@@ -1588,7 +1588,7 @@
     {
       "code": "SC001",
       "name": "sim mạng data viettel",
-      "category": "sim mạng",
+      "category": "",
       "description": "",
       "date": "2026-03-09",
       "quantity": 1,
@@ -1602,7 +1602,7 @@
     {
       "code": "TBĐ-000",
       "name": "dây cảm biến rada ARS 408",
-      "category": "dây cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-03-30",
       "quantity": 18,
@@ -1616,7 +1616,7 @@
     {
       "code": "TBĐ-001",
       "name": "Dây mạng, dây tín hiệu, bộ cấp nguồn tín hiệu",
-      "category": "dây dữ liệu",
+      "category": "",
       "description": "",
       "date": "2026-03-23",
       "quantity": 16,
@@ -1630,7 +1630,7 @@
     {
       "code": "TBĐ-002",
       "name": "dây data USB to USB ugreen",
-      "category": "dây dữ liệu",
+      "category": "",
       "description": "",
       "date": "2026-03-26",
       "quantity": 1,
@@ -1644,7 +1644,7 @@
     {
       "code": "TBĐ-003",
       "name": "dây mạng cat 5E (5m)",
-      "category": "dây mạng",
+      "category": "",
       "description": "",
       "date": "2026-03-26",
       "quantity": 1,
@@ -1658,7 +1658,7 @@
     {
       "code": "TBĐ004",
       "name": "FK-FF-Cable-15M",
-      "category": "phụ kiện của cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-03-23",
       "quantity": 60,
@@ -1672,7 +1672,7 @@
     {
       "code": "TBĐ005",
       "name": "Cbi-Fakra-Zfm-12M",
-      "category": "phụ kiện của cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-03-23",
       "quantity": 4,
@@ -1686,7 +1686,7 @@
     {
       "code": "TBĐ006",
       "name": "Đồng hồ đo điện Fluke",
-      "category": "Thiết bị điện",
+      "category": "",
       "description": "",
       "date": "2026-04-03",
       "quantity": 1,
@@ -1700,7 +1700,7 @@
     {
       "code": "TBLT001",
       "name": "Nas Synology",
-      "category": "Thiết bị lưu trữ",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 1,
@@ -1714,7 +1714,7 @@
     {
       "code": "TBLT002",
       "name": "Ổ SSD Advantech 512G",
-      "category": "Thiết bị lưu trữ",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 1,
@@ -1728,7 +1728,7 @@
     {
       "code": "TBLT002",
       "name": "Ổ SSD Advantech 512G",
-      "category": "Thiết bị lưu trữ",
+      "category": "",
       "description": "",
       "date": "2026-03-10",
       "quantity": 1,
@@ -1742,7 +1742,7 @@
     {
       "code": "TBLT003",
       "name": "Ổ SSD Samsung 870Evo 1TB",
-      "category": "Thiết bị lưu trữ",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 1,
@@ -1756,7 +1756,7 @@
     {
       "code": "TBLT005",
       "name": "Ổ HDD 20TB",
-      "category": "Thiết bị lưu trữ",
+      "category": "",
       "description": "",
       "date": "2026-03-12",
       "quantity": 12,
@@ -1770,7 +1770,7 @@
     {
       "code": "TBLT005",
       "name": "Ổ HDD 20TB",
-      "category": "Thiết bị lưu trữ",
+      "category": "",
       "description": "",
       "date": "2026-04-06",
       "quantity": 2,
@@ -1840,7 +1840,7 @@
     {
       "code": "MT&PK005",
       "name": "Can Hub Kvaser",
-      "category": "Máy tính nhúng & Phụ kiện",
+      "category": "",
       "description": "",
       "date": "2026-04-14",
       "quantity": 1,
@@ -1952,7 +1952,7 @@
     {
       "code": "MT&PK031",
       "name": "Pin sạc dự phòng  ugreen",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-04-25",
       "quantity": 2,
@@ -1966,7 +1966,7 @@
     {
       "code": "MT&PK030",
       "name": "Bộ phát 4G tp-link",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-04-25",
       "quantity": 1,
@@ -1980,7 +1980,7 @@
     {
       "code": "MT&PK035",
       "name": "Củ sạc nhanh 100W Ugreen",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-04-25",
       "quantity": 1,
@@ -2008,7 +2008,7 @@
     {
       "code": "CB-016",
       "name": "Lidar M1 Plus + hub",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-05-06",
       "quantity": 1,
@@ -3185,7 +3185,7 @@
     {
       "code": "MT&PK009",
       "name": "Laptop L14",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-02-26",
       "quantity": 1,
@@ -3199,7 +3199,7 @@
     {
       "code": "MT&PK062",
       "name": "Chuột logitech",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-03",
       "quantity": 1,
@@ -3213,7 +3213,7 @@
     {
       "code": "MT&PK019",
       "name": "Bàn phím Logitech",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-03",
       "quantity": 1,
@@ -3227,7 +3227,7 @@
     {
       "code": "MT&PK026",
       "name": "Màn hinh Acer EK241",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-03",
       "quantity": 1,
@@ -3241,7 +3241,7 @@
     {
       "code": "MT&PK026",
       "name": "Màn hinh Acer EK241",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-03",
       "quantity": 2,
@@ -3255,7 +3255,7 @@
     {
       "code": "MT&PK027",
       "name": "Bàn Phím Chuột MK200",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-03",
       "quantity": 1,
@@ -3269,7 +3269,7 @@
     {
       "code": "MT&PK012",
       "name": "Logitech K400",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-04",
       "quantity": 1,
@@ -3297,7 +3297,7 @@
     {
       "code": "MT&PK035",
       "name": "Củ sạc nhanh 100W Ugreen",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-06",
       "quantity": 1,
@@ -3311,7 +3311,7 @@
     {
       "code": "MT&PK032",
       "name": "Cáp, bộ chuyển đổi typeC  ugreen",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-06",
       "quantity": 3,
@@ -3325,7 +3325,7 @@
     {
       "code": "MT&PK036",
       "name": "Sim mobifone",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-06",
       "quantity": 2,
@@ -3339,7 +3339,7 @@
     {
       "code": "MT&PK031",
       "name": "Pin sạc dự phòng  ugreen",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-06",
       "quantity": 2,
@@ -3353,7 +3353,7 @@
     {
       "code": "MT&PK009",
       "name": "Laptop L14",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-06",
       "quantity": 1,
@@ -3367,7 +3367,7 @@
     {
       "code": "CB-012",
       "name": "Lidar Airy (V)",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-03-06",
       "quantity": 1,
@@ -3381,7 +3381,7 @@
     {
       "code": "CB-018",
       "name": "lidar Airy new",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-03-06",
       "quantity": 1,
@@ -3395,7 +3395,7 @@
     {
       "code": "CB-001",
       "name": "Ublox C102-F9R",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-03-09",
       "quantity": 1,
@@ -3409,7 +3409,7 @@
     {
       "code": "TBLT002",
       "name": "Ổ SSD Advantech 512G",
-      "category": "Thiết bị lưu trữ",
+      "category": "",
       "description": "",
       "date": "2026-03-09",
       "quantity": 1,
@@ -3423,7 +3423,7 @@
     {
       "code": "SC001",
       "name": "sim mạng data viettel",
-      "category": "sim mạng",
+      "category": "",
       "description": "",
       "date": "2026-03-09",
       "quantity": 1,
@@ -3437,7 +3437,7 @@
     {
       "code": "MT&PK026",
       "name": "Màn hinh Acer EK241",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-09",
       "quantity": 1,
@@ -3451,7 +3451,7 @@
     {
       "code": "MT&PK033",
       "name": "Cáp mạng ugreen 1,5m",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-09",
       "quantity": 10,
@@ -3465,7 +3465,7 @@
     {
       "code": "MT&PK034",
       "name": "Thiết bị định tuyến Mikrotik ,RouterOSL6",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-09",
       "quantity": 1,
@@ -3479,7 +3479,7 @@
     {
       "code": "MT&PK022",
       "name": "Chuột Logitech B100",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-10",
       "quantity": 1,
@@ -3493,7 +3493,7 @@
     {
       "code": "MT&PK028",
       "name": "Màn Hiình WaveShare",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-10",
       "quantity": 1,
@@ -3507,7 +3507,7 @@
     {
       "code": "CB-016",
       "name": "Lidar M1 Plus",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-03-12",
       "quantity": 1,
@@ -3521,7 +3521,7 @@
     {
       "code": "TBLT005",
       "name": "Ổ HDD 20TB",
-      "category": "Thiết bị lưu trữ",
+      "category": "",
       "description": "",
       "date": "2026-03-12",
       "quantity": 2,
@@ -3535,7 +3535,7 @@
     {
       "code": "MT&PK026",
       "name": "Màn hinh Acer EK241",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-13",
       "quantity": 1,
@@ -3549,7 +3549,7 @@
     {
       "code": "MT&PK015",
       "name": "Converter DP to HDMI",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-13",
       "quantity": 1,
@@ -3563,7 +3563,7 @@
     {
       "code": "MT&PK026",
       "name": "Màn hinh Acer EK241",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-13",
       "quantity": 1,
@@ -3577,7 +3577,7 @@
     {
       "code": "MT&PK022",
       "name": "Chuột Logitech B100",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": null,
       "quantity": 1,
@@ -3591,7 +3591,7 @@
     {
       "code": "CB-022",
       "name": "airy Roboshen(H)",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-03-18",
       "quantity": 2,
@@ -3605,7 +3605,7 @@
     {
       "code": "CB-005",
       "name": "Antenna GNSS CUAV",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-03-18",
       "quantity": 1,
@@ -3619,7 +3619,7 @@
     {
       "code": "CB-007",
       "name": "GNSS (check lại cùng bộ IMU)",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-03-18",
       "quantity": 1,
@@ -3633,7 +3633,7 @@
     {
       "code": "MT&PK064",
       "name": "Bàn phím logitech k120",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-23",
       "quantity": 1,
@@ -3647,7 +3647,7 @@
     {
       "code": "MT&PK063",
       "name": "Chuột Logitech PNKX 110650",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-23",
       "quantity": 1,
@@ -3661,7 +3661,7 @@
     {
       "code": "CB-007",
       "name": "GNSS (check lại cùng bộ IMU)",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-03-23",
       "quantity": 1,
@@ -3675,7 +3675,7 @@
     {
       "code": "TBĐ005",
       "name": "Cbi-Fakra-Zfm-12M",
-      "category": "phụ kiện của cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-03-24",
       "quantity": 4,
@@ -3689,7 +3689,7 @@
     {
       "code": "TBĐ004",
       "name": "FK-FF-Cable-15M",
-      "category": "phụ kiện của cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-03-24",
       "quantity": 1,
@@ -3703,7 +3703,7 @@
     {
       "code": "MT&PK007",
       "name": "nuvo-10108GC-10G-5049",
-      "category": "Máy tính nhúng & Phụ kiện",
+      "category": "",
       "description": "",
       "date": "2026-03-25",
       "quantity": 2,
@@ -3717,7 +3717,7 @@
     {
       "code": "MT&PK027",
       "name": "Bàn Phím Chuột MK200",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-03-25",
       "quantity": 2,
@@ -3731,7 +3731,7 @@
     {
       "code": "CB-002",
       "name": "Altos + Dây + Hub",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": null,
       "quantity": 1,
@@ -3745,7 +3745,7 @@
     {
       "code": "CB-027",
       "name": "cảm biến E1R + hub",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-03-30",
       "quantity": 3,
@@ -3759,7 +3759,7 @@
     {
       "code": "CB-016",
       "name": "Lidar M1 Plus",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-03-30",
       "quantity": 1,
@@ -3773,7 +3773,7 @@
     {
       "code": "CB-031",
       "name": "rada ARS 408",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-04-01",
       "quantity": 4,
@@ -3787,7 +3787,7 @@
     {
       "code": "MT&PK005",
       "name": "Can Hub Kvaser",
-      "category": "Máy tính nhúng & Phụ kiện",
+      "category": "",
       "description": "",
       "date": "2026-04-01",
       "quantity": 1,
@@ -3801,7 +3801,7 @@
     {
       "code": "MT&PK035",
       "name": "Củ sạc nhanh 100W Ugreen",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-04-03",
       "quantity": 1,
@@ -3815,7 +3815,7 @@
     {
       "code": "MT&PK032",
       "name": "Cáp, bộ chuyển đổi typeC  ugreen",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-04-03",
       "quantity": 2,
@@ -3829,7 +3829,7 @@
     {
       "code": "MT&PK031",
       "name": "Pin sạc dự phòng  ugreen",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-04-03",
       "quantity": 2,
@@ -3843,7 +3843,7 @@
     {
       "code": "MT&PK030",
       "name": "Bộ phát 4G tp-link",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-04-03",
       "quantity": 2,
@@ -3857,7 +3857,7 @@
     {
       "code": "TBĐ-000",
       "name": "dây cảm biến rada ARS 408",
-      "category": "dây cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-04-06",
       "quantity": 2,
@@ -3871,7 +3871,7 @@
     {
       "code": "TBLT005",
       "name": "Ổ HDD 20TB",
-      "category": "Thiết bị lưu trữ",
+      "category": "",
       "description": "",
       "date": "2026-04-06",
       "quantity": 12,
@@ -3885,7 +3885,7 @@
     {
       "code": "MT&PK005",
       "name": "Can Hub Kvaser",
-      "category": "Máy tính nhúng & Phụ kiện",
+      "category": "",
       "description": "",
       "date": "2026-04-13",
       "quantity": 1,
@@ -3899,7 +3899,7 @@
     {
       "code": "MT&PK057",
       "name": "View Sonic VA1655-3",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-04-13",
       "quantity": 1,
@@ -3913,7 +3913,7 @@
     {
       "code": "MT&PK031",
       "name": "Pin sạc dự phòng  ugreen",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-04-13",
       "quantity": 1,
@@ -3927,7 +3927,7 @@
     {
       "code": "MT&PK030",
       "name": "Bộ phát 4G tp-link",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-04-13",
       "quantity": 1,
@@ -3941,7 +3941,7 @@
     {
       "code": "MT&PK035",
       "name": "Củ sạc nhanh 100W Ugreen",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-04-13",
       "quantity": 1,
@@ -3955,7 +3955,7 @@
     {
       "code": "MT&PK032",
       "name": "Cáp, bộ chuyển đổi typeC  ugreen",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-04-13",
       "quantity": 1,
@@ -3969,7 +3969,7 @@
     {
       "code": "MT&PK006",
       "name": "Pcan-usb Pro",
-      "category": "Máy tính nhúng & Phụ kiện",
+      "category": "",
       "description": "",
       "date": null,
       "quantity": 1,
@@ -3983,7 +3983,7 @@
     {
       "code": "MT&PK055",
       "name": "Đọc ổ cứng 2,5/3.5 inches",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-04-14",
       "quantity": 2,
@@ -3997,7 +3997,7 @@
     {
       "code": "MT&PK017",
       "name": "CAT8 2M",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-04-14",
       "quantity": 1,
@@ -4011,7 +4011,7 @@
     {
       "code": "TBĐ-000",
       "name": "dây cảm biến rada ARS 408",
-      "category": "dây cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-04-16",
       "quantity": 4,
@@ -4067,7 +4067,7 @@
     {
       "code": "CB-031",
       "name": "rada ARS 408",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-04-16",
       "quantity": 4,
@@ -4081,7 +4081,7 @@
     {
       "code": "CB-002",
       "name": "Altos + Dây + Hub",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-04-16",
       "quantity": 1,
@@ -4095,7 +4095,7 @@
     {
       "code": "MT&PK052",
       "name": "Hub USB type-C 5 trong 2",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-04-20",
       "quantity": 1,
@@ -4123,7 +4123,7 @@
     {
       "code": "MT&PK052",
       "name": "Hub USB type-C 5 trong 2",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-04-21",
       "quantity": 1,
@@ -4137,7 +4137,7 @@
     {
       "code": "MT&PK045",
       "name": "Cáp chuyển đổi Displayport qua HDMI dài 5m Ugreen",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-04-21",
       "quantity": 1,
@@ -4151,7 +4151,7 @@
     {
       "code": "MT&PK055",
       "name": "Đọc ổ cứng 2,5/3.5 inches",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-05-04",
       "quantity": 2,
@@ -4179,7 +4179,7 @@
     {
       "code": "CB-016",
       "name": "Lidar M1 Plus",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-05-04",
       "quantity": 1,
@@ -4207,7 +4207,7 @@
     {
       "code": "CB-027",
       "name": "cảm biến E1R + hub",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-05-04",
       "quantity": 3,
@@ -4221,7 +4221,7 @@
     {
       "code": "MT&PK016",
       "name": "CAT8 10M",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-05-04",
       "quantity": 2,
@@ -4235,7 +4235,7 @@
     {
       "code": "MT&PK017",
       "name": "CAT8 2M",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-05-04",
       "quantity": 2,
@@ -4249,7 +4249,7 @@
     {
       "code": "MT&PK035",
       "name": "Củ sạc nhanh 100W Ugreen",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-05-05",
       "quantity": 1,
@@ -4263,7 +4263,7 @@
     {
       "code": "MT&PK031",
       "name": "Pin sạc dự phòng  ugreen",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-05-05",
       "quantity": 2,
@@ -4277,7 +4277,7 @@
     {
       "code": "MT&PK030",
       "name": "Bộ phát 4G tp-link",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-05-05",
       "quantity": 1,
@@ -4291,7 +4291,7 @@
     {
       "code": "MT&PK022",
       "name": "Chuột Logitech B100",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-05-05",
       "quantity": 1,
@@ -4305,7 +4305,7 @@
     {
       "code": "MT&PK007",
       "name": "nuvo-10108GC-10G-5049",
-      "category": "Máy tính nhúng & Phụ kiện",
+      "category": "",
       "description": "",
       "date": "2026-05-06",
       "quantity": 1,
@@ -4333,7 +4333,7 @@
     {
       "code": "CB-027",
       "name": "cảm biến E1R + hub",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-05-06",
       "quantity": 4,
@@ -4347,7 +4347,7 @@
     {
       "code": "CB-024",
       "name": "AC_ISX031-H60",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-05-06",
       "quantity": 4,
@@ -4361,7 +4361,7 @@
     {
       "code": "CB-025",
       "name": "AC_ISX031-H120",
-      "category": "Cái",
+      "category": "",
       "description": "",
       "date": "2026-05-06",
       "quantity": 4,
@@ -4375,7 +4375,7 @@
     {
       "code": "CB-026",
       "name": "AC_ISX031-H190",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-05-06",
       "quantity": 4,
@@ -4389,7 +4389,7 @@
     {
       "code": "TBĐ004",
       "name": "FK-FF-Cable-15M",
-      "category": "phụ kiện của cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-05-06",
       "quantity": 12,
@@ -4403,7 +4403,7 @@
     {
       "code": "CB-031",
       "name": "rada ARS 408",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-05-06",
       "quantity": 4,
@@ -4417,7 +4417,7 @@
     {
       "code": "TBĐ-000",
       "name": "dây cảm biến rada ARS 408",
-      "category": "dây cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-05-06",
       "quantity": 4,
@@ -4431,7 +4431,7 @@
     {
       "code": "CB-002",
       "name": "Altos + Dây + Hub",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-05-06",
       "quantity": 1,
@@ -4445,7 +4445,7 @@
     {
       "code": "CB-003",
       "name": "CGI-230",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-05-06",
       "quantity": 1,
@@ -4543,7 +4543,7 @@
     {
       "code": "MT&PK058",
       "name": "Bàn phím Logitech K400",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-05-12",
       "quantity": 1,
@@ -4557,7 +4557,7 @@
     {
       "code": "MT&PK057",
       "name": "View Sonic VA1655-3",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-05-19",
       "quantity": 2,
@@ -4571,7 +4571,7 @@
     {
       "code": "MT&PK058",
       "name": "Bàn phím Logitech K400",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-05-19",
       "quantity": 1,
@@ -4585,7 +4585,7 @@
     {
       "code": "MT&PK058",
       "name": "Bàn phím Logitech K400",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-05-19",
       "quantity": 2,
@@ -4599,7 +4599,7 @@
     {
       "code": "MT&PK058",
       "name": "Bàn phím Logitech K400",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-05-20",
       "quantity": 1,
@@ -4613,7 +4613,7 @@
     {
       "code": "MT&PK031",
       "name": "Pin sạc dự phòng  ugreen",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-05-20",
       "quantity": 1,
@@ -4627,7 +4627,7 @@
     {
       "code": "MT&PK057",
       "name": "View Sonic VA1655-3",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-05-20",
       "quantity": 1,
@@ -4641,7 +4641,7 @@
     {
       "code": "MT&PK025",
       "name": "Sim Vinaphone",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-05-21",
       "quantity": 1,
@@ -4655,7 +4655,7 @@
     {
       "code": "CB-011",
       "name": "IMU Xsen MTi100",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-05-21",
       "quantity": 1,
@@ -4683,7 +4683,7 @@
     {
       "code": "MT&PK058",
       "name": "Bàn phím Logitech K400",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-05-25",
       "quantity": 1,
@@ -4837,7 +4837,7 @@
     {
       "code": "CB-027",
       "name": "cảm biến E1R + hub",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-06-11",
       "quantity": 1,
@@ -4921,7 +4921,7 @@
     {
       "code": "MT&PK007",
       "name": "nuvo-10108GC-10G-5049",
-      "category": "Máy tính nhúng & Phụ kiện",
+      "category": "",
       "description": "",
       "date": "2026-06-25",
       "quantity": 1,
@@ -4935,7 +4935,7 @@
     {
       "code": "CB-031",
       "name": "rada ARS 408",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-07-01",
       "quantity": 4,
@@ -4949,7 +4949,7 @@
     {
       "code": "CB-002",
       "name": "Altos + Dây + Hub",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-07-01",
       "quantity": 1,
@@ -4963,7 +4963,7 @@
     {
       "code": "CB-003",
       "name": "CGI-230",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-07-01",
       "quantity": 1,
@@ -4991,7 +4991,7 @@
     {
       "code": "CB-028",
       "name": "cảm biến  BP",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-07-01",
       "quantity": 3,
@@ -5047,7 +5047,7 @@
     {
       "code": "CB-024",
       "name": "AC_ISX031-H60",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-07-01",
       "quantity": 4,
@@ -5061,7 +5061,7 @@
     {
       "code": "CB-025",
       "name": "AC_ISX031-H120",
-      "category": "Cái",
+      "category": "",
       "description": "",
       "date": "2026-07-01",
       "quantity": 4,
@@ -5075,7 +5075,7 @@
     {
       "code": "CB-026",
       "name": "AC_ISX031-H190",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-07-01",
       "quantity": 4,
@@ -5089,7 +5089,7 @@
     {
       "code": "TBĐ004",
       "name": "FK-FF-Cable-15M",
-      "category": "phụ kiện của cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-07-01",
       "quantity": 12,
@@ -5187,7 +5187,7 @@
     {
       "code": "CB-027",
       "name": "cảm biến E1R + hub",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-07-01",
       "quantity": 3,
@@ -5215,7 +5215,7 @@
     {
       "code": "CB-001",
       "name": "Ublox C102-F9R",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-07-01",
       "quantity": 1,
@@ -5257,7 +5257,7 @@
     {
       "code": "CB-031",
       "name": "rada ARS 408",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-07-02",
       "quantity": 3,
@@ -5271,7 +5271,7 @@
     {
       "code": "CB-024",
       "name": "AC_ISX031-H60",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-07-02",
       "quantity": 2,
@@ -5285,7 +5285,7 @@
     {
       "code": "CB-025",
       "name": "AC_ISX031-H120",
-      "category": "Cái",
+      "category": "",
       "description": "",
       "date": "2026-07-02",
       "quantity": 3,
@@ -5299,7 +5299,7 @@
     {
       "code": "TBĐ004",
       "name": "FK-FF-Cable-15M",
-      "category": "phụ kiện của cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-07-02",
       "quantity": 5,
@@ -5327,7 +5327,7 @@
     {
       "code": "TBĐ-000",
       "name": "dây cảm biến rada ARS 408",
-      "category": "dây cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-07-03",
       "quantity": 3,
@@ -5355,7 +5355,7 @@
     {
       "code": "CB-024",
       "name": "AC_ISX031-H60",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-07-07",
       "quantity": 1,
@@ -5369,7 +5369,7 @@
     {
       "code": "MT&PK032",
       "name": "Cáp, bộ chuyển đổi typeC  ugreen",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-07-10",
       "quantity": 1,
@@ -5383,7 +5383,7 @@
     {
       "code": "MT&PK031",
       "name": "Pin sạc dự phòng  ugreen",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-07-10",
       "quantity": 2,
@@ -5397,7 +5397,7 @@
     {
       "code": "MT&PK030",
       "name": "Bộ phát 4G tp-link",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-07-10",
       "quantity": 1,
@@ -5439,7 +5439,7 @@
     {
       "code": "MT&PK011",
       "name": "View Sonic VA1650",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-07-24",
       "quantity": 1,
@@ -5481,7 +5481,7 @@
     {
       "code": "MT&PK011",
       "name": "View Sonic VA1650",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": null,
       "quantity": 1,
@@ -5495,7 +5495,7 @@
     {
       "code": "CB-005",
       "name": "Antenna GNSS CUAV",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-07-31",
       "quantity": 1,
@@ -5537,7 +5537,7 @@
     {
       "code": "CB-027",
       "name": "cảm biến E1R + hub",
-      "category": "Cảm biến",
+      "category": "",
       "description": "",
       "date": "2026-07-31",
       "quantity": 3,
@@ -5607,7 +5607,7 @@
     {
       "code": "MT&PK057",
       "name": "View Sonic VA1655-3",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-08-11",
       "quantity": 1,
@@ -5621,7 +5621,7 @@
     {
       "code": "MT&PK046",
       "name": "Cáp dữ liệu Video HDMI 8M Ugreen",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": "2026-08-11",
       "quantity": 1,
@@ -5663,7 +5663,7 @@
     {
       "code": "MT&PK007",
       "name": "nuvo-10108GC-10G-5049",
-      "category": "Máy tính nhúng & Phụ kiện",
+      "category": "",
       "description": "",
       "date": "2026-08-12",
       "quantity": 1,
@@ -5747,7 +5747,7 @@
     {
       "code": "MT&PK027",
       "name": "Bàn Phím Chuột MK200",
-      "category": "Phụ kiện & Máy tính",
+      "category": "",
       "description": "",
       "date": null,
       "quantity": 1,
@@ -7033,62 +7033,62 @@
   ],
   "categories": [
     {
-      "id": "asset_category_50d5c47695c25f8c6288",
+      "id": "asset_category_cam_bien",
       "name": "Cảm biến",
       "createdAt": "2026-09-18T08:38:31.929Z"
     },
     {
-      "id": "asset_category_24acf55712108605b994",
+      "id": "asset_category_may_tinh_nhung_phu_kien",
       "name": "Máy tính nhúng & Phụ kiện",
       "createdAt": "2026-09-18T08:38:31.929Z"
     },
     {
-      "id": "asset_category_9f0c0732dca7cf809587",
+      "id": "asset_category_phu_kien_may_tinh",
       "name": "Phụ kiện & Máy tính",
       "createdAt": "2026-09-18T08:38:31.929Z"
     },
     {
-      "id": "asset_category_4e0bded182c90da63e05",
+      "id": "asset_category_power_supply",
       "name": "Power Supply",
       "createdAt": "2026-09-18T08:38:31.929Z"
     },
     {
-      "id": "asset_category_2d933e6efb00d18c9209",
+      "id": "asset_category_sim_mang",
       "name": "sim mạng",
       "createdAt": "2026-09-18T08:38:31.929Z"
     },
     {
-      "id": "asset_category_d850b13db5b7561421d1",
+      "id": "asset_category_day_cam_bien",
       "name": "dây cảm biến",
       "createdAt": "2026-09-18T08:38:31.929Z"
     },
     {
-      "id": "asset_category_83cffc149320f5f9d1ef",
+      "id": "asset_category_day_du_lieu",
       "name": "dây dữ liệu",
       "createdAt": "2026-09-18T08:38:31.929Z"
     },
     {
-      "id": "asset_category_56c3cabb77d887134888",
+      "id": "asset_category_day_mang",
       "name": "dây mạng",
       "createdAt": "2026-09-18T08:38:31.929Z"
     },
     {
-      "id": "asset_category_137108362e2ae38734fc",
+      "id": "asset_category_phu_kien_cua_cam_bien",
       "name": "phụ kiện của cảm biến",
       "createdAt": "2026-09-18T08:38:31.929Z"
     },
     {
-      "id": "asset_category_b732e4cc44def5256718",
+      "id": "asset_category_thiet_bi_dien",
       "name": "Thiết bị điện",
       "createdAt": "2026-09-18T08:38:31.929Z"
     },
     {
-      "id": "asset_category_5d6f58efe7e772048283",
+      "id": "asset_category_thiet_bi_luu_tru",
       "name": "Thiết bị lưu trữ",
       "createdAt": "2026-09-18T08:38:31.929Z"
     },
     {
-      "id": "asset_category_1e0c315f51c3e43ba154",
+      "id": "asset_category_cai",
       "name": "Cái",
       "createdAt": "2026-09-21T02:50:25.971Z"
     }

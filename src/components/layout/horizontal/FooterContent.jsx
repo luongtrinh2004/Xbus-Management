@@ -14,7 +14,7 @@ const FooterContent = () => {
     <div className={classnames(horizontalLayoutClasses.footerContent, 'flex items-center justify-end flex-wrap gap-4')}>
       <p>
         <span className='text-textSecondary'>{`© ${new Date().getFullYear()},`}</span>
-        <Link href='https://www.facebook.com/luong.trinh.283901/' target='_blank' className='text-primary'>
+        <Link href='https://www.youtube.com/watch?v=Ugla2-LbdhY&list=RDUgla2-LbdhY&start_radio=1' target='_blank' className='text-primary'>
           Lương Trịnh - 22010064
         </Link>
       </p>

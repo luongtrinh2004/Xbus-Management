@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700;800&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -492,3 +494,22 @@ code {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ========================================================
+   Default Loading Animation (Replaces CircularProgress)
+   ======================================================== */
+.MuiCircularProgress-root {
+  animation: none !important;
+  background-image: url('/images/icons/loading.svg') !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  background-size: contain !important;
+}
+
+.MuiCircularProgress-root .MuiCircularProgress-svg,
+.MuiCircularProgress-root .MuiCircularProgress-circle {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+

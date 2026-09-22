@@ -14,6 +14,15 @@ const toDateOnly = (value) => {
   const date = new Date(text);
   return Number.isNaN(date.getTime()) ? "" : date.toISOString().slice(0, 10);
 };
+const toMysqlDate = (value) => {
+  const text = toDateOnly(value);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(text)) return null;
+  const date = new Date(`${text}T00:00:00.000Z`);
+  return !Number.isNaN(date.getTime()) &&
+    date.toISOString().slice(0, 10) === text
+    ? text
+    : null;
+};
 const toMysqlDateTime = (value, fallback = null) => {
   if (!value) return fallback;
   if (value instanceof Date)
@@ -566,7 +575,7 @@ export async function getAssets() {
   }
   await query(`
     INSERT IGNORE INTO asset_product_categories (id, name, created_at)
-    SELECT CONCAT('asset_category_', LEFT(MD5(product_category_name), 16)),
+    SELECT CONCAT('asset_category_', LEFT(MD5(category_name), 16)),
            category_name, NOW(3)
     FROM (
       SELECT TRIM(product_category_name) AS category_name
@@ -799,7 +808,7 @@ const assetTransactionValues = (item, type) => [
   item.name,
   item.category || null,
   item.description || null,
-  item.date,
+  toMysqlDate(item.date),
   item.quantity === null || item.quantity === "" ? null : Number(item.quantity),
   item.unit || null,
   item.location || null,
@@ -843,7 +852,7 @@ export async function updateAssetTransaction(type, item) {
       item.name,
       item.category || null,
       item.description || null,
-      item.date,
+      toMysqlDate(item.date),
       item.quantity === null || item.quantity === ""
         ? null
         : Number(item.quantity),
@@ -898,7 +907,7 @@ export async function saveAssets(data) {
             item.name,
             item.category || null,
             item.description || null,
-            item.date,
+            toMysqlDate(item.date),
             item.quantity === null || item.quantity === ""
               ? null
               : Number(item.quantity),

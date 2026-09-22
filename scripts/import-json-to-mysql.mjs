@@ -11,6 +11,15 @@ const url =
   process.env.DATABASE_URL || "mysql://xbus:123456@127.0.0.1:3306/xbus";
 const db = await mysql.createConnection({ uri: url, timezone: "+07:00" });
 const iso = (value) => (value ? new Date(value) : null);
+const mysqlDate = (value) => {
+  const text = String(value || "").trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(text)) return null;
+  const date = new Date(`${text}T00:00:00.000Z`);
+  return !Number.isNaN(date.getTime()) &&
+    date.toISOString().slice(0, 10) === text
+    ? text
+    : null;
+};
 const upsert = async (sql, values) =>
   db.execute(
     sql,
@@ -165,7 +174,7 @@ try {
           item.name,
           item.category || null,
           item.description || null,
-          item.date,
+          mysqlDate(item.date),
           Number(item.quantity || 0),
           item.location || null,
           item.person || null,

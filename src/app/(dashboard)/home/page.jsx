@@ -16,6 +16,7 @@ import Divider from "@mui/material/Divider";
 import LinearProgress from "@mui/material/LinearProgress";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
 import { useSession } from "next-auth/react";
 import { resolveAvatar } from "@/utils/getDefaultAvatar";
@@ -225,6 +226,7 @@ function WaterSchedule({ schedules, trashSchedules, isAdmin }) {
 
 export default function HomePage() {
   const muiTheme = useTheme();
+  const isMobile = useMediaQuery(muiTheme.breakpoints.down("sm"));
   const { data: session } = useSession();
   const [users, setUsers] = useState([]);
   const [waterSchedules, setWaterSchedules] = useState([]);
@@ -254,9 +256,7 @@ export default function HomePage() {
             departmentsRes.json(),
           ]);
         setUsers(usersData.data || []);
-        setDepartments(
-          Array.isArray(departmentsData) ? departmentsData : [],
-        );
+        setDepartments(Array.isArray(departmentsData) ? departmentsData : []);
         const [todayYear, todayMonth, todayDay] = toVietnamDateKey()
           .split("-")
           .map(Number);
@@ -352,11 +352,13 @@ export default function HomePage() {
         .filter((member) => member.paid && member.amount > 0)
         .map((member) => ({
           ...member,
-          user: activeUsers.find((user) => user.id === member.userId),
+          user:
+            users.find((user) => user.id === member.userId) ||
+            activeUsers.find((user) => user.id === member.userId),
         }))
         .sort((a, b) => b.amount - a.amount)
         .slice(0, 5),
-    [activeUsers, fund?.members],
+    [users, activeUsers, fund?.members],
   );
 
   const fundChart = useMemo(() => {
@@ -521,10 +523,15 @@ export default function HomePage() {
                   colors: [WARNING],
                   plotOptions: { bar: { borderRadius: 5, columnWidth: "48%" } },
                   xaxis: {
-                    categories: topContributors.map(
-                      (member) =>
-                        member.user?.name || member.name || "Thành viên",
-                    ),
+                    categories: topContributors.map((member) => {
+                      const code = member.user?.code || member.code;
+                      const name =
+                        member.user?.name ||
+                        member.name ||
+                        member.memberName ||
+                        "Thành viên";
+                      return isMobile && code ? code : name;
+                    }),
                     labels: {
                       rotate: 0,
                       trim: true,
@@ -542,8 +549,40 @@ export default function HomePage() {
                   },
                   tooltip: {
                     theme: muiTheme.palette.mode,
+                    x: {
+                      formatter: (value, { dataPointIndex }) => {
+                        const member = topContributors[dataPointIndex];
+                        if (!member) return value;
+                        const name =
+                          member.user?.name ||
+                          member.name ||
+                          member.memberName ||
+                          "Thành viên";
+                        const code = member.user?.code || member.code;
+                        return code ? `${name} (${code})` : name;
+                      },
+                    },
                     y: { formatter: (value) => `${fmt(value)} đ` },
                   },
+                  responsive: [
+                    {
+                      breakpoint: 600,
+                      options: {
+                        xaxis: {
+                          categories: topContributors.map((member) => {
+                            const code = member.user?.code || member.code;
+                            return (
+                              code ||
+                              member.user?.name ||
+                              member.name ||
+                              member.memberName ||
+                              "Thành viên"
+                            );
+                          }),
+                        },
+                      },
+                    },
+                  ],
                 }}
                 series={[
                   {

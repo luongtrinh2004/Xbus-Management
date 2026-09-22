@@ -17,32 +17,39 @@ const TokenBalance = () => {
   return (
     <Box
       aria-label={`Điểm rèn luyện: ${points ?? 0}`}
+      title={`Điểm rèn luyện: ${points ?? 0}`}
       sx={{
         display: "inline-flex",
         alignItems: "center",
         justifyContent: "center",
-        gap: 0.5,
-        width: 76,
-        height: 34,
+        gap: "4px",
+        height: 27,
+        pl: "9px",
+        pr: "3px",
         border: "1px solid",
         borderColor: "primary.main",
-        borderRadius: 999,
+        borderRadius: 9999,
         bgcolor: "rgba(115, 103, 240, 0.08)",
         color: "text.primary",
         cursor: "default",
         userSelect: "none",
+        flexShrink: 0,
+        boxSizing: "border-box",
       }}
     >
       <Typography
         component="span"
         sx={{
-          minWidth: "3ch",
-          fontFamily: '"Inter Tight", "Public Sans", sans-serif',
-          fontSize: "0.9375rem",
-          fontWeight: 600,
-          lineHeight: 1,
-          textAlign: "right",
-          fontVariantNumeric: "tabular-nums",
+          fontFamily: '"Inter Tight", sans-serif',
+          fontSize: "0.875rem",
+          fontWeight: 700,
+          lineHeight: "16px",
+          letterSpacing: "-0.03em",
+          WebkitFontSmoothing: "antialiased",
+          MozOsxFontSmoothing: "grayscale",
+          color: (theme) =>
+            theme.palette.mode === "dark" ? "text.primary" : "#383838",
+          textAlign: "center",
         }}
       >
         {points ?? "—"}
@@ -52,7 +59,7 @@ const TokenBalance = () => {
         src="/images/icons/token.svg"
         alt=""
         aria-hidden="true"
-        sx={{ width: 28, height: 28, display: "block", flexShrink: 0 }}
+        sx={{ width: 25, height: 25, display: "block", flexShrink: 0 }}
       />
     </Box>
   );
