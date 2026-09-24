@@ -33,7 +33,11 @@ import tableStyles from "@core/styles/table.module.css";
 import ConfirmDialog from "@components/ConfirmDialog";
 import DataTableToolbar from "@components/DataTableToolbar";
 import TablePaginationComponent from "@components/TablePaginationComponent";
-import { formatVietnamDate, toVietnamDateKey } from "@/libs/dateTime";
+import {
+  formatVietnamDate,
+  formatVietnamDateTime,
+  toVietnamDateKey,
+} from "@/libs/dateTime";
 import { assetDocumentCodeFromName } from "@/libs/assetIds";
 import { resolveAvatar } from "@/utils/getDefaultAvatar";
 
@@ -93,6 +97,7 @@ const columns = {
     "Vị trí",
     "Ngày nhập",
     "Trạng thái",
+    "Người phê duyệt",
     "Ghi chú",
   ],
   export: [
@@ -107,6 +112,7 @@ const columns = {
     "Đơn vị tính",
     "Ngày xuất",
     "Trạng thái",
+    "Người phê duyệt",
     "Ghi chú",
   ],
   stock: [
@@ -207,7 +213,9 @@ function AssetTable({
             {columns[type].map((label) => (
               <TableCell
                 key={label}
-                align={label === "STT" ? "center" : "left"}
+                align={
+                  label === "STT" || label === "Mã sản phẩm" ? "center" : "left"
+                }
               >
                 {label}
               </TableCell>
@@ -259,7 +267,7 @@ function AssetTable({
                           </Typography>
                         </TableCell>
                       )}
-                      <TableCell>
+                      <TableCell align="center">
                         <Typography color="text.primary" fontWeight={600}>
                           {row.code || "—"}
                         </Typography>
@@ -303,6 +311,7 @@ function AssetTable({
                           />
                         )}
                       </TableCell>
+                      <TableCell>{row.approvedByName || "—"}</TableCell>
                       <TableCell>{row.note || "—"}</TableCell>
                     </>
                   ) : type === "export" ? (
@@ -324,7 +333,7 @@ function AssetTable({
                           </Typography>
                         </TableCell>
                       )}
-                      <TableCell>
+                      <TableCell align="center">
                         <Typography color="text.primary" fontWeight={600}>
                           {row.code || "—"}
                         </Typography>
@@ -367,11 +376,12 @@ function AssetTable({
                           />
                         )}
                       </TableCell>
+                      <TableCell>{row.approvedByName || "—"}</TableCell>
                       <TableCell>{row.note || "—"}</TableCell>
                     </>
                   ) : type === "stock" ? (
                     <>
-                      <TableCell>
+                      <TableCell align="center">
                         <Typography color="primary.main" fontWeight={600}>
                           {row.code || "—"}
                         </Typography>
@@ -388,7 +398,7 @@ function AssetTable({
                     </>
                   ) : (
                     <>
-                      <TableCell>
+                      <TableCell align="center">
                         <Typography color="primary.main" fontWeight={600}>
                           {row.code || "—"}
                         </Typography>
@@ -480,6 +490,123 @@ function AssetTable({
               >
                 <Typography color="text.secondary" py={5}>
                   Chưa có dữ liệu
+                </Typography>
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+}
+
+const historyActionLabels = {
+  create: "Tạo phiếu",
+  update: "Chỉnh sửa",
+  delete: "Xóa",
+  approve: "Phê duyệt",
+  reject: "Từ chối",
+  rollback: "Hoàn tác",
+};
+
+function AssetHistoryTable({
+  rows,
+  page = 1,
+  limit = 10,
+  loading,
+  rollingBackId,
+  onRollback,
+}) {
+  return (
+    <TableContainer>
+      <Table className={tableStyles.table}>
+        <TableHead>
+          <TableRow>
+            <TableCell align="center">STT</TableCell>
+            <TableCell>Hành động</TableCell>
+            <TableCell>Loại phiếu</TableCell>
+            <TableCell>Mã phiếu</TableCell>
+            <TableCell>Sản phẩm</TableCell>
+            <TableCell>Người thực hiện</TableCell>
+            <TableCell>Thời gian</TableCell>
+            <TableCell>Ghi chú</TableCell>
+            <TableCell align="center">Thao tác</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {loading ? (
+            <TableRow>
+              <TableCell colSpan={9} align="center">
+                <Box sx={{ py: 5 }}>
+                  <CircularProgress size={30} />
+                </Box>
+              </TableCell>
+            </TableRow>
+          ) : rows.length ? (
+            rows.map((item, index) => (
+              <TableRow key={item.id} hover>
+                <TableCell align="center">
+                  {(page - 1) * limit + index + 1}
+                </TableCell>
+                <TableCell>
+                  {historyActionLabels[item.action] || item.action}
+                </TableCell>
+                <TableCell>
+                  {item.type === "import"
+                    ? "Nhập kho"
+                    : item.type === "export"
+                      ? "Xuất kho"
+                      : "—"}
+                </TableCell>
+                <TableCell>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontFamily: "monospace",
+                      fontWeight: 700,
+                      color: "primary.main",
+                    }}
+                  >
+                    {item.ticketId || "—"}
+                  </Typography>
+                </TableCell>
+                <TableCell>{item.productName || "—"}</TableCell>
+                <TableCell>{item.actorName || "—"}</TableCell>
+                <TableCell>{formatVietnamDateTime(item.createdAt)}</TableCell>
+                <TableCell>{item.note || "—"}</TableCell>
+                <TableCell align="center">
+                  {item.action === "rollback" || item.rolledBackAt ? (
+                    <Chip
+                      size="small"
+                      variant="tonal"
+                      color="secondary"
+                      label={
+                        item.action === "rollback"
+                          ? "Bản ghi hoàn tác"
+                          : "Đã hoàn tác"
+                      }
+                    />
+                  ) : (
+                    <Button
+                      size="small"
+                      variant="tonal"
+                      color="warning"
+                      disabled={rollingBackId === item.id}
+                      onClick={() => onRollback(item)}
+                    >
+                      {rollingBackId === item.id
+                        ? "Đang hoàn tác..."
+                        : "Hoàn tác"}
+                    </Button>
+                  )}
+                </TableCell>
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={9} align="center">
+                <Typography color="text.secondary" py={5}>
+                  Chưa có lịch sử thay đổi tài sản
                 </Typography>
               </TableCell>
             </TableRow>
@@ -1879,6 +2006,9 @@ export default function AssetsPage() {
     useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [assetHistory, setAssetHistory] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [rollingBackId, setRollingBackId] = useState("");
   const [rejectTarget, setRejectTarget] = useState(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -1962,6 +2092,38 @@ export default function AssetsPage() {
       toast.error("Không thể kết nối máy chủ");
     }
   };
+  const loadHistory = async () => {
+    setHistoryLoading(true);
+    try {
+      const response = await fetch("/api/assets/history");
+      const result = await response.json();
+      if (!response.ok)
+        throw new Error(result.error || "Không thể tải lịch sử");
+      setAssetHistory(result.history || []);
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+  const rollbackHistory = async (item) => {
+    setRollingBackId(item.id);
+    try {
+      const response = await fetch("/api/assets/history", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ historyId: item.id }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Không thể hoàn tác");
+      toast.success("Đã hoàn tác thay đổi tài sản");
+      await Promise.all([loadData(), loadHistory()]);
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      setRollingBackId("");
+    }
+  };
   useEffect(() => {
     if (status === "authenticated") loadData();
   }, [status]);
@@ -2031,11 +2193,11 @@ export default function AssetsPage() {
   }, [data, stockByCode]);
   const stockProducts = useMemo(
     () =>
-      [
-        ...new Map(products.map((item) => [item.documentCode, item])).values(),
-      ].sort((left, right) =>
-        String(left.name || "").localeCompare(String(right.name || ""), "vi"),
-      ),
+      [...new Map(products.map((item) => [item.documentCode, item])).values()]
+        .filter((item) => Number(item.quantity || 0) !== 0)
+        .sort((left, right) =>
+          String(left.name || "").localeCompare(String(right.name || ""), "vi"),
+        ),
     [products],
   );
   const activeRows =
@@ -2043,25 +2205,45 @@ export default function AssetsPage() {
       ? data.imports
       : tab === "export"
         ? data.exports
-        : tab === "products"
-          ? products
-          : stockProducts;
+        : tab === "history"
+          ? assetHistory
+          : tab === "products"
+            ? products
+            : stockProducts;
+  const matchesRowSearch = (row, rowType) =>
+    normalizeSearchText(
+      rowType === "products"
+        ? `${row.code} ${row.name}`
+        : rowType === "history"
+          ? `${historyActionLabels[row.action] || row.action || ""} ${row.type === "import" ? "nhập kho" : row.type === "export" ? "xuất kho" : ""} ${row.ticketId || ""} ${row.productName || ""} ${row.actorName || ""} ${row.note || ""}`
+          : `${row.ticketId || ""} ${row.documentCode || ""} ${row.code || ""} ${row.name || ""} ${row.location || ""} ${row.person || ""} ${row.issuedTo || ""} ${row.note || ""} ${row.status === "pending" ? "đang chờ pending" : row.status === "rejected" ? "từ chối rejected" : "đã duyệt approved"}`,
+    ).includes(normalizeSearchText(search));
   const filteredRows = useMemo(
     () =>
       activeRows.filter((row) => {
-        const matchesSearch = normalizeSearchText(
-          tab === "products"
-            ? `${row.code} ${row.name}`
-            : `${row.ticketId || ""} ${row.documentCode || ""} ${row.code || ""} ${row.name || ""} ${row.location || ""} ${row.person || ""} ${row.issuedTo || ""} ${row.note || ""} ${row.status === "pending" ? "đang chờ pending" : row.status === "rejected" ? "từ chối rejected" : "đã duyệt approved"}`,
-        ).includes(normalizeSearchText(search));
         const matchesStatus =
           tab !== "products" ||
           productStatus === "all" ||
           (productStatus === "active" ? row.active : !row.active);
-        return matchesSearch && matchesStatus;
+        return matchesRowSearch(row, tab) && matchesStatus;
       }),
     [activeRows, productStatus, search, tab],
   );
+  const tabCounts = {
+    import: data.imports.filter((row) => matchesRowSearch(row, "import"))
+      .length,
+    export: data.exports.filter((row) => matchesRowSearch(row, "export"))
+      .length,
+    stock: stockProducts.filter((row) => matchesRowSearch(row, "stock")).length,
+    products: products.filter(
+      (row) =>
+        matchesRowSearch(row, "products") &&
+        (productStatus === "all" ||
+          (productStatus === "active" ? row.active : !row.active)),
+    ).length,
+    history: assetHistory.filter((row) => matchesRowSearch(row, "history"))
+      .length,
+  };
   const normalizeExcelDate = (value) => {
     if (typeof value === "number") {
       const parsed = XLSX.SSF.parse_date_code(value);
@@ -2354,7 +2536,7 @@ export default function AssetsPage() {
                 },
               }}
             >
-              {canManage && (
+              {canManage && tab !== "history" && (
                 <Button
                   variant="outlined"
                   startIcon={<i className="tabler-download" />}
@@ -2363,7 +2545,7 @@ export default function AssetsPage() {
                   Xuất danh sách hiện tại
                 </Button>
               )}
-              {canManage && tab !== "stock" && (
+              {canManage && ["import", "export", "products"].includes(tab) && (
                 <Button
                   variant="tonal"
                   color="warning"
@@ -2435,25 +2617,36 @@ export default function AssetsPage() {
         <Divider />
         <Tabs
           value={tab}
-          onChange={(_, value) => setTab(value)}
+          onChange={(_, value) => {
+            setTab(value);
+            setPage(1);
+            if (value === "history") loadHistory();
+          }}
           variant="scrollable"
           scrollButtons="auto"
           allowScrollButtonsMobile
-          sx={{ px: { xs: 2, sm: 5 }, mt: 2 }}
+          sx={{
+            px: { xs: 2, sm: 5 },
+            mt: 2,
+            "& .MuiTabs-flexContainer": { width: "100%" },
+          }}
         >
-          <Tab
-            value="import"
-            label={`Nhập kho (${data.imports.filter((item) => !item.status || item.status === "approved").length})`}
-          />
-          <Tab
-            value="export"
-            label={`Xuất kho (${data.exports.filter((item) => !item.status || item.status === "approved").length})`}
-          />
-          <Tab value="stock" label={`Tồn kho (${stockProducts.length})`} />
+          <Tab value="import" label={`Nhập kho (${tabCounts.import})`} />
+          <Tab value="export" label={`Xuất kho (${tabCounts.export})`} />
+          <Tab value="stock" label={`Tồn kho (${tabCounts.stock})`} />
           <Tab
             value="products"
-            label={`Danh sách sản phẩm (${products.length})`}
+            label={`Danh sách sản phẩm (${tabCounts.products})`}
           />
+          {canManage && (
+            <Tab
+              value="history"
+              icon={<i className="tabler-history" />}
+              iconPosition="start"
+              label={`Lịch sử thay đổi (${tabCounts.history})`}
+              sx={{ ml: "auto" }}
+            />
+          )}
         </Tabs>
         {tab === "products" && (
           <Box
@@ -2495,27 +2688,52 @@ export default function AssetsPage() {
             </Box>
           </Box>
         )}
-        <AssetTable
-          type={tab}
-          rows={pagedRows}
-          canManage={canManage}
-          currentUserId={session?.user?.id}
-          page={page}
-          limit={limit}
-          onView={(item) => setViewingProduct(item)}
-          onEdit={(type, item) => {
-            if (type === "products") {
-              setEditingProduct(item);
-              setProductDialog(true);
-            } else {
-              setEditingItem(item);
-              setDialog(type);
-            }
-          }}
-          onDelete={(type, item) => setDeleteTarget({ type, item })}
-          onApprove={handleApproveTransaction}
-          onReject={(type, item) => setRejectTarget({ type, item })}
-        />
+        {tab === "history" ? (
+          <AssetHistoryTable
+            rows={pagedRows}
+            page={page}
+            limit={limit}
+            loading={historyLoading}
+            rollingBackId={rollingBackId}
+            onRollback={rollbackHistory}
+          />
+        ) : (
+          <AssetTable
+            type={tab}
+            rows={pagedRows}
+            canManage={canManage}
+            currentUserId={session?.user?.id}
+            page={page}
+            limit={limit}
+            onView={(item) => setViewingProduct(item)}
+            onEdit={(type, item) => {
+              if (type === "products") {
+                setEditingProduct(item);
+                setProductDialog(true);
+              } else {
+                setEditingItem(item);
+                setDialog(type);
+              }
+            }}
+            onDelete={(type, item) => {
+              const key =
+                item.documentCode || assetDocumentCodeFromName(item.name || "");
+              const currentStock = Number(stockByCode.get(key)?.quantity || 0);
+              const resultingStock =
+                type === "import" && isApprovedTx(item)
+                  ? currentStock - Number(item.quantity || 0)
+                  : currentStock;
+              setDeleteTarget({
+                type,
+                item,
+                resultingStock,
+                warnsNegative: resultingStock < 0,
+              });
+            }}
+            onApprove={handleApproveTransaction}
+            onReject={(type, item) => setRejectTarget({ type, item })}
+          />
+        )}
         <TablePaginationComponent
           page={page}
           total={groups.size}
@@ -2571,7 +2789,9 @@ export default function AssetsPage() {
           title="Xác nhận xóa phiếu tài sản"
           message={
             deleteTarget
-              ? `Bạn có chắc muốn xóa phiếu ${deleteTarget.type === "import" ? "nhập" : "xuất"} ${deleteTarget.item.code}?`
+              ? deleteTarget.warnsNegative
+                ? `Lưu ý: sau khi xóa, sản phẩm ${deleteTarget.item.name} (${deleteTarget.item.code || "không có mã"}) sẽ có tồn kho ${deleteTarget.resultingStock}. Bạn vẫn muốn xóa?`
+                : `Bạn có chắc muốn xóa phiếu ${deleteTarget.type === "import" ? "nhập" : "xuất"} ${deleteTarget.item.code}?`
               : ""
           }
           confirmText="Xóa phiếu"

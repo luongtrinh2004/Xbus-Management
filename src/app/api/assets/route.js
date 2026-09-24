@@ -3,6 +3,7 @@ import { getToken } from "next-auth/jwt";
 import { assetDocumentCodeFromName } from "@/libs/assetIds";
 import {
   appendAuditLog,
+  appendAssetHistory,
   createAssetTransaction,
   deleteAssetTransaction,
   getAssets,
@@ -159,7 +160,20 @@ export async function GET(req) {
       { error: "Không có quyền truy cập" },
       { status: 403 },
     );
-  return NextResponse.json(normalizeData(await getAssets()));
+  const data = normalizeData(await getAssets());
+  const users = await getUsers();
+  const names = new Map(users.map((user) => [user.id, user.name]));
+  const withApprover = (item) => ({
+    ...item,
+    approvedByName: item.approvedBy
+      ? names.get(item.approvedBy) || "Nhân sự đã nghỉ"
+      : "—",
+  });
+  return NextResponse.json({
+    ...data,
+    imports: data.imports.map(withApprover),
+    exports: data.exports.map(withApprover),
+  });
 }
 
 export async function POST(req) {
@@ -290,6 +304,18 @@ export async function POST(req) {
       updatedAt: now,
     };
     await createAssetTransaction(type, record);
+    await appendAssetHistory({
+      action: "create",
+      type,
+      targetId: record.id,
+      ticketId: record.ticketId,
+      productName: record.name,
+      actorId: token.id,
+      actorName: token.name || "Người dùng",
+      note: record.note || "",
+      before: null,
+      after: record,
+    });
     await appendAuditLog({
       adminId: token.id,
       adminName: token.name || "Người dùng",
@@ -353,18 +379,22 @@ export async function PUT(req) {
     const current = normalizeData(await getAssets());
     if (Array.isArray(body.stock) && body.stock.length) {
       const balances = new Map();
-      current.imports.filter(isApproved).forEach((item) =>
-        balances.set(
-          stockKey(item),
-          (balances.get(stockKey(item)) || 0) + Number(item.quantity || 0),
-        ),
-      );
-      current.exports.filter(isApproved).forEach((item) =>
-        balances.set(
-          stockKey(item),
-          (balances.get(stockKey(item)) || 0) - Number(item.quantity || 0),
-        ),
-      );
+      current.imports
+        .filter(isApproved)
+        .forEach((item) =>
+          balances.set(
+            stockKey(item),
+            (balances.get(stockKey(item)) || 0) + Number(item.quantity || 0),
+          ),
+        );
+      current.exports
+        .filter(isApproved)
+        .forEach((item) =>
+          balances.set(
+            stockKey(item),
+            (balances.get(stockKey(item)) || 0) - Number(item.quantity || 0),
+          ),
+        );
       const productByCode = new Map(
         current.products
           .filter((item) => item.code)
@@ -621,6 +651,18 @@ export async function PATCH(req) {
           updatedAt: now,
         };
         await updateAssetTransaction(type, updated);
+        await appendAssetHistory({
+          action: "approve",
+          type,
+          targetId: updated.id,
+          ticketId: updated.ticketId,
+          productName: updated.name,
+          actorId: token.id,
+          actorName: token.name || "Người dùng",
+          note: "Duyệt phiếu",
+          before: target,
+          after: updated,
+        });
         if (target.performedBy) {
           try {
             createNotification({
@@ -680,6 +722,18 @@ export async function PATCH(req) {
           updatedAt: now,
         };
         await updateAssetTransaction(type, updated);
+        await appendAssetHistory({
+          action: "reject",
+          type,
+          targetId: updated.id,
+          ticketId: updated.ticketId,
+          productName: updated.name,
+          actorId: token.id,
+          actorName: token.name || "Người dùng",
+          note: reason || "Không nêu lý do",
+          before: target,
+          after: updated,
+        });
         if (target.performedBy) {
           try {
             createNotification({
@@ -835,6 +889,18 @@ export async function PATCH(req) {
     }
 
     await updateAssetTransaction(type, updated);
+    await appendAssetHistory({
+      action: "update",
+      type,
+      targetId: updated.id,
+      ticketId: updated.ticketId,
+      productName: updated.name,
+      actorId: token.id,
+      actorName: token.name || "Người dùng",
+      note: updated.note || "",
+      before: previous,
+      after: updated,
+    });
     await appendAuditLog({
       adminId: token.id,
       adminName: token.name || "Người dùng",
@@ -887,23 +953,19 @@ export async function DELETE(req) {
       );
     }
 
-    const normalizedCode = stockKey(record);
-    if (
-      type === "import" &&
-      isApproved(record) &&
-      data.exports.some(
-        (item) => isApproved(item) && stockKey(item) === normalizedCode,
-      )
-    )
-      return NextResponse.json(
-        {
-          error:
-            "Không thể xóa phiếu nhập vì tài sản này đã có giao dịch xuất kho",
-        },
-        { status: 400 },
-      );
-
     await deleteAssetTransaction(type, record.id);
+    await appendAssetHistory({
+      action: "delete",
+      type,
+      targetId: record.id,
+      ticketId: record.ticketId,
+      productName: record.name,
+      actorId: token.id,
+      actorName: token.name || "Người dùng",
+      note: record.note || "",
+      before: record,
+      after: null,
+    });
     await appendAuditLog({
       adminId: token.id,
       adminName: token.name || "Người dùng",

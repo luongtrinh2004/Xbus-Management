@@ -1130,6 +1130,42 @@ export async function deleteAssetTransaction(type, id) {
   );
   return true;
 }
+
+export async function getAssetHistory() {
+  if (!mysqlEnabled()) return json.getAssetHistory();
+  return getDocument("asset-change-history", []);
+}
+
+export async function appendAssetHistory(entry) {
+  const history = await getAssetHistory();
+  const record = {
+    id: `asset_history_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+    ...entry,
+    createdAt: new Date().toISOString(),
+    rolledBackAt: null,
+    rolledBackBy: null,
+  };
+  const updated = [record, ...history].slice(0, 1000);
+  if (!mysqlEnabled()) await json.saveAssetHistory(updated);
+  else await saveDocument("asset-change-history", updated);
+  return record;
+}
+
+export async function markAssetHistoryRolledBack(id, actorId) {
+  const history = await getAssetHistory();
+  const updated = history.map((item) =>
+    item.id === id
+      ? {
+          ...item,
+          rolledBackAt: new Date().toISOString(),
+          rolledBackBy: actorId,
+        }
+      : item,
+  );
+  if (!mysqlEnabled()) await json.saveAssetHistory(updated);
+  else await saveDocument("asset-change-history", updated);
+  return updated.find((item) => item.id === id);
+}
 export async function saveAssets(data) {
   if (!mysqlEnabled()) return json.saveAssets(data);
   const connection = await getMysqlPool().getConnection();

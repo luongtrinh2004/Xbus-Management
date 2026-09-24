@@ -1,6 +1,30 @@
 {
   "auditLogs": [
     {
+      "id": "log_1790241148144_xk4t",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "ROLLBACK_ASSET_TRANSACTION",
+      "targetType": "ASSET",
+      "targetId": "import_excel_1790068274502_30_wys2",
+      "details": "Hoàn tác thay đổi delete của phiếu AAA030",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-24T09:12:28.144Z"
+    },
+    {
+      "id": "log_1790241129980_8wty",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "DELETE_ASSET_TRANSACTION",
+      "targetType": "ASSET",
+      "targetId": "import_excel_1790068274502_30_wys2",
+      "details": "Xóa phiếu nhập 20 AC_ISX031-H190 ()",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-24T09:12:09.980Z"
+    },
+    {
       "id": "log_1790234849424_as6m",
       "adminId": "usr_admin_001",
       "adminName": "Quản trị viên Hệ thống",

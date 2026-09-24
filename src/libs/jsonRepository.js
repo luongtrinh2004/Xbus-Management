@@ -148,6 +148,15 @@ export function saveAssets(data) {
   return writeJsonFile("assets.json", data);
 }
 
+export function getAssetHistory() {
+  const data = readJsonFile("asset-history.json", { history: [] });
+  return Array.isArray(data.history) ? data.history : [];
+}
+
+export function saveAssetHistory(history) {
+  return writeJsonFile("asset-history.json", { history });
+}
+
 export function getAfternoonTea() {
   return readJsonFile("afternoon-tea.json", {
     menuImageUrl: "",
