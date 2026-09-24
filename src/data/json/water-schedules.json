@@ -1,0 +1,390 @@
+{
+  "schedules": [
+    {
+      "id": "water_202609_week_1",
+      "year": 2026,
+      "month": 9,
+      "weekIndex": 1,
+      "range": "31/08 - 06/09",
+      "validDays": [
+        "01/09/2026",
+        "02/09/2026",
+        "03/09/2026",
+        "04/09/2026",
+        "05/09/2026",
+        "06/09/2026"
+      ],
+      "date": "03/09/2026",
+      "time": "09:00",
+      "requiredPeople": 5,
+      "status": "completed",
+      "note": "",
+      "participants": [
+        {
+          "userId": "usr_011",
+          "name": "Lê Tuấn Long",
+          "code": "PNKX308",
+          "completed": true
+        },
+        {
+          "userId": "usr_010",
+          "name": "Bùi Văn Quốc Anh",
+          "code": "PNKX304",
+          "completed": true
+        },
+        {
+          "userId": "usr_016",
+          "name": "Nguyễn Văn Bằng",
+          "code": "PNKX334",
+          "completed": true
+        },
+        {
+          "userId": "usr_025",
+          "name": "Nguyễn Minh Hoàng",
+          "code": "PNKX365",
+          "completed": true
+        },
+        {
+          "userId": "usr_003",
+          "name": "Hoàng Duy Lộc",
+          "code": "PNKX029",
+          "completed": true
+        }
+      ],
+      "completedAt": "2026-09-13T18:22:50.874Z",
+      "completedBy": "usr_admin_001",
+      "updatedAt": "2026-09-13T18:22:50.874Z"
+    },
+    {
+      "id": "water_20260909",
+      "year": 2026,
+      "month": 9,
+      "date": "09/09/2026",
+      "time": "14:00",
+      "requiredPeople": 5,
+      "participants": [
+        {
+          "userId": "usr_004",
+          "name": "Nguyễn Trung Kiên",
+          "code": "PNKX062",
+          "completed": true
+        },
+        {
+          "userId": "usr_005",
+          "name": "Trần Cao Khâm",
+          "code": "PNKX170",
+          "completed": true
+        },
+        {
+          "userId": "usr_013",
+          "name": "Phan Thành Nam",
+          "code": "PNKX036",
+          "completed": true
+        }
+      ],
+      "status": "completed",
+      "note": "",
+      "savedAt": "2026-09-14T07:28:35.230Z",
+      "updatedAt": "2026-09-18T04:21:52.188Z",
+      "completedAt": "2026-09-18T04:21:52.188Z",
+      "completedBy": "usr_admin_001"
+    },
+    {
+      "id": "water_20260901",
+      "year": 2026,
+      "month": 9,
+      "date": "01/09/2026",
+      "time": "14:00",
+      "requiredPeople": 5,
+      "participants": [
+        {
+          "userId": "usr_022",
+          "name": "Bùi Tùng Lâm",
+          "code": "HĐK207",
+          "completed": true
+        },
+        {
+          "userId": "usr_014",
+          "name": "Đặng Đình Khánh",
+          "code": "PNKX138",
+          "completed": true
+        },
+        {
+          "userId": "usr_admin_001",
+          "name": "Quản trị viên Hệ thống",
+          "code": "ADM001",
+          "completed": true
+        }
+      ],
+      "status": "completed",
+      "note": "",
+      "savedAt": "2026-09-14T08:23:03.038Z",
+      "updatedAt": "2026-09-18T07:08:25.600Z",
+      "completedAt": "2026-09-18T07:08:25.600Z",
+      "completedBy": "usr_admin_001"
+    },
+    {
+      "id": "water_20260907",
+      "year": 2026,
+      "month": 9,
+      "date": "07/09/2026",
+      "time": "14:00",
+      "requiredPeople": 5,
+      "participants": [
+        {
+          "userId": "usr_002",
+          "name": "Hà Quốc Việt",
+          "code": "PNKX019",
+          "completed": false
+        },
+        {
+          "userId": "usr_027",
+          "name": "Lê Ngọc Sơn",
+          "code": "HĐK213",
+          "completed": false
+        }
+      ],
+      "status": "upcoming",
+      "note": "",
+      "savedAt": "2026-09-18T04:17:27.283Z",
+      "updatedAt": "2026-09-18T04:17:33.026Z"
+    },
+    {
+      "id": "water_20260902",
+      "year": 2026,
+      "month": 9,
+      "date": "02/09/2026",
+      "time": "14:00",
+      "requiredPeople": 5,
+      "participants": [
+        {
+          "userId": "usr_009",
+          "name": "Bùi Đình Quý",
+          "code": "PNKX296",
+          "completed": true
+        }
+      ],
+      "status": "completed",
+      "note": "",
+      "savedAt": "2026-09-18T04:21:36.039Z",
+      "updatedAt": "2026-09-18T04:25:41.898Z",
+      "completedAt": "2026-09-18T04:25:41.898Z",
+      "completedBy": "usr_admin_001"
+    },
+    {
+      "id": "water_20260911",
+      "year": 2026,
+      "month": 9,
+      "date": "11/09/2026",
+      "time": "14:00",
+      "requiredPeople": 5,
+      "participants": [
+        {
+          "userId": "usr_014",
+          "name": "Đặng Đình Khánh",
+          "code": "PNKX138",
+          "completed": false
+        },
+        {
+          "userId": "usr_003",
+          "name": "Hoàng Duy Lộc",
+          "code": "PNKX029",
+          "completed": false
+        }
+      ],
+      "status": "upcoming",
+      "note": "",
+      "savedAt": "2026-09-18T04:21:38.371Z",
+      "updatedAt": "2026-09-18T04:21:40.228Z"
+    },
+    {
+      "id": "water_20261102",
+      "year": 2026,
+      "month": 11,
+      "date": "02/11/2026",
+      "time": "14:00",
+      "requiredPeople": 5,
+      "participants": [
+        {
+          "userId": "usr_002",
+          "name": "Hà Quốc Việt",
+          "code": "PNKX019",
+          "completed": false
+        }
+      ],
+      "status": "upcoming",
+      "note": "",
+      "savedAt": "2026-09-21T03:06:40.118Z",
+      "updatedAt": "2026-09-21T03:06:40.118Z"
+    },
+    {
+      "id": "water_20260910",
+      "year": 2026,
+      "month": 9,
+      "weekIndex": 2,
+      "date": "10/09/2026",
+      "time": "14:00",
+      "requiredPeople": 5,
+      "participants": [
+        {
+          "userId": "usr_018",
+          "name": "Nguyễn Mạnh Cường",
+          "code": "PNKX353",
+          "completed": false
+        },
+        {
+          "userId": "usr_012",
+          "name": "Trần Việt Dũng",
+          "code": "PNKX316",
+          "completed": false
+        },
+        {
+          "userId": "usr_017",
+          "name": "Nguyễn Minh Sang",
+          "code": "PNKX346",
+          "completed": false
+        },
+        {
+          "userId": "usr_022",
+          "name": "Bùi Tùng Lâm",
+          "code": "HĐK207",
+          "completed": false
+        },
+        {
+          "userId": "usr_002",
+          "name": "Hà Quốc Việt",
+          "code": "PNKX019",
+          "completed": false
+        }
+      ],
+      "status": "upcoming",
+      "note": "",
+      "selectionMode": "automatic",
+      "savedAt": "2026-09-21T06:27:48.462Z",
+      "updatedAt": "2026-09-21T06:27:48.462Z"
+    },
+    {
+      "id": "water_20260915",
+      "year": 2026,
+      "month": 9,
+      "weekIndex": 3,
+      "date": "15/09/2026",
+      "time": "14:00",
+      "requiredPeople": 5,
+      "participants": [
+        {
+          "userId": "usr_014",
+          "name": "Đặng Đình Khánh",
+          "code": "PNKX138",
+          "completed": false
+        },
+        {
+          "userId": "usr_019",
+          "name": "Phạm Hoàng Sơn",
+          "code": "PNKX351",
+          "completed": false
+        },
+        {
+          "userId": "usr_012",
+          "name": "Trần Việt Dũng",
+          "code": "PNKX316",
+          "completed": false
+        },
+        {
+          "userId": "usr_018",
+          "name": "Nguyễn Mạnh Cường",
+          "code": "PNKX353",
+          "completed": false
+        },
+        {
+          "userId": "usr_020",
+          "name": "Trần Bảo Khánh",
+          "code": "PNKX345",
+          "completed": false
+        }
+      ],
+      "status": "upcoming",
+      "note": "",
+      "selectionMode": "automatic",
+      "savedAt": "2026-09-22T10:12:04.268Z",
+      "updatedAt": "2026-09-22T10:12:04.268Z"
+    },
+    {
+      "id": "water_20260924",
+      "year": 2026,
+      "month": 9,
+      "weekIndex": 4,
+      "date": "24/09/2026",
+      "time": "14:00",
+      "requiredPeople": 5,
+      "participants": [
+        {
+          "userId": "usr_024",
+          "name": "Trịnh Phúc Lương",
+          "code": "HĐK181",
+          "completed": true
+        },
+        {
+          "userId": "usr_012",
+          "name": "Trần Việt Dũng",
+          "code": "PNKX316",
+          "completed": true
+        }
+      ],
+      "status": "completed",
+      "note": "",
+      "savedAt": "2026-09-24T07:08:01.107Z",
+      "updatedAt": "2026-09-24T07:08:35.943Z",
+      "completedAt": "2026-09-24T07:08:35.943Z",
+      "completedBy": "usr_admin_001"
+    },
+    {
+      "id": "water_20260925",
+      "year": 2026,
+      "month": 9,
+      "weekIndex": 4,
+      "date": "25/09/2026",
+      "time": "14:00",
+      "requiredPeople": 5,
+      "participants": [
+        {
+          "userId": "usr_024",
+          "name": "Trịnh Phúc Lương",
+          "code": "HĐK181",
+          "completed": true
+        },
+        {
+          "userId": "usr_023",
+          "name": "Nguyễn Bách Tùng",
+          "code": "HĐK208",
+          "completed": true
+        },
+        {
+          "userId": "usr_005",
+          "name": "Trần Cao Khâm",
+          "code": "PNKX170",
+          "completed": true
+        },
+        {
+          "userId": "usr_015",
+          "name": "Nghiêm Thành Long",
+          "code": "PNKX169",
+          "completed": true
+        },
+        {
+          "userId": "usr_003",
+          "name": "Hoàng Duy Lộc",
+          "code": "PNKX029",
+          "completed": true
+        }
+      ],
+      "status": "completed",
+      "note": "",
+      "savedAt": "2026-09-24T07:19:54.381Z",
+      "updatedAt": "2026-09-24T07:27:29.421Z",
+      "selectionMode": "automatic",
+      "completedAt": "2026-09-24T07:27:29.421Z",
+      "completedBy": "usr_admin_001"
+    }
+  ]
+}

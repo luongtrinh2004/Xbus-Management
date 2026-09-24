@@ -16,6 +16,7 @@ import {
   fundPaymentStatus,
   summarizeFundCash,
 } from "@/libs/fundRules";
+import { createNotification } from "@/libs/notificationStorage";
 
 const secret = process.env.NEXTAUTH_SECRET;
 const fundLabels = {
@@ -45,6 +46,7 @@ const reminderDefaults = (period, settings) => {
 
 const buildFundResponse = (fund, allFunds) => {
   const summary = summarizeFundCash(allFunds, periodKey(fund));
+  const allTimeSummary = summarizeFundCash(allFunds);
 
   return {
     ...fund,
@@ -53,6 +55,7 @@ const buildFundResponse = (fund, allFunds) => {
     incomes: fund.incomes || [],
     expenses: fund.expenses || [],
     ...summary,
+    allTimeSummary,
     paidCount: (fund.members || []).filter((member) =>
       ["paid", "overpaid"].includes(fundPaymentStatus(member).key),
     ).length,
@@ -430,6 +433,7 @@ async function changeTransaction(req, removing) {
         ...currentMember,
         userId: user.id,
         paid,
+        pendingApproval: false,
         amount: paid ? amount : 0,
         paidAt: paid ? now : null,
         updatedAt: now,
@@ -451,6 +455,15 @@ async function changeTransaction(req, removing) {
           ? `Xác nhận ${user.name} đã đóng ${payment.amount.toLocaleString("vi-VN")} đồng quỹ tháng ${funds[fundIndex].month}/${funds[fundIndex].year}`
           : `Hủy xác nhận đóng quỹ tháng ${funds[fundIndex].month}/${funds[fundIndex].year} của ${user.name}`,
       });
+      if (paid) {
+        createNotification({
+          userId: user.id,
+          type: "fund_confirmed",
+          title: "Xác nhận đóng quỹ thành công",
+          message: `${token.name || "Quản trị viên"} đã xác nhận khoản đóng quỹ ${payment.amount.toLocaleString("vi-VN")}đ tháng ${funds[fundIndex].month}/${funds[fundIndex].year} của bạn.`,
+          link: "/fund?section=members",
+        });
+      }
       return NextResponse.json(buildFundResponse(funds[fundIndex], funds));
     }
     const key = body.kind === "income" ? "incomes" : "expenses";

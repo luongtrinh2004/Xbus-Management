@@ -24,6 +24,10 @@ export function readJsonFile(fileName, defaultValue = {}) {
       return defaultValue;
     }
     const content = fs.readFileSync(filePath, "utf-8");
+    if (!content || !content.trim()) {
+      writeJsonFile(fileName, defaultValue);
+      return defaultValue;
+    }
     return JSON.parse(content);
   } catch (error) {
     console.error(`[JsonRepository] Lỗi đọc file ${fileName}:`, error);

@@ -365,8 +365,10 @@ export async function getFunds() {
             ...member,
             userId,
             paid: false,
-            amount: 0,
-            paidAt: null,
+            amount: member.pendingApproval
+              ? Number(member.pendingAmount || 0)
+              : 0,
+            paidAt: member.paidAt || null,
           })),
         ...payments
           .filter((item) => item.fund_period_id === fund.id)
@@ -375,7 +377,16 @@ export async function getFunds() {
             // Relational identity must not be overridden by legacy metadata.
             userId: item.user_id,
             paid: Boolean(item.paid),
-            amount: Number(item.amount || 0),
+            amount:
+              Number(item.amount || 0) > 0
+                ? Number(item.amount || 0)
+                : metadata.get(fund.id)?.members?.[item.user_id]
+                      ?.pendingApproval
+                  ? Number(
+                      metadata.get(fund.id)?.members?.[item.user_id]
+                        ?.pendingAmount || 0,
+                    )
+                  : 0,
             paidAt: toIso(item.paid_at),
             paymentStatus: item.payment_status || undefined,
             orderCode: item.order_code ? Number(item.order_code) : undefined,
@@ -444,6 +455,12 @@ const fundMemberMetadata = (fund) => {
         cancelledAt: item.cancelledAt,
         cancelledBy: item.cancelledBy,
         paymentChannelId: item.paymentChannelId,
+        pendingApproval: Boolean(item.pendingApproval),
+        paymentMethod: item.paymentMethod || null,
+        note: item.note || null,
+        pendingAmount: item.pendingApproval
+          ? Number(item.amount || 0)
+          : undefined,
       },
     ]),
   );
@@ -597,6 +614,28 @@ export async function saveFunds(funds) {
   }
 }
 
+export function indexToTicketCode(n) {
+  const num = Math.max(0, n) % 1000;
+  let charIndex = Math.floor(Math.max(0, n) / 1000);
+  const c3 = String.fromCharCode(65 + (charIndex % 26));
+  charIndex = Math.floor(charIndex / 26);
+  const c2 = String.fromCharCode(65 + (charIndex % 26));
+  charIndex = Math.floor(charIndex / 26);
+  const c1 = String.fromCharCode(65 + (charIndex % 26));
+  return `${c1}${c2}${c3}${String(num).padStart(3, "0")}`;
+}
+
+export function ticketCodeToIndex(code) {
+  if (!code || typeof code !== "string" || !/^[A-Z]{3}[0-9]{3}$/.test(code)) {
+    return -1;
+  }
+  const c1 = code.charCodeAt(0) - 65;
+  const c2 = code.charCodeAt(1) - 65;
+  const c3 = code.charCodeAt(2) - 65;
+  const num = parseInt(code.slice(3), 10);
+  return (c1 * 26 * 26 + c2 * 26 + c3) * 1000 + num;
+}
+
 export async function getAssets() {
   if (!mysqlEnabled()) {
     const data = await json.getAssets();
@@ -647,16 +686,33 @@ export async function getAssets() {
     const categoryNames = new Map(
       categories.map((item) => [item.id, item.name]),
     );
-    const normalizeTransaction = (item) => {
+
+    const formatTicketCode = (ticketId, index) => {
+      if (ticketId && /^[A-Z]{3}[0-9]{3}$/.test(ticketId)) {
+        return ticketId;
+      }
+      return indexToTicketCode(index);
+    };
+    const normalizeTransaction = (item, index) => {
       const product = productsByCode.get(item.code);
+      const base = {
+        ...item,
+        ticketId: formatTicketCode(item.ticketId, index),
+        status: item.status || "approved",
+        approvedBy: item.approvedBy || null,
+        approvedAt: item.approvedAt || null,
+        rejectedBy: item.rejectedBy || null,
+        rejectedAt: item.rejectedAt || null,
+        rejectReason: item.rejectReason || "",
+      };
       if (!product)
         return {
-          ...item,
+          ...base,
           documentCode: assetDocumentCodeFromName(item.name),
           unit: item.unit || "",
         };
       return {
-        ...item,
+        ...base,
         documentCode: assetDocumentCodeFromName(product.name),
         category: categoryNames.get(product.categoryId) || "",
         unit: product.unit || item.unit || "",
@@ -747,19 +803,59 @@ export async function getAssets() {
       query("SELECT * FROM asset_product_units ORDER BY name"),
     ],
   );
+  const formatSqlTicketCode = (ticketId, index) => {
+    if (ticketId && /^[A-Z]{3}[0-9]{3}$/.test(ticketId)) {
+      return ticketId;
+    }
+    return indexToTicketCode(index);
+  };
+  const importRows = rows.filter((row) => row.transaction_type === "import");
+  const exportRows = rows.filter((row) => row.transaction_type === "export");
+
   await Promise.all(
     rows.map(async (row) => {
+      const updates = [];
+      const params = [];
       const documentCode = assetDocumentCodeFromName(row.product_name);
-      if (!documentCode || row.document_code === documentCode) return;
-      await query("UPDATE asset_transactions SET document_code=? WHERE id=?", [
-        documentCode,
-        row.id,
-      ]);
-      row.document_code = documentCode;
+      if (documentCode && row.document_code !== documentCode) {
+        updates.push("document_code=?");
+        params.push(documentCode);
+        row.document_code = documentCode;
+      }
+      const typeRows =
+        row.transaction_type === "export" ? exportRows : importRows;
+      const idx = Math.max(0, typeRows.indexOf(row));
+      const properTicketId = formatSqlTicketCode(row.ticket_id, idx);
+      if (row.ticket_id !== properTicketId) {
+        updates.push("ticket_id=?");
+        params.push(properTicketId);
+        row.ticket_id = properTicketId;
+      }
+      if (!row.status) {
+        updates.push("status='approved'");
+        row.status = "approved";
+      }
+      if (updates.length > 0) {
+        try {
+          await query(
+            `UPDATE asset_transactions SET ${updates.join(",")} WHERE id=?`,
+            [...params, row.id],
+          );
+        } catch {
+          // ignore column missing error if migration not executed yet
+        }
+      }
     }),
   );
-  const map = (row) => ({
+  const map = (row, index) => ({
     id: row.id,
+    ticketId: formatSqlTicketCode(row.ticket_id, index),
+    status: row.status || "approved",
+    approvedBy: row.approved_by || null,
+    approvedAt: toIso(row.approved_at),
+    rejectedBy: row.rejected_by || null,
+    rejectedAt: toIso(row.rejected_at),
+    rejectReason: row.reject_reason || "",
     code: row.product_code,
     name: row.product_name,
     category: row.product_category_name || "",
@@ -777,8 +873,8 @@ export async function getAssets() {
     updatedAt: toIso(row.updated_at),
   });
   return {
-    imports: rows.filter((row) => row.transaction_type === "import").map(map),
-    exports: rows.filter((row) => row.transaction_type === "export").map(map),
+    imports: importRows.map(map),
+    exports: exportRows.map(map),
     products: productRows.map((row) => ({
       id: row.id,
       code: row.code || "",
@@ -920,8 +1016,22 @@ export async function deleteAssetUnit(id) {
   return true;
 }
 
+const formatTransactionTicketCode = (ticketId, fallbackIndex = 0) => {
+  if (ticketId && /^[A-Z]{3}[0-9]{3}$/.test(ticketId)) {
+    return ticketId;
+  }
+  return indexToTicketCode(fallbackIndex);
+};
+
 const assetTransactionValues = (item, type) => [
   item.id,
+  formatTransactionTicketCode(item.ticketId, type),
+  item.status || "approved",
+  item.approvedBy || null,
+  item.approvedAt ? new Date(item.approvedAt) : null,
+  item.rejectedBy || null,
+  item.rejectedAt ? new Date(item.rejectedAt) : null,
+  item.rejectReason || null,
   assetDocumentCodeFromName(item.name) || null,
   type,
   item.code,
@@ -944,29 +1054,43 @@ export async function createAssetTransaction(type, item) {
   if (!mysqlEnabled()) {
     const data = await json.getAssets();
     const key = type === "export" ? "exports" : "imports";
-    await json.saveAssets({ ...data, [key]: [item, ...(data[key] || [])] });
+    const record = {
+      ...item,
+      ticketId: formatTransactionTicketCode(item.ticketId, type),
+    };
+    await json.saveAssets({ ...data, [key]: [record, ...(data[key] || [])] });
     return true;
   }
   await query(
-    "INSERT INTO asset_transactions (id,document_code,transaction_type,product_code,product_name,product_category_name,product_description,transaction_date,quantity,unit_name,storage_location,counterparty_name,recipient_name,performed_by_user_id,note,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+    "INSERT INTO asset_transactions (id,ticket_id,status,approved_by,approved_at,rejected_by,rejected_at,reject_reason,document_code,transaction_type,product_code,product_name,product_category_name,product_description,transaction_date,quantity,unit_name,storage_location,counterparty_name,recipient_name,performed_by_user_id,note,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
     assetTransactionValues(item, type),
   );
   return true;
 }
 
 export async function updateAssetTransaction(type, item) {
+  const properTicketId = formatTransactionTicketCode(item.ticketId, type);
   if (!mysqlEnabled()) {
     const data = await json.getAssets();
     const key = type === "export" ? "exports" : "imports";
     await json.saveAssets({
       ...data,
-      [key]: (data[key] || []).map((row) => (row.id === item.id ? item : row)),
+      [key]: (data[key] || []).map((row) =>
+        row.id === item.id ? { ...item, ticketId: properTicketId } : row,
+      ),
     });
     return true;
   }
   await query(
-    "UPDATE asset_transactions SET document_code=?,product_code=?,product_name=?,product_category_name=?,product_description=?,transaction_date=?,quantity=?,unit_name=?,storage_location=?,counterparty_name=?,recipient_name=?,performed_by_user_id=?,note=?,updated_at=? WHERE id=? AND transaction_type=?",
+    "UPDATE asset_transactions SET ticket_id=?,status=?,approved_by=?,approved_at=?,rejected_by=?,rejected_at=?,reject_reason=?,document_code=?,product_code=?,product_name=?,product_category_name=?,product_description=?,transaction_date=?,quantity=?,unit_name=?,storage_location=?,counterparty_name=?,recipient_name=?,performed_by_user_id=?,note=?,updated_at=? WHERE id=? AND transaction_type=?",
     [
+      properTicketId,
+      item.status || "approved",
+      item.approvedBy || null,
+      item.approvedAt ? new Date(item.approvedAt) : null,
+      item.rejectedBy || null,
+      item.rejectedAt ? new Date(item.rejectedAt) : null,
+      item.rejectReason || null,
       assetDocumentCodeFromName(item.name) || null,
       item.code,
       item.name,
@@ -1018,28 +1142,8 @@ export async function saveAssets(data) {
     ])
       for (const item of records)
         await connection.execute(
-          "INSERT INTO asset_transactions (id,document_code,transaction_type,product_code,product_name,product_category_name,product_description,transaction_date,quantity,unit_name,storage_location,counterparty_name,recipient_name,performed_by_user_id,note,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-          [
-            item.id,
-            assetDocumentCodeFromName(item.name) || null,
-            type,
-            item.code,
-            item.name,
-            item.category || null,
-            item.description || null,
-            toMysqlDate(item.date),
-            item.quantity === null || item.quantity === ""
-              ? null
-              : Number(item.quantity),
-            item.unit || null,
-            item.location || null,
-            item.person || null,
-            item.issuedTo || null,
-            item.performedBy || null,
-            item.note || null,
-            item.createdAt ? new Date(item.createdAt) : new Date(),
-            item.updatedAt ? new Date(item.updatedAt) : null,
-          ],
+          "INSERT INTO asset_transactions (id,ticket_id,status,approved_by,approved_at,rejected_by,rejected_at,reject_reason,document_code,transaction_type,product_code,product_name,product_category_name,product_description,transaction_date,quantity,unit_name,storage_location,counterparty_name,recipient_name,performed_by_user_id,note,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+          assetTransactionValues(item, type),
         );
     await connection.commit();
     return true;
@@ -1252,8 +1356,12 @@ export async function getTrashScheduleState() {
     rows.map((row) => ({
       dateKey: toDateOnly(row.schedule_date),
       userId: row.user_id,
+      userIds: [row.user_id, row.second_user_id].filter(Boolean),
       completed: Boolean(row.completed),
       completedBy: row.completed_by,
+      completedUserIds: [row.completed_by, row.second_completed_by].filter(
+        Boolean,
+      ),
       completedAt: toIso(row.completed_at),
     })),
     metadata,
@@ -1274,13 +1382,15 @@ export async function saveTrashScheduleState(state) {
     } else await connection.execute("DELETE FROM trash_schedules");
     for (const row of records) {
       await connection.execute(
-        "INSERT INTO trash_schedules (schedule_date,user_id,completed,completed_by,completed_at) VALUES (?,?,?,?,?) ON DUPLICATE KEY UPDATE user_id=VALUES(user_id),completed=VALUES(completed),completed_by=VALUES(completed_by),completed_at=VALUES(completed_at)",
+        "INSERT INTO trash_schedules (schedule_date,user_id,completed,completed_by,completed_at,second_user_id,second_completed_by) VALUES (?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE user_id=VALUES(user_id),completed=VALUES(completed),completed_by=VALUES(completed_by),completed_at=VALUES(completed_at),second_user_id=VALUES(second_user_id),second_completed_by=VALUES(second_completed_by)",
         [
           row.dateKey,
           row.userId,
           row.completed,
           row.completedBy,
           toMysqlDateTime(row.completedAt),
+          row.userIds?.[1] || null,
+          row.completedUserIds?.[1] || null,
         ],
       );
     }

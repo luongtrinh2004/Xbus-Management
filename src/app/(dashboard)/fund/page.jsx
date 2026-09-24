@@ -32,6 +32,9 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
+import Tab from "@mui/material/Tab";
+import Tabs from "@mui/material/Tabs";
+import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import CustomTextField from "@core/components/mui/TextField";
 import tableStyles from "@core/styles/table.module.css";
@@ -123,6 +126,10 @@ export default function FundPage() {
   const [cancellationReason, setCancellationReason] = useState("Được miễn");
   const [savingObligation, setSavingObligation] = useState(false);
   const [paymentMember, setPaymentMember] = useState(null);
+  const [paymentTab, setPaymentTab] = useState("manual");
+  const [manualAmount, setManualAmount] = useState("");
+  const [manualNote, setManualNote] = useState("");
+  const [submittingManual, setSubmittingManual] = useState(false);
   const [paymentThousands, setPaymentThousands] = useState("");
   const [paymentData, setPaymentData] = useState(null);
   const [creatingPayment, setCreatingPayment] = useState(false);
@@ -252,10 +259,48 @@ export default function FundPage() {
       setCreatingPayment(false);
     }
   };
+
+  const submitManualPayment = async () => {
+    if (submittingManual) return;
+    const amount = Number(String(manualAmount).replace(/\D/g, ""));
+    if (!Number.isFinite(amount) || amount <= 0) {
+      toast.error("Vui lòng nhập số tiền đã đóng hợp lệ");
+      return;
+    }
+    setSubmittingManual(true);
+    try {
+      const [month, year] = period.split("/").map(Number);
+      const res = await fetch("/api/fund-payments/manual", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          month,
+          year,
+          amount,
+          note: manualNote,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Không thể lưu thông tin");
+      toast.success(
+        "Đã gửi thông tin đóng quỹ thủ công. Vui lòng chờ admin/trợ lý xác nhận.",
+      );
+      closePaymentDialog();
+      await loadFund(period);
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setSubmittingManual(false);
+    }
+  };
+
   const closePaymentDialog = () => {
     setPaymentMember(null);
     setPaymentData(null);
     setPaymentThousands("");
+    setManualAmount("");
+    setManualNote("");
+    setPaymentTab("manual");
   };
 
   useEffect(() => {
@@ -929,37 +974,28 @@ export default function FundPage() {
           }
         />
         <CardContent sx={{ pt: 0 }} aria-busy={loadingPeriod}>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            {loadingPeriod
-              ? "Đang tải tổng hợp..."
-              : isAllPeriods
-                ? "Tổng hợp tất cả kỳ"
-                : `Tổng hợp tháng ${period}`}
-          </Typography>
-          <Grid container spacing={3}>
+          <Grid container spacing={3} sx={{ mt: 0.5 }}>
             {[
               {
                 label: "Tổng thu",
-                value: fund?.totalIncome,
+                value: fund?.allTimeSummary?.totalIncome ?? fund?.totalIncome,
                 icon: "tabler-trending-up",
                 color: "success",
-                detail: "Tiền đóng quỹ và các nguồn thu khác",
               },
               {
                 label: "Tổng chi",
-                value: fund?.totalExpense,
+                value: fund?.allTimeSummary?.totalExpense ?? fund?.totalExpense,
                 icon: "tabler-trending-down",
                 color: "error",
-                detail: "Các khoản chi đã ghi nhận",
               },
               {
                 label: "Còn lại",
-                value: fund?.balance,
+                value: fund?.allTimeSummary?.balance ?? fund?.balance,
                 icon: "tabler-wallet",
-                color: Number(fund?.balance) < 0 ? "error" : "primary",
-                detail: isAllPeriods
-                  ? `Số dư ban đầu ${money(fund?.openingBalance || 0)} + tổng thu − tổng chi`
-                  : `Số dư đầu kỳ ${money(fund?.openingBalance || 0)} + thu − chi`,
+                color:
+                  Number(fund?.allTimeSummary?.balance ?? fund?.balance) < 0
+                    ? "error"
+                    : "primary",
               },
             ].map((item) => (
               <Grid key={item.label} size={{ xs: 12, sm: 4 }}>
@@ -1000,13 +1036,6 @@ export default function FundPage() {
                     }}
                   >
                     {loadingPeriod ? "—" : money(item.value || 0)}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{ mt: 1 }}
-                  >
-                    {item.detail}
                   </Typography>
                 </Box>
               </Grid>
@@ -1772,14 +1801,19 @@ export default function FundPage() {
                               variant="tonal"
                               color={paymentStatus.color}
                               label={paymentStatus.label}
-                              sx={
-                                member.obligationCancelled
+                              sx={{
+                                width: 96,
+                                minWidth: 96,
+                                justifyContent: "center",
+                                fontWeight: 600,
+                                fontSize: "0.8125rem",
+                                ...(member.obligationCancelled
                                   ? {
                                       bgcolor: "rgba(115,103,240,.16)",
                                       color: "#7367f0",
                                     }
-                                  : undefined
-                              }
+                                  : {}),
+                              }}
                             />
                             {member.obligationCancelled && (
                               <Typography
@@ -1841,12 +1875,16 @@ export default function FundPage() {
                           ) : (
                             <Typography
                               variant="body2"
-                              fontWeight={600}
+                              fontWeight={member.paid ? 600 : 400}
                               color={
                                 member.paid ? "text.primary" : "text.disabled"
                               }
                             >
-                              {money(member.paid ? member.amount : 0)}
+                              {money(
+                                member.paid || member.pendingApproval
+                                  ? member.amount
+                                  : 0,
+                              )}
                             </Typography>
                           )}
                         </TableCell>
@@ -1887,9 +1925,46 @@ export default function FundPage() {
                         </TableCell>
                         {canManage && (
                           <TableCell align="center">
-                            {isEditingPayment ||
-                            member.obligationCancelled ||
-                            (!member.paid && member.requiredAmount === 0) ? (
+                            {member.pendingApproval ? (
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  gap: 0.5,
+                                  justifyContent: "center",
+                                }}
+                              >
+                                <Tooltip title="Xác nhận đã nhận tiền (Duyệt đóng quỹ)">
+                                  <IconButton
+                                    color="success"
+                                    size="small"
+                                    disabled={savingPayment}
+                                    onClick={() =>
+                                      updateMemberPayment(
+                                        member,
+                                        true,
+                                        member.amount,
+                                      )
+                                    }
+                                  >
+                                    <i className="tabler-circle-check" />
+                                  </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Từ chối yêu cầu đóng quỹ">
+                                  <IconButton
+                                    color="error"
+                                    size="small"
+                                    disabled={savingPayment}
+                                    onClick={() =>
+                                      setCancelPaymentTarget(member)
+                                    }
+                                  >
+                                    <i className="tabler-circle-x" />
+                                  </IconButton>
+                                </Tooltip>
+                              </Box>
+                            ) : isEditingPayment ||
+                              member.obligationCancelled ||
+                              (!member.paid && member.requiredAmount === 0) ? (
                               <Typography
                                 variant="body2"
                                 color="text.secondary"
@@ -1973,26 +2048,46 @@ export default function FundPage() {
                               !fund?.isFuture &&
                               member.requiredAmount > 0 &&
                               !member.obligationCancelled ? (
-                              <Button
-                                size="small"
-                                variant="contained"
-                                onClick={() => {
-                                  setPaymentMember(member);
-                                  const required = minimumFor(member);
-                                  const inThousands =
-                                    Math.floor(required / 1000) || "";
-                                  setPaymentThousands(
-                                    inThousands
-                                      ? Number(inThousands).toLocaleString(
-                                          "vi-VN",
-                                        )
-                                      : "",
-                                  );
-                                  setPaymentData(null);
-                                }}
-                              >
-                                Đóng quỹ
-                              </Button>
+                              member.pendingApproval ? (
+                                !canManage ? (
+                                  <Typography
+                                    variant="body2"
+                                    color="text.secondary"
+                                  >
+                                    —
+                                  </Typography>
+                                ) : null
+                              ) : (
+                                <Button
+                                  size="small"
+                                  variant="contained"
+                                  onClick={() => {
+                                    setPaymentMember(member);
+                                    setPaymentTab("manual");
+                                    const required = minimumFor(member);
+                                    setManualAmount(
+                                      required
+                                        ? Number(required).toLocaleString(
+                                            "vi-VN",
+                                          )
+                                        : "150.000",
+                                    );
+                                    setManualNote("");
+                                    const inThousands =
+                                      Math.floor(required / 1000) || "";
+                                    setPaymentThousands(
+                                      inThousands
+                                        ? Number(inThousands).toLocaleString(
+                                            "vi-VN",
+                                          )
+                                        : "",
+                                    );
+                                    setPaymentData(null);
+                                  }}
+                                >
+                                  Đóng quỹ
+                                </Button>
+                              )
                             ) : (
                               !canManage && (
                                 <Typography
@@ -2362,7 +2457,7 @@ export default function FundPage() {
             <Box>
               <Typography variant="h5">Đóng quỹ phòng</Typography>
               <Typography variant="body2" color="text.secondary">
-                Quét mã QR hoặc mở trang thanh toán
+                Chọn phương thức đóng quỹ phòng tháng {period}
               </Typography>
             </Box>
             <IconButton
@@ -2374,8 +2469,101 @@ export default function FundPage() {
             </IconButton>
           </Box>
         </DialogTitle>
-        <DialogContent sx={{ pt: 2 }}>
-          {paymentData?.status === "PAID" ? (
+
+        <Box sx={{ borderBottom: 1, borderColor: "divider", px: 3 }}>
+          <Tabs
+            value={paymentTab}
+            onChange={(_, val) => setPaymentTab(val)}
+            sx={{ minHeight: 48 }}
+          >
+            <Tab
+              value="manual"
+              label="Đóng quỹ thủ công"
+              icon={<i className="tabler-cash" style={{ fontSize: 18 }} />}
+              iconPosition="start"
+              sx={{ textTransform: "none", fontWeight: 600, minHeight: 48 }}
+            />
+            <Tab
+              value="online"
+              label="Quét mã QR (Online)"
+              icon={<i className="tabler-qrcode" style={{ fontSize: 18 }} />}
+              iconPosition="start"
+              sx={{ textTransform: "none", fontWeight: 600, minHeight: 48 }}
+            />
+          </Tabs>
+        </Box>
+
+        <DialogContent sx={{ pt: 2.5 }}>
+          {paymentTab === "manual" ? (
+            <Box
+              sx={{ display: "flex", flexDirection: "column", gap: 2.5, py: 1 }}
+            >
+              <Box
+                sx={{
+                  p: 2,
+                  bgcolor: "action.hover",
+                  borderRadius: 2,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
+                <Box>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    display="block"
+                  >
+                    Mức đóng quy định kỳ này
+                  </Typography>
+                  <Typography
+                    variant="h6"
+                    fontWeight={700}
+                    color="primary.main"
+                  >
+                    {money(minimumFor(paymentMember || {}))}
+                  </Typography>
+                </Box>
+              </Box>
+
+              <Box>
+                <Typography variant="body2" fontWeight={600} mb={1}>
+                  Số tiền đã đóng (VNĐ) *
+                </Typography>
+                <CustomTextField
+                  fullWidth
+                  placeholder="Nhập số tiền đã đóng"
+                  value={manualAmount}
+                  onChange={(e) => {
+                    const raw = e.target.value.replace(/\D/g, "");
+                    setManualAmount(
+                      raw ? Number(raw).toLocaleString("vi-VN") : "",
+                    );
+                  }}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">VNĐ</InputAdornment>
+                    ),
+                  }}
+                  helperText="Tự điền số tiền thực tế bạn đã đóng tiền mặt hoặc chuyển khoản"
+                />
+              </Box>
+
+              <Box>
+                <Typography variant="body2" fontWeight={600} mb={1}>
+                  Ghi chú (Tùy chọn)
+                </Typography>
+                <CustomTextField
+                  fullWidth
+                  multiline
+                  rows={2}
+                  placeholder="Ví dụ: Đã gửi tiền mặt cho trợ lý Quyên, chuyển khoản Techcombank..."
+                  value={manualNote}
+                  onChange={(e) => setManualNote(e.target.value)}
+                />
+              </Box>
+            </Box>
+          ) : paymentData?.status === "PAID" ? (
             <Box sx={{ py: 5, textAlign: "center" }}>
               <Box
                 sx={{
@@ -2653,8 +2841,34 @@ export default function FundPage() {
             </Grid>
           )}
         </DialogContent>
-        <DialogActions>
-          {paymentData?.status === "PAID" ? (
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          {paymentTab === "manual" ? (
+            <>
+              <Button
+                variant="tonal"
+                color="secondary"
+                onClick={closePaymentDialog}
+                disabled={submittingManual}
+              >
+                Hủy
+              </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                disabled={submittingManual || !manualAmount}
+                onClick={submitManualPayment}
+                startIcon={
+                  submittingManual ? (
+                    <CircularProgress size={16} color="inherit" />
+                  ) : (
+                    <i className="tabler-check" />
+                  )
+                }
+              >
+                {submittingManual ? "Đang lưu..." : "Lưu & Gửi xác nhận"}
+              </Button>
+            </>
+          ) : paymentData?.status === "PAID" ? (
             <Button variant="contained" onClick={closePaymentDialog}>
               Hoàn tất
             </Button>

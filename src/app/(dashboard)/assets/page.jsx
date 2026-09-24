@@ -57,34 +57,63 @@ const makeImportLine = (currentName = "") => ({
   clientId: `asset_line_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
   person: currentName || "",
 });
+export const indexToTicketCode = (n) => {
+  const num = Math.max(0, n) % 1000;
+  let charIndex = Math.floor(Math.max(0, n) / 1000);
+  const c3 = String.fromCharCode(65 + (charIndex % 26));
+  charIndex = Math.floor(charIndex / 26);
+  const c2 = String.fromCharCode(65 + (charIndex % 26));
+  charIndex = Math.floor(charIndex / 26);
+  const c1 = String.fromCharCode(65 + (charIndex % 26));
+  return `${c1}${c2}${c3}${String(num).padStart(3, "0")}`;
+};
+
+export const ticketCodeToIndex = (code) => {
+  if (!code || typeof code !== "string" || !/^[A-Z]{3}[0-9]{3}$/.test(code)) {
+    return -1;
+  }
+  const c1 = code.charCodeAt(0) - 65;
+  const c2 = code.charCodeAt(1) - 65;
+  const c3 = code.charCodeAt(2) - 65;
+  const num = parseInt(code.slice(3), 10);
+  return (c1 * 26 * 26 + c2 * 26 + c3) * 1000 + num;
+};
+
 const columns = {
   import: [
-    "Ngày nhập",
-    "Loại SP",
+    "STT",
+    "Mã phiếu",
     "Mã sản phẩm",
+    "Loại SP",
     "Tên sản phẩm",
     "Mô tả sản phẩm",
     "Người nhập kho",
     "Số lượng",
     "Đơn vị tính",
     "Vị trí",
+    "Ngày nhập",
+    "Trạng thái",
     "Ghi chú",
   ],
   export: [
-    "Ngày xuất",
-    "Loại SP",
+    "STT",
+    "Mã phiếu",
     "Mã sản phẩm",
+    "Loại SP",
     "Tên sản phẩm",
     "Người mượn tài sản",
     "Xuất cho",
     "Số lượng",
     "Đơn vị tính",
+    "Ngày xuất",
+    "Trạng thái",
     "Ghi chú",
   ],
   stock: [
-    "Mã SP",
-    "Tên SP",
-    "Loại sản phẩm",
+    "STT",
+    "Mã sản phẩm",
+    "Loại SP",
+    "Tên sản phẩm",
     "Đơn vị tính",
     "Vị trí",
     "Tổng nhập",
@@ -92,9 +121,11 @@ const columns = {
     "Tồn kho",
   ],
   products: [
-    "Mã SP",
-    "Tên SP",
-    "Loại sản phẩm",
+    "STT",
+    "Mã sản phẩm",
+    "Loại SP",
+    "Tên sản phẩm",
+    "Mô tả sản phẩm",
     "Đơn vị tính",
     "Vị trí",
     "Trạng thái",
@@ -143,12 +174,30 @@ const filterPeopleOptions = (options, inputValue) => {
   const query = normalizeSearchText(inputValue);
   if (!query) return options;
   return options.filter((person) =>
-    normalizeSearchText(`${person.name} ${person.code}`).includes(query),
+    normalizeSearchText(
+      `${person.name} ${person.code || ""} ${person.email || ""}`,
+    ).includes(query),
   );
 };
 
-function AssetTable({ rows, type, canManage, onView, onEdit, onDelete }) {
+function AssetTable({
+  rows,
+  type,
+  canManage,
+  currentUserId,
+  page = 1,
+  limit = 10,
+  onView,
+  onEdit,
+  onDelete,
+  onApprove,
+  onReject,
+}) {
   const editable = type !== "stock";
+  const showActions =
+    type === "products" ||
+    (editable &&
+      (canManage || rows.some((r) => r.performedBy === currentUserId)));
 
   return (
     <TableContainer>
@@ -156,137 +205,277 @@ function AssetTable({ rows, type, canManage, onView, onEdit, onDelete }) {
         <TableHead>
           <TableRow>
             {columns[type].map((label) => (
-              <TableCell key={label}>{label}</TableCell>
+              <TableCell
+                key={label}
+                align={label === "STT" ? "center" : "left"}
+              >
+                {label}
+              </TableCell>
             ))}
-            {(type === "products" || (editable && canManage)) && (
-              <TableCell align="center">Thao tác</TableCell>
-            )}
+            {showActions && <TableCell align="center">Thao tác</TableCell>}
           </TableRow>
         </TableHead>
         <TableBody>
           {rows.length ? (
-            rows.map((row) => (
-              <TableRow key={row.id || row.code} hover>
-                {type === "import" ? (
-                  <>
-                    <TableCell>
-                      {row.date ? formatDate(row.date) : "—"}
+            rows.map((row, index) => {
+              const stt = row.ticketNumber ?? (page - 1) * limit + index + 1;
+              const showTicket = row.ticketRowSpan !== 0;
+              const isPending = row.status === "pending";
+              const isRejected = row.status === "rejected";
+              const isOwner = row.performedBy === currentUserId;
+
+              return (
+                <TableRow key={row.id || row.code} hover>
+                  {showTicket && (
+                    <TableCell
+                      align="center"
+                      rowSpan={row.ticketRowSpan || 1}
+                      sx={{
+                        width: 50,
+                        fontWeight: 500,
+                        color: "text.secondary",
+                        verticalAlign: "middle",
+                      }}
+                    >
+                      {stt}
                     </TableCell>
-                    <TableCell>{row.category || "—"}</TableCell>
-                    <TableCell>
-                      <Typography color="primary.main" fontWeight={600}>
-                        {row.code || "—"}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>{row.name || "—"}</TableCell>
-                    <TableCell>{row.description || "—"}</TableCell>
-                    <TableCell>{row.person || "—"}</TableCell>
-                    <TableCell>{row.quantity ?? "—"}</TableCell>
-                    <TableCell>{row.unit || "—"}</TableCell>
-                    <TableCell>{row.location || "—"}</TableCell>
-                    <TableCell>{row.note || "—"}</TableCell>
-                  </>
-                ) : type === "export" ? (
-                  <>
-                    <TableCell>
-                      {row.date ? formatDate(row.date) : "—"}
-                    </TableCell>
-                    <TableCell>{row.category || "—"}</TableCell>
-                    <TableCell>
-                      <Typography color="primary.main" fontWeight={600}>
-                        {row.code || "—"}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>{row.name || "—"}</TableCell>
-                    <TableCell>{row.person || "—"}</TableCell>
-                    <TableCell>{row.issuedTo || "—"}</TableCell>
-                    <TableCell>{row.quantity ?? "—"}</TableCell>
-                    <TableCell>{row.unit || "—"}</TableCell>
-                    <TableCell>{row.note || "—"}</TableCell>
-                  </>
-                ) : type === "stock" ? (
-                  <>
-                    <TableCell>
-                      <Typography color="primary.main" fontWeight={600}>
-                        {row.code}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>{row.name}</TableCell>
-                    <TableCell>{row.categoryName || "—"}</TableCell>
-                    <TableCell>{row.unit || "—"}</TableCell>
-                    <TableCell>{row.location || "—"}</TableCell>
-                    <TableCell>{row.totalImport}</TableCell>
-                    <TableCell>{row.totalExport}</TableCell>
-                    <TableCell>
-                      <Typography fontWeight={700}>{row.quantity}</Typography>
-                    </TableCell>
-                  </>
-                ) : (
-                  <>
-                    <TableCell>
-                      <Typography color="primary.main" fontWeight={600}>
-                        {row.code}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>{row.name}</TableCell>
-                    <TableCell>{row.categoryName || "—"}</TableCell>
-                    <TableCell>{row.unit || "—"}</TableCell>
-                    <TableCell>{row.location || "—"}</TableCell>
-                    <TableCell>
-                      <Chip
-                        size="small"
-                        variant="tonal"
-                        color={row.active ? "success" : "secondary"}
-                        label={row.active ? "Hoạt động" : "Ngừng sử dụng"}
-                      />
-                    </TableCell>
-                  </>
-                )}
-                {(type === "products" || (editable && canManage)) && (
-                  <TableCell align="center">
-                    <Box display="flex" justifyContent="center" gap={0.5}>
-                      {type === "products" && (
-                        <IconButton
-                          size="small"
-                          color="info"
-                          aria-label={`Xem ${row.name}`}
-                          onClick={() => onView(row)}
+                  )}
+                  {type === "import" ? (
+                    <>
+                      {showTicket && (
+                        <TableCell
+                          rowSpan={row.ticketRowSpan || 1}
+                          sx={{ verticalAlign: "middle" }}
                         >
-                          <i className="tabler-eye" />
-                        </IconButton>
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              fontFamily: "monospace",
+                              fontWeight: 700,
+                              color: "primary.main",
+                            }}
+                          >
+                            {row.ticketId || "—"}
+                          </Typography>
+                        </TableCell>
                       )}
-                      {canManage && (
-                        <IconButton
-                          size="small"
-                          color="primary"
-                          aria-label={`Chỉnh sửa ${row.name}`}
-                          onClick={() => onEdit(type, row)}
+                      <TableCell>
+                        <Typography color="text.primary" fontWeight={600}>
+                          {row.code || "—"}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>{row.category || "—"}</TableCell>
+                      <TableCell>{row.name || "—"}</TableCell>
+                      <TableCell>{row.description || "—"}</TableCell>
+                      <TableCell>{row.person || "—"}</TableCell>
+                      <TableCell>
+                        <Typography fontWeight={700}>
+                          {row.quantity ?? "—"}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>{row.unit || "—"}</TableCell>
+                      <TableCell>{row.location || "—"}</TableCell>
+                      <TableCell>
+                        {row.date ? formatDate(row.date) : "—"}
+                      </TableCell>
+                      <TableCell>
+                        {isPending ? (
+                          <Chip
+                            size="small"
+                            variant="tonal"
+                            color="warning"
+                            label="Đang chờ"
+                          />
+                        ) : isRejected ? (
+                          <Chip
+                            size="small"
+                            variant="tonal"
+                            color="error"
+                            label="Từ chối"
+                            title={row.rejectReason || ""}
+                          />
+                        ) : (
+                          <Chip
+                            size="small"
+                            variant="tonal"
+                            color="success"
+                            label="Đã duyệt"
+                          />
+                        )}
+                      </TableCell>
+                      <TableCell>{row.note || "—"}</TableCell>
+                    </>
+                  ) : type === "export" ? (
+                    <>
+                      {showTicket && (
+                        <TableCell
+                          rowSpan={row.ticketRowSpan || 1}
+                          sx={{ verticalAlign: "middle" }}
                         >
-                          <i className="tabler-edit" />
-                        </IconButton>
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              fontFamily: "monospace",
+                              fontWeight: 700,
+                              color: "primary.main",
+                            }}
+                          >
+                            {row.ticketId || "—"}
+                          </Typography>
+                        </TableCell>
                       )}
-                      {type !== "products" && (
-                        <IconButton
+                      <TableCell>
+                        <Typography color="text.primary" fontWeight={600}>
+                          {row.code || "—"}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>{row.category || "—"}</TableCell>
+                      <TableCell>{row.name || "—"}</TableCell>
+                      <TableCell>{row.person || "—"}</TableCell>
+                      <TableCell>{row.issuedTo || "—"}</TableCell>
+                      <TableCell>
+                        <Typography fontWeight={700}>
+                          {row.quantity ?? "—"}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>{row.unit || "—"}</TableCell>
+                      <TableCell>
+                        {row.date ? formatDate(row.date) : "—"}
+                      </TableCell>
+                      <TableCell>
+                        {isPending ? (
+                          <Chip
+                            size="small"
+                            variant="tonal"
+                            color="warning"
+                            label="Đang chờ"
+                          />
+                        ) : isRejected ? (
+                          <Chip
+                            size="small"
+                            variant="tonal"
+                            color="error"
+                            label="Từ chối"
+                            title={row.rejectReason || ""}
+                          />
+                        ) : (
+                          <Chip
+                            size="small"
+                            variant="tonal"
+                            color="success"
+                            label="Đã duyệt"
+                          />
+                        )}
+                      </TableCell>
+                      <TableCell>{row.note || "—"}</TableCell>
+                    </>
+                  ) : type === "stock" ? (
+                    <>
+                      <TableCell>
+                        <Typography color="primary.main" fontWeight={600}>
+                          {row.code || "—"}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>{row.categoryName || "—"}</TableCell>
+                      <TableCell>{row.name}</TableCell>
+                      <TableCell>{row.unit || "—"}</TableCell>
+                      <TableCell>{row.location || "—"}</TableCell>
+                      <TableCell>{row.totalImport}</TableCell>
+                      <TableCell>{row.totalExport}</TableCell>
+                      <TableCell>
+                        <Typography fontWeight={700}>{row.quantity}</Typography>
+                      </TableCell>
+                    </>
+                  ) : (
+                    <>
+                      <TableCell>
+                        <Typography color="primary.main" fontWeight={600}>
+                          {row.code || "—"}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>{row.categoryName || "—"}</TableCell>
+                      <TableCell>{row.name}</TableCell>
+                      <TableCell>{row.description || "—"}</TableCell>
+                      <TableCell>{row.unit || "—"}</TableCell>
+                      <TableCell>{row.location || "—"}</TableCell>
+                      <TableCell>
+                        <Chip
                           size="small"
-                          color="error"
-                          aria-label={`Xóa ${row.name}`}
-                          onClick={() => onDelete(type, row)}
-                        >
-                          <i className="tabler-trash" />
-                        </IconButton>
-                      )}
-                    </Box>
-                  </TableCell>
-                )}
-              </TableRow>
-            ))
+                          variant="tonal"
+                          color={row.active ? "success" : "secondary"}
+                          label={row.active ? "Hoạt động" : "Ngừng sử dụng"}
+                        />
+                      </TableCell>
+                    </>
+                  )}
+                  {showActions && (
+                    <TableCell align="center">
+                      <Box display="flex" justifyContent="center" gap={0.5}>
+                        {canManage &&
+                          (type === "import" || type === "export") &&
+                          isPending && (
+                            <>
+                              <IconButton
+                                size="small"
+                                color="success"
+                                title="Duyệt phiếu"
+                                aria-label={`Duyệt phiếu ${row.ticketId || row.code || ""}`}
+                                onClick={() => onApprove(type, row)}
+                              >
+                                <i className="tabler-check" />
+                              </IconButton>
+                              <IconButton
+                                size="small"
+                                color="error"
+                                title="Từ chối phiếu"
+                                aria-label={`Từ chối phiếu ${row.ticketId || row.code || ""}`}
+                                onClick={() => onReject(type, row)}
+                              >
+                                <i className="tabler-x" />
+                              </IconButton>
+                            </>
+                          )}
+                        {type === "products" && (
+                          <IconButton
+                            size="small"
+                            color="info"
+                            aria-label={`Xem ${row.name}`}
+                            onClick={() => onView(row)}
+                          >
+                            <i className="tabler-eye" />
+                          </IconButton>
+                        )}
+                        {canManage && (
+                          <IconButton
+                            size="small"
+                            color="primary"
+                            aria-label={`Chỉnh sửa ${row.name}`}
+                            onClick={() => onEdit(type, row)}
+                          >
+                            <i className="tabler-edit" />
+                          </IconButton>
+                        )}
+                        {type !== "products" &&
+                          (canManage || (isPending && isOwner)) && (
+                            <IconButton
+                              size="small"
+                              color="error"
+                              aria-label={`Xóa ${row.name}`}
+                              onClick={() => onDelete(type, row)}
+                            >
+                              <i className="tabler-trash" />
+                            </IconButton>
+                          )}
+                      </Box>
+                    </TableCell>
+                  )}
+                </TableRow>
+              );
+            })
           ) : (
             <TableRow>
               <TableCell
-                colSpan={
-                  columns[type].length +
-                  (type === "products" || (editable && canManage) ? 1 : 0)
-                }
+                colSpan={columns[type].length + (showActions ? 1 : 0)}
                 align="center"
               >
                 <Typography color="text.secondary" py={5}>
@@ -309,35 +498,51 @@ function TransactionDialog({
   products,
   categories,
   currentName,
+  canManage,
   editingItem,
   onClose,
   onSaved,
 }) {
   const [form, setForm] = useState(emptyForm);
+  const [ticketId, setTicketId] = useState("");
   const [importLines, setImportLines] = useState([makeImportLine()]);
   const [saving, setSaving] = useState(false);
   const [people, setPeople] = useState([]);
+  const [personTouched, setPersonTouched] = useState(false);
   const isBulkTransaction = !editingItem;
   useEffect(() => {
     if (!open) return;
+    setPersonTouched(false);
     fetch("/api/users?status=able&limit=500")
       .then((response) => response.json())
       .then((result) => setPeople(result.data || []))
       .catch(() => setPeople([]));
   }, [open]);
+  const getNextSequentialCode = () => {
+    const all = [...(imports || []), ...(exports || [])];
+    let maxIdx = -1;
+    for (const item of all) {
+      const idx = ticketCodeToIndex(item.ticketId);
+      if (idx > maxIdx) maxIdx = idx;
+    }
+    return indexToTicketCode(maxIdx + 1);
+  };
+
   useEffect(() => {
     if (open) {
-      setForm(
-        editingItem
-          ? { ...emptyForm, ...editingItem }
-          : {
-              ...emptyForm,
-              person: currentName || "",
-            },
-      );
+      if (editingItem) {
+        setTicketId(editingItem.ticketId || getNextSequentialCode());
+        setForm({ ...emptyForm, ...editingItem });
+      } else {
+        setTicketId(getNextSequentialCode());
+        setForm({
+          ...emptyForm,
+          person: currentName || "",
+        });
+      }
       setImportLines([makeImportLine(currentName)]);
     }
-  }, [open, type, currentName, editingItem]);
+  }, [open, type, currentName, editingItem, imports, exports]);
   const productFields = (productId) => {
     const item = products.find((entry) => entry.id === productId);
     return {
@@ -374,6 +579,15 @@ function TransactionDialog({
       rows.length > 1 ? rows.filter((row) => row.clientId !== clientId) : rows,
     );
   const assetOptions = products.filter((item) => item.active);
+  const isApprovedTx = (item) => !item.status || item.status === "approved";
+  const approvedImports = useMemo(
+    () => (imports || []).filter(isApprovedTx),
+    [imports],
+  );
+  const approvedExports = useMemo(
+    () => (exports || []).filter(isApprovedTx),
+    [exports],
+  );
   const transactionKey = (item) =>
     item.documentCode || assetDocumentCodeFromName(item.name);
   const productKey = (item) =>
@@ -384,10 +598,10 @@ function TransactionDialog({
     );
   const selectedKey = productKey(form);
   const selectedStock = selectedKey
-    ? imports
+    ? approvedImports
         .filter((item) => transactionKey(item) === selectedKey)
         .reduce((sum, item) => sum + Number(item.quantity || 0), 0) -
-      exports
+      approvedExports
         .filter((item) => transactionKey(item) === selectedKey)
         .reduce((sum, item) => sum + Number(item.quantity || 0), 0)
     : 0;
@@ -400,36 +614,111 @@ function TransactionDialog({
   const quantityError =
     type === "export" && Boolean(selectedKey) && quantity > availableForExport;
   const stockForProduct = (product) =>
-    imports
+    approvedImports
       .filter((item) => transactionKey(item) === productKey(product))
       .reduce((sum, item) => sum + Number(item.quantity || 0), 0) -
-    exports
+    approvedExports
       .filter((item) => transactionKey(item) === productKey(product))
       .reduce((sum, item) => sum + Number(item.quantity || 0), 0);
   const requestedForProduct = (product) =>
     importLines
       .filter((item) => productKey(item) === productKey(product))
       .reduce((sum, item) => sum + Number(item.quantity || 0), 0);
-  const validImportLines = importLines.filter(
-    (row) =>
-      productKey(row) &&
-      Number.isInteger(Number(row.quantity)) &&
-      Number(row.quantity) > 0,
+  const isPersonValid = Boolean(
+    form.person && people.some((p) => p.name === form.person),
   );
+
+  const areLinesValid =
+    importLines.length > 0 &&
+    importLines.every((row) => {
+      const hasProduct = Boolean(
+        row.productId && products.some((p) => p.id === row.productId),
+      );
+      const qty = Number(row.quantity);
+      const isQtyValid = Number.isInteger(qty) && qty > 0;
+      const isIssuedToValid =
+        type !== "export" ||
+        Boolean(row.issuedTo && people.some((p) => p.name === row.issuedTo));
+      const isStockSufficient =
+        type !== "export" ||
+        (stockForProduct(row) > 0 &&
+          requestedForProduct(row) <= stockForProduct(row));
+      return hasProduct && isQtyValid && isIssuedToValid && isStockSufficient;
+    });
+
   const bulkTransactionInvalid =
-    isBulkTransaction &&
+    isBulkTransaction && (!form.date || !isPersonValid || !areLinesValid);
+
+  const selectedProduct =
+    products.find((item) => item.id === form.productId) ||
+    products.find(
+      (item) =>
+        form.code &&
+        item.code?.trim().toUpperCase() === form.code.trim().toUpperCase(),
+    ) ||
+    products.find(
+      (item) =>
+        selectedKey && assetDocumentCodeFromName(item.name) === selectedKey,
+    ) ||
+    null;
+  const isSingleProductValid = Boolean(selectedProduct?.active);
+  const isSingleIssuedToValid =
+    type !== "export" ||
+    Boolean(form.issuedTo && people.some((p) => p.name === form.issuedTo));
+
+  const singleTransactionInvalid =
+    !isBulkTransaction &&
     (!form.date ||
-      !form.person?.trim() ||
-      validImportLines.length !== importLines.length ||
-      (type === "export" && importLines.some((row) => !row.issuedTo?.trim())) ||
-      (type === "export" &&
-        importLines.some(
-          (row) => requestedForProduct(row) > stockForProduct(row),
-        )));
+      !isPersonValid ||
+      !isSingleProductValid ||
+      !Number.isInteger(quantity) ||
+      quantity <= 0 ||
+      quantityError ||
+      !isSingleIssuedToValid);
+
   const submit = async () => {
-    if (quantityError || bulkTransactionInvalid) return;
+    if (isBulkTransaction ? bulkTransactionInvalid : singleTransactionInvalid) {
+      if (!isPersonValid) {
+        toast.error(
+          `Vui lòng chọn ${type === "import" ? "người nhập kho" : "người mượn tài sản"} từ danh sách nhân viên công ty`,
+        );
+        return;
+      }
+      if (type === "export") {
+        if (isBulkTransaction) {
+          const invalidLine = importLines.find(
+            (row) =>
+              !row.issuedTo || !people.some((p) => p.name === row.issuedTo),
+          );
+          if (invalidLine) {
+            toast.error(
+              "Vui lòng chọn người nhận tài sản (xuất cho) từ danh sách nhân viên cho từng sản phẩm",
+            );
+            return;
+          }
+          const outOfStock = importLines.find(
+            (row) =>
+              stockForProduct(row) <= 0 ||
+              requestedForProduct(row) > stockForProduct(row),
+          );
+          if (outOfStock) {
+            toast.error(
+              `Số lượng xuất cho ${outOfStock.name || "sản phẩm"} vượt quá tồn kho khả dụng`,
+            );
+            return;
+          }
+        } else if (!isSingleIssuedToValid) {
+          toast.error(
+            "Vui lòng chọn người nhận tài sản từ danh sách nhân viên công ty",
+          );
+          return;
+        }
+      }
+      return;
+    }
     setSaving(true);
     try {
+      const activeTicketId = ticketId || getNextSequentialCode();
       if (isBulkTransaction) {
         for (const row of importLines) {
           const { clientId, ...payload } = row;
@@ -438,6 +727,7 @@ function TransactionDialog({
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               ...payload,
+              ticketId: activeTicketId,
               date: form.date,
               person: form.person,
               note: form.note,
@@ -455,7 +745,13 @@ function TransactionDialog({
         const response = await fetch("/api/assets", {
           method: editingItem ? "PATCH" : "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...form, id: editingItem?.id, type }),
+          body: JSON.stringify({
+            ...form,
+            productId: selectedProduct.id,
+            ticketId: activeTicketId,
+            id: editingItem?.id,
+            type,
+          }),
         });
         const result = await response.json();
         if (!response.ok)
@@ -463,12 +759,16 @@ function TransactionDialog({
       }
       toast.success(
         isBulkTransaction
-          ? `Đã ghi nhận ${importLines.length} sản phẩm trong phiếu ${type === "import" ? "nhập" : "xuất"}`
+          ? canManage
+            ? `Đã ghi nhận ${importLines.length} sản phẩm trong phiếu ${type === "import" ? "nhập" : "xuất"}`
+            : `Đã gửi phiếu ${type === "import" ? "nhập" : "xuất"} (${activeTicketId}) gồm ${importLines.length} sản phẩm. Đang chờ duyệt.`
           : editingItem
             ? "Đã cập nhật giao dịch tài sản"
-            : type === "import"
-              ? "Đã ghi nhận nhập tài sản"
-              : "Đã ghi nhận xuất tài sản",
+            : canManage
+              ? type === "import"
+                ? "Đã ghi nhận nhập tài sản"
+                : "Đã ghi nhận xuất tài sản"
+              : `Đã gửi phiếu ${type === "import" ? "nhập" : "xuất"}. Đang chờ duyệt.`,
       );
       onSaved();
       onClose();
@@ -485,14 +785,56 @@ function TransactionDialog({
       fullWidth
       maxWidth={isBulkTransaction ? "lg" : "sm"}
     >
-      <DialogTitle>
-        {editingItem
-          ? `Chỉnh sửa phiếu ${type === "import" ? "nhập" : "xuất"}`
-          : type === "import"
-            ? "Nhập tài sản"
-            : "Xuất tài sản"}
+      <DialogTitle
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          flexWrap: "wrap",
+          gap: 1,
+        }}
+      >
+        <span>
+          {editingItem
+            ? `Chỉnh sửa phiếu ${type === "import" ? "nhập" : "xuất"}`
+            : type === "import"
+              ? "Nhập tài sản"
+              : "Xuất tài sản"}
+        </span>
+        {ticketId && (
+          <Chip
+            label={`Mã phiếu: ${ticketId}`}
+            color="primary"
+            variant="tonal"
+            size="small"
+            sx={{ fontFamily: "monospace", fontWeight: 700 }}
+          />
+        )}
       </DialogTitle>
       <DialogContent dividers>
+        {!canManage && (
+          <Box
+            sx={{
+              p: 1.5,
+              mb: 2.5,
+              borderRadius: 1.5,
+              bgcolor: "warning.lighter",
+              color: "warning.darker",
+              border: "1px solid",
+              borderColor: "warning.light",
+              display: "flex",
+              alignItems: "center",
+              gap: 1.5,
+            }}
+          >
+            <i className="tabler-alert-circle text-xl" />
+            <Typography variant="body2" color="inherit">
+              Phiếu {type === "import" ? "nhập" : "xuất"} của bạn sẽ được gửi
+              tới Quản trị viên / Trợ lý để duyệt. Sau khi được duyệt, số lượng
+              mới được tính vào tồn kho.
+            </Typography>
+          </Box>
+        )}
         {isBulkTransaction ? (
           <Box sx={{ display: "grid", gap: 2.5, pt: 1 }}>
             <Box
@@ -500,7 +842,7 @@ function TransactionDialog({
                 display: "grid",
                 gridTemplateColumns: {
                   xs: "1fr",
-                  md: "160px minmax(240px, 1fr) minmax(280px, 1.5fr)",
+                  md: "180px minmax(260px, 1.2fr) minmax(280px, 1.8fr)",
                 },
                 gap: 2,
                 p: 2.5,
@@ -518,19 +860,82 @@ function TransactionDialog({
                 slotProps={{ inputLabel: { shrink: true } }}
               />
               <Autocomplete
-                freeSolo
                 options={people}
-                inputValue={form.person}
-                onInputChange={(_, value) =>
-                  setForm({ ...form, person: value })
+                value={
+                  people.find((person) => person.name === form.person) || null
                 }
                 onChange={(_, person) => {
-                  if (person && typeof person !== "string")
-                    setForm({ ...form, person: person.name });
+                  setForm((prev) => ({ ...prev, person: person?.name || "" }));
                 }}
-                getOptionLabel={(person) =>
-                  typeof person === "string" ? person : person.name || ""
+                getOptionLabel={(person) => {
+                  if (!person) return "";
+                  if (typeof person === "string") return person;
+                  return `${person.name || ""}${person.code ? ` (${person.code})` : ""}`;
+                }}
+                isOptionEqualToValue={(option, value) =>
+                  option.id === value?.id || option.name === value?.name
                 }
+                filterOptions={(options, state) =>
+                  filterPeopleOptions(options, state.inputValue)
+                }
+                ListboxProps={{
+                  style: { maxHeight: 280, overflowY: "auto" },
+                }}
+                noOptionsText="Không tìm thấy nhân viên trong công ty"
+                renderOption={(props, person) => {
+                  const { key, ...optionProps } = props;
+                  return (
+                    <Box
+                      component="li"
+                      key={key}
+                      {...optionProps}
+                      sx={{ display: "flex", gap: 1.5, alignItems: "center" }}
+                    >
+                      <Avatar
+                        src={resolveAvatar(person)}
+                        alt={person.name}
+                        sx={{ width: 32, height: 32, fontSize: "0.85rem" }}
+                      >
+                        {person.name?.[0]?.toUpperCase()}
+                      </Avatar>
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Box
+                          sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                        >
+                          <Typography variant="body2" fontWeight={600}>
+                            {person.name}
+                          </Typography>
+                          {person.code && (
+                            <Typography
+                              variant="caption"
+                              sx={{
+                                px: 0.75,
+                                py: 0.1,
+                                borderRadius: 1,
+                                bgcolor: "action.selected",
+                                fontFamily: "monospace",
+                                fontWeight: 700,
+                                lineHeight: 1.6,
+                                flexShrink: 0,
+                              }}
+                            >
+                              {person.code}
+                            </Typography>
+                          )}
+                        </Box>
+                        {person.email && (
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            noWrap
+                          >
+                            {person.email}
+                          </Typography>
+                        )}
+                      </Box>
+                    </Box>
+                  );
+                }}
                 renderInput={(params) => (
                   <CustomTextField
                     {...params}
@@ -539,7 +944,18 @@ function TransactionDialog({
                         ? "Người nhập kho *"
                         : "Người mượn tài sản *"
                     }
-                    placeholder="Gõ tên hoặc chọn nhân sự"
+                    placeholder="Chọn nhân sự công ty"
+                    onBlur={() => setPersonTouched(true)}
+                    error={personTouched && !isPersonValid}
+                    helperText={
+                      personTouched && !isPersonValid
+                        ? !form.person
+                          ? type === "import"
+                            ? "Vui lòng chọn người nhập kho"
+                            : "Vui lòng chọn người mượn tài sản"
+                          : "Vui lòng chọn từ danh sách nhân viên"
+                        : ""
+                    }
                   />
                 )}
               />
@@ -731,13 +1147,7 @@ function TransactionDialog({
             {type === "export" ? (
               <Autocomplete
                 options={assetOptions}
-                value={
-                  assetOptions.find(
-                    (item) =>
-                      item.id === form.productId ||
-                      assetDocumentCodeFromName(item.name) === productKey(form),
-                  ) || null
-                }
+                value={selectedProduct}
                 onChange={(_, item) => selectProduct(item?.id || "")}
                 getOptionLabel={(item) =>
                   `${item.code ? `${item.code} — ` : ""}${item.name}`
@@ -761,13 +1171,7 @@ function TransactionDialog({
             ) : (
               <Autocomplete
                 options={assetOptions}
-                value={
-                  assetOptions.find(
-                    (item) =>
-                      item.id === form.productId ||
-                      assetDocumentCodeFromName(item.name) === productKey(form),
-                  ) || null
-                }
+                value={selectedProduct}
                 onChange={(_, item) => selectProduct(item?.id || "")}
                 getOptionLabel={(item) =>
                   `${item.code ? `${item.code} — ` : ""}${item.name}`
@@ -800,6 +1204,12 @@ function TransactionDialog({
                     {...params}
                     label="Chọn sản phẩm *"
                     placeholder="Tìm mã/tên; chưa có thì thêm sản phẩm trước"
+                    error={!isSingleProductValid}
+                    helperText={
+                      !isSingleProductValid
+                        ? "Vui lòng chọn sản phẩm đang hoạt động"
+                        : ""
+                    }
                   />
                 )}
               />
@@ -837,29 +1247,82 @@ function TransactionDialog({
             />
             <CustomTextField label="Vị trí *" value={form.location} disabled />
             <Autocomplete
-              freeSolo
               options={people}
-              inputValue={form.person}
-              onInputChange={(_, value) => setForm({ ...form, person: value })}
-              onChange={(_, person) => {
-                if (person && typeof person !== "string")
-                  setForm({ ...form, person: person.name });
-              }}
-              getOptionLabel={(person) =>
-                typeof person === "string" ? person : person.name || ""
+              value={
+                people.find((person) => person.name === form.person) || null
               }
-              renderOption={(props, person) => (
-                <Box component="li" {...props} key={person.id}>
-                  <Box>
-                    <Typography variant="body2" fontWeight={600}>
-                      {person.name}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {person.code || "—"} · {person.email || "—"}
-                    </Typography>
+              onChange={(_, person) => {
+                setForm((prev) => ({ ...prev, person: person?.name || "" }));
+              }}
+              getOptionLabel={(person) => {
+                if (!person) return "";
+                if (typeof person === "string") return person;
+                return `${person.name || ""}${person.code ? ` (${person.code})` : ""}`;
+              }}
+              isOptionEqualToValue={(option, value) =>
+                option.id === value?.id || option.name === value?.name
+              }
+              filterOptions={(options, state) =>
+                filterPeopleOptions(options, state.inputValue)
+              }
+              ListboxProps={{
+                style: { maxHeight: 280, overflowY: "auto" },
+              }}
+              noOptionsText="Không tìm thấy nhân viên trong công ty"
+              renderOption={(props, person) => {
+                const { key, ...optionProps } = props;
+                return (
+                  <Box
+                    component="li"
+                    key={key}
+                    {...optionProps}
+                    sx={{ display: "flex", gap: 1.5, alignItems: "center" }}
+                  >
+                    <Avatar
+                      src={resolveAvatar(person)}
+                      alt={person.name}
+                      sx={{ width: 32, height: 32, fontSize: "0.85rem" }}
+                    >
+                      {person.name?.[0]?.toUpperCase()}
+                    </Avatar>
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                      >
+                        <Typography variant="body2" fontWeight={600}>
+                          {person.name}
+                        </Typography>
+                        {person.code && (
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              px: 0.75,
+                              py: 0.1,
+                              borderRadius: 1,
+                              bgcolor: "action.selected",
+                              fontFamily: "monospace",
+                              fontWeight: 700,
+                              lineHeight: 1.6,
+                              flexShrink: 0,
+                            }}
+                          >
+                            {person.code}
+                          </Typography>
+                        )}
+                      </Box>
+                      {person.email && (
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          noWrap
+                        >
+                          {person.email}
+                        </Typography>
+                      )}
+                    </Box>
                   </Box>
-                </Box>
-              )}
+                );
+              }}
               renderInput={(params) => (
                 <CustomTextField
                   {...params}
@@ -868,7 +1331,18 @@ function TransactionDialog({
                       ? "Người nhập kho *"
                       : "Người mượn tài sản *"
                   }
-                  placeholder="Gõ tên hoặc chọn nhân sự"
+                  placeholder="Chọn nhân sự công ty"
+                  onBlur={() => setPersonTouched(true)}
+                  error={personTouched && !isPersonValid}
+                  helperText={
+                    personTouched && !isPersonValid
+                      ? !form.person
+                        ? type === "import"
+                          ? "Vui lòng chọn người nhập kho"
+                          : "Vui lòng chọn người mượn tài sản"
+                        : "Vui lòng chọn từ danh sách nhân viên"
+                      : ""
+                  }
                 />
               )}
             />
@@ -879,13 +1353,15 @@ function TransactionDialog({
                   people.find((person) => person.name === form.issuedTo) || null
                 }
                 onChange={(_, person) =>
-                  setForm({ ...form, issuedTo: person?.name || "" })
+                  setForm((prev) => ({ ...prev, issuedTo: person?.name || "" }))
                 }
-                getOptionLabel={(person) =>
-                  `${person.name || ""} (${person.code || "—"})`
-                }
+                getOptionLabel={(person) => {
+                  if (!person) return "";
+                  if (typeof person === "string") return person;
+                  return `${person.name || ""}${person.code ? ` (${person.code})` : ""}`;
+                }}
                 isOptionEqualToValue={(option, value) =>
-                  option.id === value?.id
+                  option.id === value?.id || option.name === value?.name
                 }
                 filterOptions={(options, state) =>
                   filterPeopleOptions(options, state.inputValue)
@@ -893,7 +1369,7 @@ function TransactionDialog({
                 ListboxProps={{
                   style: { maxHeight: 240, overflowY: "auto" },
                 }}
-                noOptionsText="Không tìm thấy nhân sự"
+                noOptionsText="Không tìm thấy nhân viên"
                 renderOption={(props, person) => {
                   const { key, ...optionProps } = props;
                   return (
@@ -901,23 +1377,28 @@ function TransactionDialog({
                       component="li"
                       key={key}
                       {...optionProps}
-                      sx={{ display: "flex", gap: 1.5 }}
+                      sx={{ display: "flex", gap: 1.5, alignItems: "center" }}
                     >
                       <Avatar
                         src={resolveAvatar(person)}
                         alt={person.name}
-                        sx={{ width: 36, height: 36 }}
-                      />
-                      <Typography variant="body2" fontWeight={600}>
-                        {person.name}{" "}
+                        sx={{ width: 32, height: 32, fontSize: "0.85rem" }}
+                      >
+                        {person.name?.[0]?.toUpperCase()}
+                      </Avatar>
+                      <Box>
+                        <Typography variant="body2" fontWeight={600}>
+                          {person.name}
+                        </Typography>
                         <Typography
                           component="span"
                           variant="caption"
                           color="text.secondary"
                         >
-                          ({person.code || "Chưa có mã"})
+                          {person.code || "Chưa có mã"}
+                          {person.email ? ` · ${person.email}` : ""}
                         </Typography>
-                      </Typography>
+                      </Box>
                     </Box>
                   );
                 }}
@@ -926,6 +1407,16 @@ function TransactionDialog({
                     {...params}
                     label="Xuất cho *"
                     placeholder="Tìm theo tên hoặc mã nhân sự"
+                    error={Boolean(
+                      form.issuedTo &&
+                        !people.some((p) => p.name === form.issuedTo),
+                    )}
+                    helperText={
+                      form.issuedTo &&
+                      !people.some((p) => p.name === form.issuedTo)
+                        ? "Vui lòng chọn từ danh sách nhân viên"
+                        : ""
+                    }
                   />
                 )}
               />
@@ -951,7 +1442,7 @@ function TransactionDialog({
             saving ||
             (isBulkTransaction
               ? bulkTransactionInvalid
-              : quantityError || !Number.isInteger(quantity) || quantity <= 0)
+              : singleTransactionInvalid)
           }
           onClick={submit}
         >
@@ -1305,6 +1796,70 @@ function ProductConfigurationDialog({
   );
 }
 
+function RejectDialog({ open, target, onClose, onConfirm }) {
+  const [reason, setReason] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (open) setReason("");
+  }, [open]);
+
+  const handleConfirm = async () => {
+    setSubmitting(true);
+    try {
+      await onConfirm(reason);
+      onClose();
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <Dialog
+      open={open}
+      onClose={submitting ? undefined : onClose}
+      fullWidth
+      maxWidth="xs"
+    >
+      <DialogTitle>Từ chối duyệt phiếu</DialogTitle>
+      <DialogContent>
+        <Typography variant="body2" sx={{ mb: 2 }}>
+          Bạn có chắc chắn muốn từ chối phiếu{" "}
+          {target?.type === "export" ? "xuất" : "nhập"} kho{" "}
+          <strong>{target?.item?.ticketId || target?.item?.code}</strong>?
+        </Typography>
+        <CustomTextField
+          fullWidth
+          label="Lý do từ chối (tùy chọn)"
+          placeholder="Nhập lý do để người tạo phiếu nắm được"
+          multiline
+          minRows={2}
+          value={reason}
+          onChange={(e) => setReason(e.target.value)}
+        />
+      </DialogContent>
+      <DialogActions sx={{ px: 3, pb: 3 }}>
+        <Button
+          color="secondary"
+          variant="tonal"
+          disabled={submitting}
+          onClick={onClose}
+        >
+          Hủy bỏ
+        </Button>
+        <Button
+          color="error"
+          variant="contained"
+          disabled={submitting}
+          onClick={handleConfirm}
+        >
+          {submitting ? "Đang xử lý..." : "Từ chối phiếu"}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
+
 export default function AssetsPage() {
   const { data: session, status } = useSession();
   const canManage = ["admin", "assistant"].includes(session?.user?.role);
@@ -1324,6 +1879,7 @@ export default function AssetsPage() {
     useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [rejectTarget, setRejectTarget] = useState(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [productStatus, setProductStatus] = useState("all");
@@ -1341,6 +1897,52 @@ export default function AssetsPage() {
       else toast.error(result.error);
     } finally {
       setLoading(false);
+    }
+  };
+  const handleApproveTransaction = async (type, item) => {
+    try {
+      const response = await fetch("/api/assets", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type,
+          id: item.id,
+          ticketId: item.ticketId,
+          action: "approve",
+        }),
+      });
+      const result = await response.json();
+      if (!response.ok)
+        throw new Error(result.error || "Không thể duyệt phiếu");
+      toast.success(`Đã duyệt phiếu ${item.ticketId || item.code} thành công`);
+      await loadData();
+    } catch (error) {
+      toast.error(error.message || "Không thể duyệt phiếu");
+    }
+  };
+  const handleRejectConfirm = async (reason) => {
+    if (!rejectTarget) return;
+    try {
+      const response = await fetch("/api/assets", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: rejectTarget.type,
+          id: rejectTarget.item.id,
+          ticketId: rejectTarget.item.ticketId,
+          action: "reject",
+          rejectReason: reason,
+        }),
+      });
+      const result = await response.json();
+      if (!response.ok)
+        throw new Error(result.error || "Không thể từ chối phiếu");
+      toast.success(
+        `Đã từ chối phiếu ${rejectTarget.item.ticketId || rejectTarget.item.code}`,
+      );
+      await loadData();
+    } catch (error) {
+      toast.error(error.message || "Không thể từ chối phiếu");
     }
   };
   const deleteTransaction = async (type, item) => {
@@ -1363,9 +1965,11 @@ export default function AssetsPage() {
   useEffect(() => {
     if (status === "authenticated") loadData();
   }, [status]);
+  const isApprovedTx = (item) => !item.status || item.status === "approved";
   const stockByCode = useMemo(() => {
     const rows = new Map();
     data.imports.forEach((item) => {
+      if (!isApprovedTx(item)) return;
       const key =
         item.documentCode || assetDocumentCodeFromName(item.name || "");
       if (!key || item.quantity === null || item.quantity === undefined) return;
@@ -1382,6 +1986,7 @@ export default function AssetsPage() {
       );
     });
     data.exports.forEach((item) => {
+      if (!isApprovedTx(item)) return;
       const key =
         item.documentCode || assetDocumentCodeFromName(item.name || "");
       if (!key || item.quantity === null || item.quantity === undefined) return;
@@ -1416,10 +2021,10 @@ export default function AssetsPage() {
           stockByCode.get(documentCode)?.location || item.location || "",
         quantity: stockByCode.get(documentCode)?.quantity ?? 0,
         totalImport: data.imports
-          .filter(matchesProduct)
+          .filter((entry) => isApprovedTx(entry) && matchesProduct(entry))
           .reduce((sum, entry) => sum + Number(entry.quantity || 0), 0),
         totalExport: data.exports
-          .filter(matchesProduct)
+          .filter((entry) => isApprovedTx(entry) && matchesProduct(entry))
           .reduce((sum, entry) => sum + Number(entry.quantity || 0), 0),
       };
     });
@@ -1447,7 +2052,7 @@ export default function AssetsPage() {
         const matchesSearch = normalizeSearchText(
           tab === "products"
             ? `${row.code} ${row.name}`
-            : `${row.documentCode} ${row.code} ${row.name} ${row.location} ${row.person} ${row.issuedTo} ${row.note}`,
+            : `${row.ticketId || ""} ${row.documentCode || ""} ${row.code || ""} ${row.name || ""} ${row.location || ""} ${row.person || ""} ${row.issuedTo || ""} ${row.note || ""} ${row.status === "pending" ? "đang chờ pending" : row.status === "rejected" ? "từ chối rejected" : "đã duyệt approved"}`,
         ).includes(normalizeSearchText(search));
         const matchesStatus =
           tab !== "products" ||
@@ -1554,6 +2159,17 @@ export default function AssetsPage() {
             Object.values(row).some((value) => String(value || "").trim()),
           )
           .map((row) => ({
+            ticketId: String(
+              pick(row, [
+                "maphieu",
+                "sophieu",
+                "ticketid",
+                "ticket_id",
+                "maticket",
+              ]) || "",
+            )
+              .trim()
+              .toUpperCase(),
             documentCode: pick(row, ["sochungtu", "machungtu", "documentcode"]),
             code: pick(row, ["masanpham", "masp", "ma", "code"]),
             name: pick(row, ["tensanpham", "tensp", "ten", "name"]),
@@ -1674,7 +2290,28 @@ export default function AssetsPage() {
     );
     XLSX.writeFile(workbook, `${current.file}_${toVietnamDateKey()}.xlsx`);
   };
-  const pagedRows = filteredRows.slice((page - 1) * limit, page * limit);
+  const groupedTickets = tab === "import" || tab === "export";
+  const groups = new Map();
+  filteredRows.forEach((row, index) => {
+    // Legacy transactions without a ticket remain separate records.
+    const key =
+      groupedTickets && row.ticketId
+        ? `ticket:${row.ticketId}`
+        : `row:${index}`;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(row);
+  });
+  const pageGroups = [...groups.values()].slice(
+    (page - 1) * limit,
+    page * limit,
+  );
+  const pagedRows = pageGroups.flatMap((group, groupIndex) =>
+    group.map((row, rowIndex) => ({
+      ...row,
+      ticketNumber: (page - 1) * limit + groupIndex + 1,
+      ticketRowSpan: rowIndex === 0 ? group.length : 0,
+    })),
+  );
   if (status === "loading" || loading)
     return (
       <Box display="flex" justifyContent="center" py={12}>
@@ -1705,19 +2342,19 @@ export default function AssetsPage() {
             </Box>
           }
           action={
-            canManage ? (
-              <Box
-                display="flex"
-                gap={2}
-                flexWrap="wrap"
-                justifyContent="flex-end"
-                sx={{
-                  width: { xs: "100%", sm: "auto" },
-                  "& .MuiButton-root": {
-                    flex: { xs: "1 1 100%", sm: "0 0 auto" },
-                  },
-                }}
-              >
+            <Box
+              display="flex"
+              gap={2}
+              flexWrap="wrap"
+              justifyContent="flex-end"
+              sx={{
+                width: { xs: "100%", sm: "auto" },
+                "& .MuiButton-root": {
+                  flex: { xs: "1 1 100%", sm: "0 0 auto" },
+                },
+              }}
+            >
+              {canManage && (
                 <Button
                   variant="outlined"
                   startIcon={<i className="tabler-download" />}
@@ -1725,63 +2362,64 @@ export default function AssetsPage() {
                 >
                   Xuất danh sách hiện tại
                 </Button>
-                {tab !== "stock" && (
-                  <Button
-                    variant="tonal"
-                    color="warning"
-                    startIcon={<i className="tabler-file-upload" />}
-                    disabled={importingExcel}
-                    onClick={() => {
-                      setExcelImportType(tab);
-                      excelInputRef.current?.click();
-                    }}
-                  >
-                    {importingExcel ? "Đang import…" : "Import danh sách mới"}
-                  </Button>
-                )}
-                {tab === "products" && (
-                  <Button
-                    variant="contained"
-                    startIcon={<i className="tabler-plus" />}
-                    onClick={() => {
-                      setEditingProduct(null);
-                      setProductDialog(true);
-                    }}
-                  >
-                    Thêm sản phẩm
-                  </Button>
-                )}
-                {tab === "import" && (
-                  <Button
-                    variant="contained"
-                    startIcon={<i className="tabler-package-import" />}
-                    onClick={() => {
-                      setEditingItem(null);
-                      setDialog("import");
-                    }}
-                  >
-                    Nhập tài sản
-                  </Button>
-                )}
-                {tab === "export" && (
-                  <Button
-                    variant="contained"
-                    startIcon={<i className="tabler-package-export" />}
-                    onClick={() => {
-                      setEditingItem(null);
-                      setDialog("export");
-                    }}
-                  >
-                    Xuất tài sản
-                  </Button>
-                )}
-              </Box>
-            ) : null
+              )}
+              {canManage && tab !== "stock" && (
+                <Button
+                  variant="tonal"
+                  color="warning"
+                  startIcon={<i className="tabler-file-upload" />}
+                  disabled={importingExcel}
+                  onClick={() => {
+                    setExcelImportType(tab);
+                    excelInputRef.current?.click();
+                  }}
+                >
+                  {importingExcel ? "Đang import…" : "Import danh sách mới"}
+                </Button>
+              )}
+              {canManage && tab === "products" && (
+                <Button
+                  variant="contained"
+                  startIcon={<i className="tabler-plus" />}
+                  onClick={() => {
+                    setEditingProduct(null);
+                    setProductDialog(true);
+                  }}
+                >
+                  Thêm sản phẩm
+                </Button>
+              )}
+              {tab === "import" && (
+                <Button
+                  variant="contained"
+                  startIcon={<i className="tabler-package-import" />}
+                  onClick={() => {
+                    setEditingItem(null);
+                    setDialog("import");
+                  }}
+                >
+                  Nhập tài sản
+                </Button>
+              )}
+              {tab === "export" && (
+                <Button
+                  variant="contained"
+                  startIcon={<i className="tabler-package-export" />}
+                  onClick={() => {
+                    setEditingItem(null);
+                    setDialog("export");
+                  }}
+                >
+                  Xuất tài sản
+                </Button>
+              )}
+            </Box>
           }
         />
       </Card>
       <Card>
         <DataTableToolbar
+          itemLabel={groupedTickets ? "phiếu" : "dòng"}
           search={search}
           onSearchChange={(value) => {
             setSearch(value);
@@ -1803,8 +2441,14 @@ export default function AssetsPage() {
           allowScrollButtonsMobile
           sx={{ px: { xs: 2, sm: 5 }, mt: 2 }}
         >
-          <Tab value="import" label={`Nhập kho (${data.imports.length})`} />
-          <Tab value="export" label={`Xuất kho (${data.exports.length})`} />
+          <Tab
+            value="import"
+            label={`Nhập kho (${data.imports.filter((item) => !item.status || item.status === "approved").length})`}
+          />
+          <Tab
+            value="export"
+            label={`Xuất kho (${data.exports.filter((item) => !item.status || item.status === "approved").length})`}
+          />
           <Tab value="stock" label={`Tồn kho (${stockProducts.length})`} />
           <Tab
             value="products"
@@ -1855,6 +2499,9 @@ export default function AssetsPage() {
           type={tab}
           rows={pagedRows}
           canManage={canManage}
+          currentUserId={session?.user?.id}
+          page={page}
+          limit={limit}
           onView={(item) => setViewingProduct(item)}
           onEdit={(type, item) => {
             if (type === "products") {
@@ -1866,10 +2513,12 @@ export default function AssetsPage() {
             }
           }}
           onDelete={(type, item) => setDeleteTarget({ type, item })}
+          onApprove={handleApproveTransaction}
+          onReject={(type, item) => setRejectTarget({ type, item })}
         />
         <TablePaginationComponent
           page={page}
-          total={filteredRows.length}
+          total={groups.size}
           limit={limit}
           onPageChange={(_, nextPage) => setPage(nextPage + 1)}
         />
@@ -1881,8 +2530,9 @@ export default function AssetsPage() {
           exports={data.exports}
           products={data.products || []}
           categories={data.categories || []}
-          editingItem={editingItem}
           currentName={session?.user?.name}
+          canManage={canManage}
+          editingItem={editingItem}
           onClose={() => {
             setDialog(null);
             setEditingItem(null);
@@ -1929,6 +2579,12 @@ export default function AssetsPage() {
           onConfirm={() =>
             deleteTransaction(deleteTarget.type, deleteTarget.item)
           }
+        />
+        <RejectDialog
+          open={Boolean(rejectTarget)}
+          target={rejectTarget}
+          onClose={() => setRejectTarget(null)}
+          onConfirm={handleRejectConfirm}
         />
         <input
           ref={excelInputRef}

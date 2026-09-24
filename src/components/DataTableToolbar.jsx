@@ -12,6 +12,7 @@ export default function DataTableToolbar({
   onLimitChange,
   placeholder,
   children,
+  itemLabel = "dòng",
 }) {
   return (
     <Box
@@ -25,7 +26,14 @@ export default function DataTableToolbar({
         flexDirection: { xs: "column", sm: "row" },
       }}
     >
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, width: { xs: "100%", sm: "auto" } }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1.5,
+          width: { xs: "100%", sm: "auto" },
+        }}
+      >
         <Typography variant="body2" color="text.secondary">
           Hiển thị
         </Typography>
@@ -41,7 +49,7 @@ export default function DataTableToolbar({
           <MenuItem value={50}>50</MenuItem>
         </CustomTextField>
         <Typography variant="body2" color="text.secondary">
-          dòng
+          {itemLabel}
         </Typography>
       </Box>
       <Box

@@ -95,7 +95,6 @@ const UserDropdown = () => {
         overlap="circular"
         badgeContent={<BadgeContentSpan onClick={handleDropdownOpen} />}
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-        className="mis-2"
       >
         <Avatar
           ref={anchorRef}

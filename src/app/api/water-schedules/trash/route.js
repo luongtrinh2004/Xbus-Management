@@ -1,3 +1,4 @@
+import { trashUserIds } from "@/libs/trashScheduleStorage";
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import {
@@ -11,9 +12,11 @@ import {
 } from "@/libs/dataRepository";
 import {
   getTrashSchedules,
+  getEligibleTrashUsers,
   getTrashSchedulesForMonth,
 } from "@/libs/waterScheduler";
 import { toVietnamDateKey } from "@/libs/dateTime";
+import { createNotification } from "@/libs/notificationStorage";
 
 const secret = process.env.NEXTAUTH_SECRET;
 const normalizeOffset = (value) =>
@@ -62,6 +65,12 @@ export async function PATCH(req) {
     );
 
   const body = await req.json();
+  if (
+    ["assign", "complete"].includes(body.action) &&
+    (!/^\d{4}-\d{2}-\d{2}$/.test(body.dateKey || "") ||
+      Number.isNaN(Date.parse(body.dateKey)))
+  )
+    return NextResponse.json({ error: "Ngày không hợp lệ" }, { status: 400 });
   if (body.action === "fill_empty") {
     const [users, exemptUserIds, trashState] = await Promise.all([
       getUsers(),
@@ -117,44 +126,72 @@ export async function PATCH(req) {
   }
   if (body.action === "complete") {
     const current = await loadWeek(normalizeOffset(body.weekOffset));
-    const schedule = current.schedules.find(
-      (item) => item.dateKey === body.dateKey,
+    const targetUserIds = trashUserIds(
+      current.trashState.trashScheduleOverrides?.[body.dateKey],
     );
-    const targetUserId = schedule?.userId || body.userId;
-    if (!targetUserId)
+    if (!targetUserIds.length)
       return NextResponse.json(
-        { error: "Không tìm thấy lịch đổ rác" },
+        { error: "Không tìm thấy lịch đổ rác đã lưu" },
         { status: 404 },
       );
     const completions = {
       ...(current.trashState.trashScheduleCompletions || {}),
     };
     if (!completions[body.dateKey]) {
-      const userIndex = current.users.findIndex(
-        (user) => user.id === targetUserId,
-      );
-      if (userIndex >= 0) {
-        current.users[userIndex].schedulingPoints =
-          (current.users[userIndex].schedulingPoints || 0) + 1;
-        current.users[userIndex].updatedAt = new Date().toISOString();
-        await saveUsers(current.users);
+      for (const user of current.users) {
+        if (targetUserIds.includes(user.id)) {
+          user.schedulingPoints = Number(user.schedulingPoints || 0) + 1;
+          user.updatedAt = new Date().toISOString();
+        }
       }
+      await saveUsers(current.users);
       completions[body.dateKey] = {
-        userId: targetUserId,
+        userId: targetUserIds[0],
+        userIds: targetUserIds,
         completedAt: new Date().toISOString(),
       };
       await saveTrashScheduleState({
         ...current.trashState,
         trashScheduleCompletions: completions,
       });
+
+      // Gửi thông báo cho nhân sự được xác nhận đổ rác
+      const [y, m, d] = String(body.dateKey).split("-");
+      for (const targetUserId of targetUserIds)
+        await createNotification({
+          userId: targetUserId,
+          type: "duty_confirmed",
+          title: "Xác nhận đổ rác thành công",
+          message: `${token.name || "Quản trị viên"} đã xác nhận bạn hoàn thành ca đổ rác ngày ${d}/${m}/${y} (+1 điểm).`,
+          link: "/water-schedule",
+        });
     }
     return NextResponse.json({ success: true, completed: true });
   }
   if (body.action === "assign") {
     const current = await loadWeek(normalizeOffset(body.weekOffset));
+    if (current.trashState.trashScheduleCompletions?.[body.dateKey])
+      return NextResponse.json(
+        { error: "Không thể sửa lịch đã hoàn thành" },
+        { status: 409 },
+      );
+    const requested = body.userIds ?? (body.userId ? [body.userId] : []);
+    const eligible = new Set(
+      getEligibleTrashUsers(current.users).map((user) => user.id),
+    );
+    if (
+      !Array.isArray(requested) ||
+      requested.length > 2 ||
+      new Set(requested).size !== requested.length ||
+      requested.some((id) => !eligible.has(id))
+    )
+      return NextResponse.json(
+        { error: "Chọn tối đa 2 nhân sự khác nhau, đủ điều kiện đổ rác" },
+        { status: 400 },
+      );
     const overrides = {
       ...(current.trashState.trashScheduleOverrides || {}),
-      [body.dateKey]: body.userId || null,
+      [body.dateKey]: requested.length > 1 ? requested : requested[0] || null,
     };
     const [currentYear, currentMonth] = toVietnamDateKey()
       .split("-")
@@ -197,7 +234,10 @@ export async function PATCH(req) {
   const queue = [...current.schedules, nextWeek[0]];
   const overrides = { ...(current.trashState.trashScheduleOverrides || {}) };
   for (let position = index; position < current.schedules.length; position += 1)
-    overrides[current.schedules[position].dateKey] = queue[position + 1].userId;
+    overrides[current.schedules[position].dateKey] =
+      queue[position + 1].userIds?.length > 1
+        ? queue[position + 1].userIds
+        : queue[position + 1].userId;
 
   await saveTrashScheduleState({
     ...current.trashState,

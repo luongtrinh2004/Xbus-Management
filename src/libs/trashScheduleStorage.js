@@ -1,3 +1,10 @@
+export const trashUserIds = (value) => [
+  ...new Set(
+    (Array.isArray(value) ? value : [value]).filter(
+      (id) => typeof id === "string" && id,
+    ),
+  ),
+];
 // Compatibility at the scheduling boundary; persisted schedules are one row per day.
 export function trashStateToRecords(state) {
   const overrides = state.trashScheduleOverrides || {};
@@ -6,16 +13,25 @@ export function trashStateToRecords(state) {
     .sort()
     .map((dateKey) => ({
       dateKey,
-      userId: overrides[dateKey] || null,
+      userId: trashUserIds(overrides[dateKey])[0] || null,
+      userIds: trashUserIds(overrides[dateKey]),
       completed: Boolean(completions[dateKey]),
       completedBy: completions[dateKey]?.userId || null,
+      completedUserIds: trashUserIds(
+        completions[dateKey]?.userIds || completions[dateKey]?.userId,
+      ),
       completedAt: completions[dateKey]?.completedAt || null,
     }));
 }
 export function trashRecordsToState(schedules, metadata = {}) {
   return {
     trashScheduleOverrides: Object.fromEntries(
-      schedules.map((row) => [row.dateKey, row.userId || null]),
+      schedules.map((row) => [
+        row.dateKey,
+        trashUserIds(row.userIds || row.userId).length > 1
+          ? trashUserIds(row.userIds)
+          : row.userId || row.userIds?.[0] || null,
+      ]),
     ),
     trashScheduleCompletions: Object.fromEntries(
       schedules
@@ -24,6 +40,11 @@ export function trashRecordsToState(schedules, metadata = {}) {
           row.dateKey,
           {
             userId: row.completedBy || row.userId,
+            userIds: trashUserIds(
+              row.completedUserIds?.length
+                ? row.completedUserIds
+                : row.completedBy || row.userId,
+            ),
             completedAt: row.completedAt,
           },
         ]),

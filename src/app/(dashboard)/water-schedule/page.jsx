@@ -26,31 +26,36 @@ export default function WaterSchedulePage() {
   const [trashAssignableUsers, setTrashAssignableUsers] = useState([]);
   const [exemptUserIds, setExemptUserIds] = useState([]);
   const [trashSchedules, setTrashSchedules] = useState([]);
+  const [myTrashSchedules, setMyTrashSchedules] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const loadData = useCallback(async ({ showLoading = false } = {}) => {
-    try {
-      if (showLoading) setLoading(true);
-      const res = await fetch(
-        `/api/water-schedules?month=${month}&year=${year}`,
-      );
-      const data = await res.json();
-      if (res.ok) {
-        setSchedules(data.schedules || []);
-        setWeeksMeta(data.weeksMeta || []);
-        setEligibleUsers(data.eligibleUsers || []);
-        setTrashAssignableUsers(data.trashAssignableUsers || []);
-        setExemptUserIds(data.exemptUserIds || []);
-        setTrashSchedules(data.trashSchedules || []);
-        setCurrentUser(data.currentUser || null);
+  const loadData = useCallback(
+    async ({ showLoading = false } = {}) => {
+      try {
+        if (showLoading) setLoading(true);
+        const res = await fetch(
+          `/api/water-schedules?month=${month}&year=${year}`,
+        );
+        const data = await res.json();
+        if (res.ok) {
+          setSchedules(data.schedules || []);
+          setWeeksMeta(data.weeksMeta || []);
+          setEligibleUsers(data.eligibleUsers || []);
+          setTrashAssignableUsers(data.trashAssignableUsers || []);
+          setExemptUserIds(data.exemptUserIds || []);
+          setTrashSchedules(data.trashSchedules || []);
+          setMyTrashSchedules(data.myTrashSchedules || []);
+          setCurrentUser(data.currentUser || null);
+        }
+      } catch (err) {
+        console.error("[WaterSchedulePage] Error fetching data:", err);
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.error("[WaterSchedulePage] Error fetching data:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [month, year]);
+    },
+    [month, year],
+  );
 
   useEffect(() => {
     loadData({ showLoading: true });
@@ -92,6 +97,11 @@ export default function WaterSchedulePage() {
           trashSchedules={trashSchedules}
           onRefresh={() => loadData()}
         />
+        <UserScheduleView
+          schedules={schedules}
+          trashSchedules={myTrashSchedules}
+          currentUser={currentUser || session?.user}
+        />
       </Box>
     );
   }
@@ -99,6 +109,7 @@ export default function WaterSchedulePage() {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 4 }}>
       <UserScheduleView
+        trashSchedules={myTrashSchedules}
         schedules={schedules}
         currentUser={currentUser || session?.user}
       />

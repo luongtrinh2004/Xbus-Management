@@ -8,6 +8,7 @@ import NavToggle from "./NavToggle";
 import Logo from "@components/layout/shared/Logo";
 import ModeDropdown from "@components/layout/shared/ModeDropdown";
 import TokenBalance from "@components/layout/shared/TokenBalance";
+import NotificationDropdown from "@components/layout/shared/NotificationDropdown";
 import UserDropdown from "@components/layout/shared/UserDropdown";
 
 // Hook Imports
@@ -35,6 +36,7 @@ const NavbarContent = () => {
       <div className="flex items-center gap-2">
         <ModeDropdown />
         <TokenBalance />
+        <NotificationDropdown />
         <UserDropdown />
       </div>
     </div>

@@ -1,3 +1,4 @@
+import { trashUserIds } from "./trashScheduleStorage.js";
 /**
  * Thư viện hỗ trợ tính toán lịch tuần và thuật toán phân công bê nước công bằng
  * Tuân thủ theo Phần 2: Quản lý lịch bê nước và đổ rác (Flow tài liệu Xbus)
@@ -160,19 +161,27 @@ export function getTrashSchedulesForMonth(
                   )),
           )[0]
         : null;
-    const person = hasOverride
-      ? usersById.get(overrides[dateKey]) || null
-      : defaultPerson;
-    // Lịch trước ngày bắt đầu không được cộng lại vào điểm sau khi reset.
-    // Chỉ các lượt trong đợt đang xếp mới tăng điểm dự kiến để chia đều.
-    if (
-      person &&
-      dateKey >= startDateKey &&
-      projectedPoints.has(person.id) &&
-      !completions[dateKey]
-    ) {
-      projectedPoints.set(person.id, (projectedPoints.get(person.id) || 0) + 1);
-      lastAssignedIndex.set(person.id, workingIndexInMonth);
+    const assignedIds = hasOverride
+      ? trashUserIds(overrides[dateKey])
+      : defaultPerson
+        ? [defaultPerson.id]
+        : [];
+    const assignedPeople = assignedIds.map(
+      (id) => usersById.get(id) || { id, name: "Nhân sự đã nghỉ" },
+    );
+    const person = assignedPeople[0];
+    for (const assigned of assignedPeople) {
+      if (
+        dateKey >= startDateKey &&
+        projectedPoints.has(assigned.id) &&
+        !completions[dateKey]
+      ) {
+        projectedPoints.set(
+          assigned.id,
+          (projectedPoints.get(assigned.id) || 0) + 1,
+        );
+        lastAssignedIndex.set(assigned.id, workingIndexInMonth);
+      }
     }
     schedules.push({
       id: `trash_${year}${String(month).padStart(2, "0")}${String(day).padStart(2, "0")}`,
@@ -180,7 +189,14 @@ export function getTrashSchedulesForMonth(
       dateKey,
       weekday,
       userId: person?.id || "",
-      name: person?.name || "",
+      userIds: assignedIds,
+      participants: assignedPeople.map((user) => ({
+        userId: user.id,
+        name: user.name,
+        code: user.code,
+        avatarUrl: user.avatarUrl,
+      })),
+      name: assignedPeople.map((user) => user.name).join(", "),
       code: person?.code || "",
       avatarUrl: person?.avatarUrl || "",
       role: person?.role || "",

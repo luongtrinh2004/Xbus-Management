@@ -62,7 +62,7 @@ export default function AdminScheduleView({
   const [exemptSearch, setExemptSearch] = useState("");
   const [waterScheduleOpen, setWaterScheduleOpen] = useState(true);
   const [trashEdit, setTrashEdit] = useState(null);
-  const [trashAssignee, setTrashAssignee] = useState("");
+  const [trashAssignee, setTrashAssignee] = useState([]);
   const [trashSearch, setTrashSearch] = useState("");
   const [completionTarget, setCompletionTarget] = useState(null);
   useEffect(() => setExemptIds(exemptUserIds), [exemptUserIds]);
@@ -168,7 +168,12 @@ export default function AdminScheduleView({
     const user = trashAssignableUsers.find((item) => item.id === userId);
     const existing = trashByDate.get(date);
     if (!user || existing?.completed) return;
-    if (existing?.userId) return toast.info("Ngày này đã có người đổ rác");
+    const existingIds =
+      existing?.userIds || (existing?.userId ? [existing.userId] : []);
+    if (existingIds.includes(userId))
+      return toast.info("Nhân sự đã có trong lịch");
+    if (existingIds.length >= 2)
+      return toast.info("Tối đa 2 người đổ rác mỗi ngày");
     const [day, selectedMonth, selectedYear] = date.split("/");
     const response = await fetch("/api/water-schedules/trash", {
       method: "PATCH",
@@ -176,7 +181,7 @@ export default function AdminScheduleView({
       body: JSON.stringify({
         action: "assign",
         dateKey: `${selectedYear}-${selectedMonth}-${day}`,
-        userId,
+        userIds: [...existingIds, userId],
         weekOffset: 0,
       }),
     });
@@ -404,7 +409,7 @@ export default function AdminScheduleView({
     await onRefresh?.();
     return true;
   };
-  const assignTrash = async (userId = trashAssignee) => {
+  const assignTrash = async (userIds = trashAssignee) => {
     if (!trashEdit) return;
     const response = await fetch("/api/water-schedules/trash", {
       method: "PATCH",
@@ -412,7 +417,7 @@ export default function AdminScheduleView({
       body: JSON.stringify({
         action: "assign",
         dateKey: trashEdit.dateKey,
-        userId,
+        userIds,
         weekOffset: 0,
       }),
     });
@@ -886,7 +891,11 @@ export default function AdminScheduleView({
                             </Box>
                             <Box
                               onDragOver={(event) => {
-                                if (!trashCompleted && !hasTrash) {
+                                if (
+                                  !trashCompleted &&
+                                  (trash?.userIds?.length ||
+                                    (hasTrash ? 1 : 0)) < 2
+                                ) {
                                   event.preventDefault();
                                   setDragTarget({
                                     date: cell.date,
@@ -986,8 +995,7 @@ export default function AdminScheduleView({
                                   <Typography
                                     variant="caption"
                                     fontWeight={700}
-                                    noWrap
-                                    sx={{ flex: 1 }}
+                                    sx={{ flex: 1, whiteSpace: "normal" }}
                                   >
                                     {trash.name}
                                   </Typography>
@@ -1001,7 +1009,10 @@ export default function AdminScheduleView({
                                     onClick={(event) => {
                                       event.stopPropagation();
                                       setTrashEdit(trash);
-                                      setTrashAssignee(trash.userId || "");
+                                      setTrashAssignee(
+                                        trash.userIds ||
+                                          (trash.userId ? [trash.userId] : []),
+                                      );
                                     }}
                                   >
                                     <i className="tabler-user-edit text-sm" />
@@ -1162,25 +1173,29 @@ export default function AdminScheduleView({
         fullWidth
         maxWidth="xs"
       >
-        <DialogTitle>Chỉ định người đổ rác</DialogTitle>
+        <DialogTitle>Chỉ định người đổ rác (tối đa 2 người)</DialogTitle>
         <DialogContent dividers>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
             <Typography variant="body2" color="text.secondary" sx={{ flex: 1 }}>
               Người đang được xếp:{" "}
               <strong>
-                {trashAssignee
-                  ? trashAssignableUsers.find(
-                      (user) => user.id === trashAssignee,
-                    )?.name || trashEdit?.name
+                {trashAssignee.length
+                  ? trashAssignee
+                      .map(
+                        (id) =>
+                          trashAssignableUsers.find((user) => user.id === id)
+                            ?.name || id,
+                      )
+                      .join(", ")
                   : "Chưa có"}
               </strong>
             </Typography>
-            {trashAssignee && (
+            {trashAssignee.length > 0 && (
               <IconButton
                 size="small"
                 color="error"
                 title="Xóa người đang được xếp"
-                onClick={() => setTrashAssignee("")}
+                onClick={() => setTrashAssignee([])}
               >
                 <i className="tabler-user-x" />
               </IconButton>
@@ -1216,7 +1231,15 @@ export default function AdminScheduleView({
             .map((user) => (
               <Box
                 key={user.id}
-                onClick={() => setTrashAssignee(user.id)}
+                onClick={() => {
+                  if (trashAssignee.includes(user.id))
+                    setTrashAssignee((ids) =>
+                      ids.filter((id) => id !== user.id),
+                    );
+                  else if (trashAssignee.length < 2)
+                    setTrashAssignee((ids) => [...ids, user.id]);
+                  else toast.info("Chỉ được chọn tối đa 2 người đổ rác");
+                }}
                 sx={{
                   display: "flex",
                   alignItems: "center",
@@ -1224,13 +1247,16 @@ export default function AdminScheduleView({
                   p: 1,
                   cursor: "pointer",
                   borderRadius: 1,
-                  bgcolor:
-                    trashAssignee === user.id
-                      ? "action.selected"
-                      : "transparent",
+                  bgcolor: trashAssignee.includes(user.id)
+                    ? "action.selected"
+                    : "transparent",
                   "&:hover": { bgcolor: "action.hover" },
                 }}
               >
+                <Checkbox
+                  checked={trashAssignee.includes(user.id)}
+                  tabIndex={-1}
+                />
                 <Avatar
                   src={resolveAvatar(user)}
                   sx={{ width: 30, height: 30 }}

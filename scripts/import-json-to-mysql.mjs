@@ -170,9 +170,14 @@ try {
   for (const type of ["imports", "exports"])
     for (const item of assets[type] || [])
       await upsert(
-        "INSERT INTO asset_transactions (id,type,asset_code,name,asset_type,description,transaction_date,quantity,location,person,note,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE name=VALUES(name),asset_type=VALUES(asset_type),description=VALUES(description),transaction_date=VALUES(transaction_date),quantity=VALUES(quantity),location=VALUES(location),person=VALUES(person),note=VALUES(note),updated_at=VALUES(updated_at)",
+        "INSERT INTO asset_transactions (id,ticket_id,status,document_code,transaction_type,product_code,product_name,product_category_name,product_description,transaction_date,quantity,unit_name,storage_location,counterparty_name,recipient_name,performed_by_user_id,note,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE ticket_id=VALUES(ticket_id),status=VALUES(status),product_name=VALUES(product_name),product_category_name=VALUES(product_category_name),product_description=VALUES(product_description),transaction_date=VALUES(transaction_date),quantity=VALUES(quantity),unit_name=VALUES(unit_name),storage_location=VALUES(storage_location),counterparty_name=VALUES(counterparty_name),recipient_name=VALUES(recipient_name),note=VALUES(note),updated_at=VALUES(updated_at)",
         [
           item.id,
+          item.ticketId && /^[A-Z]{3}[0-9]{3}$/.test(item.ticketId)
+            ? item.ticketId
+            : "AAA000",
+          item.status || "approved",
+          item.documentCode || null,
           type === "imports" ? "import" : "export",
           item.code,
           item.name,
@@ -180,8 +185,11 @@ try {
           item.description || null,
           mysqlDate(item.date),
           Number(item.quantity || 0),
+          item.unit || null,
           item.location || null,
           item.person || null,
+          item.issuedTo || null,
+          item.performedBy || null,
           item.note || null,
           iso(item.createdAt),
           iso(item.updatedAt),
@@ -269,13 +277,15 @@ try {
       };
   for (const row of trash.schedules || []) {
     await upsert(
-      "INSERT INTO trash_schedules (schedule_date,user_id,completed,completed_by,completed_at) VALUES (?,?,?,?,?) ON DUPLICATE KEY UPDATE user_id=VALUES(user_id),completed=VALUES(completed),completed_by=VALUES(completed_by),completed_at=VALUES(completed_at)",
+      "INSERT INTO trash_schedules (schedule_date,user_id,completed,completed_by,completed_at,second_user_id,second_completed_by) VALUES (?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE user_id=VALUES(user_id),completed=VALUES(completed),completed_by=VALUES(completed_by),completed_at=VALUES(completed_at),second_user_id=VALUES(second_user_id),second_completed_by=VALUES(second_completed_by)",
       [
         row.dateKey,
         row.userId,
         Boolean(row.completed),
         row.completedBy,
         iso(row.completedAt),
+        row.userIds?.[1] || null,
+        row.completedUserIds?.[1] || null,
       ],
     );
   }
@@ -305,6 +315,14 @@ try {
     "INSERT INTO app_documents (document_key,document_value,updated_at) VALUES (?,?,?) ON DUPLICATE KEY UPDATE document_value=VALUES(document_value),updated_at=VALUES(updated_at)",
     ["afternoon-tea", JSON.stringify(json("afternoon-tea.json")), new Date()],
   );
+  if (
+    fs.existsSync(path.join(root, "src", "data", "json", "notifications.json"))
+  ) {
+    await upsert(
+      "INSERT INTO app_documents (document_key,document_value,updated_at) VALUES (?,?,?) ON DUPLICATE KEY UPDATE document_value=VALUES(document_value),updated_at=VALUES(updated_at)",
+      ["notifications", JSON.stringify(json("notifications.json")), new Date()],
+    );
+  }
   await db.commit();
   for (const table of [
     "users",

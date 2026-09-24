@@ -1,4 +1,5 @@
 "use client";
+import { toVietnamDateKey } from "@/libs/dateTime";
 
 import { useMemo } from "react";
 import Grid from "@mui/material/Grid2";
@@ -13,7 +14,11 @@ import Divider from "@mui/material/Divider";
 import Alert from "@mui/material/Alert";
 import tableStyles from "@core/styles/table.module.css";
 
-export default function UserScheduleView({ schedules = [], currentUser }) {
+export default function UserScheduleView({
+  schedules = [],
+  trashSchedules = [],
+  currentUser,
+}) {
   // Lọc các lịch có phân công mình
   const mySchedules = useMemo(() => {
     if (!currentUser) return [];
@@ -44,7 +49,107 @@ export default function UserScheduleView({ schedules = [], currentUser }) {
     [mySchedules],
   );
 
+  const todayKey = toVietnamDateKey();
+  const dateKeyFromDisplay = (value) => {
+    const [day, month, year] = String(value || "").split("/");
+    return year && month && day ? `${year}-${month}-${day}` : "";
+  };
+  const displayDate = (dateKey) =>
+    String(dateKey || "")
+      .split("-")
+      .reverse()
+      .join("/");
+  const participantId = (participant) =>
+    typeof participant === "string" ? participant : participant?.userId;
+  const participantName = (participant) =>
+    typeof participant === "string" ? participant : participant?.name;
+
+  const upcomingActivities = useMemo(() => {
+    const water = upcomingSchedules.map((schedule) => ({
+      id: `water-${schedule.id}`,
+      activity: "water",
+      dateKey: dateKeyFromDisplay(schedule.date),
+      time: schedule.time || "09:00",
+      note: schedule.note || "Lấy nước tại tầng 11",
+      teammates: (schedule.participants || [])
+        .filter((person) => participantId(person) !== currentUser?.id)
+        .map(participantName)
+        .filter(Boolean),
+      status: "upcoming",
+    }));
+    const trash = trashSchedules
+      .filter((item) => !item.completed && item.dateKey >= todayKey)
+      .map((item) => ({
+        id: `trash-${item.dateKey}`,
+        activity: "trash",
+        dateKey: item.dateKey,
+        time: "Trước khi ra về",
+        note: "Đổ rác cuối ngày",
+        teammates: (item.userIds || [])
+          .filter((id) => id !== currentUser?.id)
+          .map(
+            (id) =>
+              trashSchedules
+                .find((row) => row.dateKey === item.dateKey)
+                ?.name?.split(", ")[(item.userIds || []).indexOf(id)] ||
+              "Thành viên cùng ca",
+          ),
+        status: "upcoming",
+      }));
+    return [...water, ...trash].sort((a, b) =>
+      `${a.dateKey}-${a.time}`.localeCompare(`${b.dateKey}-${b.time}`),
+    );
+  }, [upcomingSchedules, trashSchedules, todayKey, currentUser?.id]);
+
+  const historyActivities = useMemo(() => {
+    const water = historySchedules.map((schedule) => {
+      const mine = (schedule.participants || []).find(
+        (person) => participantId(person) === currentUser?.id,
+      );
+      const completed = mine?.completed ?? schedule.status === "completed";
+      return {
+        id: `water-${schedule.id}`,
+        activity: "water",
+        dateKey: dateKeyFromDisplay(schedule.date),
+        time: schedule.time || "09:00",
+        note: schedule.note || "Lấy nước tại tầng 11",
+        teammates: (schedule.participants || [])
+          .filter((person) => participantId(person) !== currentUser?.id)
+          .map(participantName)
+          .filter(Boolean),
+        status:
+          schedule.status === "cancelled"
+            ? "cancelled"
+            : completed
+              ? "completed"
+              : "missed",
+      };
+    });
+    const trash = trashSchedules
+      .filter((item) => item.completed || item.dateKey < todayKey)
+      .map((item) => ({
+        id: `trash-${item.dateKey}`,
+        activity: "trash",
+        dateKey: item.dateKey,
+        time: "Trước khi ra về",
+        note: "Đổ rác cuối ngày",
+        teammates: (item.userIds || [])
+          .filter((id) => id !== currentUser?.id)
+          .map(
+            (id) =>
+              item.name?.split(", ")[(item.userIds || []).indexOf(id)] ||
+              "Thành viên cùng ca",
+          ),
+        status: item.completed ? "completed" : "missed",
+      }));
+    return [...water, ...trash].sort((a, b) =>
+      `${b.dateKey}-${b.time}`.localeCompare(`${a.dateKey}-${a.time}`),
+    );
+  }, [historySchedules, trashSchedules, todayKey, currentUser?.id]);
   const totalTrips = currentUser?.waterTripCount || 0;
+  const totalTrashTrips = trashSchedules.filter(
+    (item) => item.completed,
+  ).length;
   const totalPoints = currentUser?.schedulingPoints || 0;
 
   return (
@@ -72,22 +177,21 @@ export default function UserScheduleView({ schedules = [], currentUser }) {
             }}
           >
             <Typography variant="h6" fontWeight={700} lineHeight={1.25}>
-              Lịch Bê Nước Của Tôi
+              Lịch Sinh Hoạt Đội Của Tôi
             </Typography>
             <Typography
               variant="body2"
               color="text.secondary"
               lineHeight={1.35}
             >
-              Theo dõi các ca phân công bê nước sắp tới và điểm rèn luyện cá
-              nhân
+              Theo dõi lịch bê nước, đổ rác và điểm rèn luyện cá nhân
             </Typography>
           </Box>
         </Box>
       </Grid>
 
-      {/* 3 Thẻ Thông Tin Cá Nhân (Mục 2.15) */}
-      <Grid size={{ xs: 12, sm: 4 }}>
+      {/* Thống kê riêng từng hoạt động và tổng lịch sắp tới. */}
+      <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
         <Card>
           <CardContent sx={{ display: "flex", alignItems: "center", gap: 3 }}>
             <Avatar
@@ -103,7 +207,7 @@ export default function UserScheduleView({ schedules = [], currentUser }) {
             </Avatar>
             <Box>
               <Typography variant="body2" color="text.secondary">
-                Tổng Số Lần Đã Đi
+                Số Lượt Bê Nước
               </Typography>
               <Typography variant="h5" fontWeight={700}>
                 {totalTrips} lượt
@@ -116,7 +220,36 @@ export default function UserScheduleView({ schedules = [], currentUser }) {
         </Card>
       </Grid>
 
-      <Grid size={{ xs: 12, sm: 4 }}>
+      <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
+        <Card>
+          <CardContent sx={{ display: "flex", alignItems: "center", gap: 3 }}>
+            <Avatar
+              variant="rounded"
+              sx={{
+                width: 48,
+                height: 48,
+                bgcolor: "rgba(255, 159, 67, 0.12)",
+                color: "warning.main",
+              }}
+            >
+              <i className="tabler-trash text-2xl" />
+            </Avatar>
+            <Box>
+              <Typography variant="body2" color="text.secondary">
+                Số Lượt Đổ Rác
+              </Typography>
+              <Typography variant="h5" fontWeight={700}>
+                {totalTrashTrips} lượt
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                Đã hoàn thành
+              </Typography>
+            </Box>
+          </CardContent>
+        </Card>
+      </Grid>
+
+      <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
         <Card>
           <CardContent sx={{ display: "flex", alignItems: "center", gap: 3 }}>
             <Avatar
@@ -145,7 +278,7 @@ export default function UserScheduleView({ schedules = [], currentUser }) {
         </Card>
       </Grid>
 
-      <Grid size={{ xs: 12, sm: 4 }}>
+      <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
         <Card>
           <CardContent sx={{ display: "flex", alignItems: "center", gap: 3 }}>
             <Avatar
@@ -164,7 +297,7 @@ export default function UserScheduleView({ schedules = [], currentUser }) {
                 Lịch Sắp Tới
               </Typography>
               <Typography variant="h5" fontWeight={700} color="info.main">
-                {upcomingSchedules.length} lịch
+                {upcomingActivities.length} lịch
               </Typography>
               <Typography variant="caption" color="text.secondary">
                 Cần thực hiện
@@ -174,7 +307,7 @@ export default function UserScheduleView({ schedules = [], currentUser }) {
         </Card>
       </Grid>
 
-      {/* BẢNG 1: LỊCH SẮP TỚI CỦA BẠN */}
+      {/* Lịch bê nước và đổ rác dùng chung một dòng thời gian. */}
       <Grid size={{ xs: 12 }}>
         <Card>
           <CardHeader
@@ -182,19 +315,19 @@ export default function UserScheduleView({ schedules = [], currentUser }) {
               <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                 <i className="tabler-clock text-info text-xl" />
                 <Typography variant="h6" fontWeight={600}>
-                  Ca Bê Nước Sắp Tới Được Phân Công
+                  Lịch Hoạt Động Sắp Tới
                 </Typography>
               </Box>
             }
           />
           <Divider />
           <CardContent>
-            {upcomingSchedules.length > 0 ? (
+            {upcomingActivities.length > 0 ? (
               <Box sx={{ overflowX: "auto" }}>
                 <table className={tableStyles.table}>
                   <thead>
                     <tr>
-                      <th>Tuần</th>
+                      <th>Hoạt động</th>
                       <th>Ngày thực hiện</th>
                       <th>Giờ</th>
                       <th>Ghi chú</th>
@@ -203,71 +336,84 @@ export default function UserScheduleView({ schedules = [], currentUser }) {
                     </tr>
                   </thead>
                   <tbody>
-                    {upcomingSchedules.map((s) => {
-                      const teammates = (s.participants || []).filter(
-                        (p) => (p.userId || p) !== currentUser?.id,
-                      );
-
-                      return (
-                        <tr key={s.id} className="hover:bg-actionHover">
-                          <td>
+                    {upcomingActivities.map((item) => (
+                      <tr key={item.id} className="hover:bg-actionHover">
+                        <td>
+                          <Chip
+                            size="small"
+                            variant="tonal"
+                            color={
+                              item.activity === "water" ? "info" : "warning"
+                            }
+                            icon={
+                              <i
+                                className={
+                                  item.activity === "water"
+                                    ? "tabler-droplet"
+                                    : "tabler-trash"
+                                }
+                              />
+                            }
+                            label={
+                              item.activity === "water" ? "Bê nước" : "Đổ rác"
+                            }
+                          />
+                        </td>
+                        <td>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 1,
+                            }}
+                          >
+                            <i className="tabler-calendar text-primary text-sm" />
                             <Typography variant="body2" fontWeight={600}>
-                              Tuần {s.weekIndex}
+                              {displayDate(item.dateKey)}
                             </Typography>
-                            <Typography
-                              variant="caption"
-                              color="text.secondary"
-                            >
-                              {s.range}
-                            </Typography>
-                          </td>
-                          <td>
-                            <Box
-                              sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 1,
-                              }}
-                            >
-                              <i className="tabler-calendar text-primary text-sm" />
-                              <Typography variant="body2" fontWeight={600}>
-                                {s.date}
-                              </Typography>
-                            </Box>
-                          </td>
-                          <td>{s.time || "09:00"}</td>
-                          <td>{s.note || "Lấy nước tại tầng 1"}</td>
-                          <td>
-                            <Box
-                              sx={{
-                                display: "flex",
-                                flexWrap: "wrap",
-                                gap: 0.5,
-                              }}
-                            >
-                              {teammates.map((t, idx) => (
+                          </Box>
+                        </td>
+                        <td>{item.time}</td>
+                        <td>{item.note}</td>
+                        <td>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              flexWrap: "wrap",
+                              gap: 0.5,
+                            }}
+                          >
+                            {item.teammates.length ? (
+                              item.teammates.map((name, idx) => (
                                 <Chip
                                   key={idx}
-                                  label={t.name || t}
+                                  label={name}
                                   size="small"
                                   variant="tonal"
                                   color="secondary"
                                   sx={{ fontSize: 11 }}
                                 />
-                              ))}
-                            </Box>
-                          </td>
-                          <td style={{ textAlign: "center" }}>
-                            <Chip
-                              size="small"
-                              label="Sắp tới"
-                              color="info"
-                              variant="tonal"
-                            />
-                          </td>
-                        </tr>
-                      );
-                    })}
+                              ))
+                            ) : (
+                              <Typography
+                                variant="body2"
+                                color="text.secondary"
+                              >
+                                —
+                              </Typography>
+                            )}
+                          </Box>
+                        </td>
+                        <td style={{ textAlign: "center" }}>
+                          <Chip
+                            size="small"
+                            label="Sắp tới"
+                            color="info"
+                            variant="tonal"
+                          />
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </Box>
@@ -276,7 +422,7 @@ export default function UserScheduleView({ schedules = [], currentUser }) {
                 severity="info"
                 icon={<i className="tabler-info-circle" />}
               >
-                Bạn hiện không có lịch bê nước nào sắp tới trong tháng này.
+                Bạn hiện không có lịch bê nước hoặc đổ rác nào sắp tới.
               </Alert>
             )}
           </CardContent>
@@ -291,75 +437,80 @@ export default function UserScheduleView({ schedules = [], currentUser }) {
               <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                 <i className="tabler-history text-secondary text-xl" />
                 <Typography variant="h6" fontWeight={600}>
-                  Lịch Sử Tham Gia & Điểm Nhận Được
+                  Lịch Sử Hoạt Động
                 </Typography>
               </Box>
             }
           />
           <Divider />
           <CardContent>
-            {historySchedules.length > 0 ? (
+            {historyActivities.length > 0 ? (
               <Box sx={{ overflowX: "auto" }}>
                 <table className={tableStyles.table}>
                   <thead>
                     <tr>
-                      <th>Lịch tuần</th>
-                      <th>Ngày diễn ra</th>
-                      <th>Kết quả</th>
-                      <th style={{ textAlign: "center" }}>Điểm ghi nhận</th>
+                      <th>Hoạt động</th>
+                      <th>Ngày thực hiện</th>
+                      <th>Giờ</th>
+                      <th>Ghi chú</th>
+                      <th>Thành viên cùng ca</th>
+                      <th style={{ textAlign: "center" }}>Trạng thái</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {historySchedules.map((s) => {
-                      const myParticipantObj = (s.participants || []).find(
-                        (p) => (p.userId || p) === currentUser?.id,
-                      );
-                      const isCompleted = s.status === "completed";
-                      const isDone = myParticipantObj?.completed ?? isCompleted;
-
-                      return (
-                        <tr key={s.id} className="hover:bg-actionHover">
-                          <td>
-                            <Typography variant="body2" fontWeight={600}>
-                              Tuần {s.weekIndex} ({s.range})
-                            </Typography>
-                          </td>
-                          <td>{s.date}</td>
-                          <td>
-                            {s.status === "cancelled" ? (
-                              <Chip
-                                size="small"
-                                label="Đã hủy ca"
-                                color="error"
-                                variant="tonal"
+                    {historyActivities.map((item) => (
+                      <tr key={item.id} className="hover:bg-actionHover">
+                        <td>
+                          <Chip
+                            size="small"
+                            variant="tonal"
+                            color={
+                              item.activity === "water" ? "info" : "warning"
+                            }
+                            icon={
+                              <i
+                                className={
+                                  item.activity === "water"
+                                    ? "tabler-droplet"
+                                    : "tabler-trash"
+                                }
                               />
-                            ) : isDone ? (
-                              <Chip
-                                size="small"
-                                label="Đã tham gia"
-                                color="success"
-                                variant="tonal"
-                              />
-                            ) : (
-                              <Chip
-                                size="small"
-                                label="Không tham gia"
-                                color="secondary"
-                                variant="tonal"
-                              />
-                            )}
-                          </td>
-                          <td style={{ textAlign: "center" }}>
-                            <Chip
-                              size="small"
-                              label={isDone ? "+1 điểm" : "0 điểm"}
-                              color={isDone ? "success" : "secondary"}
-                              variant="tonal"
-                            />
-                          </td>
-                        </tr>
-                      );
-                    })}
+                            }
+                            label={
+                              item.activity === "water" ? "Bê nước" : "Đổ rác"
+                            }
+                          />
+                        </td>
+                        <td>{displayDate(item.dateKey)}</td>
+                        <td>{item.time}</td>
+                        <td>{item.note}</td>
+                        <td>
+                          {item.teammates.length
+                            ? item.teammates.join(", ")
+                            : "—"}
+                        </td>
+                        <td style={{ textAlign: "center" }}>
+                          <Chip
+                            size="small"
+                            variant="tonal"
+                            color={
+                              item.status === "completed"
+                                ? "success"
+                                : item.status === "cancelled"
+                                  ? "error"
+                                  : "secondary"
+                            }
+                            label={
+                              item.status === "completed"
+                                ? "Đã hoàn thành · +1 điểm"
+                                : item.status === "cancelled"
+                                  ? "Đã hủy"
+                                  : "Chưa xác nhận"
+                            }
+                          />
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </Box>
@@ -369,7 +520,7 @@ export default function UserScheduleView({ schedules = [], currentUser }) {
                 color="text.secondary"
                 sx={{ py: 2, textAlign: "center" }}
               >
-                Chưa có lịch sử bê nước được ghi nhận
+                Chưa có lịch sử bê nước hoặc đổ rác được ghi nhận
               </Typography>
             )}
           </CardContent>

@@ -7,6 +7,7 @@ import {
   incrementWaterStats,
   appendAuditLog,
 } from "@/libs/dataRepository";
+import { createNotification } from "@/libs/notificationStorage";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -71,6 +72,17 @@ export async function POST(req, { params }) {
         rewardedUserNames.push(u.name || u.code);
     });
     await incrementWaterStats(completedUserIds);
+
+    // Gửi thông báo cho từng người được xác nhận
+    completedUserIds.forEach((uid) => {
+      createNotification({
+        userId: uid,
+        type: "duty_confirmed",
+        title: "Xác nhận lấy nước thành công",
+        message: `${token.name || "Quản trị viên"} đã xác nhận bạn hoàn thành ca lấy nước ngày ${schedule.date || schedule.weekRange || ""} (+1 điểm).`,
+        link: "/water-schedule",
+      });
+    });
 
     // Ghi nhật ký hoạt động
     await appendAuditLog({

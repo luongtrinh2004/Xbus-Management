@@ -1,3 +1,4 @@
+import { trashUserIds } from "@/libs/trashScheduleStorage";
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import {
@@ -70,7 +71,10 @@ export async function GET(req) {
     ) {
       trashOverrides = Object.fromEntries(
         Object.entries(trashOverrides).filter(
-          ([dateKey]) => !dateKey.startsWith(`${generationKey}-`),
+          ([dateKey, value]) =>
+            !dateKey.startsWith(`${generationKey}-`) ||
+            Array.isArray(value) ||
+            Boolean(trashState.trashScheduleCompletions?.[dateKey]),
         ),
       );
     }
@@ -125,11 +129,13 @@ export async function GET(req) {
     }
 
     // Nếu là user hoặc có param myScheduleOnly, chỉ lọc các lịch mà user có tên/ID
-    const currentUser = allUsers.find(
-      (user) =>
-        user.id === token?.id ||
-        user.email?.toLowerCase() === token?.email?.toLowerCase(),
-    );
+    const currentUser =
+      allUsers.find((user) => user.id === token.id) ||
+      (token.email
+        ? allUsers.find(
+            (user) => user.email?.toLowerCase() === token.email.toLowerCase(),
+          )
+        : null);
     const currentUserId = currentUser?.id || token?.id || token?.sub;
     const userEmail = token?.email;
 
@@ -149,6 +155,33 @@ export async function GET(req) {
       );
     }
 
+    const myTrashSchedules = Object.entries(trashOverrides)
+      .map(([dateKey, value]) => {
+        const completion = trashState.trashScheduleCompletions?.[dateKey];
+        const userIds = completion
+          ? trashUserIds(completion.userIds || completion.userId)
+          : trashUserIds(value);
+        return {
+          dateKey,
+          userIds,
+          name: userIds
+            .map(
+              (id) =>
+                allUsers.find((user) => user.id === id)?.name ||
+                "Nhân sự đã nghỉ",
+            )
+            .join(", "),
+          completed: Boolean(completion),
+          completedAt: completion?.completedAt || null,
+        };
+      })
+      .filter((item) => item.userIds.includes(currentUserId))
+      .sort((a, b) => a.dateKey.localeCompare(b.dateKey));
+    if (myScheduleOnly || token?.role === "user")
+      trashSchedules = trashSchedules.filter((item) =>
+        item.userIds?.includes(currentUserId),
+      );
+
     // Lấy thông tin cấu trúc các tuần chuẩn của tháng đó
     const weeksMeta = getWeeksOfMonth(year, month);
 
@@ -157,6 +190,7 @@ export async function GET(req) {
       year,
       schedules: result,
       trashSchedules,
+      myTrashSchedules,
       weeksMeta,
       eligibleUsers: ["admin", "assistant"].includes(token?.role)
         ? eligibleUsers

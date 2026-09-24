@@ -233,7 +233,7 @@ export default function UserWaterHistoryModal({
                         />
                       )}
                     </td>
-                    <td>{h.note || "Lấy nước tại tầng 1"}</td>
+                    <td>{h.note || "Lấy nước tại tầng 11"}</td>
                   </tr>
                 ))}
               </tbody>

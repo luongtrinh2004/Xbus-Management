@@ -6,14 +6,17 @@ import {
   createAssetTransaction,
   deleteAssetTransaction,
   getAssets,
+  getUsers,
   saveAssets,
   updateAssetTransaction,
 } from "@/libs/dataRepository";
+import { createNotification } from "@/libs/notificationStorage";
 
 const secret = process.env.NEXTAUTH_SECRET;
 const canManageAssets = (token) =>
   token?.role === "admin" || token?.role === "assistant";
 const canViewAssets = (token) => Boolean(token);
+const isApproved = (item) => !item.status || item.status === "approved";
 const normalizeData = (data) => ({
   imports: Array.isArray(data.imports) ? data.imports : [],
   exports: Array.isArray(data.exports) ? data.exports : [],
@@ -43,6 +46,37 @@ const transactionBaseKey = (item) =>
     normalizeText(item.date),
     normalizeText(item.person).toLocaleLowerCase("vi"),
   ].join("|");
+
+const indexToTicketCode = (n) => {
+  const num = Math.max(0, n) % 1000;
+  let charIndex = Math.floor(Math.max(0, n) / 1000);
+  const c3 = String.fromCharCode(65 + (charIndex % 26));
+  charIndex = Math.floor(charIndex / 26);
+  const c2 = String.fromCharCode(65 + (charIndex % 26));
+  charIndex = Math.floor(charIndex / 26);
+  const c1 = String.fromCharCode(65 + (charIndex % 26));
+  return `${c1}${c2}${c3}${String(num).padStart(3, "0")}`;
+};
+
+const ticketCodeToIndex = (code) => {
+  if (!code || typeof code !== "string" || !/^[A-Z]{3}[0-9]{3}$/.test(code)) {
+    return -1;
+  }
+  const c1 = code.charCodeAt(0) - 65;
+  const c2 = code.charCodeAt(1) - 65;
+  const c3 = code.charCodeAt(2) - 65;
+  const num = parseInt(code.slice(3), 10);
+  return (c1 * 26 * 26 + c2 * 26 + c3) * 1000 + num;
+};
+
+const getNextTicketCode = (items = []) => {
+  let maxIndex = -1;
+  for (const item of items) {
+    const idx = ticketCodeToIndex(item.ticketId);
+    if (idx > maxIndex) maxIndex = idx;
+  }
+  return indexToTicketCode(maxIndex + 1);
+};
 
 const mergeTransactions = (current, incoming, type, token) => {
   const currentGroups = new Map();
@@ -83,9 +117,15 @@ const mergeTransactions = (current, incoming, type, token) => {
     const occurrence = occurrences.get(baseKey) || 0;
     occurrences.set(baseKey, occurrence + 1);
     const existing = currentGroups.get(baseKey)?.[occurrence];
+    const ticketId =
+      item.ticketId && /^[A-Z]{3}[0-9]{3}$/.test(item.ticketId)
+        ? item.ticketId
+        : getNextTicketCode([...current, ...Array.from(replacements.values())]);
     if (existing) {
       replacements.set(existing.id, {
         ...normalized,
+        ticketId: existing.ticketId || ticketId,
+        status: existing.status || "approved",
         id: existing.id,
         createdAt: existing.createdAt || now,
         updatedAt: now,
@@ -93,7 +133,13 @@ const mergeTransactions = (current, incoming, type, token) => {
       updated += 1;
     } else {
       const id = `${type}_excel_${Date.now()}_${index}_${Math.random().toString(36).slice(2, 6)}`;
-      replacements.set(id, { ...normalized, id, createdAt: now });
+      replacements.set(id, {
+        ...normalized,
+        id,
+        ticketId,
+        status: "approved",
+        createdAt: now,
+      });
       added += 1;
     }
   });
@@ -119,10 +165,10 @@ export async function GET(req) {
 export async function POST(req) {
   try {
     const token = await getToken({ req, secret });
-    if (!canManageAssets(token))
+    if (!token?.id)
       return NextResponse.json(
-        { error: "Không có quyền truy cập" },
-        { status: 403 },
+        { error: "Vui lòng đăng nhập để thực hiện" },
+        { status: 401 },
       );
     const body = await req.json();
     const data = normalizeData(await getAssets());
@@ -151,30 +197,83 @@ export async function POST(req) {
         { error: "Sản phẩm đã ngừng sử dụng" },
         { status: 400 },
       );
+
+    const users = await getUsers();
+    const personName = body.person.trim();
+    const matchedPerson = users.find(
+      (u) =>
+        u.name?.trim().toLowerCase() === personName.toLowerCase() ||
+        (body.personId && u.id === body.personId),
+    );
+    if (!matchedPerson) {
+      return NextResponse.json(
+        {
+          error: `Người ${type === "import" ? "nhập kho" : "mượn tài sản"} "${personName}" không hợp lệ. Vui lòng chọn nhân sự trong danh sách nhân viên công ty.`,
+        },
+        { status: 400 },
+      );
+    }
+
+    let matchedRecipient = null;
+    if (type === "export") {
+      const issuedToName = body.issuedTo.trim();
+      matchedRecipient = users.find(
+        (u) =>
+          u.name?.trim().toLowerCase() === issuedToName.toLowerCase() ||
+          (body.issuedToId && u.id === body.issuedToId),
+      );
+      if (!matchedRecipient) {
+        return NextResponse.json(
+          {
+            error: `Người nhận tài sản "${issuedToName}" không hợp lệ. Vui lòng chọn nhân sự trong danh sách nhân viên công ty.`,
+          },
+          { status: 400 },
+        );
+      }
+    }
+
     const categoryName =
       data.categories.find((item) => item.id === product.categoryId)?.name ||
       "";
     const normalizedCode = normalizeText(product.code).toUpperCase();
+    const docCode = assetDocumentCodeFromName(product.name);
+
     if (type === "export") {
       const imported = data.imports
-        .filter(
-          (item) => stockKey(item) === assetDocumentCodeFromName(product.name),
-        )
-        .reduce((sum, item) => sum + item.quantity, 0);
+        .filter((item) => isApproved(item) && stockKey(item) === docCode)
+        .reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
       const exported = data.exports
-        .filter(
-          (item) => stockKey(item) === assetDocumentCodeFromName(product.name),
-        )
-        .reduce((sum, item) => sum + item.quantity, 0);
-      if (quantity > imported - exported)
+        .filter((item) => isApproved(item) && stockKey(item) === docCode)
+        .reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
+      const available = imported - exported;
+      if (quantity > available)
         return NextResponse.json(
-          { error: `Số lượng tồn kho chỉ còn ${imported - exported}` },
+          { error: `Số lượng tồn kho khả dụng chỉ còn ${available}` },
           { status: 400 },
         );
     }
+
+    const isAdminOrAssistant = canManageAssets(token);
+    const status = isAdminOrAssistant ? "approved" : "pending";
+    const now = new Date().toISOString();
+    let ticketId = (body.ticketId || "").trim().toUpperCase();
+    if (!/^[A-Z]{3}[0-9]{3}$/.test(ticketId)) {
+      ticketId = getNextTicketCode([
+        ...(data.imports || []),
+        ...(data.exports || []),
+      ]);
+    }
+
     const record = {
       id: `${type}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
-      documentCode: assetDocumentCodeFromName(product.name),
+      ticketId,
+      status,
+      approvedBy: status === "approved" ? token.id : null,
+      approvedAt: status === "approved" ? now : null,
+      rejectedBy: null,
+      rejectedAt: null,
+      rejectReason: "",
+      documentCode: docCode,
       code: normalizedCode,
       name: product.name,
       category: categoryName,
@@ -183,22 +282,46 @@ export async function POST(req) {
       date: body.date,
       quantity,
       location: product.location || "",
-      person: body.person.trim(),
-      issuedTo: type === "export" ? normalizeText(body.issuedTo) : "",
+      person: matchedPerson.name,
+      issuedTo: type === "export" ? matchedRecipient.name : "",
       performedBy: token.id || "",
       note: body.note?.trim() || "",
-      createdAt: new Date().toISOString(),
+      createdAt: now,
+      updatedAt: now,
     };
     await createAssetTransaction(type, record);
     await appendAuditLog({
       adminId: token.id,
       adminName: token.name || "Người dùng",
       adminEmail: token.email || "",
-      action: type === "export" ? "EXPORT_ASSET" : "IMPORT_ASSET",
+      action:
+        status === "pending"
+          ? type === "export"
+            ? "REQUEST_EXPORT_ASSET"
+            : "REQUEST_IMPORT_ASSET"
+          : type === "export"
+            ? "EXPORT_ASSET"
+            : "IMPORT_ASSET",
       targetType: "ASSET",
       targetId: record.id,
-      details: `${type === "export" ? "Xuất" : "Nhập"} ${quantity} ${record.name} (${record.code})`,
+      details: `${status === "pending" ? "Tạo phiếu chờ duyệt" : "Thực hiện"}: ${type === "export" ? "Xuất" : "Nhập"} ${quantity} ${record.name} (${record.code}) - Mã phiếu: ${ticketId}`,
     });
+
+    if (status === "pending") {
+      try {
+        createNotification({
+          targetRole: "admin",
+          type: "system",
+          title: `Phiếu ${type === "export" ? "xuất" : "nhập"} kho cần duyệt`,
+          message: `${token.name || "Một nhân sự"} đã tạo phiếu ${type === "export" ? "xuất" : "nhập"} kho (${ticketId}) đang chờ quản trị viên duyệt.`,
+          link: "/assets",
+          metadata: { ticketId, type, id: record.id },
+        });
+      } catch (err) {
+        console.error("[Notification Error]", err);
+      }
+    }
+
     return NextResponse.json(record, { status: 201 });
   } catch (error) {
     console.error("[API Assets] POST:", error);
@@ -230,13 +353,13 @@ export async function PUT(req) {
     const current = normalizeData(await getAssets());
     if (Array.isArray(body.stock) && body.stock.length) {
       const balances = new Map();
-      current.imports.forEach((item) =>
+      current.imports.filter(isApproved).forEach((item) =>
         balances.set(
           stockKey(item),
           (balances.get(stockKey(item)) || 0) + Number(item.quantity || 0),
         ),
       );
-      current.exports.forEach((item) =>
+      current.exports.filter(isApproved).forEach((item) =>
         balances.set(
           stockKey(item),
           (balances.get(stockKey(item)) || 0) - Number(item.quantity || 0),
@@ -250,6 +373,13 @@ export async function PUT(req) {
       const now = new Date();
       const date = now.toISOString().slice(0, 10);
       let updated = 0;
+      const baseIdx =
+        Math.max(
+          -1,
+          ...[...current.imports, ...current.exports].map((it) =>
+            ticketCodeToIndex(it.ticketId),
+          ),
+        ) + 1;
       for (const [index, item] of body.stock.entries()) {
         const code = normalizeText(item.code).toUpperCase();
         const desired = Number(item.quantity);
@@ -261,6 +391,13 @@ export async function PUT(req) {
         const type = difference > 0 ? "import" : "export";
         const record = {
           id: `${type}_stock_${Date.now()}_${index}`,
+          ticketId: indexToTicketCode(baseIdx + index),
+          status: "approved",
+          approvedBy: token.id || null,
+          approvedAt: now.toISOString(),
+          rejectedBy: null,
+          rejectedAt: null,
+          rejectReason: "",
           documentCode,
           code,
           name: product.name,
@@ -414,16 +551,169 @@ export async function PUT(req) {
 export async function PATCH(req) {
   try {
     const token = await getToken({ req, secret });
-    if (!canManageAssets(token))
+    if (!token?.id)
       return NextResponse.json(
-        { error: "Không có quyền truy cập" },
-        { status: 403 },
+        { error: "Vui lòng đăng nhập để thực hiện" },
+        { status: 401 },
       );
 
     const body = await req.json();
     const data = normalizeData(await getAssets());
     const type = body.type === "export" ? "export" : "import";
     const collection = type === "export" ? data.exports : data.imports;
+
+    // Xử lý Duyệt phiếu
+    if (body.action === "approve") {
+      if (!canManageAssets(token))
+        return NextResponse.json(
+          { error: "Không có quyền duyệt phiếu" },
+          { status: 403 },
+        );
+      const targets = collection.filter(
+        (item) =>
+          (body.id
+            ? item.id === body.id
+            : (item.ticketId || item.id) === body.ticketId) &&
+          item.status === "pending",
+      );
+      if (!targets.length)
+        return NextResponse.json(
+          { error: "Không tìm thấy phiếu đang chờ duyệt" },
+          { status: 404 },
+        );
+
+      // Nếu duyệt phiếu xuất, kiểm tra lại tồn kho hiện tại
+      if (type === "export") {
+        const neededByProduct = new Map();
+        for (const item of targets) {
+          const key = stockKey(item);
+          neededByProduct.set(
+            key,
+            (neededByProduct.get(key) || 0) + Number(item.quantity || 0),
+          );
+        }
+        for (const [key, needed] of neededByProduct.entries()) {
+          const imported = data.imports
+            .filter((item) => isApproved(item) && stockKey(item) === key)
+            .reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
+          const exported = data.exports
+            .filter((item) => isApproved(item) && stockKey(item) === key)
+            .reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
+          const available = imported - exported;
+          if (needed > available) {
+            return NextResponse.json(
+              {
+                error: `Không thể duyệt phiếu xuất vì tồn kho không đủ (còn ${available}, yêu cầu ${needed})`,
+              },
+              { status: 400 },
+            );
+          }
+        }
+      }
+
+      const now = new Date().toISOString();
+      for (const target of targets) {
+        const updated = {
+          ...target,
+          status: "approved",
+          approvedBy: token.id,
+          approvedAt: now,
+          updatedAt: now,
+        };
+        await updateAssetTransaction(type, updated);
+        if (target.performedBy) {
+          try {
+            createNotification({
+              userId: target.performedBy,
+              type: "system",
+              title: `Phiếu ${type === "export" ? "xuất" : "nhập"} kho đã được duyệt`,
+              message: `Phiếu ${type === "export" ? "xuất" : "nhập"} (${target.ticketId || target.id} - ${target.name}) của bạn đã được quản trị viên duyệt thành công.`,
+              link: "/assets",
+              metadata: { ticketId: target.ticketId, id: target.id },
+            });
+          } catch {}
+        }
+      }
+
+      await appendAuditLog({
+        adminId: token.id,
+        adminName: token.name || "Người dùng",
+        adminEmail: token.email || "",
+        action: "APPROVE_ASSET_TRANSACTION",
+        targetType: "ASSET",
+        targetId: body.ticketId || body.id,
+        details: `Duyệt ${targets.length} sản phẩm trong phiếu ${type === "export" ? "xuất" : "nhập"} kho (${body.ticketId || targets[0]?.ticketId || body.id})`,
+      });
+
+      return NextResponse.json({ success: true, count: targets.length });
+    }
+
+    // Xử lý Từ chối phiếu
+    if (body.action === "reject") {
+      if (!canManageAssets(token))
+        return NextResponse.json(
+          { error: "Không có quyền từ chối phiếu" },
+          { status: 403 },
+        );
+      const targets = collection.filter(
+        (item) =>
+          (body.id
+            ? item.id === body.id
+            : (item.ticketId || item.id) === body.ticketId) &&
+          item.status === "pending",
+      );
+      if (!targets.length)
+        return NextResponse.json(
+          { error: "Không tìm thấy phiếu đang chờ duyệt" },
+          { status: 404 },
+        );
+
+      const now = new Date().toISOString();
+      const reason = String(body.rejectReason || "").trim();
+      for (const target of targets) {
+        const updated = {
+          ...target,
+          status: "rejected",
+          rejectedBy: token.id,
+          rejectedAt: now,
+          rejectReason: reason,
+          updatedAt: now,
+        };
+        await updateAssetTransaction(type, updated);
+        if (target.performedBy) {
+          try {
+            createNotification({
+              userId: target.performedBy,
+              type: "system",
+              title: `Phiếu ${type === "export" ? "xuất" : "nhập"} kho bị từ chối`,
+              message: `Phiếu ${type === "export" ? "xuất" : "nhập"} (${target.ticketId || target.id} - ${target.name}) của bạn đã bị từ chối${reason ? `: ${reason}` : "."}`,
+              link: "/assets",
+              metadata: { ticketId: target.ticketId, id: target.id, reason },
+            });
+          } catch {}
+        }
+      }
+
+      await appendAuditLog({
+        adminId: token.id,
+        adminName: token.name || "Người dùng",
+        adminEmail: token.email || "",
+        action: "REJECT_ASSET_TRANSACTION",
+        targetType: "ASSET",
+        targetId: body.ticketId || body.id,
+        details: `Từ chối ${targets.length} sản phẩm trong phiếu ${type === "export" ? "xuất" : "nhập"} kho (${body.ticketId || targets[0]?.ticketId || body.id}). Lý do: ${reason || "Không nêu lý do"}`,
+      });
+
+      return NextResponse.json({ success: true, count: targets.length });
+    }
+
+    // Chỉnh sửa giao dịch thông thường
+    if (!canManageAssets(token))
+      return NextResponse.json(
+        { error: "Không có quyền truy cập" },
+        { status: 403 },
+      );
+
     const index = collection.findIndex((item) => item.id === body.id);
     const quantity = Number(body.quantity);
     const product = findProduct(data.products || [], body);
@@ -454,6 +744,41 @@ export async function PATCH(req) {
         { error: "Sản phẩm đã ngừng sử dụng" },
         { status: 400 },
       );
+
+    const users = await getUsers();
+    const personName = body.person.trim();
+    const matchedPerson = users.find(
+      (u) =>
+        u.name?.trim().toLowerCase() === personName.toLowerCase() ||
+        (body.personId && u.id === body.personId),
+    );
+    if (!matchedPerson) {
+      return NextResponse.json(
+        {
+          error: `Người ${type === "import" ? "nhập kho" : "mượn tài sản"} "${personName}" không hợp lệ. Vui lòng chọn nhân sự trong danh sách nhân viên công ty.`,
+        },
+        { status: 400 },
+      );
+    }
+
+    let matchedRecipient = null;
+    if (type === "export") {
+      const issuedToName = body.issuedTo.trim();
+      matchedRecipient = users.find(
+        (u) =>
+          u.name?.trim().toLowerCase() === issuedToName.toLowerCase() ||
+          (body.issuedToId && u.id === body.issuedToId),
+      );
+      if (!matchedRecipient) {
+        return NextResponse.json(
+          {
+            error: `Người nhận tài sản "${issuedToName}" không hợp lệ. Vui lòng chọn nhân sự trong danh sách nhân viên công ty.`,
+          },
+          { status: 400 },
+        );
+      }
+    }
+
     const categoryName =
       data.categories.find((item) => item.id === product.categoryId)?.name ||
       "";
@@ -462,6 +787,8 @@ export async function PATCH(req) {
     const previous = collection[index];
     const updated = {
       ...previous,
+      ticketId: previous.ticketId || previous.id,
+      status: previous.status || "approved",
       documentCode: assetDocumentCodeFromName(product.name),
       code: normalizedCode,
       name: product.name,
@@ -472,38 +799,40 @@ export async function PATCH(req) {
       quantity,
       location: product.location || "",
       performedBy: previous.performedBy || token.id || "",
-      person: body.person.trim(),
-      issuedTo: type === "export" ? normalizeText(body.issuedTo) : "",
+      person: matchedPerson.name,
+      issuedTo: type === "export" ? matchedRecipient.name : "",
       note: body.note?.trim() || "",
       updatedAt: new Date().toISOString(),
     };
     collection[index] = updated;
 
-    const balances = new Map();
-    data.imports.forEach((item) => {
-      const code = stockKey(item);
-      balances.set(
-        code,
-        (balances.get(code) || 0) + Number(item.quantity || 0),
+    if (isApproved(updated)) {
+      const balances = new Map();
+      data.imports.filter(isApproved).forEach((item) => {
+        const code = stockKey(item);
+        balances.set(
+          code,
+          (balances.get(code) || 0) + Number(item.quantity || 0),
+        );
+      });
+      data.exports.filter(isApproved).forEach((item) => {
+        const code = stockKey(item);
+        balances.set(
+          code,
+          (balances.get(code) || 0) - Number(item.quantity || 0),
+        );
+      });
+      const invalidBalance = [...balances.entries()].find(
+        ([, balance]) => balance < 0,
       );
-    });
-    data.exports.forEach((item) => {
-      const code = stockKey(item);
-      balances.set(
-        code,
-        (balances.get(code) || 0) - Number(item.quantity || 0),
-      );
-    });
-    const invalidBalance = [...balances.entries()].find(
-      ([, balance]) => balance < 0,
-    );
-    if (invalidBalance)
-      return NextResponse.json(
-        {
-          error: `Không thể cập nhật vì tồn kho ${invalidBalance[0]} sẽ âm ${Math.abs(invalidBalance[1])}`,
-        },
-        { status: 400 },
-      );
+      if (invalidBalance)
+        return NextResponse.json(
+          {
+            error: `Không thể cập nhật vì tồn kho ${invalidBalance[0]} sẽ âm ${Math.abs(invalidBalance[1])}`,
+          },
+          { status: 400 },
+        );
+    }
 
     await updateAssetTransaction(type, updated);
     await appendAuditLog({
@@ -528,10 +857,10 @@ export async function PATCH(req) {
 export async function DELETE(req) {
   try {
     const token = await getToken({ req, secret });
-    if (!canManageAssets(token))
+    if (!token?.id)
       return NextResponse.json(
-        { error: "Không có quyền truy cập" },
-        { status: 403 },
+        { error: "Vui lòng đăng nhập để thực hiện" },
+        { status: 401 },
       );
 
     const body = await req.json();
@@ -547,10 +876,24 @@ export async function DELETE(req) {
       );
 
     const record = collection[index];
+    const canManage = canManageAssets(token);
+    const isOwnerPending =
+      record.performedBy === token.id && record.status === "pending";
+
+    if (!canManage && !isOwnerPending) {
+      return NextResponse.json(
+        { error: "Không có quyền xóa phiếu này" },
+        { status: 403 },
+      );
+    }
+
     const normalizedCode = stockKey(record);
     if (
       type === "import" &&
-      data.exports.some((item) => stockKey(item) === normalizedCode)
+      isApproved(record) &&
+      data.exports.some(
+        (item) => isApproved(item) && stockKey(item) === normalizedCode,
+      )
     )
       return NextResponse.json(
         {

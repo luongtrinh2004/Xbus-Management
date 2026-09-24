@@ -152,6 +152,8 @@ export function snapshotFund(fund, users, settings) {
 export function fundPaymentStatus(member) {
   if (member.obligationCancelled)
     return { key: "cancelled", label: "Hủy", color: "secondary", rank: 5 };
+  if (member.pendingApproval && !member.paid)
+    return { key: "pending", label: "Đang chờ", color: "warning", rank: 3.5 };
   if (
     Number(member.requiredAmount) === 0 &&
     (!member.paid || !Number(member.amount))

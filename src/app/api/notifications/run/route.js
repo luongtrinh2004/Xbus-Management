@@ -240,24 +240,27 @@ export async function POST(req) {
       const displayTrashTarget = trashTargetDate
         ? displayDate(trashTargetDate)
         : "";
-      const trashUser = usersById.get(trash?.userId);
-      if (
-        trashUser?.email &&
-        !trashState.trashScheduleCompletions?.[trashTargetDate]
-      )
-        await deliver(
-          `trash:${trashTargetDate}:${trashUser.id}${immediateSchedule ? ":manual" : ""}`,
-          {
-            to: trashUser.email,
-            subject: `Nhắc lịch đổ rác ngày ${displayTrashTarget}`,
-            ...createNotificationContent({
-              name: trashUser.name,
-              title: "Nhắc lịch đổ rác",
-              message: `Bạn được phân công đổ rác vào ngày ${displayTrashTarget}.\nVui lòng truy cập Xbus Office để kiểm tra lịch và chủ động sắp xếp công việc.`,
-            }),
-          },
-          immediateSchedule ? 60_000 : null,
-        );
+      for (const assignedId of trash?.userIds ||
+        (trash?.userId ? [trash.userId] : [])) {
+        const trashUser = usersById.get(assignedId);
+        if (
+          trashUser?.email &&
+          !trashState.trashScheduleCompletions?.[trashTargetDate]
+        )
+          await deliver(
+            `trash:${trashTargetDate}:${trashUser.id}${immediateSchedule ? ":manual" : ""}`,
+            {
+              to: trashUser.email,
+              subject: `Nhắc lịch đổ rác ngày ${displayTrashTarget}`,
+              ...createNotificationContent({
+                name: trashUser.name,
+                title: "Nhắc lịch đổ rác",
+                message: `Bạn được phân công đổ rác vào ngày ${displayTrashTarget}.\nVui lòng truy cập Xbus Office để kiểm tra lịch và chủ động sắp xếp công việc.`,
+              }),
+            },
+            immediateSchedule ? 60_000 : null,
+          );
+      }
     }
 
     const cutoff = Date.now() - 90 * 86400000;
