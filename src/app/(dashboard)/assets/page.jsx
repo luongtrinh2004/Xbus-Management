@@ -2200,6 +2200,10 @@ export default function AssetsPage() {
         ),
     [products],
   );
+  const negativeStockProducts = useMemo(
+    () => stockProducts.filter((item) => Number(item.quantity || 0) < 0),
+    [stockProducts],
+  );
   const activeRows =
     tab === "import"
       ? data.imports
@@ -2207,9 +2211,11 @@ export default function AssetsPage() {
         ? data.exports
         : tab === "history"
           ? assetHistory
-          : tab === "products"
-            ? products
-            : stockProducts;
+          : tab === "negative-stock"
+            ? negativeStockProducts
+            : tab === "products"
+              ? products
+              : stockProducts;
   const matchesRowSearch = (row, rowType) =>
     normalizeSearchText(
       rowType === "products"
@@ -2235,6 +2241,9 @@ export default function AssetsPage() {
     export: data.exports.filter((row) => matchesRowSearch(row, "export"))
       .length,
     stock: stockProducts.filter((row) => matchesRowSearch(row, "stock")).length,
+    negativeStock: negativeStockProducts.filter((row) =>
+      matchesRowSearch(row, "stock"),
+    ).length,
     products: products.filter(
       (row) =>
         matchesRowSearch(row, "products") &&
@@ -2536,7 +2545,7 @@ export default function AssetsPage() {
                 },
               }}
             >
-              {canManage && tab !== "history" && (
+              {canManage && !["history", "negative-stock"].includes(tab) && (
                 <Button
                   variant="outlined"
                   startIcon={<i className="tabler-download" />}
@@ -2647,6 +2656,15 @@ export default function AssetsPage() {
               sx={{ ml: "auto" }}
             />
           )}
+          {canManage && (
+            <Tab
+              value="negative-stock"
+              icon={<i className="tabler-alert-triangle" />}
+              iconPosition="start"
+              label={`Tồn kho âm (${tabCounts.negativeStock})`}
+              sx={{ color: "error.main" }}
+            />
+          )}
         </Tabs>
         {tab === "products" && (
           <Box
@@ -2699,7 +2717,7 @@ export default function AssetsPage() {
           />
         ) : (
           <AssetTable
-            type={tab}
+            type={tab === "negative-stock" ? "stock" : tab}
             rows={pagedRows}
             canManage={canManage}
             currentUserId={session?.user?.id}

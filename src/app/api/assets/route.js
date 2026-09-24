@@ -953,6 +953,25 @@ export async function DELETE(req) {
       );
     }
 
+    const productStockKey = stockKey(record);
+    const currentStock =
+      data.imports
+        .filter(
+          (item) => isApproved(item) && stockKey(item) === productStockKey,
+        )
+        .reduce((sum, item) => sum + Number(item.quantity || 0), 0) -
+      data.exports
+        .filter(
+          (item) => isApproved(item) && stockKey(item) === productStockKey,
+        )
+        .reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+    const resultingStock = isApproved(record)
+      ? currentStock +
+        (type === "import"
+          ? -Number(record.quantity || 0)
+          : Number(record.quantity || 0))
+      : currentStock;
+
     await deleteAssetTransaction(type, record.id);
     await appendAssetHistory({
       action: "delete",
@@ -975,6 +994,26 @@ export async function DELETE(req) {
       targetId: record.id,
       details: `Xóa phiếu ${type === "export" ? "xuất" : "nhập"} ${record.quantity} ${record.name} (${record.code})`,
     });
+    if (resultingStock < 0) {
+      try {
+        createNotification({
+          targetRole: "admin",
+          type: "system",
+          title: "Cảnh báo tồn kho âm",
+          message: `${token.name || "Người dùng"} đã xóa phiếu ${type === "export" ? "xuất" : "nhập"} ${record.ticketId || record.id}, làm sản phẩm ${record.name} (${record.code || "không có mã"}) còn tồn kho ${resultingStock}.`,
+          link: "/assets",
+          metadata: {
+            type: "negative_asset_stock",
+            productCode: record.code || "",
+            productName: record.name,
+            quantity: resultingStock,
+            ticketId: record.ticketId || "",
+          },
+        });
+      } catch (notificationError) {
+        console.error("[Asset negative stock notification]", notificationError);
+      }
+    }
     return NextResponse.json({ message: "Đã xóa phiếu tài sản" });
   } catch (error) {
     console.error("[API Assets] DELETE:", error);

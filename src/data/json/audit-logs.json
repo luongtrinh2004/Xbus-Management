@@ -1,6 +1,30 @@
 {
   "auditLogs": [
     {
+      "id": "log_1790241543506_zz4f",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "EXPORT_ASSET",
+      "targetType": "ASSET",
+      "targetId": "export_1790241543502_ottv",
+      "details": "Thực hiện: Xuất 1 Adapter Camera Orin (MT&PK003) - Mã phiếu: AAA433",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-24T09:19:03.506Z"
+    },
+    {
+      "id": "log_1790241543487_y3cz",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "EXPORT_ASSET",
+      "targetType": "ASSET",
+      "targetId": "export_1790241543481_cz95",
+      "details": "Thực hiện: Xuất 1 A/V capture Adapter Family () - Mã phiếu: AAA433",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-24T09:19:03.487Z"
+    },
+    {
       "id": "log_1790241148144_xk4t",
       "adminId": "usr_admin_001",
       "adminName": "Quản trị viên Hệ thống",
