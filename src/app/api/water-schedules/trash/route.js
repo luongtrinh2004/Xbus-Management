@@ -2,12 +2,12 @@ import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import {
   appendAuditLog,
-  getSettings,
+  getTrashScheduleState,
   getWaterSchedules,
   getUsers,
   saveUsers,
   getWaterExemptions,
-  saveSettings,
+  saveTrashScheduleState,
 } from "@/libs/dataRepository";
 import {
   getTrashSchedules,
@@ -20,17 +20,17 @@ const normalizeOffset = (value) =>
   Math.max(-52, Math.min(52, Number(value) || 0));
 
 const loadWeek = async (weekOffset) => {
-  const [users, exemptUserIds, settings, waterSchedules] = await Promise.all([
+  const [users, exemptUserIds, trashState, waterSchedules] = await Promise.all([
     getUsers(),
     getWaterExemptions(),
-    getSettings(),
+    getTrashScheduleState(),
     getWaterSchedules(),
   ]);
-  const overrides = settings.trashScheduleOverrides || {};
+  const overrides = trashState.trashScheduleOverrides || {};
   return {
     users,
     exemptUserIds,
-    settings,
+    trashState,
     schedules: getTrashSchedules(
       users,
       exemptUserIds,
@@ -63,42 +63,46 @@ export async function PATCH(req) {
 
   const body = await req.json();
   if (body.action === "fill_empty") {
-    const [users, exemptUserIds, settings] = await Promise.all([
+    const [users, exemptUserIds, trashState] = await Promise.all([
       getUsers(),
       getWaterExemptions(),
-      getSettings(),
+      getTrashScheduleState(),
     ]);
     const todayKey = toVietnamDateKey();
     const [todayYear, todayMonth] = todayKey.split("-").map(Number);
     const year = Number(body.year) || todayYear;
     const month = Number(body.month) || todayMonth;
-    const startKey = year === todayYear && month === todayMonth
-      ? todayKey
-      : `${year}-${String(month).padStart(2, "0")}-01`;
-    const overrides = { ...(settings.trashScheduleOverrides || {}) };
+    const startKey =
+      year === todayYear && month === todayMonth
+        ? todayKey
+        : `${year}-${String(month).padStart(2, "0")}-01`;
+    const overrides = { ...(trashState.trashScheduleOverrides || {}) };
     const defaults = getTrashSchedulesForMonth(
       users,
       exemptUserIds,
       year,
       month,
-      {},
+      Object.fromEntries(
+        Object.entries(overrides).filter(([, userId]) => userId),
+      ),
       true,
+      {
+        randomize: true,
+        startDateKey: startKey,
+        completions: trashState.trashScheduleCompletions || {},
+      },
     );
     let assigned = 0;
     for (const item of defaults) {
-      if (
-        item.dateKey >= startKey &&
-        !overrides[item.dateKey] &&
-        item.userId
-      ) {
+      if (item.dateKey >= startKey && !overrides[item.dateKey] && item.userId) {
         overrides[item.dateKey] = item.userId;
         assigned += 1;
       }
     }
-    await saveSettings({
-      ...settings,
+    await saveTrashScheduleState({
+      ...trashState,
       trashScheduleOverrides: overrides,
-      trashScheduleRevision: Number(settings.trashScheduleRevision || 0) + 1,
+      trashScheduleRevision: Number(trashState.trashScheduleRevision || 0) + 1,
     });
     await appendAuditLog({
       adminId: token.id,
@@ -123,7 +127,7 @@ export async function PATCH(req) {
         { status: 404 },
       );
     const completions = {
-      ...(current.settings.trashScheduleCompletions || {}),
+      ...(current.trashState.trashScheduleCompletions || {}),
     };
     if (!completions[body.dateKey]) {
       const userIndex = current.users.findIndex(
@@ -139,8 +143,8 @@ export async function PATCH(req) {
         userId: targetUserId,
         completedAt: new Date().toISOString(),
       };
-      await saveSettings({
-        ...current.settings,
+      await saveTrashScheduleState({
+        ...current.trashState,
         trashScheduleCompletions: completions,
       });
     }
@@ -149,7 +153,7 @@ export async function PATCH(req) {
   if (body.action === "assign") {
     const current = await loadWeek(normalizeOffset(body.weekOffset));
     const overrides = {
-      ...(current.settings.trashScheduleOverrides || {}),
+      ...(current.trashState.trashScheduleOverrides || {}),
       [body.dateKey]: body.userId || null,
     };
     const [currentYear, currentMonth] = toVietnamDateKey()
@@ -157,11 +161,11 @@ export async function PATCH(req) {
       .map(Number);
     const nextMonthStart = `${currentMonth === 12 ? currentYear + 1 : currentYear}-${String(currentMonth === 12 ? 1 : currentMonth + 1).padStart(2, "0")}-01`;
     const affectsFuturePlan = String(body.dateKey || "") < nextMonthStart;
-    await saveSettings({
-      ...current.settings,
+    await saveTrashScheduleState({
+      ...current.trashState,
       trashScheduleOverrides: overrides,
       trashScheduleRevision:
-        Number(current.settings.trashScheduleRevision || 0) +
+        Number(current.trashState.trashScheduleRevision || 0) +
         Number(affectsFuturePlan),
     });
     return NextResponse.json({ success: true });
@@ -182,7 +186,7 @@ export async function PATCH(req) {
     current.exemptUserIds,
     toVietnamDateKey(),
     weekOffset + 1,
-    current.settings.trashScheduleOverrides || {},
+    current.trashState.trashScheduleOverrides || {},
   );
   if (!nextWeek.length)
     return NextResponse.json(
@@ -191,12 +195,12 @@ export async function PATCH(req) {
     );
 
   const queue = [...current.schedules, nextWeek[0]];
-  const overrides = { ...(current.settings.trashScheduleOverrides || {}) };
+  const overrides = { ...(current.trashState.trashScheduleOverrides || {}) };
   for (let position = index; position < current.schedules.length; position += 1)
     overrides[current.schedules[position].dateKey] = queue[position + 1].userId;
 
-  await saveSettings({
-    ...current.settings,
+  await saveTrashScheduleState({
+    ...current.trashState,
     trashScheduleOverrides: overrides,
   });
   await appendAuditLog({

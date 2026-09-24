@@ -5,8 +5,8 @@ import {
   saveWaterSchedules,
   getUsers,
   getWaterExemptions,
-  getSettings,
-  saveSettings,
+  getTrashScheduleState,
+  saveTrashScheduleState,
   appendAuditLog,
 } from "@/libs/dataRepository";
 import {
@@ -41,22 +41,24 @@ export async function GET(req) {
     const allUsers = await getUsers();
     const eligibleUsers = getEligibleWaterUsers(allUsers);
     const exemptUserIds = await getWaterExemptions();
-    const settings = await getSettings();
+    const trashState = await getTrashScheduleState();
     const activationDate = new Date(Date.UTC(year, month - 2, 15));
     const [todayYear, todayMonth, todayDay] = toVietnamDateKey()
       .split("-")
       .map(Number);
     const today = new Date(Date.UTC(todayYear, todayMonth - 1, todayDay));
     const shouldGenerateTrash = today >= activationDate;
-    let trashOverrides = settings.trashScheduleOverrides || {};
+    let trashOverrides = trashState.trashScheduleOverrides || {};
     const generationKey = `${year}-${String(month).padStart(2, "0")}`;
     const isFutureMonth =
       year > todayYear || (year === todayYear && month > todayMonth);
     const trashGenerationMeta = {
-      ...(settings.trashScheduleGenerationMeta || {}),
+      ...(trashState.trashScheduleGenerationMeta || {}),
     };
     const trashFingerprint = [
-      Number(settings.trashScheduleRevision || 0),
+      "points-exemption-v2",
+      [...exemptUserIds].sort().join(","),
+      Number(trashState.trashScheduleRevision || 0),
       ...getEligibleTrashUsers(allUsers, exemptUserIds).map(
         (user) => `${user.id}:${Number(user.schedulingPoints || 0)}`,
       ),
@@ -93,8 +95,8 @@ export async function GET(req) {
       if (changed) {
         trashOverrides = frozenOverrides;
         trashGenerationMeta[generationKey] = trashFingerprint;
-        await saveSettings({
-          ...settings,
+        await saveTrashScheduleState({
+          ...trashState,
           trashScheduleOverrides: frozenOverrides,
           trashScheduleGenerationMeta: trashGenerationMeta,
         });
@@ -110,7 +112,7 @@ export async function GET(req) {
     }
     trashSchedules = trashSchedules.map((item) => ({
       ...item,
-      completed: Boolean(settings.trashScheduleCompletions?.[item.dateKey]),
+      completed: Boolean(trashState.trashScheduleCompletions?.[item.dateKey]),
     }));
 
     // Lọc theo tháng và năm

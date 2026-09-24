@@ -1,3 +1,8 @@
+import {
+  trashStateToRecords,
+  trashRecordsToState,
+  trashStateMetadata,
+} from "./trashScheduleStorage.js";
 import * as json from "./jsonRepository.js";
 import {
   assetCategoryIdFromName,
@@ -304,6 +309,17 @@ export async function saveSettings(settings) {
   return true;
 }
 
+const transactionBelongsToFund = (item, fund) => {
+  if (item.occurred_at) {
+    const text = toDateOnly(item.occurred_at);
+    if (/^\d{4}-\d{2}-\d{2}$/.test(text)) {
+      const [y, m] = text.split("-").map(Number);
+      return y === Number(fund.year) && m === Number(fund.month);
+    }
+  }
+  return item.fund_period_id === fund.id;
+};
+
 export async function getFunds() {
   if (!mysqlEnabled()) return applyFundBalances(json.getFunds());
   const [[periods], [payments], [transactions], [users], [metadataRows]] =
@@ -374,7 +390,8 @@ export async function getFunds() {
       ],
       incomes: transactions
         .filter(
-          (item) => item.fund_period_id === fund.id && item.kind === "income",
+          (item) =>
+            transactionBelongsToFund(item, fund) && item.kind === "income",
         )
         .map((item) => ({
           id: item.id,
@@ -391,7 +408,8 @@ export async function getFunds() {
         })),
       expenses: transactions
         .filter(
-          (item) => item.fund_period_id === fund.id && item.kind === "expense",
+          (item) =>
+            transactionBelongsToFund(item, fund) && item.kind === "expense",
         )
         .map((item) => ({
           id: item.id,
@@ -1222,4 +1240,59 @@ export async function appendAuditLog({
     ],
   );
   return log;
+}
+
+export async function getTrashScheduleState() {
+  if (!mysqlEnabled()) return json.getTrashScheduleState();
+  const [rows] = await query(
+    "SELECT * FROM trash_schedules ORDER BY schedule_date",
+  );
+  const metadata = await getDocument("trash-schedule-meta", {});
+  return trashRecordsToState(
+    rows.map((row) => ({
+      dateKey: toDateOnly(row.schedule_date),
+      userId: row.user_id,
+      completed: Boolean(row.completed),
+      completedBy: row.completed_by,
+      completedAt: toIso(row.completed_at),
+    })),
+    metadata,
+  );
+}
+export async function saveTrashScheduleState(state) {
+  if (!mysqlEnabled()) return json.saveTrashScheduleState(state);
+  const records = trashStateToRecords(state);
+  const connection = await getMysqlPool().getConnection();
+  try {
+    await connection.beginTransaction();
+    // Match the full-snapshot contract used by the scheduling service.
+    if (records.length) {
+      await connection.query(
+        "DELETE FROM trash_schedules WHERE schedule_date NOT IN (?)",
+        [records.map((row) => row.dateKey)],
+      );
+    } else await connection.execute("DELETE FROM trash_schedules");
+    for (const row of records) {
+      await connection.execute(
+        "INSERT INTO trash_schedules (schedule_date,user_id,completed,completed_by,completed_at) VALUES (?,?,?,?,?) ON DUPLICATE KEY UPDATE user_id=VALUES(user_id),completed=VALUES(completed),completed_by=VALUES(completed_by),completed_at=VALUES(completed_at)",
+        [
+          row.dateKey,
+          row.userId,
+          row.completed,
+          row.completedBy,
+          toMysqlDateTime(row.completedAt),
+        ],
+      );
+    }
+    await connection.execute(
+      "INSERT INTO app_documents (document_key,document_value,updated_at) VALUES ('trash-schedule-meta',?,?) ON DUPLICATE KEY UPDATE document_value=VALUES(document_value),updated_at=VALUES(updated_at)",
+      [JSON.stringify(trashStateMetadata(state)), new Date()],
+    );
+    await connection.commit();
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
 }

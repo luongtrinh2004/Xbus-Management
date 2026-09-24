@@ -14,6 +14,7 @@ import {
   periodKey,
   snapshotFund,
   fundPaymentStatus,
+  summarizeFundCash,
 } from "@/libs/fundRules";
 
 const secret = process.env.NEXTAUTH_SECRET;
@@ -43,19 +44,7 @@ const reminderDefaults = (period, settings) => {
 };
 
 const buildFundResponse = (fund, allFunds) => {
-  const memberIncome = (fund.members || []).reduce(
-    (sum, member) => sum + (member.paid ? member.amount || 0 : 0),
-    0,
-  );
-  const additionalIncome = (fund.incomes || []).reduce(
-    (sum, income) => sum + (income.amount || 0),
-    0,
-  );
-  const totalIncome = memberIncome + additionalIncome;
-  const totalExpense = (fund.expenses || []).reduce(
-    (sum, expense) => sum + (expense.amount || 0),
-    0,
-  );
+  const summary = summarizeFundCash(allFunds, periodKey(fund));
 
   return {
     ...fund,
@@ -63,24 +52,26 @@ const buildFundResponse = (fund, allFunds) => {
     isFuture: periodKey(fund) > periodKey(currentFundPeriod()),
     incomes: fund.incomes || [],
     expenses: fund.expenses || [],
-    memberIncome,
-    totalIncome,
-    totalExpense,
-    balance: (fund.openingBalance || 0) + totalIncome - totalExpense,
+    ...summary,
     paidCount: (fund.members || []).filter((member) =>
       ["paid", "overpaid"].includes(fundPaymentStatus(member).key),
     ).length,
     totalMembers: (fund.members || []).length,
     availablePeriods: allFunds
-      .filter((item) => periodKey(item) <= periodKey(currentFundPeriod()))
       .map((item) => ({ month: item.month, year: item.year }))
       .sort((a, b) => b.year - a.year || b.month - a.month),
   };
 };
 
-const buildAllFundsResponse = (funds) => {
+const buildAllFundsResponse = (funds, users = []) => {
+  const names = new Map(users.map((user) => [user.id, user.name]));
   const incomes = funds.flatMap((fund) => [
-    ...(fund.incomes || []),
+    ...(fund.incomes || []).map((income) => ({
+      ...income,
+      month: fund.month,
+      year: fund.year,
+      userName: income.userName || names.get(income.userId) || "",
+    })),
     ...(fund.members || [])
       .filter((member) => member.paid)
       .map((member) => ({
@@ -90,21 +81,19 @@ const buildAllFundsResponse = (funds) => {
         amount: member.amount || 0,
         note: "",
         userId: member.userId,
-        userName: member.userName || "",
+        userName:
+          member.memberName ||
+          member.userName ||
+          names.get(member.userId) ||
+          "Nhân sự đã nghỉ",
+        month: fund.month,
+        year: fund.year,
         receivedAt: member.paidAt,
         createdAt: member.updatedAt,
         locked: true,
       })),
   ]);
   const expenses = funds.flatMap((fund) => fund.expenses || []);
-  const totalIncome = incomes.reduce(
-    (sum, item) => sum + (item.amount || 0),
-    0,
-  );
-  const totalExpense = expenses.reduce(
-    (sum, item) => sum + (item.amount || 0),
-    0,
-  );
 
   return {
     id: "all",
@@ -114,14 +103,12 @@ const buildAllFundsResponse = (funds) => {
     members: [],
     incomes,
     expenses,
+    ...summarizeFundCash(funds),
+    // Member payments are already included as income rows in all-period mode.
     memberIncome: 0,
-    totalIncome,
-    totalExpense,
-    balance: totalIncome - totalExpense,
     paidCount: 0,
     totalMembers: 0,
     availablePeriods: funds
-      .filter((item) => periodKey(item) <= periodKey(currentFundPeriod()))
       .map((item) => ({ month: item.month, year: item.year }))
       .sort((a, b) => b.year - a.year || b.month - a.month),
   };
@@ -154,48 +141,32 @@ export async function GET(req) {
     )
       return NextResponse.json({ error: "Kỳ không hợp lệ" }, { status: 400 });
     let changed = false;
-    if (
-      !allFunds.some(
-        (f) => f.month === current.month && f.year === current.year,
-      )
-    ) {
-      const previous = allFunds
-        .filter((f) => periodKey(f) < periodKey(current))
-        .sort((a, b) => periodKey(b).localeCompare(periodKey(a)))[0];
-      allFunds.push({
-        id: `fund_${current.year}_${current.month}`,
-        ...current,
-        ...reminderDefaults(current, settings),
-        openingBalance: previous
-          ? buildFundResponse(previous, allFunds).balance
-          : 0,
-        members: [],
-        incomes: [],
-        expenses: [],
-      });
-      changed = true;
-    }
-    if (
-      !allFunds.some(
-        (f) => f.month === selected.month && f.year === selected.year,
-      )
-    ) {
-      allFunds.push({
-        id: `fund_${selected.year}_${selected.month}`,
-        ...selected,
-        ...reminderDefaults(selected, settings),
-        openingBalance: 0,
-        members: [],
-        incomes: [],
-        expenses: [],
-      });
-      changed = true;
+    const startYear = 2025;
+    const endYear = Math.max(current.year, selected.year, 2026);
+    for (let y = startYear; y <= endYear; y++) {
+      for (let m = 1; m <= 12; m++) {
+        if (!allFunds.some((f) => f.month === m && f.year === y)) {
+          const p = { month: m, year: y };
+          allFunds.push({
+            id: `fund_${y}_${m}`,
+            month: m,
+            year: y,
+            ...reminderDefaults(p, settings),
+            openingBalance: 0,
+            members: [],
+            incomes: [],
+            expenses: [],
+          });
+          changed = true;
+        }
+      }
     }
     for (const item of allFunds)
       changed = snapshotFund(item, users, settings) || changed;
     if (changed) await saveFundSnapshots(allFunds);
 
-    if (allPeriods) return NextResponse.json(buildAllFundsResponse(allFunds));
+    if (allPeriods)
+      return NextResponse.json(buildAllFundsResponse(allFunds, users));
 
     // Lấy quỹ hiện tại (mới nhất hoặc theo tháng/năm)
     let fund = null;
@@ -249,9 +220,15 @@ export async function POST(req) {
         { status: 400 },
       );
     }
-    const amount = Number(body.amount);
-    const month = Number(body.month);
-    const year = Number(body.year);
+    let month = Number(body.month);
+    let year = Number(body.year);
+    if (body.date && /^\d{4}-\d{2}-\d{2}$/.test(body.date)) {
+      const [dYear, dMonth] = body.date.split("-").map(Number);
+      if (dMonth >= 1 && dMonth <= 12 && dYear >= 2000 && dYear <= 2100) {
+        month = dMonth;
+        year = dYear;
+      }
+    }
     if (
       !["income", "expense"].includes(body.kind) ||
       !Number.isFinite(amount) ||
@@ -266,14 +243,23 @@ export async function POST(req) {
     }
 
     const funds = await getFunds();
-    const fundIndex = funds.findIndex(
+    let fundIndex = funds.findIndex(
       (item) => item.month === month && item.year === year,
     );
-    if (fundIndex === -1)
-      return NextResponse.json(
-        { error: "Không tìm thấy kỳ quỹ đã chọn" },
-        { status: 404 },
-      );
+    if (fundIndex === -1) {
+      const settings = await getSettings();
+      funds.push({
+        id: `fund_${year}_${month}`,
+        month,
+        year,
+        ...reminderDefaults({ month, year }, settings),
+        openingBalance: 0,
+        members: [],
+        incomes: [],
+        expenses: [],
+      });
+      fundIndex = funds.length - 1;
+    }
 
     const isPenalty =
       body.kind === "income" &&

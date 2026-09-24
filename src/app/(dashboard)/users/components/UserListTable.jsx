@@ -11,6 +11,10 @@ import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
 import Box from "@mui/material/Box";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
 import Divider from "@mui/material/Divider";
 import {
   createColumnHelper,
@@ -86,6 +90,30 @@ const UserListTable = ({
 }) => {
   const { data: session } = useSession();
   const isAdmin = session?.user?.role === "admin";
+  const [resetOpen, setResetOpen] = useState(false);
+  const [resetting, setResetting] = useState(false);
+  const resetPoints = async () => {
+    if (resetting) return;
+    setResetting(true);
+    try {
+      const response = await fetch("/api/users/reset-points", {
+        method: "POST",
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Không thể reset điểm");
+      setData((previous) =>
+        previous.map((user) => ({ ...user, schedulingPoints: 0 })),
+      );
+      setResetOpen(false);
+      window.dispatchEvent(new Event("scheduling-points-updated"));
+      toast.success(`Đã reset điểm rèn luyện cho ${result.count} nhân sự`);
+      await fetchUsers();
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      setResetting(false);
+    }
+  };
   const [addUserOpen, setAddUserOpen] = useState(false);
   const [data, setData] = useState(tableData || []);
   const [openUpdate, setOpenUpdate] = useState(false);
@@ -344,8 +372,20 @@ const UserListTable = ({
         header: "Điểm rèn luyện",
         meta: { sortable: true },
         cell: ({ row }) => (
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <Typography variant="body2" fontWeight={600}>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: "5ch 18px",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: 1,
+            }}
+          >
+            <Typography
+              variant="body2"
+              fontWeight={600}
+              sx={{ textAlign: "right", fontVariantNumeric: "tabular-nums" }}
+            >
               {Number(row.original.schedulingPoints) || 0}
             </Typography>
             <Box
@@ -557,6 +597,18 @@ const UserListTable = ({
 
             {isAdmin && (
               <Button
+                variant="tonal"
+                color="warning"
+                startIcon={<i className="tabler-refresh" />}
+                onClick={() => setResetOpen(true)}
+                disabled={resetting}
+              >
+                Reset điểm rèn luyện
+              </Button>
+            )}
+
+            {isAdmin && (
+              <Button
                 variant="contained"
                 color="primary"
                 startIcon={<i className="tabler-plus" />}
@@ -592,6 +644,9 @@ const UserListTable = ({
                             alignItems: "center",
                             gap: 1,
                             cursor: "pointer",
+                            ...(header.column.id === "schedulingPoints"
+                              ? { width: "100%", justifyContent: "center" }
+                              : {}),
                             textTransform: "uppercase",
                           }}
                         >
@@ -656,6 +711,38 @@ const UserListTable = ({
         />
       </Card>
 
+      <Dialog
+        open={resetOpen}
+        onClose={() => !resetting && setResetOpen(false)}
+        fullWidth
+        maxWidth="xs"
+      >
+        <DialogTitle>Reset điểm rèn luyện</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Đưa điểm rèn luyện của toàn bộ nhân sự về 0, bao gồm cả nhân sự
+            ngoài trang và bộ lọc hiện tại. Lịch phân công và số lượt bê nước
+            được giữ nguyên.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            color="inherit"
+            onClick={() => setResetOpen(false)}
+            disabled={resetting}
+          >
+            Hủy
+          </Button>
+          <Button
+            variant="contained"
+            color="warning"
+            onClick={resetPoints}
+            disabled={resetting}
+          >
+            {resetting ? "Đang reset..." : "Xác nhận reset"}
+          </Button>
+        </DialogActions>
+      </Dialog>
       {/* Drawer thêm nhân sự */}
       <AddUserDrawer
         open={addUserOpen}

@@ -82,11 +82,11 @@ const incomeTypes = [
   ["other", "Thu khác", "tabler-cash-banknote", "info"],
 ];
 const expenseTypes = [
-  ["food_drink", "Ăn uống"],
-  ["office", "Văn phòng"],
-  ["event", "Sự kiện"],
-  ["support", "Hỗ trợ thành viên"],
-  ["other", "Chi khác"],
+  ["food_drink", "Ăn uống", "tabler-tools-kitchen-2", "warning"],
+  ["office", "Văn phòng", "tabler-building", "info"],
+  ["event", "Sự kiện", "tabler-calendar-event", "success"],
+  ["support", "Hỗ trợ thành viên", "tabler-heart-handshake", "primary"],
+  ["other", "Chi khác", "tabler-receipt", "error"],
 ];
 
 export default function FundPage() {
@@ -106,6 +106,7 @@ export default function FundPage() {
   const [dialog, setDialog] = useState("");
   const [editingId, setEditingId] = useState("");
   const [incomeFilter, setIncomeFilter] = useState("all");
+  const [expenseFilter, setExpenseFilter] = useState("all");
   const [saving, setSaving] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [cancelPaymentTarget, setCancelPaymentTarget] = useState(null);
@@ -125,6 +126,7 @@ export default function FundPage() {
   const [paymentThousands, setPaymentThousands] = useState("");
   const [paymentData, setPaymentData] = useState(null);
   const [creatingPayment, setCreatingPayment] = useState(false);
+  const [loadingPeriod, setLoadingPeriod] = useState(false);
   const [pendingOrderCode, setPendingOrderCode] = useState("");
   const amountInputRef = useRef(null);
   const handledOrderCodesRef = useRef(new Set());
@@ -189,6 +191,19 @@ export default function FundPage() {
       .catch((error) => toast.error(error.message))
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    setIncomePage(1);
+    setExpensePage(1);
+  }, [period]);
+
+  useEffect(() => {
+    setIncomePage(1);
+  }, [incomeFilter]);
+
+  useEffect(() => {
+    setExpensePage(1);
+  }, [expenseFilter]);
 
   const minimumFor = (member) =>
     Number(
@@ -331,53 +346,95 @@ export default function FundPage() {
     [users, fund, session?.user?.id, minimumAmounts],
   );
 
+  const isAllPeriods = period === "all";
+
   const incomeTotals = useMemo(() => {
     const values = Object.fromEntries(incomeTypes.map(([key]) => [key, 0]));
-    values.monthly_fund = fund?.memberIncome || 0;
+    if (!isAllPeriods) {
+      values.monthly_fund = fund?.memberIncome || 0;
+    }
     (fund?.incomes || []).forEach((item) => {
+      if (!isAllPeriods && fund?.month && fund?.year) {
+        const d = item.receivedAt || item.createdAt;
+        if (d) {
+          const key = toVietnamDateKey(d);
+          if (/^\d{4}-\d{2}/.test(key)) {
+            const [y, m] = key.split("-").map(Number);
+            if (y !== fund.year || m !== fund.month) return;
+          }
+        }
+      }
       values[item.category || "other"] += item.amount || 0;
     });
     return values;
-  }, [fund]);
+  }, [fund, isAllPeriods]);
+
+  const expenseTotals = useMemo(() => {
+    const values = Object.fromEntries(expenseTypes.map(([key]) => [key, 0]));
+    (fund?.expenses || []).forEach((item) => {
+      if (!isAllPeriods && fund?.month && fund?.year) {
+        const d = item.spentAt || item.createdAt;
+        if (d) {
+          const key = toVietnamDateKey(d);
+          if (/^\d{4}-\d{2}/.test(key)) {
+            const [y, m] = key.split("-").map(Number);
+            if (y !== fund.year || m !== fund.month) return;
+          }
+        }
+      }
+      values[item.category || "other"] =
+        (values[item.category || "other"] || 0) + (item.amount || 0);
+    });
+    return values;
+  }, [fund, isAllPeriods]);
 
   const periodOptions = useMemo(() => {
     const available = fund?.availablePeriods || [];
     const now = new Date();
-    const latestAvailable = available.reduce(
-      (latest, item) => Math.max(latest, item.year * 12 + item.month),
-      2025 * 12 + 1,
-    );
-    const latest = Math.max(
-      latestAvailable,
-      now.getFullYear() * 12 + now.getMonth() + 1,
+    const maxYear = Math.max(
+      2026,
+      now.getFullYear(),
+      ...available.map((item) => item.year),
     );
     const options = [];
 
-    for (let value = latest; value >= 2025 * 12 + 1; value -= 1) {
-      const year = Math.floor((value - 1) / 12);
-      const month = ((value - 1) % 12) + 1;
-      const label = `${String(month).padStart(2, "0")}/${year}`;
-      options.push({ value: label, label });
+    for (let y = maxYear; y >= 2025; y -= 1) {
+      for (let m = 12; m >= 1; m -= 1) {
+        const label = `${String(m).padStart(2, "0")}/${y}`;
+        options.push({ value: label, label });
+      }
     }
 
     return [{ value: "all", label: "Tất cả kỳ" }, ...options];
   }, [fund?.availablePeriods]);
-  const periodYears = useMemo(
-    () =>
-      [...new Set(periodOptions.slice(1).map((item) => item.value.slice(-4)))]
-        .map(Number)
-        .sort((a, b) => b - a),
-    [periodOptions],
-  );
-  const isAllPeriods = period === "all";
+
+  const periodYears = useMemo(() => {
+    const available = fund?.availablePeriods || [];
+    const now = new Date();
+    const maxYear = Math.max(
+      2026,
+      now.getFullYear(),
+      ...available.map((item) => item.year),
+    );
+    const years = [];
+    for (let y = maxYear; y >= 2025; y -= 1) {
+      years.push(y);
+    }
+    return years;
+  }, [fund?.availablePeriods]);
 
   const choosePeriod = async (value) => {
-    setPeriod(value);
     setPeriodPickerAnchor(null);
+    setIncomePage(1);
+    setExpensePage(1);
+    setLoadingPeriod(true);
     try {
       await loadFund(value);
+      setPeriod(value);
     } catch (error) {
       toast.error(error.message);
+    } finally {
+      setLoadingPeriod(false);
     }
   };
 
@@ -385,11 +442,12 @@ export default function FundPage() {
     const file = event.target.files?.[0];
     event.target.value = "";
     if (!file) return;
-    if (isAllPeriods) return toast.error("Hãy chọn một kỳ trước khi import");
     const importKind = activeSection === "expense" ? "expense" : "income";
-    const category = importKind === "income" ? incomeFilter : "other";
-    if (importKind === "income" && category === "all")
-      return toast.error("Hãy chọn loại nguồn thu trước khi import");
+    const category = importKind === "income" ? incomeFilter : expenseFilter;
+    if (category === "all")
+      return toast.error(
+        `Hãy chọn ${importKind === "income" ? "loại nguồn thu" : "nhóm chi"} trước khi import`,
+      );
     const compact = (value) =>
       String(value || "")
         .normalize("NFD")
@@ -532,13 +590,21 @@ export default function FundPage() {
             receivedAt: member.paidAt,
             locked: true,
           })),
-        ...(fund?.incomes || []),
+        ...(fund?.incomes || []).filter((item) => {
+          if (isAllPeriods || !fund?.month || !fund?.year) return true;
+          const d = item.receivedAt || item.createdAt;
+          if (!d) return true;
+          const key = toVietnamDateKey(d);
+          if (!/^\d{4}-\d{2}/.test(key)) return true;
+          const [y, m] = key.split("-").map(Number);
+          return y === fund.year && m === fund.month;
+        }),
       ].sort(
         (a, b) =>
           new Date(a.receivedAt || a.createdAt) -
           new Date(b.receivedAt || b.createdAt),
       ),
-    [fund, users],
+    [fund, users, isAllPeriods],
   );
   const filteredIncomeRows = useMemo(
     () =>
@@ -557,15 +623,30 @@ export default function FundPage() {
       }),
     [filteredIncomeRows, incomeSearch],
   );
+  const filteredExpenseRows = useMemo(() => {
+    const baseList = (fund?.expenses || []).filter((item) => {
+      if (isAllPeriods || !fund?.month || !fund?.year) return true;
+      const d = item.spentAt || item.createdAt;
+      if (!d) return true;
+      const key = toVietnamDateKey(d);
+      if (!/^\d{4}-\d{2}/.test(key)) return true;
+      const [y, m] = key.split("-").map(Number);
+      return y === fund.year && m === fund.month;
+    });
+    return expenseFilter === "all"
+      ? baseList
+      : baseList.filter((item) => (item.category || "other") === expenseFilter);
+  }, [expenseFilter, fund, isAllPeriods]);
+
   const visibleExpenseRows = useMemo(
     () =>
-      (fund?.expenses || []).filter((item) => {
+      filteredExpenseRows.filter((item) => {
         const date = item.spentAt || item.createdAt;
         return `${item.note} ${item.createdByName} ${item.title} ${formatVietnamDate(date)} ${toVietnamDateKey(date)}`
           .toLowerCase()
           .includes(expenseSearch.toLowerCase().trim());
       }),
-    [fund, expenseSearch],
+    [filteredExpenseRows, expenseSearch],
   );
 
   const openDialog = (kind) => {
@@ -595,7 +676,11 @@ export default function FundPage() {
   const saveTransaction = async () => {
     try {
       setSaving(true);
-      const [month, year] = period.split("/").map(Number);
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(form.date))
+        throw new Error("Vui lòng chọn ngày giao dịch hợp lệ");
+      const [year, month] = form.date.split("-").map(Number);
+      const prepared = await fetch(`/api/funds?month=${month}&year=${year}`);
+      if (!prepared.ok) throw new Error("Không thể tải kỳ ghi nhận giao dịch");
       const response = await fetch("/api/funds", {
         method: editingId ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
@@ -611,7 +696,7 @@ export default function FundPage() {
       const data = await response.json();
       if (!response.ok)
         throw new Error(data.error || "Không thể lưu giao dịch");
-      setFund(data);
+      await loadFund(period);
       const usersData = await fetch("/api/users?limit=200").then((response) =>
         response.json(),
       );
@@ -726,7 +811,15 @@ export default function FundPage() {
     <Box>
       <Card sx={{ mb: 4 }}>
         <CardHeader
-          sx={{ alignItems: "center", "& .MuiCardHeader-action": { m: 0 } }}
+          sx={{
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: 2,
+            "& .MuiCardHeader-action": {
+              m: 0,
+              width: { xs: "100%", sm: "auto" },
+            },
+          }}
           title={
             <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
               <Avatar
@@ -757,13 +850,14 @@ export default function FundPage() {
               <Button
                 variant="outlined"
                 color="inherit"
+                disabled={loadingPeriod}
                 endIcon={<i className="tabler-chevron-down" />}
                 onClick={(event) => {
-                  const selectedYear = Number(period.split("/")[1]);
+                  const selectedYear = Number(period?.split("/")[1]);
                   setPeriodPickerYear(
                     periodYears.includes(selectedYear)
                       ? selectedYear
-                      : periodYears[0] || 2025,
+                      : periodYears[0] || 2026,
                   );
                   setPeriodPickerAnchor(event.currentTarget);
                 }}
@@ -834,6 +928,91 @@ export default function FundPage() {
             </Box>
           }
         />
+        <CardContent sx={{ pt: 0 }} aria-busy={loadingPeriod}>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+            {loadingPeriod
+              ? "Đang tải tổng hợp..."
+              : isAllPeriods
+                ? "Tổng hợp tất cả kỳ"
+                : `Tổng hợp tháng ${period}`}
+          </Typography>
+          <Grid container spacing={3}>
+            {[
+              {
+                label: "Tổng thu",
+                value: fund?.totalIncome,
+                icon: "tabler-trending-up",
+                color: "success",
+                detail: "Tiền đóng quỹ và các nguồn thu khác",
+              },
+              {
+                label: "Tổng chi",
+                value: fund?.totalExpense,
+                icon: "tabler-trending-down",
+                color: "error",
+                detail: "Các khoản chi đã ghi nhận",
+              },
+              {
+                label: "Còn lại",
+                value: fund?.balance,
+                icon: "tabler-wallet",
+                color: Number(fund?.balance) < 0 ? "error" : "primary",
+                detail: isAllPeriods
+                  ? `Số dư ban đầu ${money(fund?.openingBalance || 0)} + tổng thu − tổng chi`
+                  : `Số dư đầu kỳ ${money(fund?.openingBalance || 0)} + thu − chi`,
+              },
+            ].map((item) => (
+              <Grid key={item.label} size={{ xs: 12, sm: 4 }}>
+                <Box
+                  sx={{
+                    p: 3,
+                    height: "100%",
+                    border: "1px solid",
+                    borderColor: "divider",
+                    borderRadius: 2,
+                  }}
+                >
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 2,
+                      mb: 2,
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        display: "grid",
+                        placeItems: "center",
+                        color: `${item.color}.main`,
+                      }}
+                    >
+                      <i className={item.icon} />
+                    </Box>
+                    <Typography color="text.secondary">{item.label}</Typography>
+                  </Box>
+                  <Typography
+                    variant="h4"
+                    fontWeight={700}
+                    sx={{
+                      color: `${item.color}.main`,
+                      overflowWrap: "anywhere",
+                    }}
+                  >
+                    {loadingPeriod ? "—" : money(item.value || 0)}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ mt: 1 }}
+                  >
+                    {item.detail}
+                  </Typography>
+                </Box>
+              </Grid>
+            ))}
+          </Grid>
+        </CardContent>
       </Card>
 
       <input
@@ -907,7 +1086,7 @@ export default function FundPage() {
                           </MenuItem>
                         ))}
                       </CustomTextField>
-                      {canManage && !isAllPeriods && (
+                      {canManage && (
                         <Button
                           color="secondary"
                           variant="tonal"
@@ -918,7 +1097,7 @@ export default function FundPage() {
                           Import Excel
                         </Button>
                       )}
-                      {canManage && !isAllPeriods && (
+                      {canManage && (
                         <Button
                           color="success"
                           variant="tonal"
@@ -1051,12 +1230,18 @@ export default function FundPage() {
                                 </TableCell>
                               )}
                               <TableCell>
-                                {item.userName || "Công ty"}
+                                {item.userName ||
+                                  users.find((user) => user.id === item.userId)
+                                    ?.name ||
+                                  (item.category === "monthly_fund" ||
+                                  item.userId
+                                    ? "Nhân sự đã nghỉ"
+                                    : "Công ty")}
                               </TableCell>
                               <TableCell>{item.note || "—"}</TableCell>
                               <TableCell>
                                 {item.locked
-                                  ? `Tháng ${period}`
+                                  ? `Tháng ${item.month && item.year ? `${String(item.month).padStart(2, "0")}/${item.year}` : isAllPeriods ? "—" : period}`
                                   : formatVietnamDate(
                                       item.receivedAt || item.createdAt,
                                     )}
@@ -1133,13 +1318,22 @@ export default function FundPage() {
             {activeSection === "expense" && (
               <Card sx={{ height: "100%" }}>
                 <CardHeader
+                  sx={{
+                    alignItems: "center",
+                    flexWrap: "wrap",
+                    gap: 2,
+                    "& .MuiCardHeader-action": {
+                      m: 0,
+                      width: { xs: "100%", sm: "auto" },
+                    },
+                  }}
                   title={
                     <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                       <Avatar
                         variant="rounded"
                         sx={{
-                          bgcolor: "rgba(115,103,240,.12)",
-                          color: "primary.main",
+                          bgcolor: "rgba(234,84,85,.12)",
+                          color: "error.main",
                         }}
                       >
                         <i className="tabler-trending-down" />
@@ -1155,18 +1349,44 @@ export default function FundPage() {
                     </Box>
                   }
                   action={
-                    canManage &&
-                    !isAllPeriods && (
-                      <Box sx={{ display: "flex", gap: 1 }}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1.5,
+                        flexWrap: "wrap",
+                        width: { xs: "100%", sm: "auto" },
+                      }}
+                    >
+                      <CustomTextField
+                        select
+                        size="small"
+                        label="Nhóm chi"
+                        value={expenseFilter}
+                        onChange={(event) =>
+                          setExpenseFilter(event.target.value)
+                        }
+                        sx={{ minWidth: { xs: "100%", sm: 190 }, flex: 1 }}
+                      >
+                        <MenuItem value="all">Tất cả khoản chi</MenuItem>
+                        {expenseTypes.map(([key, label]) => (
+                          <MenuItem key={key} value={key}>
+                            {label}
+                          </MenuItem>
+                        ))}
+                      </CustomTextField>
+                      {canManage && (
                         <Button
                           color="secondary"
                           variant="tonal"
                           startIcon={<i className="tabler-upload" />}
-                          disabled={importingExcel}
+                          disabled={importingExcel || expenseFilter === "all"}
                           onClick={() => importFileRef.current?.click()}
                         >
                           Import Excel
                         </Button>
+                      )}
+                      {canManage && (
                         <Button
                           color="error"
                           variant="tonal"
@@ -1175,120 +1395,199 @@ export default function FundPage() {
                         >
                           Thêm khoản chi
                         </Button>
-                      </Box>
-                    )
+                      )}
+                    </Box>
                   }
                 />
                 <Divider />
-                <DataTableToolbar
-                  search={expenseSearch}
-                  onSearchChange={(value) => {
-                    setExpenseSearch(value);
-                    setExpensePage(1);
-                  }}
-                  limit={expenseLimit}
-                  onLimitChange={(value) => {
-                    setExpenseLimit(value);
-                    setExpensePage(1);
-                  }}
-                  placeholder="Tìm nội dung, người thực hiện hoặc ngày chi..."
-                />
-                <Divider />
-                <TableContainer>
-                  <Table size="small">
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>NHÓM CHI</TableCell>
-                        <TableCell>GHI CHÚ</TableCell>
-                        <TableCell>NGƯỜI THỰC HIỆN</TableCell>
-                        <TableCell>NGÀY CHI</TableCell>
-                        <TableCell align="right">SỐ TIỀN</TableCell>
-                        <TableCell align="center">THAO TÁC</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {visibleExpenseRows
-                        .slice(
-                          (expensePage - 1) * expenseLimit,
-                          expensePage * expenseLimit,
-                        )
-                        .map((item) => (
-                          <TableRow key={item.id} hover>
-                            <TableCell>
-                              <Chip
-                                size="small"
-                                variant="tonal"
-                                color="error"
-                                label={
-                                  expenseTypes.find(
-                                    ([key]) => key === item.category,
-                                  )?.[1] || "Chi khác"
-                                }
-                              />
-                            </TableCell>
-                            <TableCell>{item.note || "—"}</TableCell>
-                            <TableCell>{item.createdByName || "—"}</TableCell>
-                            <TableCell>
-                              {formatVietnamDate(
-                                item.spentAt || item.createdAt,
+                <CardContent>
+                  <Grid container spacing={1.5}>
+                    {[
+                      [
+                        "all",
+                        "Tổng tiền chi",
+                        "tabler-cash-banknote-off",
+                        "error",
+                      ],
+                      ...expenseTypes,
+                    ].map(([key, label, icon]) => (
+                      <Grid key={key} size={{ xs: 12, sm: 6, lg: 2 }}>
+                        <Box
+                          role="button"
+                          tabIndex={0}
+                          onClick={() => setExpenseFilter(key)}
+                          sx={{
+                            p: 1.5,
+                            display: "flex",
+                            gap: 1.5,
+                            alignItems: "center",
+                            borderRadius: 2,
+                            bgcolor:
+                              expenseFilter === key
+                                ? "rgba(234,84,85,.12)"
+                                : "action.hover",
+                            border: "1px solid",
+                            borderColor:
+                              expenseFilter === key
+                                ? "error.main"
+                                : "transparent",
+                            cursor: "pointer",
+                          }}
+                        >
+                          <Avatar
+                            variant="rounded"
+                            sx={{
+                              bgcolor: "rgba(234,84,85,.12)",
+                              color: "error.main",
+                            }}
+                          >
+                            <i className={icon} />
+                          </Avatar>
+                          <Box>
+                            <Typography variant="body2" color="text.secondary">
+                              {label}
+                            </Typography>
+                            <Typography fontWeight={700}>
+                              {money(
+                                key === "all"
+                                  ? fund?.totalExpense
+                                  : expenseTotals[key],
                               )}
-                            </TableCell>
-                            <TableCell align="right">
-                              <Typography color="error.main" fontWeight={700}>
-                                −{money(item.amount)}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </Grid>
+                    ))}
+                  </Grid>
+                  <DataTableToolbar
+                    search={expenseSearch}
+                    onSearchChange={(value) => {
+                      setExpenseSearch(value);
+                      setExpensePage(1);
+                    }}
+                    limit={expenseLimit}
+                    onLimitChange={(value) => {
+                      setExpenseLimit(value);
+                      setExpensePage(1);
+                    }}
+                    placeholder="Tìm nội dung, người thực hiện hoặc ngày chi..."
+                  />
+                  <TableContainer
+                    sx={{
+                      border: "1px solid",
+                      borderColor: "divider",
+                      borderRadius: 2,
+                    }}
+                  >
+                    <Table size="small">
+                      <TableHead>
+                        <TableRow>
+                          {expenseFilter === "all" && (
+                            <TableCell>NHÓM CHI</TableCell>
+                          )}
+                          <TableCell>GHI CHÚ</TableCell>
+                          <TableCell>NGƯỜI THỰC HIỆN</TableCell>
+                          <TableCell>NGÀY CHI</TableCell>
+                          <TableCell align="right">SỐ TIỀN</TableCell>
+                          <TableCell align="center">THAO TÁC</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {visibleExpenseRows
+                          .slice(
+                            (expensePage - 1) * expenseLimit,
+                            expensePage * expenseLimit,
+                          )
+                          .map((item) => (
+                            <TableRow key={item.id} hover>
+                              {expenseFilter === "all" && (
+                                <TableCell>
+                                  <Chip
+                                    size="small"
+                                    variant="tonal"
+                                    color={
+                                      expenseTypes.find(
+                                        ([key]) => key === item.category,
+                                      )?.[3] || "error"
+                                    }
+                                    label={
+                                      expenseTypes.find(
+                                        ([key]) => key === item.category,
+                                      )?.[1] || "Chi khác"
+                                    }
+                                  />
+                                </TableCell>
+                              )}
+                              <TableCell>{item.note || "—"}</TableCell>
+                              <TableCell>{item.createdByName || "—"}</TableCell>
+                              <TableCell>
+                                {formatVietnamDate(
+                                  item.spentAt || item.createdAt,
+                                )}
+                              </TableCell>
+                              <TableCell align="right">
+                                <Typography color="error.main" fontWeight={700}>
+                                  −{money(item.amount)}
+                                </Typography>
+                              </TableCell>
+                              <TableCell align="center">
+                                {canManage && !isAllPeriods ? (
+                                  <Box
+                                    sx={{
+                                      display: "flex",
+                                      justifyContent: "center",
+                                    }}
+                                  >
+                                    <IconButton
+                                      size="small"
+                                      color="primary"
+                                      onClick={() =>
+                                        editTransaction("expense", item)
+                                      }
+                                    >
+                                      <i className="tabler-edit" />
+                                    </IconButton>
+                                    <IconButton
+                                      size="small"
+                                      color="error"
+                                      onClick={() =>
+                                        setDeleteTarget({
+                                          kind: "expense",
+                                          item,
+                                        })
+                                      }
+                                    >
+                                      <i className="tabler-trash" />
+                                    </IconButton>
+                                  </Box>
+                                ) : (
+                                  "—"
+                                )}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        {!visibleExpenseRows.length && (
+                          <TableRow>
+                            <TableCell
+                              colSpan={expenseFilter === "all" ? 6 : 5}
+                              align="center"
+                            >
+                              <Typography color="text.secondary" py={4}>
+                                Chưa có khoản chi trong kỳ
                               </Typography>
                             </TableCell>
-                            <TableCell align="center">
-                              {canManage && !isAllPeriods ? (
-                                <Box
-                                  sx={{
-                                    display: "flex",
-                                    justifyContent: "center",
-                                  }}
-                                >
-                                  <IconButton
-                                    size="small"
-                                    color="primary"
-                                    onClick={() =>
-                                      editTransaction("expense", item)
-                                    }
-                                  >
-                                    <i className="tabler-edit" />
-                                  </IconButton>
-                                  <IconButton
-                                    size="small"
-                                    color="error"
-                                    onClick={() =>
-                                      setDeleteTarget({ kind: "expense", item })
-                                    }
-                                  >
-                                    <i className="tabler-trash" />
-                                  </IconButton>
-                                </Box>
-                              ) : (
-                                "—"
-                              )}
-                            </TableCell>
                           </TableRow>
-                        ))}
-                      {!visibleExpenseRows.length && (
-                        <TableRow>
-                          <TableCell colSpan={6} align="center">
-                            <Typography color="text.secondary" py={4}>
-                              Chưa có khoản chi trong kỳ
-                            </Typography>
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-                <TablePaginationComponent
-                  page={expensePage}
-                  total={visibleExpenseRows.length}
-                  limit={expenseLimit}
-                  onPageChange={(_, nextPage) => setExpensePage(nextPage + 1)}
-                />
+                        )}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                  <TablePaginationComponent
+                    page={expensePage}
+                    total={visibleExpenseRows.length}
+                    limit={expenseLimit}
+                    onPageChange={(_, nextPage) => setExpensePage(nextPage + 1)}
+                  />
+                </CardContent>
               </Card>
             )}
           </Grid>
@@ -1890,6 +2189,11 @@ export default function FundPage() {
                 fullWidth
                 type="date"
                 label="Ngày giao dịch"
+                helperText={
+                  isAllPeriods
+                    ? "Giao dịch được ghi vào kỳ tháng của ngày đã chọn"
+                    : undefined
+                }
                 value={form.date}
                 onChange={(event) =>
                   setForm((value) => ({ ...value, date: event.target.value }))

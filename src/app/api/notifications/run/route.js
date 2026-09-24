@@ -3,6 +3,7 @@ import { getToken } from "next-auth/jwt";
 import {
   getFunds,
   getSettings,
+  getTrashScheduleState,
   getUsers,
   getWaterExemptions,
   getWaterSchedules,
@@ -205,6 +206,7 @@ export async function POST(req) {
           );
         }
 
+      const trashState = await getTrashScheduleState();
       const [currentYear, currentMonth] = today.split("-").map(Number);
       const trashMonths = Array.from({ length: 3 }, (_, offset) => {
         const date = new Date(
@@ -219,14 +221,14 @@ export async function POST(req) {
             exemptUserIds,
             year,
             month,
-            settings.trashScheduleOverrides || {},
+            trashState.trashScheduleOverrides || {},
             true,
           ),
         )
         .filter(
           (item) =>
             item.dateKey >= today &&
-            !settings.trashScheduleCompletions?.[item.dateKey],
+            !trashState.trashScheduleCompletions?.[item.dateKey],
         )
         .sort((a, b) => a.dateKey.localeCompare(b.dateKey));
       const trashTargetDate = immediateSchedule
@@ -241,7 +243,7 @@ export async function POST(req) {
       const trashUser = usersById.get(trash?.userId);
       if (
         trashUser?.email &&
-        !settings.trashScheduleCompletions?.[trashTargetDate]
+        !trashState.trashScheduleCompletions?.[trashTargetDate]
       )
         await deliver(
           `trash:${trashTargetDate}:${trashUser.id}${immediateSchedule ? ":manual" : ""}`,

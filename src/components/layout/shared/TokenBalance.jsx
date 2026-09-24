@@ -8,10 +8,15 @@ const TokenBalance = () => {
   const [points, setPoints] = useState(null);
 
   useEffect(() => {
-    fetch("/api/profile")
-      .then((response) => (response.ok ? response.json() : null))
-      .then((profile) => setPoints(Number(profile?.schedulingPoints || 0)))
-      .catch(() => setPoints(0));
+    const refresh = () =>
+      fetch("/api/profile")
+        .then((response) => (response.ok ? response.json() : null))
+        .then((profile) => setPoints(Number(profile?.schedulingPoints || 0)))
+        .catch(() => setPoints(0));
+    refresh();
+    window.addEventListener("scheduling-points-updated", refresh);
+    return () =>
+      window.removeEventListener("scheduling-points-updated", refresh);
   }, []);
 
   return (

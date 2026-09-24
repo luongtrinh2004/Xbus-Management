@@ -1046,6 +1046,12 @@ export default function AdminScheduleView({
                 user.code?.toLowerCase().includes(query)
               );
             })
+            .sort(
+              (a, b) =>
+                Number(exemptIds.includes(b.id)) -
+                  Number(exemptIds.includes(a.id)) ||
+                String(a.name || "").localeCompare(String(b.name || ""), "vi"),
+            )
             .map((user) => (
               <Box
                 key={user.id}

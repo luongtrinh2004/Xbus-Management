@@ -135,6 +135,7 @@ const pool = {
 };
 const repository = load("src/libs/dataRepository.js", {
   "./jsonRepository.js": {},
+  "./trashScheduleStorage.js": load("src/libs/trashScheduleStorage.js"),
   "@/libs/assetIds": {},
   "./fundRules.js": rules,
   "./mysql.js": { isMysqlEnabled: () => true, getMysqlPool: () => pool },
@@ -195,11 +196,35 @@ const route = load("src/app/api/funds/route.js", {
     writes.every((sql) => !/fund_member_payments|fund_transactions/.test(sql)),
   );
 
+  const all = await route.GET({
+    nextUrl: new URL("http://localhost/api/funds?all=1"),
+  });
+  assert.equal(all.status, 200);
+  assert.equal(all.body.isAllPeriods, true);
+  const contribution = all.body.incomes.find(
+    (item) => item.category === "monthly_fund" && item.userId === "payer",
+  );
+  assert.equal(contribution.userName, "Payer");
+  assert.equal(contribution.month, 2);
+  assert.equal(contribution.year, 2020);
+  assert.equal(
+    all.body.incomes.find((item) => item.userId === "deleted").userName,
+    "Nhân sự đã nghỉ",
+  );
+  assert.equal(all.body.totalIncome, 2682000);
+  assert.equal(all.body.memberIncome, 0);
+  assert.equal(all.body.totalExpense, 0);
+  assert.equal(all.body.openingBalance, 123000);
+  assert.equal(all.body.balance, 2805000);
+
   // New period rosters survive reload without creating payment rows.
   const newRequest = {
     nextUrl: new URL("http://localhost/api/funds?year=2020&month=3"),
   };
-  assert.equal((await route.GET(newRequest)).body.members.length, 2);
+  const next = await route.GET(newRequest);
+  assert.equal(next.body.members.length, 2);
+  assert.equal(next.body.openingBalance, 2805000);
+  assert.equal(next.body.balance, 2805000);
   assert.equal((await route.GET(newRequest)).body.members.length, 2);
   assert.equal(payments.length, 2);
 

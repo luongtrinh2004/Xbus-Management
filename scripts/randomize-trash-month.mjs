@@ -1,10 +1,13 @@
 import {
-  getSettings,
+  getTrashScheduleState,
   getUsers,
   getWaterExemptions,
-  saveSettings,
+  saveTrashScheduleState,
 } from "../src/libs/dataRepository.js";
-import { getEligibleTrashUsers } from "../src/libs/waterScheduler.js";
+import {
+  getEligibleTrashUsers,
+  getTrashSchedulesForMonth,
+} from "../src/libs/waterScheduler.js";
 
 const args = Object.fromEntries(
   process.argv.slice(2).map((arg) => {
@@ -27,18 +30,6 @@ if (
     "Dùng: npm run trash:randomize-month -- --year=2026 --month=9",
   );
 
-const shuffle = (items) => {
-  const result = [...items];
-  for (let index = result.length - 1; index > 0; index -= 1) {
-    const swapIndex = Math.floor(Math.random() * (index + 1));
-    [result[index], result[swapIndex]] = [result[swapIndex], result[index]];
-  }
-  return result;
-};
-
-const dateKeyOf = (day) =>
-  `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-
 const users = await getUsers();
 const exemptUserIds = await getWaterExemptions();
 const candidates = getEligibleTrashUsers(users, exemptUserIds);
@@ -46,53 +37,29 @@ const candidates = getEligibleTrashUsers(users, exemptUserIds);
 if (!candidates.length)
   throw new Error("Không có nhân sự đủ điều kiện để random lịch đổ rác.");
 
-const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
-const workingDateKeys = [];
-for (let day = 1; day <= daysInMonth; day += 1) {
-  const date = new Date(Date.UTC(year, month - 1, day));
-  const weekday = date.getUTCDay();
-  if (weekday !== 0 && weekday !== 6) workingDateKeys.push(dateKeyOf(day));
-}
-
-const groupedByPoints = candidates.reduce((map, user) => {
-  const points = Number(user.schedulingPoints) || 0;
-  map.set(points, [...(map.get(points) || []), user]);
-  return map;
-}, new Map());
-const randomizedPool = [...groupedByPoints.entries()]
-  .sort(([left], [right]) => left - right)
-  .flatMap(([, group]) => shuffle(group));
-
-const settings = await getSettings();
-const overrides = { ...(settings.trashScheduleOverrides || {}) };
+const trashState = await getTrashScheduleState();
+const overrides = { ...(trashState.trashScheduleOverrides || {}) };
 
 for (const key of Object.keys(overrides))
   if (key.startsWith(`${year}-${String(month).padStart(2, "0")}-`))
     delete overrides[key];
 
-const projectedPoints = new Map(
-  randomizedPool.map((user) => [user.id, Number(user.schedulingPoints) || 0]),
+const schedules = getTrashSchedulesForMonth(
+  users,
+  exemptUserIds,
+  year,
+  month,
+  {},
+  true,
+  { randomize: true },
 );
-const lastAssignedIndex = new Map();
-workingDateKeys.forEach((dateKey, index) => {
-  const person = [...randomizedPool].sort(
-    (left, right) =>
-      (projectedPoints.get(left.id) || 0) -
-        (projectedPoints.get(right.id) || 0) ||
-      (lastAssignedIndex.get(left.id) ?? Number.NEGATIVE_INFINITY) -
-        (lastAssignedIndex.get(right.id) ?? Number.NEGATIVE_INFINITY) ||
-      randomizedPool.indexOf(left) - randomizedPool.indexOf(right),
-  )[0];
-  overrides[dateKey] = person.id;
-  projectedPoints.set(person.id, (projectedPoints.get(person.id) || 0) + 1);
-  lastAssignedIndex.set(person.id, index);
-});
+for (const item of schedules) overrides[item.dateKey] = item.userId;
 
-await saveSettings({
-  ...settings,
+await saveTrashScheduleState({
+  ...trashState,
   trashScheduleOverrides: overrides,
 });
 
 console.log(
-  `Đã random ${workingDateKeys.length} ngày đổ rác tháng ${String(month).padStart(2, "0")}/${year} cho ${randomizedPool.length} nhân sự.`,
+  `Đã random ${schedules.length} ngày đổ rác tháng ${String(month).padStart(2, "0")}/${year} cho ${candidates.length} nhân sự.`,
 );

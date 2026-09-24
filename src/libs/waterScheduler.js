@@ -55,97 +55,50 @@ export function getEligibleTrashUsers(users = []) {
     );
 }
 
-/** Lịch đổ rác cho 5 ngày làm việc của tuần hiện tại và tuần kế tiếp. */
+/** Lịch tuần dùng cùng thuật toán và phân công đã lưu của lịch tháng. */
 export function getTrashSchedules(
   users = [],
   exemptUserIds = [],
   currentDateKey,
   weekOffset = 0,
   overrides = {},
-  waterSchedules = [],
 ) {
-  const participants = getEligibleTrashUsers(users, exemptUserIds);
-  if (!participants.length) return [];
-
-  const [currentYear, currentMonth, currentDay] = String(currentDateKey)
-    .split("-")
-    .map(Number);
-  const today = new Date(Date.UTC(currentYear, currentMonth - 1, currentDay));
-  const weekday = today.getUTCDay();
-  const daysToMonday = weekday === 0 ? -6 : 1 - weekday;
-  const monday = new Date(today);
-  monday.setUTCDate(today.getUTCDate() + daysToMonday + weekOffset * 7);
-
-  const dayMs = 24 * 60 * 60 * 1000;
-  const rotationAnchor = Date.UTC(2026, 0, 5);
-  const schedules = [];
-  const usersById = new Map(participants.map((person) => [person.id, person]));
-  for (let weekIndex = 0; weekIndex < 1; weekIndex += 1) {
-    for (let workday = 0; workday < 5; workday += 1) {
-      const date = new Date(monday);
-      date.setUTCDate(monday.getUTCDate() + weekIndex * 7 + workday);
-      const workingDaysFromAnchor =
-        Math.floor((date.getTime() - rotationAnchor) / (dayMs * 7)) * 5 +
-        workday;
-      const recentWaterUserIds = new Set(
-        waterSchedules
-          .filter((schedule) => {
-            const [d, m, y] = String(schedule.date || "")
-              .split("/")
-              .map(Number);
-            const scheduledAt = Date.UTC(y, m - 1, d);
-            return (
-              Number.isFinite(scheduledAt) &&
-              Math.abs(scheduledAt - date.getTime()) <= 21 * dayMs
-            );
-          })
-          .flatMap((schedule) =>
-            (schedule.participants || []).map(
-              (person) => person.userId || person,
-            ),
-          ),
+  const [year, month, day] = String(currentDateKey).split("-").map(Number);
+  const monday = new Date(Date.UTC(year, month - 1, day));
+  const weekday = monday.getUTCDay();
+  monday.setUTCDate(
+    monday.getUTCDate() + (weekday === 0 ? -6 : 1 - weekday) + weekOffset * 7,
+  );
+  const months = new Map();
+  return Array.from({ length: 5 }, (_, index) => {
+    const date = new Date(monday);
+    date.setUTCDate(monday.getUTCDate() + index);
+    const dateKey = date.toISOString().slice(0, 10);
+    const key = dateKey.slice(0, 7);
+    if (!months.has(key)) {
+      months.set(
+        key,
+        getTrashSchedulesForMonth(
+          users,
+          exemptUserIds,
+          date.getUTCFullYear(),
+          date.getUTCMonth() + 1,
+          overrides,
+        ),
       );
-      const prioritized = [...participants].sort(
-        (a, b) =>
-          Number(recentWaterUserIds.has(a.id)) -
-            Number(recentWaterUserIds.has(b.id)) ||
-          (a.schedulingPoints || 0) - (b.schedulingPoints || 0),
-      );
-      const defaultPerson =
-        prioritized[
-          ((workingDaysFromAnchor % prioritized.length) + prioritized.length) %
-            prioritized.length
-        ];
-      const dateKey = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}-${String(date.getUTCDate()).padStart(2, "0")}`;
-      const hasOverride = Object.prototype.hasOwnProperty.call(
-        overrides,
-        dateKey,
-      );
-      const person = hasOverride
-        ? usersById.get(overrides[dateKey]) || null
-        : defaultPerson;
-      const year = date.getUTCFullYear();
-      const month = date.getUTCMonth() + 1;
-      const day = date.getUTCDate();
-      schedules.push({
-        id: `trash_${year}${String(month).padStart(2, "0")}${String(day).padStart(2, "0")}`,
-        date: `${String(day).padStart(2, "0")}/${String(month).padStart(2, "0")}/${year}`,
-        dateKey,
-        weekday: workday + 1,
-        weekIndex,
-        userId: person?.id || "",
-        name: person?.name || "",
-        code: person?.code || "",
-        avatarUrl: person?.avatarUrl || "",
-        role: person?.role || "",
-        gender: person?.gender || "",
-      });
     }
-  }
-  return schedules;
+    return {
+      ...months.get(key).find((item) => item.dateKey === dateKey),
+      weekIndex: 0,
+    };
+  });
 }
 
-/** Tạo lịch đổ rác cho toàn bộ ngày làm việc trong một tháng. */
+/**
+ * Xếp lịch theo điểm dự kiến thấp nhất, rồi ưu tiên người được miễn bê nước.
+ * Random chỉ trong nhóm đồng hạng khi tạo lịch; lượt đọc dùng thứ tự ổn định.
+ * Mỗi lượt chưa hoàn thành tăng 1 điểm dự kiến, không thay đổi điểm thực tế.
+ */
 export function getTrashSchedulesForMonth(
   users = [],
   exemptUserIds = [],
@@ -153,6 +106,7 @@ export function getTrashSchedulesForMonth(
   month,
   overrides = {},
   autoAssign = true,
+  { randomize = false, startDateKey = "", completions = {} } = {},
 ) {
   const participants = getEligibleTrashUsers(users, exemptUserIds);
   const usersById = new Map(users.map((person) => [person.id, person]));
@@ -166,6 +120,7 @@ export function getTrashSchedulesForMonth(
       Number(person.schedulingPoints || 0),
     ]),
   );
+  const exemptIds = new Set(exemptUserIds);
   const lastAssignedIndex = new Map();
   let workingIndexInMonth = 0;
 
@@ -188,21 +143,34 @@ export function getTrashSchedulesForMonth(
       (participants.indexOf(person) - rotationStart + participants.length) %
       participants.length;
     const defaultPerson =
-      autoAssign && participants.length
-        ? [...participants].sort(
+      autoAssign && participants.length && dateKey >= startDateKey
+        ? (randomize ? shuffleArray(participants) : [...participants]).sort(
             (a, b) =>
               (projectedPoints.get(a.id) || 0) -
                 (projectedPoints.get(b.id) || 0) ||
-              (lastAssignedIndex.get(a.id) ?? Number.NEGATIVE_INFINITY) -
-                (lastAssignedIndex.get(b.id) ?? Number.NEGATIVE_INFINITY) ||
-              rotationRank(a) - rotationRank(b) ||
-              String(a.name || "").localeCompare(String(b.name || ""), "vi"),
+              Number(exemptIds.has(b.id)) - Number(exemptIds.has(a.id)) ||
+              (randomize
+                ? 0
+                : (lastAssignedIndex.get(a.id) ?? Number.NEGATIVE_INFINITY) -
+                    (lastAssignedIndex.get(b.id) ?? Number.NEGATIVE_INFINITY) ||
+                  rotationRank(a) - rotationRank(b) ||
+                  String(a.name || "").localeCompare(
+                    String(b.name || ""),
+                    "vi",
+                  )),
           )[0]
         : null;
     const person = hasOverride
       ? usersById.get(overrides[dateKey]) || null
       : defaultPerson;
-    if (person && projectedPoints.has(person.id)) {
+    // Lịch trước ngày bắt đầu không được cộng lại vào điểm sau khi reset.
+    // Chỉ các lượt trong đợt đang xếp mới tăng điểm dự kiến để chia đều.
+    if (
+      person &&
+      dateKey >= startDateKey &&
+      projectedPoints.has(person.id) &&
+      !completions[dateKey]
+    ) {
       projectedPoints.set(person.id, (projectedPoints.get(person.id) || 0) + 1);
       lastAssignedIndex.set(person.id, workingIndexInMonth);
     }

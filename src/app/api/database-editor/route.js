@@ -23,6 +23,7 @@ const tableDescriptions = {
   fund_transactions: "Các khoản thu và chi của quỹ phòng",
   schema_migrations: "Danh sách migration database đã được áp dụng",
   users: "Tài khoản, hồ sơ, quyền và trạng thái nhân sự",
+  trash_schedules: "Lịch đổ rác theo ngày và thông tin hoàn thành",
   water_exemptions: "Danh sách nhân sự được miễn bê nước",
   water_schedule_participants: "Danh sách người tham gia từng lịch bê nước",
   water_schedules: "Lịch bê nước theo ngày, tuần và tháng",
@@ -256,10 +257,39 @@ export async function GET(req) {
     const params = [];
 
     if (search && searchableColumns.length) {
-      conditions.push(
-        `CONCAT_WS(' ', ${searchableColumns.map((column) => `CAST(${quoteIdentifier(column.name)} AS CHAR)`).join(", ")}) LIKE ?`,
-      );
-      params.push(`%${search}%`);
+      const colExpressions = [];
+      for (const column of searchableColumns) {
+        const idCol = quoteIdentifier(column.name);
+        colExpressions.push(`COALESCE(CAST(${idCol} AS CHAR), '')`);
+        if (["date", "datetime", "timestamp"].includes(column.dataType)) {
+          colExpressions.push(
+            `COALESCE(DATE_FORMAT(${idCol}, '%d/%m/%Y %H:%i:%s'), '')`,
+          );
+          colExpressions.push(
+            `COALESCE(DATE_FORMAT(${idCol}, '%d-%m-%Y'), '')`,
+          );
+          colExpressions.push(
+            `COALESCE(DATE_FORMAT(${idCol}, '%d/%m/%Y'), '')`,
+          );
+        }
+      }
+
+      const searchTerms = [search];
+      const dmyMatch = search.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+      if (dmyMatch) {
+        const [, d, m, y] = dmyMatch;
+        searchTerms.push(`${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`);
+      }
+      const myMatch = search.match(/^(\d{1,2})[\/\-](\d{4})$/);
+      if (myMatch) {
+        const [, m, y] = myMatch;
+        searchTerms.push(`${y}-${m.padStart(2, "0")}`);
+      }
+
+      const concatExpr = `CONCAT_WS(' ', ${colExpressions.join(", ")})`;
+      const searchClauses = searchTerms.map(() => `${concatExpr} LIKE ?`);
+      conditions.push(`(${searchClauses.join(" OR ")})`);
+      searchTerms.forEach((term) => params.push(`%${term}%`));
     }
 
     if (filterType) {

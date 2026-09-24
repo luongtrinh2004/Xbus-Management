@@ -1,3 +1,7 @@
+import {
+  trashStateToRecords,
+  trashStateMetadata,
+} from "../src/libs/trashScheduleStorage.js";
 import fs from "node:fs";
 import path from "node:path";
 import mysql from "mysql2/promise";
@@ -249,9 +253,53 @@ try {
         iso(item.timestamp || item.createdAt),
       ],
     );
+  const settings = json("settings.json");
+  const trashFile = path.join(
+    root,
+    "src",
+    "data",
+    "json",
+    "trash-schedules.json",
+  );
+  const trash = fs.existsSync(trashFile)
+    ? json("trash-schedules.json")
+    : {
+        schedules: trashStateToRecords(settings),
+        ...trashStateMetadata(settings),
+      };
+  for (const row of trash.schedules || []) {
+    await upsert(
+      "INSERT INTO trash_schedules (schedule_date,user_id,completed,completed_by,completed_at) VALUES (?,?,?,?,?) ON DUPLICATE KEY UPDATE user_id=VALUES(user_id),completed=VALUES(completed),completed_by=VALUES(completed_by),completed_at=VALUES(completed_at)",
+      [
+        row.dateKey,
+        row.userId,
+        Boolean(row.completed),
+        row.completedBy,
+        iso(row.completedAt),
+      ],
+    );
+  }
+  await upsert(
+    "INSERT INTO app_documents (document_key,document_value,updated_at) VALUES (?,?,?) ON DUPLICATE KEY UPDATE document_value=VALUES(document_value),updated_at=VALUES(updated_at)",
+    [
+      "trash-schedule-meta",
+      JSON.stringify({
+        revision: trash.revision || 0,
+        generationMeta: trash.generationMeta || {},
+      }),
+      new Date(),
+    ],
+  );
+  for (const key of [
+    "trashScheduleOverrides",
+    "trashScheduleCompletions",
+    "trashScheduleRevision",
+    "trashScheduleGenerationMeta",
+  ])
+    delete settings[key];
   await upsert(
     "INSERT INTO app_settings (setting_key,setting_value,updated_at) VALUES (?,?,?) ON DUPLICATE KEY UPDATE setting_value=VALUES(setting_value),updated_at=VALUES(updated_at)",
-    ["global", JSON.stringify(json("settings.json")), new Date()],
+    ["global", JSON.stringify(settings), new Date()],
   );
   await upsert(
     "INSERT INTO app_documents (document_key,document_value,updated_at) VALUES (?,?,?) ON DUPLICATE KEY UPDATE document_value=VALUES(document_value),updated_at=VALUES(updated_at)",

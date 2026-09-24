@@ -27,6 +27,7 @@ import TablePaginationComponent from "@components/TablePaginationComponent";
 import { formatVietnamDateTime } from "@/libs/dateTime";
 
 const actionLabels = {
+  RESET_SCHEDULING_POINTS: "Đặt lại điểm rèn luyện",
   CREATE_USER: "Thêm nhân sự",
   UPDATE_USER: "Cập nhật nhân sự",
   DELETE_USER: "Xóa nhân sự",

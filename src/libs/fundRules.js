@@ -195,3 +195,60 @@ export function applyFundBalances(funds) {
   }
   return funds;
 }
+
+// Số dư quỹ độc lập với nghĩa vụ đóng tiền của từng thành viên.
+// Chỉ lấy số dư nhập ban đầu ở kỳ đầu tiên; các kỳ sau chuyển tiếp từ thu/chi.
+export function summarizeFundCash(funds, selectedPeriod = null) {
+  const ordered = [...funds].sort((a, b) =>
+    periodKey(a).localeCompare(periodKey(b)),
+  );
+  const initialBalance = Number(ordered[0]?.openingBalance) || 0;
+  let balance = initialBalance;
+  let memberIncome = 0;
+  let additionalIncome = 0;
+  let totalExpense = 0;
+  for (const fund of ordered) {
+    const key = periodKey(fund);
+    if (selectedPeriod && key > selectedPeriod) break;
+    const openingBalance = balance;
+    const members = (fund.members || []).reduce(
+      (sum, member) => sum + (member.paid ? Number(member.amount) || 0 : 0),
+      0,
+    );
+    const incomes = (fund.incomes || []).reduce(
+      (sum, item) => sum + (Number(item.amount) || 0),
+      0,
+    );
+    const expenses = (fund.expenses || []).reduce(
+      (sum, item) => sum + (Number(item.amount) || 0),
+      0,
+    );
+    balance += members + incomes - expenses;
+    memberIncome += members;
+    additionalIncome += incomes;
+    totalExpense += expenses;
+    if (key === selectedPeriod)
+      return {
+        openingBalance,
+        memberIncome: members,
+        totalIncome: members + incomes,
+        totalExpense: expenses,
+        balance,
+      };
+  }
+  if (selectedPeriod)
+    return {
+      openingBalance: balance,
+      memberIncome: 0,
+      totalIncome: 0,
+      totalExpense: 0,
+      balance,
+    };
+  return {
+    openingBalance: initialBalance,
+    memberIncome,
+    totalIncome: memberIncome + additionalIncome,
+    totalExpense,
+    balance,
+  };
+}

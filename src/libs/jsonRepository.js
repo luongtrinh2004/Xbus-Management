@@ -1,3 +1,8 @@
+import {
+  trashStateToRecords,
+  trashRecordsToState,
+  trashStateMetadata,
+} from "./trashScheduleStorage.js";
 import fs from "fs";
 import path from "path";
 
@@ -195,4 +200,29 @@ export function appendAuditLog({
   logs.unshift(newLog); // đưa log mới nhất lên đầu
   writeJsonFile("audit-logs.json", { auditLogs: logs });
   return newLog;
+}
+
+export function getTrashScheduleState() {
+  const file = path.join(DATA_DIR, "trash-schedules.json");
+  if (!fs.existsSync(file)) {
+    // Upgrade older local installations only after the new file is saved successfully.
+    const settings = getSettings();
+    saveTrashScheduleState(settings);
+    for (const key of [
+      "trashScheduleOverrides",
+      "trashScheduleCompletions",
+      "trashScheduleRevision",
+      "trashScheduleGenerationMeta",
+    ])
+      delete settings[key];
+    saveSettings(settings);
+  }
+  const data = JSON.parse(fs.readFileSync(file, "utf8"));
+  return trashRecordsToState(data.schedules || [], data);
+}
+export function saveTrashScheduleState(state) {
+  return writeJsonFile("trash-schedules.json", {
+    schedules: trashStateToRecords(state),
+    ...trashStateMetadata(state),
+  });
 }
