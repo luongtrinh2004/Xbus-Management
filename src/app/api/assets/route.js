@@ -18,6 +18,7 @@ const canManageAssets = (token) =>
   token?.role === "admin" || token?.role === "assistant";
 const canViewAssets = (token) => Boolean(token);
 const isApproved = (item) => !item.status || item.status === "approved";
+const externalPersonName = "Người khác";
 const normalizeData = (data) => ({
   imports: Array.isArray(data.imports) ? data.imports : [],
   exports: Array.isArray(data.exports) ? data.exports : [],
@@ -28,6 +29,7 @@ const normalizeData = (data) => ({
 
 const normalizeText = (value) => String(value || "").trim();
 const stockKey = (item) =>
+  normalizeText(item.documentCode) ||
   assetDocumentCodeFromName(item.name || item.productName);
 const findProduct = (products, input) => {
   const productId = normalizeText(input.productId);
@@ -38,7 +40,7 @@ const findProduct = (products, input) => {
     (item) =>
       (productId && item.id === productId) ||
       (code && normalizeText(item.code).toUpperCase() === code) ||
-      (documentCode && assetDocumentCodeFromName(item.name) === documentCode),
+      (documentCode && stockKey(item) === documentCode),
   );
 };
 const transactionBaseKey = (item) =>
@@ -101,7 +103,8 @@ const mergeTransactions = (current, incoming, type, token) => {
         : null;
 
     const normalized = {
-      documentCode: assetDocumentCodeFromName(name),
+      documentCode:
+        normalizeText(item.documentCode) || assetDocumentCodeFromName(name),
       code,
       name,
       category: normalizeText(item.category),
@@ -214,11 +217,15 @@ export async function POST(req) {
 
     const users = await getUsers();
     const personName = body.person.trim();
-    const matchedPerson = users.find(
-      (u) =>
-        u.name?.trim().toLowerCase() === personName.toLowerCase() ||
-        (body.personId && u.id === body.personId),
-    );
+    const matchedPerson =
+      users.find(
+        (u) =>
+          u.name?.trim().toLowerCase() === personName.toLowerCase() ||
+          (body.personId && u.id === body.personId),
+      ) ||
+      (type === "export" && personName === externalPersonName
+        ? { name: externalPersonName }
+        : null);
     if (!matchedPerson) {
       return NextResponse.json(
         {
@@ -231,11 +238,15 @@ export async function POST(req) {
     let matchedRecipient = null;
     if (type === "export") {
       const issuedToName = body.issuedTo.trim();
-      matchedRecipient = users.find(
-        (u) =>
-          u.name?.trim().toLowerCase() === issuedToName.toLowerCase() ||
-          (body.issuedToId && u.id === body.issuedToId),
-      );
+      matchedRecipient =
+        users.find(
+          (u) =>
+            u.name?.trim().toLowerCase() === issuedToName.toLowerCase() ||
+            (body.issuedToId && u.id === body.issuedToId),
+        ) ||
+        (issuedToName === externalPersonName
+          ? { name: externalPersonName }
+          : null);
       if (!matchedRecipient) {
         return NextResponse.json(
           {
@@ -250,7 +261,7 @@ export async function POST(req) {
       data.categories.find((item) => item.id === product.categoryId)?.name ||
       "";
     const normalizedCode = normalizeText(product.code).toUpperCase();
-    const docCode = assetDocumentCodeFromName(product.name);
+    const docCode = stockKey(product);
 
     if (type === "export") {
       const imported = data.imports
@@ -415,7 +426,7 @@ export async function PUT(req) {
         const desired = Number(item.quantity);
         const product = productByCode.get(code);
         if (!product || !Number.isInteger(desired) || desired < 0) continue;
-        const documentCode = assetDocumentCodeFromName(product.name);
+        const documentCode = stockKey(product);
         const difference = desired - (balances.get(documentCode) || 0);
         if (!difference) continue;
         const type = difference > 0 ? "import" : "export";
@@ -503,6 +514,9 @@ export async function PUT(req) {
         const requestedUnit = normalizeText(item.unit);
         return {
           ...item,
+          documentCode: product
+            ? stockKey(product)
+            : assetDocumentCodeFromName(requestedName),
           code: product?.code || "",
           name: product?.name || requestedName,
           category: product
@@ -801,11 +815,15 @@ export async function PATCH(req) {
 
     const users = await getUsers();
     const personName = body.person.trim();
-    const matchedPerson = users.find(
-      (u) =>
-        u.name?.trim().toLowerCase() === personName.toLowerCase() ||
-        (body.personId && u.id === body.personId),
-    );
+    const matchedPerson =
+      users.find(
+        (u) =>
+          u.name?.trim().toLowerCase() === personName.toLowerCase() ||
+          (body.personId && u.id === body.personId),
+      ) ||
+      (type === "export" && personName === externalPersonName
+        ? { name: externalPersonName }
+        : null);
     if (!matchedPerson) {
       return NextResponse.json(
         {
@@ -818,11 +836,15 @@ export async function PATCH(req) {
     let matchedRecipient = null;
     if (type === "export") {
       const issuedToName = body.issuedTo.trim();
-      matchedRecipient = users.find(
-        (u) =>
-          u.name?.trim().toLowerCase() === issuedToName.toLowerCase() ||
-          (body.issuedToId && u.id === body.issuedToId),
-      );
+      matchedRecipient =
+        users.find(
+          (u) =>
+            u.name?.trim().toLowerCase() === issuedToName.toLowerCase() ||
+            (body.issuedToId && u.id === body.issuedToId),
+        ) ||
+        (issuedToName === externalPersonName
+          ? { name: externalPersonName }
+          : null);
       if (!matchedRecipient) {
         return NextResponse.json(
           {
@@ -843,7 +865,7 @@ export async function PATCH(req) {
       ...previous,
       ticketId: previous.ticketId || previous.id,
       status: previous.status || "approved",
-      documentCode: assetDocumentCodeFromName(product.name),
+      documentCode: stockKey(product),
       code: normalizedCode,
       name: product.name,
       category: categoryName,
@@ -859,34 +881,6 @@ export async function PATCH(req) {
       updatedAt: new Date().toISOString(),
     };
     collection[index] = updated;
-
-    if (isApproved(updated)) {
-      const balances = new Map();
-      data.imports.filter(isApproved).forEach((item) => {
-        const code = stockKey(item);
-        balances.set(
-          code,
-          (balances.get(code) || 0) + Number(item.quantity || 0),
-        );
-      });
-      data.exports.filter(isApproved).forEach((item) => {
-        const code = stockKey(item);
-        balances.set(
-          code,
-          (balances.get(code) || 0) - Number(item.quantity || 0),
-        );
-      });
-      const invalidBalance = [...balances.entries()].find(
-        ([, balance]) => balance < 0,
-      );
-      if (invalidBalance)
-        return NextResponse.json(
-          {
-            error: `Không thể cập nhật vì tồn kho ${invalidBalance[0]} sẽ âm ${Math.abs(invalidBalance[1])}`,
-          },
-          { status: 400 },
-        );
-    }
 
     await updateAssetTransaction(type, updated);
     await appendAssetHistory({

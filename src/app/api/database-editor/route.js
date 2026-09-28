@@ -50,6 +50,7 @@ const columnLabels = {
     updated_at: "Ngày cập nhật",
   },
   asset_products: {
+    document_code: "Số chứng từ",
     id: "Mã bản ghi",
     code: "Mã sản phẩm",
     name: "Tên sản phẩm",

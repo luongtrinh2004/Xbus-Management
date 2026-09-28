@@ -414,7 +414,7 @@ export default function HomePage() {
           <CardHeader
             title={
               <SectionTitle icon="tabler-award" color={WARNING}>
-                Top 5 Điểm Rèn Luyện
+                Top 5 Điểm Công Dân
               </SectionTitle>
             }
           />

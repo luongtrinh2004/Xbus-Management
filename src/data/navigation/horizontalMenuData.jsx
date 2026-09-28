@@ -46,6 +46,18 @@ const horizontalMenuData = [
     roles: ["user", "assistant", "admin"],
   },
   {
+    label: "Trà chiều",
+    href: "/afternoon-tea",
+    icon: "tabler-bubble-tea",
+    roles: ["user", "assistant", "admin"],
+  },
+  {
+    label: "Ảnh và video",
+    href: "/gallery",
+    icon: "tabler-photo-video",
+    roles: ["user", "assistant", "admin"],
+  },
+  {
     label: "Lịch sử hoạt động",
     href: "/audit-logs",
     icon: "tabler-history",

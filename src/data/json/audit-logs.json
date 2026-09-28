@@ -1,6 +1,30 @@
 {
   "auditLogs": [
     {
+      "id": "log_1790594925436_rt2t",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "CANCEL_FUND_PAYMENT",
+      "targetType": "FUND",
+      "targetId": "fund_2026_09",
+      "details": "Hủy xác nhận đóng quỹ tháng 9/2026 của Quản trị viên Hệ thống",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-28T11:28:45.436Z"
+    },
+    {
+      "id": "log_1790325369784_qbys",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "UPDATE_ASSET_TRANSACTION",
+      "targetType": "ASSET",
+      "targetId": "import_excel_1790068274502_2_gwov",
+      "details": "Cập nhật phiếu nhập 3 Altos + Dây + Hubb (CB-002)",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-09-25T08:36:09.784Z"
+    },
+    {
       "id": "log_1790241543506_zz4f",
       "adminId": "usr_admin_001",
       "adminName": "Quản trị viên Hệ thống",

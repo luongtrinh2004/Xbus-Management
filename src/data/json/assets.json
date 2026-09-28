@@ -320,16 +320,16 @@
       "rejectReason": ""
     },
     {
-      "documentCode": "altos_day_hub",
-      "code": "",
-      "name": "Altos + Dây + Hub",
+      "documentCode": "altos_day_hubb",
+      "code": "CB-002",
+      "name": "Altos + Dây + Hubb",
       "category": "",
-      "unit": "",
+      "unit": "Cái",
       "description": "",
       "date": "2026-03-04",
       "quantity": 3,
       "location": "",
-      "person": "QuyênNTH",
+      "person": "Quản trị viên Hệ thống",
       "issuedTo": "",
       "note": "",
       "id": "import_excel_1790068274502_2_gwov",
@@ -340,7 +340,9 @@
       "approvedAt": null,
       "rejectedBy": null,
       "rejectedAt": null,
-      "rejectReason": ""
+      "rejectReason": "",
+      "performedBy": "usr_admin_001",
+      "updatedAt": "2026-09-25T08:36:09.778Z"
     },
     {
       "documentCode": "altos_day_hub",
@@ -6354,7 +6356,7 @@
       "rejectReason": ""
     },
     {
-      "documentCode": "altos_day_hub",
+      "documentCode": "altos_day_hubb",
       "code": "CB-002",
       "name": "Altos + Dây + Hub",
       "category": "",
@@ -6929,7 +6931,7 @@
       "rejectReason": ""
     },
     {
-      "documentCode": "altos_day_hub",
+      "documentCode": "altos_day_hubb",
       "code": "CB-002",
       "name": "Altos + Dây + Hub",
       "category": "",
@@ -7504,7 +7506,7 @@
       "rejectReason": ""
     },
     {
-      "documentCode": "altos_day_hub",
+      "documentCode": "altos_day_hubb",
       "code": "CB-002",
       "name": "Altos + Dây + Hub",
       "category": "",
@@ -8355,7 +8357,7 @@
       "rejectReason": ""
     },
     {
-      "documentCode": "altos_day_hub",
+      "documentCode": "altos_day_hubb",
       "code": "CB-002",
       "name": "Altos + Dây + Hub",
       "category": "",
@@ -10162,14 +10164,14 @@
       "createdAt": "2026-09-22T09:11:27.673Z"
     },
     {
+      "id": "product_mucgfum2_95365ea489ddc1e8",
       "code": "CB-002",
-      "name": "Altos + Dây + Hub",
+      "name": "Altos + Dây + Hubb",
       "categoryId": "",
       "unit": "Cái",
       "description": "",
       "location": "",
       "active": true,
-      "id": "product_mucgfum2_95365ea489ddc1e8",
       "createdAt": "2026-09-22T09:11:27.674Z"
     },
     {

@@ -1288,9 +1288,9 @@
         {
           "userId": "usr_admin_001",
           "paid": false,
-          "amount": 150000,
-          "paidAt": "2026-09-24T03:06:55.654Z",
-          "updatedAt": "2026-09-24T03:06:55.654Z",
+          "amount": 0,
+          "paidAt": null,
+          "updatedAt": "2026-09-28T11:28:45.430Z",
           "approvedBy": "usr_admin_001",
           "memberName": "Quản trị viên Hệ thống",
           "categoryId": "category_official",
@@ -1305,7 +1305,7 @@
           "checkoutUrl": "https://pay.payos.vn/web/2120c9f48053407dbcb82b2e3e771fc3",
           "createdAt": "2026-09-16T10:19:38.860Z",
           "voluntarySurplus": false,
-          "pendingApproval": true,
+          "pendingApproval": false,
           "paymentMethod": "manual",
           "note": "",
           "obligationCancelled": false,
@@ -1748,7 +1748,7 @@
       ],
       "createdBy": "usr_admin_001",
       "createdAt": "2026-09-01T08:00:00.000Z",
-      "updatedAt": "2026-09-24T03:06:32.808Z",
+      "updatedAt": "2026-09-28T11:28:45.430Z",
       "incomes": [
         {
           "id": "inc_1789384385780",

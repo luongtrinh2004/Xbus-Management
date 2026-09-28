@@ -655,6 +655,7 @@ export async function getAssets() {
     const categories = [...categoriesByName.values()];
     const products = (data.products || []).map((item) => ({
       ...item,
+      documentCode: item.documentCode || assetDocumentCodeFromName(item.name),
       categoryId: item.categoryId || "",
     }));
     const unitNames = new Set(
@@ -708,12 +709,16 @@ export async function getAssets() {
       if (!product)
         return {
           ...base,
-          documentCode: assetDocumentCodeFromName(item.name),
+          documentCode:
+            item.documentCode || assetDocumentCodeFromName(item.name),
           unit: item.unit || "",
         };
       return {
         ...base,
-        documentCode: assetDocumentCodeFromName(product.name),
+        documentCode:
+          item.documentCode ||
+          product.documentCode ||
+          assetDocumentCodeFromName(product.name),
         category: categoryNames.get(product.categoryId) || "",
         unit: product.unit || item.unit || "",
       };
@@ -803,6 +808,14 @@ export async function getAssets() {
       query("SELECT * FROM asset_product_units ORDER BY name"),
     ],
   );
+  for (const product of productRows) {
+    if (product.document_code) continue;
+    product.document_code = assetDocumentCodeFromName(product.name);
+    await query("UPDATE asset_products SET document_code=? WHERE id=?", [
+      product.document_code || null,
+      product.id,
+    ]);
+  }
   const formatSqlTicketCode = (ticketId, index) => {
     if (ticketId && /^[A-Z]{3}[0-9]{3}$/.test(ticketId)) {
       return ticketId;
@@ -817,7 +830,7 @@ export async function getAssets() {
       const updates = [];
       const params = [];
       const documentCode = assetDocumentCodeFromName(row.product_name);
-      if (documentCode && row.document_code !== documentCode) {
+      if (documentCode && !row.document_code) {
         updates.push("document_code=?");
         params.push(documentCode);
         row.document_code = documentCode;
@@ -877,6 +890,7 @@ export async function getAssets() {
     exports: exportRows.map(map),
     products: productRows.map((row) => ({
       id: row.id,
+      documentCode: row.document_code || "",
       code: row.code || "",
       name: row.name,
       categoryId: row.product_category_id || "",
@@ -903,30 +917,103 @@ export async function getAssets() {
 }
 
 export async function saveAssetProduct(product) {
+  product.documentCode = assetDocumentCodeFromName(product.name);
+  product.updatedAt = new Date().toISOString();
   if (!mysqlEnabled()) {
     const data = await json.getAssets();
     const products = Array.isArray(data.products) ? data.products : [];
     const index = products.findIndex((item) => item.id === product.id);
+    const previous = products[index];
+    const oldDocumentCode =
+      previous &&
+      (previous.documentCode || assetDocumentCodeFromName(previous.name));
+    const category =
+      (data.categories || []).find((item) => item.id === product.categoryId)
+        ?.name || "";
+    const synchronize = (items = []) =>
+      items.map((item) => {
+        const key = item.documentCode || assetDocumentCodeFromName(item.name);
+        if (!previous || !oldDocumentCode || key !== oldDocumentCode)
+          return item;
+        return {
+          ...item,
+          documentCode: product.documentCode,
+          code: product.code,
+          name: product.name,
+          category,
+          unit: product.unit,
+          description: product.description || "",
+          location: product.location || "",
+          updatedAt: product.updatedAt,
+        };
+      });
     if (index >= 0) products[index] = product;
     else products.push(product);
-    return json.saveAssets({ ...data, products });
+    return json.saveAssets({
+      ...data,
+      products,
+      imports: synchronize(data.imports),
+      exports: synchronize(data.exports),
+    });
   }
-  await query(
-    "INSERT INTO asset_products (id,code,name,product_category_id,unit_name,description,storage_location,active,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE code=VALUES(code),name=VALUES(name),product_category_id=VALUES(product_category_id),unit_name=VALUES(unit_name),description=VALUES(description),storage_location=VALUES(storage_location),active=VALUES(active),updated_at=VALUES(updated_at)",
-    [
-      product.id,
-      product.code || null,
-      product.name,
-      product.categoryId || null,
-      product.unit,
-      product.description || null,
-      product.location || null,
-      Boolean(product.active),
-      product.createdAt ? new Date(product.createdAt) : new Date(),
-      new Date(),
-    ],
-  );
-  return true;
+  const connection = await getMysqlPool().getConnection();
+  try {
+    await connection.beginTransaction();
+    const [[previous]] = await connection.execute(
+      "SELECT * FROM asset_products WHERE id=? FOR UPDATE",
+      [product.id],
+    );
+    await connection.execute(
+      "INSERT INTO asset_products (id,document_code,code,name,product_category_id,unit_name,description,storage_location,active,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE document_code=VALUES(document_code),code=VALUES(code),name=VALUES(name),product_category_id=VALUES(product_category_id),unit_name=VALUES(unit_name),description=VALUES(description),storage_location=VALUES(storage_location),active=VALUES(active),updated_at=VALUES(updated_at)",
+      [
+        product.id,
+        product.documentCode || null,
+        product.code || null,
+        product.name,
+        product.categoryId || null,
+        product.unit,
+        product.description || null,
+        product.location || null,
+        Boolean(product.active),
+        product.createdAt ? new Date(product.createdAt) : new Date(),
+        new Date(),
+      ],
+    );
+    if (previous) {
+      const oldDocumentCode =
+        previous.document_code || assetDocumentCodeFromName(previous.name);
+      const [[category]] = await connection.execute(
+        "SELECT name FROM asset_product_categories WHERE id=?",
+        [product.categoryId || ""],
+      );
+      await connection.execute(
+        `UPDATE asset_transactions SET document_code=?, product_code=?, product_name=?,
+          product_category_name=?, unit_name=?, product_description=?, storage_location=?, updated_at=?
+         WHERE (? <> '' AND document_code=?)
+            OR ((document_code IS NULL OR document_code='') AND product_name=?)`,
+        [
+          product.documentCode || null,
+          product.code || "",
+          product.name,
+          category?.name || null,
+          product.unit,
+          product.description || null,
+          product.location || null,
+          new Date(),
+          oldDocumentCode,
+          oldDocumentCode,
+          previous.name,
+        ],
+      );
+    }
+    await connection.commit();
+    return true;
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
 }
 
 export async function saveAssetCategory(category) {
@@ -1032,7 +1119,7 @@ const assetTransactionValues = (item, type) => [
   item.rejectedBy || null,
   item.rejectedAt ? new Date(item.rejectedAt) : null,
   item.rejectReason || null,
-  assetDocumentCodeFromName(item.name) || null,
+  item.documentCode || assetDocumentCodeFromName(item.name) || null,
   type,
   item.code,
   item.name,
@@ -1091,7 +1178,7 @@ export async function updateAssetTransaction(type, item) {
       item.rejectedBy || null,
       item.rejectedAt ? new Date(item.rejectedAt) : null,
       item.rejectReason || null,
-      assetDocumentCodeFromName(item.name) || null,
+      item.documentCode || assetDocumentCodeFromName(item.name) || null,
       item.code,
       item.name,
       item.category || null,

@@ -61,6 +61,12 @@ const makeImportLine = (currentName = "") => ({
   clientId: `asset_line_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
   person: currentName || "",
 });
+const externalPersonOption = {
+  id: "external-person",
+  name: "Người khác",
+  code: "Ngoài team",
+  isExternal: true,
+};
 export const indexToTicketCode = (n) => {
   const num = Math.max(0, n) % 1000;
   let charIndex = Math.floor(Math.max(0, n) / 1000);
@@ -706,6 +712,16 @@ function TransactionDialog({
       rows.length > 1 ? rows.filter((row) => row.clientId !== clientId) : rows,
     );
   const assetOptions = products.filter((item) => item.active);
+  const borrowerOptions =
+    type === "export" ? [externalPersonOption, ...people] : people;
+  const recipientOptions = [externalPersonOption, ...people];
+  const isExternalPerson = (name) => name === externalPersonOption.name;
+  const isValidTeamOrExternalPerson = (name) =>
+    Boolean(
+      name &&
+        (people.some((person) => person.name === name) ||
+          (type === "export" && isExternalPerson(name))),
+    );
   const isApprovedTx = (item) => !item.status || item.status === "approved";
   const approvedImports = useMemo(
     () => (imports || []).filter(isApprovedTx),
@@ -739,7 +755,10 @@ function TransactionDialog({
       : 0);
   const quantity = Number(form.quantity);
   const quantityError =
-    type === "export" && Boolean(selectedKey) && quantity > availableForExport;
+    !editingItem &&
+    type === "export" &&
+    Boolean(selectedKey) &&
+    quantity > availableForExport;
   const stockForProduct = (product) =>
     approvedImports
       .filter((item) => transactionKey(item) === productKey(product))
@@ -751,9 +770,7 @@ function TransactionDialog({
     importLines
       .filter((item) => productKey(item) === productKey(product))
       .reduce((sum, item) => sum + Number(item.quantity || 0), 0);
-  const isPersonValid = Boolean(
-    form.person && people.some((p) => p.name === form.person),
-  );
+  const isPersonValid = isValidTeamOrExternalPerson(form.person);
 
   const areLinesValid =
     importLines.length > 0 &&
@@ -765,7 +782,11 @@ function TransactionDialog({
       const isQtyValid = Number.isInteger(qty) && qty > 0;
       const isIssuedToValid =
         type !== "export" ||
-        Boolean(row.issuedTo && people.some((p) => p.name === row.issuedTo));
+        Boolean(
+          row.issuedTo &&
+            (people.some((person) => person.name === row.issuedTo) ||
+              isExternalPerson(row.issuedTo)),
+        );
       const isStockSufficient =
         type !== "export" ||
         (stockForProduct(row) > 0 &&
@@ -791,7 +812,11 @@ function TransactionDialog({
   const isSingleProductValid = Boolean(selectedProduct?.active);
   const isSingleIssuedToValid =
     type !== "export" ||
-    Boolean(form.issuedTo && people.some((p) => p.name === form.issuedTo));
+    Boolean(
+      form.issuedTo &&
+        (people.some((person) => person.name === form.issuedTo) ||
+          isExternalPerson(form.issuedTo)),
+    );
 
   const singleTransactionInvalid =
     !isBulkTransaction &&
@@ -815,7 +840,9 @@ function TransactionDialog({
         if (isBulkTransaction) {
           const invalidLine = importLines.find(
             (row) =>
-              !row.issuedTo || !people.some((p) => p.name === row.issuedTo),
+              !row.issuedTo ||
+              (!people.some((person) => person.name === row.issuedTo) &&
+                !isExternalPerson(row.issuedTo)),
           );
           if (invalidLine) {
             toast.error(
@@ -987,9 +1014,11 @@ function TransactionDialog({
                 slotProps={{ inputLabel: { shrink: true } }}
               />
               <Autocomplete
-                options={people}
+                options={borrowerOptions}
                 value={
-                  people.find((person) => person.name === form.person) || null
+                  borrowerOptions.find(
+                    (person) => person.name === form.person,
+                  ) || null
                 }
                 onChange={(_, person) => {
                   setForm((prev) => ({ ...prev, person: person?.name || "" }));
@@ -1183,10 +1212,11 @@ function TransactionDialog({
                 <CustomTextField label="Vị trí" value={row.location} disabled />
                 {type === "export" && (
                   <Autocomplete
-                    options={people}
+                    options={recipientOptions}
                     value={
-                      people.find((person) => person.name === row.issuedTo) ||
-                      null
+                      recipientOptions.find(
+                        (person) => person.name === row.issuedTo,
+                      ) || null
                     }
                     onChange={(_, person) =>
                       updateImportLine(row.clientId, {
@@ -1361,7 +1391,7 @@ function TransactionDialog({
               onChange={(e) => setForm({ ...form, quantity: e.target.value })}
               error={quantityError}
               helperText={
-                type === "export" && form.code
+                type === "export" && form.code && !editingItem
                   ? quantityError
                     ? `Số lượng vượt quá tồn kho (${availableForExport})`
                     : `Có thể xuất tối đa ${availableForExport}`
@@ -1369,14 +1399,17 @@ function TransactionDialog({
               }
               inputProps={{
                 min: 1,
-                ...(type === "export" ? { max: availableForExport } : {}),
+                ...(type === "export" && !editingItem
+                  ? { max: availableForExport }
+                  : {}),
               }}
             />
             <CustomTextField label="Vị trí *" value={form.location} disabled />
             <Autocomplete
-              options={people}
+              options={borrowerOptions}
               value={
-                people.find((person) => person.name === form.person) || null
+                borrowerOptions.find((person) => person.name === form.person) ||
+                null
               }
               onChange={(_, person) => {
                 setForm((prev) => ({ ...prev, person: person?.name || "" }));
@@ -1475,9 +1508,11 @@ function TransactionDialog({
             />
             {type === "export" && (
               <Autocomplete
-                options={people}
+                options={recipientOptions}
                 value={
-                  people.find((person) => person.name === form.issuedTo) || null
+                  recipientOptions.find(
+                    (person) => person.name === form.issuedTo,
+                  ) || null
                 }
                 onChange={(_, person) =>
                   setForm((prev) => ({ ...prev, issuedTo: person?.name || "" }))
@@ -1536,11 +1571,15 @@ function TransactionDialog({
                     placeholder="Tìm theo tên hoặc mã nhân sự"
                     error={Boolean(
                       form.issuedTo &&
-                        !people.some((p) => p.name === form.issuedTo),
+                        !people.some(
+                          (person) => person.name === form.issuedTo,
+                        ) &&
+                        !isExternalPerson(form.issuedTo),
                     )}
                     helperText={
                       form.issuedTo &&
-                      !people.some((p) => p.name === form.issuedTo)
+                      !people.some((person) => person.name === form.issuedTo) &&
+                      !isExternalPerson(form.issuedTo)
                         ? "Vui lòng chọn từ danh sách nhân viên"
                         : ""
                     }
@@ -2417,49 +2456,61 @@ export default function AssetsPage() {
   };
   const exportCurrentList = () => {
     const workbook = XLSX.utils.book_new();
-    const importRows = data.imports.map((item) => ({
-      "Số chứng từ": item.documentCode || "",
-      "Ngày nhập": item.date,
+    const statusLabel = (item) =>
+      item.status === "pending"
+        ? "Đang chờ"
+        : item.status === "rejected"
+          ? "Từ chối"
+          : "Đã duyệt";
+    const importRows = data.imports.map((item, index) => ({
+      STT: index + 1,
+      "Mã phiếu": item.ticketId || "",
+      "Mã sản phẩm": item.code || "",
       "Loại SP": item.category || "",
-      "Mã sản phẩm": item.code,
-      "Tên sản phẩm": item.name,
+      "Tên sản phẩm": item.name || "",
       "Mô tả sản phẩm": item.description || "",
-      "Người nhập kho": item.person,
+      "Người nhập kho": item.person || "",
       "Số lượng": item.quantity,
       "Đơn vị tính": item.unit || "",
-      "Vị trí": item.location,
+      "Vị trí": item.location || "",
+      "Ngày nhập": item.date ? formatDate(item.date) : "",
+      "Trạng thái": statusLabel(item),
+      "Người phê duyệt": item.approvedByName || "",
       "Ghi chú": item.note || "",
     }));
-    const exportRows = data.exports.map((item) => ({
-      "Số chứng từ": item.documentCode || "",
-      "Ngày xuất": item.date,
+    const exportRows = data.exports.map((item, index) => ({
+      STT: index + 1,
+      "Mã phiếu": item.ticketId || "",
+      "Mã sản phẩm": item.code || "",
       "Loại SP": item.category || "",
-      "Mã sản phẩm": item.code,
-      "Tên sản phẩm": item.name,
-      "Người mượn tài sản": item.person,
+      "Tên sản phẩm": item.name || "",
+      "Người mượn tài sản": item.person || "",
       "Xuất cho": item.issuedTo || "",
       "Số lượng": item.quantity,
       "Đơn vị tính": item.unit || "",
+      "Ngày xuất": item.date ? formatDate(item.date) : "",
+      "Trạng thái": statusLabel(item),
+      "Người phê duyệt": item.approvedByName || "",
       "Ghi chú": item.note || "",
     }));
-    const stockRows = products.map((item) => ({
-      "Mã SP": item.code,
-      "Tên SP": item.name,
-      "Loại sản phẩm": item.categoryName || "",
+    const stockRows = stockProducts.map((item, index) => ({
+      STT: index + 1,
+      "Mã sản phẩm": item.code || "",
+      "Loại SP": item.categoryName || "",
+      "Tên sản phẩm": item.name || "",
       "Đơn vị tính": item.unit || "",
       "Vị trí": item.location || "",
       "Tổng nhập": item.totalImport,
       "Tổng xuất": item.totalExport,
       "Tồn kho": item.quantity,
     }));
-    const productRows = (data.products || []).map((item) => ({
+    const productRows = products.map((item, index) => ({
+      STT: index + 1,
       "Mã sản phẩm": item.code || "",
+      "Loại SP": item.categoryName || "",
       "Tên sản phẩm": item.name || "",
-      "Loại sản phẩm":
-        (data.categories || []).find((entry) => entry.id === item.categoryId)
-          ?.name || "",
+      "Mô tả sản phẩm": item.description || "",
       "Đơn vị tính": item.unit || "",
-      "Mô tả": item.description || "",
       "Vị trí": item.location || "",
       "Trạng thái": item.active ? "Hoạt động" : "Ngừng sử dụng",
     }));

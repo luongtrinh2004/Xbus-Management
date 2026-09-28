@@ -12,6 +12,7 @@ const accessControl: Record<Role, string[]> = {
     "/fund",
     "/assets",
     "/afternoon-tea",
+    "/gallery",
   ],
   assistant: [
     "/home",
@@ -20,6 +21,7 @@ const accessControl: Record<Role, string[]> = {
     "/fund",
     "/assets",
     "/afternoon-tea",
+    "/gallery",
     "/audit-logs",
     "/edit-database",
   ],
@@ -93,6 +95,7 @@ export const config = {
     "/fund",
     "/assets",
     "/afternoon-tea",
+    "/gallery",
     "/audit-logs",
     "/login",
     "/pending-approval",

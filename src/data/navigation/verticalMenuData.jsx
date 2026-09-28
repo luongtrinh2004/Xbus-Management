@@ -53,6 +53,12 @@ const verticalMenuData = [
     roles: ["user", "assistant", "admin"],
   },
   {
+    label: "Ảnh và video",
+    href: "/gallery",
+    icon: "tabler-photo-video",
+    roles: ["user", "assistant", "admin"],
+  },
+  {
     label: "Lịch sử hoạt động",
     href: "/audit-logs",
     icon: "tabler-history",
