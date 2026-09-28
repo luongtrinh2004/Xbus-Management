@@ -848,9 +848,16 @@ export default function DatabaseEditorPage() {
       >
         {/* SIDEBAR DANH SÁCH BẢNG */}
         <Card
-          sx={{ maxHeight: { lg: "calc(100vh - 180px)" }, overflow: "hidden" }}
+          sx={{
+            position: { lg: "sticky" },
+            top: { lg: 80 },
+            display: "flex",
+            flexDirection: "column",
+            maxHeight: { xs: 600, lg: "calc(100vh - 95px)" },
+            overflow: "hidden",
+          }}
         >
-          <Box sx={{ p: 2, pb: 1.5 }}>
+          <Box sx={{ p: 2, pb: 1.5, flexShrink: 0 }}>
             <Box
               sx={{
                 display: "flex",
@@ -890,8 +897,35 @@ export default function DatabaseEditorPage() {
             dense
             disablePadding
             sx={{
-              maxHeight: { lg: "calc(100vh - 270px)" },
+              flex: 1,
+              minHeight: 0,
               overflowY: "auto",
+              maxHeight: { xs: 500, lg: "calc(100vh - 180px)" },
+              scrollbarWidth: "thin",
+              scrollbarColor: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "rgba(115, 103, 240, 0.6) rgba(255, 255, 255, 0.05)"
+                  : "rgba(115, 103, 240, 0.45) rgba(0, 0, 0, 0.04)",
+              "&::-webkit-scrollbar": {
+                width: 7,
+              },
+              "&::-webkit-scrollbar-track": {
+                background: (theme) =>
+                  theme.palette.mode === "dark"
+                    ? "rgba(255, 255, 255, 0.04)"
+                    : "rgba(0, 0, 0, 0.03)",
+                borderRadius: 4,
+              },
+              "&::-webkit-scrollbar-thumb": {
+                backgroundColor: (theme) =>
+                  theme.palette.mode === "dark"
+                    ? "rgba(115, 103, 240, 0.6)"
+                    : "rgba(115, 103, 240, 0.45)",
+                borderRadius: 4,
+                "&:hover": {
+                  backgroundColor: "primary.main",
+                },
+              },
             }}
           >
             {filteredTables.map((table) => (
