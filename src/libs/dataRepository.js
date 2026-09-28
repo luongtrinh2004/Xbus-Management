@@ -1407,7 +1407,7 @@ export async function saveAfternoonTea(data) {
 export async function getAuditLogs() {
   if (!mysqlEnabled()) return json.getAuditLogs();
   const [rows] = await query(
-    "SELECT * FROM audit_logs WHERE timestamp >= DATE_SUB(DATE_ADD(UTC_TIMESTAMP(3), INTERVAL 7 HOUR), INTERVAL 30 DAY) ORDER BY timestamp DESC",
+    "SELECT * FROM audit_logs ORDER BY timestamp DESC",
   );
   return rows.map((item) => ({
     id: item.id,

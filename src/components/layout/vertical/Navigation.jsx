@@ -10,6 +10,7 @@ import Link from "next/link";
 import { styled, useColorScheme, useTheme } from "@mui/material/styles";
 
 // Component Imports
+import Divider from "@mui/material/Divider";
 import VerticalNav, { NavHeader, NavCollapseIcons } from "@menu/vertical-menu";
 import VerticalMenu from "./VerticalMenu";
 import NavUser from "./NavUser";
@@ -117,6 +118,7 @@ const Navigation = (props) => {
           />
         )}
       </NavHeader>
+      <Divider sx={{ borderColor: "divider", opacity: 0.6 }} />
       <StyledBoxForShadow ref={shadowRef} />
       <VerticalMenu scrollMenu={scrollMenu} />
       <NavUser />

@@ -170,18 +170,7 @@ export function saveAfternoonTea(data) {
 
 export function getAuditLogs() {
   const data = readJsonFile("audit-logs.json", { auditLogs: [] });
-  const logs = data.auditLogs || [];
-  const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
-  const activeLogs = logs.filter((log) => {
-    const timestamp = new Date(log.timestamp || log.createdAt).getTime();
-    return !Number.isFinite(timestamp) || timestamp >= cutoff;
-  });
-
-  if (activeLogs.length !== logs.length) {
-    writeJsonFile("audit-logs.json", { auditLogs: activeLogs });
-  }
-
-  return activeLogs;
+  return data.auditLogs || [];
 }
 
 /**

@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 // Third-party Imports
 import classnames from "classnames";
 
@@ -15,20 +17,24 @@ import UserDropdown from "@components/layout/shared/UserDropdown";
 import { verticalLayoutClasses } from "@layouts/utils/layoutClasses";
 
 const NavbarContent = () => {
+  const [hasAnnouncements, setHasAnnouncements] = useState(false);
+
   return (
     <div
       className={classnames(
         verticalLayoutClasses.navbarContent,
-        "flex items-center justify-between gap-4 is-full",
+        "flex items-center justify-between gap-3 is-full",
       )}
     >
-      <div className="flex items-center gap-4 shrink-0">
+      <div className="flex items-center gap-3 shrink-0">
         <NavToggle />
         <ModeDropdown />
       </div>
-      <div className="flex items-center gap-2">
-        <HeaderAnnouncements />
-        <TokenBalance />
+
+      <HeaderAnnouncements onActiveChange={setHasAnnouncements} />
+
+      <div className="flex items-center gap-2 shrink-0">
+        {!hasAnnouncements && <TokenBalance />}
         <NotificationDropdown />
         <UserDropdown />
       </div>

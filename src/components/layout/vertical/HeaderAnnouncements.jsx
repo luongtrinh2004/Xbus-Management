@@ -42,7 +42,7 @@ const birthdayMonthDay = (value) => {
   return "";
 };
 
-export default function HeaderAnnouncements() {
+export default function HeaderAnnouncements({ onActiveChange }) {
   const [users, setUsers] = useState([]);
   const [invitations, setInvitations] = useState([]);
 
@@ -97,43 +97,75 @@ export default function HeaderAnnouncements() {
     ];
   }, [invitations, users]);
 
-  if (!messages.length) return null;
+  const hasMessages = messages.length > 0;
+
+  useEffect(() => {
+    onActiveChange?.(hasMessages);
+  }, [hasMessages, onActiveChange]);
+
+  if (!hasMessages) return null;
 
   return (
     <Box
       aria-label="Thông báo"
       sx={{
-        width: { xs: 180, sm: 360 },
-        maxWidth: "35vw",
+        flex: 1,
+        minWidth: 0,
+        height: 36,
+        display: "flex",
+        alignItems: "center",
         overflow: "hidden",
-        borderRadius: 1.5,
+        borderRadius: 2,
         bgcolor: "error.main",
         color: "common.white",
         px: 2,
-        py: 1.1,
-        boxShadow: "0 2px 8px rgba(255,76,81,.28)",
-        "@keyframes header-announcement": {
-          "0%": { transform: "translateX(-105%)" },
-          "100%": { transform: "translateX(100vw)" },
+        boxShadow: "0 2px 8px rgba(255, 76, 81, 0.28)",
+        position: "relative",
+        cursor: "default",
+        userSelect: "none",
+        "&:hover .header-marquee-track": {
+          animationPlayState: "paused",
+        },
+        "@keyframes header-marquee-ltr": {
+          "0%": {
+            left: 0,
+            transform: "translateY(-50%) translateX(-100%)",
+          },
+          "100%": {
+            left: "100%",
+            transform: "translateY(-50%) translateX(0%)",
+          },
         },
       }}
     >
-      <Typography
-        component="div"
-        style={{ color: "#fff" }}
+      <Box
+        className="header-marquee-track"
         sx={{
-          color: "#fff !important",
-          fontSize: "1.0625rem",
-          fontWeight: 800,
-          lineHeight: 1.5,
-          letterSpacing: 0.2,
-          display: "inline-block",
-          minWidth: "max-content",
-          animation: "header-announcement 14s linear infinite",
+          position: "absolute",
+          top: "50%",
+          left: 0,
+          whiteSpace: "nowrap",
+          display: "inline-flex",
+          alignItems: "center",
+          animation: "header-marquee-ltr 22s linear infinite",
+          willChange: "transform, left",
         }}
       >
-        {messages.join("     •     ")}
-      </Typography>
+        <Typography
+          component="span"
+          sx={{
+            color: "#fff !important",
+            fontSize: "0.9375rem",
+            fontWeight: 800,
+            lineHeight: 1,
+            letterSpacing: 0.2,
+            display: "inline-block",
+            verticalAlign: "middle",
+          }}
+        >
+          {messages.join("     •     ")}
+        </Typography>
+      </Box>
     </Box>
   );
 }
