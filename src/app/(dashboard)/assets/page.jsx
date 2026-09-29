@@ -145,6 +145,61 @@ const columns = {
 };
 const formatDate = formatVietnamDate;
 
+const getRowSortValue = (row, colLabel, type) => {
+  if (!row) return "";
+  switch (colLabel) {
+    case "Mã phiếu":
+      return row.ticketId || "";
+    case "Mã sản phẩm":
+      return row.code || "";
+    case "Loại SP":
+      return row.category || row.categoryName || "";
+    case "Tên sản phẩm":
+      return row.name || "";
+    case "Mô tả sản phẩm":
+      return row.description || "";
+    case "Người nhập kho":
+    case "Người mượn tài sản":
+      return row.person || "";
+    case "Xuất cho":
+      return row.issuedTo || "";
+    case "Số lượng":
+    case "Tồn kho":
+      return Number(row.quantity) || 0;
+    case "Tổng nhập":
+      return Number(row.totalImport) || 0;
+    case "Tổng xuất":
+      return Number(row.totalExport) || 0;
+    case "Đơn vị tính":
+      return row.unit || "";
+    case "Vị trí":
+      return row.location || "";
+    case "Ngày nhập":
+    case "Ngày xuất":
+      return row.date ? new Date(row.date).getTime() : 0;
+    case "Trạng thái":
+      return type === "products"
+        ? (row.active ? "Hoạt động" : "Ngừng sử dụng")
+        : (row.status === "pending" ? "Đang chờ" : row.status === "rejected" ? "Từ chối" : "Đã duyệt");
+    case "Người phê duyệt":
+      return row.approvedByName || "";
+    case "Ghi chú":
+      return row.note || "";
+    default:
+      return "";
+  }
+};
+
+const compareSortValues = (valA, valB, direction = "asc") => {
+  let cmp = 0;
+  if (typeof valA === "number" && typeof valB === "number") {
+    cmp = valA - valB;
+  } else {
+    cmp = String(valA || "").localeCompare(String(valB || ""), "vi", { numeric: true, sensitivity: "base" });
+  }
+  return direction === "asc" ? cmp : -cmp;
+};
+
 const normalizeSearchText = (value) =>
   String(value || "")
     .normalize("NFD")
@@ -204,6 +259,9 @@ function AssetTable({
   onDelete,
   onApprove,
   onReject,
+  sortColumn = "",
+  sortDirection = "asc",
+  onSort,
 }) {
   const editable = type !== "stock";
   const showActions =
@@ -214,19 +272,86 @@ function AssetTable({
   return (
     <TableContainer>
       <Table className={tableStyles.table}>
-        <TableHead>
+        <TableHead
+          sx={{
+            "& th": {
+              textTransform: "uppercase",
+              fontSize: "0.8125rem",
+              fontWeight: 500,
+              letterSpacing: "0.2px",
+              lineHeight: 1.8462,
+              height: 56,
+              color: "text.primary",
+              userSelect: "none",
+              whiteSpace: "nowrap",
+            },
+          }}
+        >
           <TableRow>
-            {columns[type].map((label) => (
-              <TableCell
-                key={label}
-                align={
-                  label === "STT" || label === "Mã sản phẩm" ? "center" : "left"
-                }
-              >
-                {label}
+            {columns[type].map((label) => {
+              if (label === "STT") {
+                return (
+                  <TableCell
+                    key={label}
+                    align="center"
+                    sx={{ width: 60 }}
+                  >
+                    {label}
+                  </TableCell>
+                );
+              }
+
+              const isCurrent = sortColumn === label;
+              const align = label === "Mã sản phẩm" ? "center" : "left";
+
+              return (
+                <TableCell
+                  key={label}
+                  align={align}
+                >
+                  <Box
+                    component="button"
+                    type="button"
+                    onClick={() => onSort?.(label)}
+                    sx={{
+                      border: 0,
+                      p: 0,
+                      bgcolor: "transparent",
+                      color: "inherit",
+                      font: "inherit",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 1,
+                      cursor: "pointer",
+                      textTransform: "uppercase",
+                      fontSize: "0.8125rem",
+                      fontWeight: 500,
+                      letterSpacing: "0.2px",
+                      ...(align === "center" ? { width: "100%", justifyContent: "center" } : {}),
+                      "&:hover": {
+                        color: "primary.main",
+                      },
+                    }}
+                  >
+                    <span>{label}</span>
+                    <i
+                      className={
+                        isCurrent
+                          ? sortDirection === "asc"
+                            ? "tabler-chevron-up text-xl text-primary"
+                            : "tabler-chevron-down text-xl text-primary"
+                          : "tabler-selector text-xl"
+                      }
+                    />
+                  </Box>
+                </TableCell>
+              );
+            })}
+            {showActions && (
+              <TableCell align="center" sx={{ width: 110 }}>
+                Thao tác
               </TableCell>
-            ))}
-            {showActions && <TableCell align="center">Thao tác</TableCell>}
+            )}
           </TableRow>
         </TableHead>
         <TableBody>
@@ -526,7 +651,21 @@ function AssetHistoryTable({
   return (
     <TableContainer>
       <Table className={tableStyles.table}>
-        <TableHead>
+        <TableHead
+          sx={{
+            "& th": {
+              textTransform: "uppercase",
+              fontSize: "0.8125rem",
+              fontWeight: 500,
+              letterSpacing: "0.2px",
+              lineHeight: 1.8462,
+              height: 56,
+              color: "text.primary",
+              userSelect: "none",
+              whiteSpace: "nowrap",
+            },
+          }}
+        >
           <TableRow>
             <TableCell align="center">STT</TableCell>
             <TableCell>Hành động</TableCell>
@@ -2054,6 +2193,31 @@ export default function AssetsPage() {
   const [productStatus, setProductStatus] = useState("all");
   const [limit, setLimit] = useState(10);
   const [page, setPage] = useState(1);
+  const [sortColumn, setSortColumn] = useState("");
+  const [sortDirection, setSortDirection] = useState("asc");
+
+  const handleSort = (colLabel) => {
+    if (sortColumn === colLabel) {
+      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortColumn(colLabel);
+      if (
+        [
+          "Số lượng",
+          "Tồn kho",
+          "Tổng nhập",
+          "Tổng xuất",
+          "Ngày nhập",
+          "Ngày xuất",
+        ].includes(colLabel)
+      ) {
+        setSortDirection("desc");
+      } else {
+        setSortDirection("asc");
+      }
+    }
+  };
+
   const [excelImportType, setExcelImportType] = useState(null);
   const [importingExcel, setImportingExcel] = useState(false);
   const excelInputRef = useRef(null);
@@ -2543,7 +2707,23 @@ export default function AssetsPage() {
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key).push(row);
   });
-  const pageGroups = [...groups.values()].slice(
+  let groupList = [...groups.values()];
+  if (sortColumn) {
+    groupList.sort((groupA, groupB) => {
+      const valA = getRowSortValue(
+        groupA[0],
+        sortColumn,
+        tab === "negative-stock" ? "stock" : tab
+      );
+      const valB = getRowSortValue(
+        groupB[0],
+        sortColumn,
+        tab === "negative-stock" ? "stock" : tab
+      );
+      return compareSortValues(valA, valB, sortDirection);
+    });
+  }
+  const pageGroups = groupList.slice(
     (page - 1) * limit,
     page * limit,
   );
@@ -2680,6 +2860,7 @@ export default function AssetsPage() {
           onChange={(_, value) => {
             setTab(value);
             setPage(1);
+            setSortColumn("");
             if (value === "history") loadHistory();
           }}
           variant="scrollable"
@@ -2801,6 +2982,9 @@ export default function AssetsPage() {
             }}
             onApprove={handleApproveTransaction}
             onReject={(type, item) => setRejectTarget({ type, item })}
+            sortColumn={sortColumn}
+            sortDirection={sortDirection}
+            onSort={handleSort}
           />
         )}
         <TablePaginationComponent

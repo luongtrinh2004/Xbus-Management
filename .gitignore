@@ -14,6 +14,7 @@ yarn-error.log*
 src/data/json/
 public/images/afternoon-tea/
 public/images/avatars/*
+public/uploads/
 
 # Default avatar assets are part of the UI.
 !public/images/avatars/assistant.png

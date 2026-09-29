@@ -228,3 +228,12 @@ export function saveTrashScheduleState(state) {
     ...trashStateMetadata(state),
   });
 }
+
+export function getGalleryData() {
+  return readJsonFile("gallery.json", { items: [] });
+}
+
+export function saveGalleryData(data) {
+  return writeJsonFile("gallery.json", data);
+}
+

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
@@ -21,7 +21,8 @@ import Divider from "@mui/material/Divider";
 import Tooltip from "@mui/material/Tooltip";
 import CustomTextField from "@core/components/mui/TextField";
 import { toast } from "react-toastify";
-import { POPULAR_TAGS } from "./mockData";
+import { POPULAR_TAGS } from "./constants";
+import MentionInput from "./MentionInput";
 
 function formatBytes(bytes, decimals = 1) {
   if (!+bytes) return "0 Bytes";
@@ -30,6 +31,64 @@ function formatBytes(bytes, decimals = 1) {
   const sizes = ["Bytes", "KB", "MB", "GB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+}
+
+function captureVideoThumbnail(file) {
+  return new Promise((resolve) => {
+    try {
+      const video = document.createElement("video");
+      video.preload = "metadata";
+      video.muted = true;
+      video.playsInline = true;
+      const url = URL.createObjectURL(file);
+      video.src = url;
+
+      let captured = false;
+      const doCapture = () => {
+        if (captured) return;
+        captured = true;
+        try {
+          const canvas = document.createElement("canvas");
+          const width = Math.min(800, video.videoWidth || 640);
+          const height = Math.round(
+            (width / (video.videoWidth || 16)) * (video.videoHeight || 9)
+          );
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(video, 0, 0, width, height);
+          canvas.toBlob(
+            (blob) => {
+              URL.revokeObjectURL(url);
+              resolve({
+                blob,
+                previewUrl: blob ? URL.createObjectURL(blob) : "",
+              });
+            },
+            "image/jpeg",
+            0.85
+          );
+        } catch {
+          URL.revokeObjectURL(url);
+          resolve(null);
+        }
+      };
+
+      video.onloadeddata = () => {
+        video.currentTime = Math.min(0.5, (video.duration || 1) / 3);
+      };
+      video.onseeked = doCapture;
+      video.onerror = () => {
+        URL.revokeObjectURL(url);
+        resolve(null);
+      };
+      setTimeout(() => {
+        if (!captured) doCapture();
+      }, 1500);
+    } catch {
+      resolve(null);
+    }
+  });
 }
 
 export default function UploadModal({ open, onClose, onUploadSuccess, currentUser, usersList = [] }) {
@@ -42,27 +101,133 @@ export default function UploadModal({ open, onClose, onUploadSuccess, currentUse
   const [customTagInput, setCustomTagInput] = useState("");
   const [privacy, setPrivacy] = useState("public");
   const [isUploading, setIsUploading] = useState(false);
+  const [mentionsInfo, setMentionsInfo] = useState({ isTagAll: false, taggedUserIds: [] });
+  const queueRef = useRef([]);
 
-  const handleFilesSelected = (filesList) => {
-    const newItems = Array.from(filesList).map((file, idx) => {
+  const MAX_FILES_PER_POST = 20;
+
+  // Keep queueRef in sync with filesQueue state for async handlers
+  useEffect(() => {
+    queueRef.current = filesQueue;
+  }, [filesQueue]);
+
+  // Upload single file immediately to MinIO S3 in the background
+  const uploadSingleFile = (uploadItem) => {
+    const formData = new FormData();
+    formData.append("file", uploadItem.file);
+    if (uploadItem.thumbnailBlob) {
+      formData.append("thumbnail", uploadItem.thumbnailBlob, `thumb_${Date.now()}.jpg`);
+    }
+
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", "/api/gallery/upload/file", true);
+
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) {
+        const percent = Math.min(99, Math.round((e.loaded / e.total) * 100));
+        setFilesQueue((prev) =>
+          prev.map((q) =>
+            q.id === uploadItem.id
+              ? { ...q, progress: percent, status: "uploading" }
+              : q
+          )
+        );
+      }
+    };
+
+    xhr.onload = () => {
+      if (xhr.status === 200) {
+        try {
+          const res = JSON.parse(xhr.responseText);
+          if (res.success && res.fileData) {
+            setFilesQueue((prev) =>
+              prev.map((q) =>
+                q.id === uploadItem.id
+                  ? {
+                      ...q,
+                      progress: 100,
+                      status: "ready",
+                      uploadedData: res.fileData,
+                    }
+                  : q
+              )
+            );
+            return;
+          }
+        } catch {}
+      }
+
+      setFilesQueue((prev) =>
+        prev.map((q) =>
+          q.id === uploadItem.id
+            ? { ...q, status: "error", errorMsg: "Lỗi tải lên" }
+            : q
+        )
+      );
+    };
+
+    xhr.onerror = () => {
+      setFilesQueue((prev) =>
+        prev.map((q) =>
+          q.id === uploadItem.id
+            ? { ...q, status: "error", errorMsg: "Lỗi mạng" }
+            : q
+        )
+      );
+    };
+
+    xhr.send(formData);
+  };
+
+  const handleFilesSelected = async (filesList) => {
+    const rawFiles = Array.from(filesList);
+    const availableSlots = MAX_FILES_PER_POST - filesQueue.length;
+
+    if (availableSlots <= 0) {
+      toast.warning(`Một bài đăng chỉ được chứa tối đa ${MAX_FILES_PER_POST} ảnh hoặc video.`);
+      return;
+    }
+
+    if (rawFiles.length > availableSlots) {
+      toast.info(
+        `Đã tự động chọn ${availableSlots} tệp hợp lệ (Đạt giới hạn tối đa ${MAX_FILES_PER_POST} tệp/bài đăng).`
+      );
+    }
+
+    const filesToProcess = rawFiles.slice(0, availableSlots);
+
+    for (let idx = 0; idx < filesToProcess.length; idx++) {
+      const file = filesToProcess[idx];
       const isVideo = file.type.startsWith("video/");
       const isImage = file.type.startsWith("image/");
-      const previewUrl = isImage ? URL.createObjectURL(file) : "";
+      let previewUrl = isImage ? URL.createObjectURL(file) : "";
+      let thumbnailBlob = null;
 
-      return {
-        id: `upload_${Date.now()}_${idx}`,
+      if (isVideo) {
+        const thumbRes = await captureVideoThumbnail(file);
+        if (thumbRes?.previewUrl) {
+          previewUrl = thumbRes.previewUrl;
+          thumbnailBlob = thumbRes.blob;
+        }
+      }
+
+      const item = {
+        id: `upload_${Date.now()}_${idx}_${Math.random().toString(36).slice(2, 6)}`,
         file,
         name: file.name,
         size: file.size,
         sizeFormatted: formatBytes(file.size),
         type: isVideo ? "video" : "image",
         previewUrl,
+        thumbnailBlob,
         progress: 0,
-        status: "pending", // pending | uploading | success | error
+        status: "uploading",
+        uploadedData: null,
       };
-    });
 
-    setFilesQueue((prev) => [...prev, ...newItems]);
+      setFilesQueue((prev) => [...prev, item]);
+      uploadSingleFile(item);
+    }
   };
 
   const handleDragOver = (e) => {
@@ -88,9 +253,13 @@ export default function UploadModal({ open, onClose, onUploadSuccess, currentUse
   };
 
   const handleRetryQueueItem = (id) => {
-    setFilesQueue((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, progress: 0, status: "pending" } : item))
-    );
+    const item = filesQueue.find((q) => q.id === id);
+    if (item) {
+      setFilesQueue((prev) =>
+        prev.map((q) => (q.id === id ? { ...q, progress: 0, status: "uploading" } : q))
+      );
+      uploadSingleFile(item);
+    }
   };
 
   const handleToggleTag = (tag) => {
@@ -111,92 +280,75 @@ export default function UploadModal({ open, onClose, onUploadSuccess, currentUse
     }
   };
 
-  const handleStartUpload = () => {
+  // When user clicks "Tải lên" / "Đăng bài" -> files already uploaded to MinIO!
+  const handleStartUpload = async () => {
     if (filesQueue.length === 0) {
       toast.warning("Vui lòng chọn ít nhất 1 file ảnh hoặc video để tải lên");
       return;
     }
 
+    // Check if any files are still uploading
+    const stillUploading = filesQueue.some((q) => q.status === "uploading");
+    if (stillUploading) {
+      setIsUploading(true);
+      toast.info("Đang hoàn tất tải lên các tệp, vui lòng chờ trong giây lát...");
+      // Poll briefly until ready
+      const checkInterval = setInterval(async () => {
+        const currentQueue = queueRef.current;
+        const pending = currentQueue.some((q) => q.status === "uploading");
+        if (!pending) {
+          clearInterval(checkInterval);
+          await finalizePost(currentQueue);
+        }
+      }, 300);
+      return;
+    }
+
+    await finalizePost(filesQueue);
+  };
+
+  const finalizePost = async (queue) => {
     setIsUploading(true);
+    try {
+      const readyFiles = queue
+        .filter((q) => q.status === "ready" && q.uploadedData)
+        .map((q) => q.uploadedData);
 
-    // Simulate progress upload for each file
-    let currentProgress = 0;
-    const interval = setInterval(() => {
-      currentProgress += 20;
-      setFilesQueue((prev) =>
-        prev.map((item) => ({
-          ...item,
-          status: "uploading",
-          progress: Math.min(100, currentProgress + Math.floor(Math.random() * 15)),
-        }))
-      );
-
-      if (currentProgress >= 100) {
-        clearInterval(interval);
-        setTimeout(() => {
-          setIsUploading(false);
-
-          // Build created media items
-          const newMediaItems = filesQueue.map((item, index) => {
-            const ext = item.name.split(".").pop().toUpperCase();
-            return {
-              id: `media_custom_${Date.now()}_${index}`,
-              title: title.trim() || item.name.replace(/\.[^/.]+$/, ""),
-              fileName: item.name,
-              type: item.type,
-              url:
-                item.previewUrl ||
-                (item.type === "video"
-                  ? "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-                  : "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=800&q=80"),
-              thumbnail:
-                item.previewUrl ||
-                "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=800&q=80",
-              fileSize: item.size,
-              fileSizeFormatted: item.sizeFormatted,
-              fileFormat: ext || (item.type === "video" ? "MP4" : "JPG"),
-              dimensions: item.type === "video" ? "1920 x 1080 (FHD)" : "3840 x 2160 (4K)",
-              duration: item.type === "video" ? "01:45" : undefined,
-              durationSeconds: item.type === "video" ? 105 : undefined,
-              uploadedAt: new Date().toISOString(),
-              uploader: (() => {
-                const matched = usersList.find(
-                  (u) =>
-                    (currentUser?.email && u.email?.toLowerCase() === currentUser.email.toLowerCase()) ||
-                    (currentUser?.id && u.id === currentUser.id) ||
-                    (currentUser?.name && u.name === currentUser.name)
-                );
-                return {
-                  id: matched?.id || currentUser?.id || "usr_001",
-                  name: matched?.name || currentUser?.name || "Vũ Hoàng Dũng",
-                  email: matched?.email || currentUser?.email || "dungvh@phenikaa-x.com",
-                  code: matched?.code || "PNKX047",
-                  avatar: matched?.avatar || currentUser?.image || "/images/avatars/male-admin.png",
-                  role: matched?.role || "Quản Lý Dự Án",
-                  department: matched?.department || "Quản Lý Dự Án",
-                };
-              })(),
-              privacy,
-              tags: selectedTags.length > 0 ? selectedTags : ["#xbus"],
-              description:
-                description.trim() || "Tệp media được tải lên hệ thống lưu trữ nội bộ Xbus.",
-              likes: 1,
-              isLiked: false,
-              exif: {
-                camera: "Thiết bị người dùng",
-                resolution: "Full HD",
-                uploadedVia: "Web Uploader",
-              },
-              comments: [],
-            };
-          });
-
-          onUploadSuccess(newMediaItems);
-          toast.success(`Đã tải lên thành công ${newMediaItems.length} tệp!`);
-          handleResetAndClose();
-        }, 500);
+      if (readyFiles.length === 0) {
+        toast.error("Không có tệp nào tải lên thành công. Vui lòng thử lại.");
+        setIsUploading(false);
+        return;
       }
-    }, 200);
+
+      // Fast JSON submit: Post is created in ~10ms
+      const res = await fetch("/api/gallery/upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: title.trim(),
+          description: description.trim(),
+          privacy,
+          tags: selectedTags,
+          uploadedFiles: readyFiles,
+          isTagAll: /@all\b/i.test(`${title} ${description}`) || mentionsInfo.isTagAll,
+          taggedUserIds: mentionsInfo.taggedUserIds,
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        onUploadSuccess(data.items, data.storage);
+        toast.success(`Đã đăng tải thành công bài viết với ${readyFiles.length} tệp!`);
+        handleResetAndClose();
+      } else {
+        toast.error(data.error || "Lỗi tạo bài đăng");
+      }
+    } catch (err) {
+      console.error("[finalizePost] Lỗi:", err);
+      toast.error("Lỗi gửi dữ liệu bài đăng");
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleResetAndClose = () => {
@@ -315,16 +467,21 @@ export default function UploadModal({ open, onClose, onUploadSuccess, currentUse
           </Typography>
 
           <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.5 }}>
-            Hỗ trợ định dạng: <strong>JPG, PNG, WEBP, GIF, MP4, MOV, MKV...</strong> • Dung lượng tối đa: <strong>500MB / file</strong>
+            Tối đa <strong>20 ảnh/video</strong> cho một bài đăng • Định dạng: <strong>JPG, PNG, WEBP, GIF, MP4, MOV...</strong> (Max 500MB/tệp)
           </Typography>
         </Box>
 
         {/* Upload Queue List */}
         {filesQueue.length > 0 && (
           <Box sx={{ mt: 3 }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1.5 }}>
-              Danh sách tệp đang chờ ({filesQueue.length}):
-            </Typography>
+            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1.5 }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                Danh sách tệp trong bài đăng ({filesQueue.length}/20 tệp):
+              </Typography>
+              <Typography variant="caption" color="primary.main" sx={{ fontWeight: 600 }}>
+                {20 - filesQueue.length > 0 ? `Còn có thể thêm ${20 - filesQueue.length} tệp` : "Đã đạt tối đa 20 tệp"}
+              </Typography>
+            </Box>
 
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, maxHeight: 220, overflowY: "auto", pr: 0.5 }}>
               {filesQueue.map((item) => (
@@ -427,24 +584,28 @@ export default function UploadModal({ open, onClose, onUploadSuccess, currentUse
         </Typography>
 
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
-          <CustomTextField
-            label="Tiêu đề hiển thị"
-            placeholder="Ví dụ: Thử nghiệm xe buýt Xbus tại Hòa Lạc..."
+          <MentionInput
+            label="Tiêu đề hiển thị (Hỗ trợ @ để gắn thẻ hoặc @All)"
+            placeholder="Ví dụ: Thử nghiệm xe buýt Xbus tại Hòa Lạc @All..."
             size="small"
             fullWidth
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(val) => setTitle(val)}
+            usersList={usersList}
+            onMentionsChange={setMentionsInfo}
           />
 
-          <CustomTextField
-            label="Mô tả chi tiết"
-            placeholder="Ghi chú về nội dung ảnh, sự kiện, thời điểm hoặc thông số kỹ thuật..."
+          <MentionInput
+            label="Mô tả chi tiết (Hỗ trợ @ để gắn thẻ hoặc @All)"
+            placeholder="Ghi chú về nội dung ảnh, sự kiện... gõ @ để nhắc tên hoặc @All..."
             size="small"
             multiline
             rows={2}
             fullWidth
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={(val) => setDescription(val)}
+            usersList={usersList}
+            onMentionsChange={setMentionsInfo}
           />
 
           {/* Tags */}

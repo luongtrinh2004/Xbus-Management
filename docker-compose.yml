@@ -13,13 +13,38 @@ services:
       - xbus_data:/app/src/data/json
       - xbus_avatars:/app/public/images/avatars
       - xbus_tea_images:/app/public/images/afternoon-tea
+      - xbus_gallery:/app/public/uploads/gallery
     restart: unless-stopped
+    depends_on:
+      - minio
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3000/login"]
       interval: 30s
       timeout: 5s
       retries: 3
       start_period: 30s
+
+  minio:
+    image: minio/minio:latest
+    container_name: xbus-minio
+    # Port 9000: S3 API, Port 9001: MinIO Web Console (giao diện quản trị S3)
+    ports:
+      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:9001:9001"
+    env_file:
+      - .env
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-xbus_admin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-xbus_secret_password}
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
 
   mysql:
     image: mysql:8.4
@@ -55,4 +80,6 @@ volumes:
   xbus_data:
   xbus_avatars:
   xbus_tea_images:
+  xbus_gallery:
+  minio_data:
   mysql_data:

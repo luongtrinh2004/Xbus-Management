@@ -14,6 +14,7 @@ import Avatar from "@mui/material/Avatar";
 import Chip from "@mui/material/Chip";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
+import { renderWithMentions } from "./mentionUtils";
 
 function formatDateTime(dateString) {
   try {
@@ -36,6 +37,9 @@ export default function MediaListView({
   onDownload,
   onShare,
   onDelete,
+  onEdit,
+  currentUser = null,
+  isAdminOrAssistant = false,
 }) {
   const allSelected = items.length > 0 && selectedIds.length === items.length;
   const someSelected = selectedIds.length > 0 && selectedIds.length < items.length;
@@ -54,21 +58,47 @@ export default function MediaListView({
                   size="small"
                 />
               </TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Tệp Media</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Bài đăng</TableCell>
               <TableCell sx={{ fontWeight: 600 }}>Loại & Kích thước</TableCell>
               <TableCell sx={{ fontWeight: 600 }}>Người đăng</TableCell>
               <TableCell sx={{ fontWeight: 600 }}>Thời gian tải</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Thẻ tag</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Quyền xem</TableCell>
-              <TableCell align="right" sx={{ pr: 3, fontWeight: 600 }}>
-                Thao tác
-              </TableCell>
+              <TableCell sx={{ fontWeight: 600, textAlign: "center" }}>Hành động</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {items.map((item) => {
               const isSelected = selectedIds.includes(item.id);
-              const isVideo = item.type === "video";
+              const isVideo =
+                item.type === "video" || /\.(mp4|mov|webm|avi|mkv|m4v)$/i.test(item.url || "");
+              const hasImageThumbnail = Boolean(
+                item.thumbnail &&
+                item.thumbnail !== item.url &&
+                !/\.(mp4|mov|webm|avi|mkv|m4v)$/i.test(item.thumbnail)
+              );
+
+              const rawTitle = (item.title || "").trim();
+              const isNoTitle =
+                !rawTitle ||
+                rawTitle.startsWith("Gemini_Generated_Image") ||
+                /^\d{6,}_/.test(rawTitle) ||
+                /\.(jpe?g|png|webp|gif|mp4|mov|svg)$/i.test(rawTitle);
+              const displayTitle = isNoTitle ? "Bài viết không có tiêu đề" : rawTitle;
+
+              const rawDesc = (item.description || "").trim();
+              const isNoDesc =
+                !rawDesc ||
+                rawDesc === "Tệp media được tải lên hệ thống lưu trữ nội bộ Xbus." ||
+                rawDesc === "-";
+              const displayDescription = isNoDesc ? "Mô tả : -" : rawDesc;
+
+              const isOwner =
+                (item.uploader?.id && currentUser?.id && item.uploader.id === currentUser.id) ||
+                (item.uploader?.email &&
+                  currentUser?.email &&
+                  item.uploader.email.toLowerCase() === currentUser.email.toLowerCase());
+
+              const canEdit = isAdminOrAssistant || isOwner;
+              const canDelete = isAdminOrAssistant || isOwner;
 
               return (
                 <TableRow
@@ -109,12 +139,23 @@ export default function MediaListView({
                           bgcolor: "background.default",
                         }}
                       >
-                        <Box
-                          component="img"
-                          src={item.thumbnail || item.url}
-                          alt={item.title}
-                          sx={{ width: "100%", height: "100%", objectFit: "cover" }}
-                        />
+                        {isVideo && !hasImageThumbnail ? (
+                          <Box
+                            component="video"
+                            src={`${item.url}#t=0.5`}
+                            preload="metadata"
+                            muted
+                            playsInline
+                            sx={{ width: "100%", height: "100%", objectFit: "cover", pointerEvents: "none", bgcolor: "#000" }}
+                          />
+                        ) : (
+                          <Box
+                            component="img"
+                            src={hasImageThumbnail ? item.thumbnail : item.url}
+                            alt={displayTitle}
+                            sx={{ width: "100%", height: "100%", objectFit: "cover" }}
+                          />
+                        )}
                         {isVideo && (
                           <Box
                             sx={{
@@ -132,21 +173,28 @@ export default function MediaListView({
                         )}
                       </Box>
 
-                      <Box sx={{ minWidth: 0 }}>
+                      <Box sx={{ minWidth: 0, maxWidth: 280 }}>
                         <Typography
                           variant="body2"
                           sx={{
-                            fontWeight: 600,
+                            fontWeight: isNoTitle ? 400 : 600,
+                            fontStyle: isNoTitle ? "italic" : "normal",
+                            color: isNoTitle ? "text.disabled" : "text.primary",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
                             whiteSpace: "nowrap",
-                            maxWidth: 240,
                           }}
                         >
-                          {item.title || item.fileName}
+                          {isNoTitle ? displayTitle : renderWithMentions(displayTitle)}
                         </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {item.fileName}
+                        <Typography
+                          variant="caption"
+                          color={isNoDesc ? "text.disabled" : "text.secondary"}
+                          fontStyle={isNoDesc ? "italic" : "normal"}
+                          noWrap
+                          sx={{ display: "block" }}
+                        >
+                          {isNoDesc ? displayDescription : renderWithMentions(displayDescription)}
                         </Typography>
                       </Box>
                     </Box>
@@ -157,17 +205,13 @@ export default function MediaListView({
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                       <Chip
                         icon={<i className={isVideo ? "tabler-video" : "tabler-photo"} style={{ fontSize: 13 }} />}
-                        label={isVideo ? `${item.duration || "Video"}` : item.fileFormat}
+                        label={isVideo ? `${item.duration || "Video"}` : item.fileFormat || "MEDIA"}
                         size="small"
-                        sx={{
-                          height: 22,
-                          fontSize: "0.75rem",
-                          fontWeight: 500,
-                          bgcolor: isVideo ? "rgba(115, 103, 240, 0.12)" : "rgba(40, 199, 111, 0.12)",
-                          color: isVideo ? "primary.main" : "success.main",
-                        }}
+                        variant="tonal"
+                        color={isVideo ? "primary" : "secondary"}
+                        sx={{ height: 24, fontSize: "0.75rem" }}
                       />
-                      <Typography variant="caption" color="text.secondary">
+                      <Typography variant="body2" color="text.secondary">
                         {item.fileSizeFormatted}
                       </Typography>
                     </Box>
@@ -175,98 +219,49 @@ export default function MediaListView({
 
                   {/* Uploader */}
                   <TableCell>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1.25 }}>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                       <Avatar
                         src={item.uploader?.avatar}
+                        alt={item.uploader?.name}
                         sx={{ width: 28, height: 28, fontSize: 12, bgcolor: "primary.light" }}
                       >
                         {item.uploader?.name?.[0]}
                       </Avatar>
                       <Box>
-                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                        <Typography variant="body2" fontWeight={500}>
                           {item.uploader?.name}
                         </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {item.uploader?.department}
+                        <Typography variant="caption" color="text.disabled">
+                          {item.uploader?.department || item.uploader?.role}
                         </Typography>
                       </Box>
                     </Box>
                   </TableCell>
 
-                  {/* Upload Time */}
+                  {/* Time */}
                   <TableCell>
                     <Typography variant="body2" color="text.secondary">
                       {formatDateTime(item.uploadedAt)}
                     </Typography>
                   </TableCell>
 
-                  {/* Tags */}
-                  <TableCell>
-                    <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap", maxWidth: 180 }}>
-                      {(item.tags || []).slice(0, 2).map((tag) => (
-                        <Chip
-                          key={tag}
-                          label={tag}
-                          size="small"
-                          sx={{ height: 20, fontSize: "0.7rem", bgcolor: "action.hover" }}
-                        />
-                      ))}
-                      {(item.tags || []).length > 2 && (
-                        <Chip
-                          label={`+${item.tags.length - 2}`}
-                          size="small"
-                          sx={{ height: 20, fontSize: "0.7rem", bgcolor: "action.hover" }}
-                        />
+                  {/* Action buttons */}
+                  <TableCell sx={{ textAlign: "center" }}>
+                    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 0.5 }}>
+                      {canEdit && onEdit && (
+                        <Tooltip title="Chỉnh sửa bài">
+                          <IconButton
+                            size="small"
+                            color="warning"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onEdit(item);
+                            }}
+                          >
+                            <i className="tabler-edit" style={{ fontSize: 18 }} />
+                          </IconButton>
+                        </Tooltip>
                       )}
-                    </Box>
-                  </TableCell>
-
-                  {/* Privacy */}
-                  <TableCell>
-                    <Chip
-                      size="small"
-                      label={
-                        item.privacy === "public"
-                          ? "Công khai"
-                          : item.privacy === "team"
-                            ? "Nội bộ"
-                            : "Chỉ mình tôi"
-                      }
-                      sx={{
-                        height: 22,
-                        fontSize: "0.72rem",
-                        fontWeight: 500,
-                        bgcolor:
-                          item.privacy === "public"
-                            ? "rgba(40, 199, 111, 0.12)"
-                            : item.privacy === "team"
-                              ? "rgba(0, 186, 209, 0.12)"
-                              : "rgba(128, 131, 144, 0.12)",
-                        color:
-                          item.privacy === "public"
-                            ? "success.main"
-                            : item.privacy === "team"
-                              ? "info.main"
-                              : "secondary.main",
-                      }}
-                    />
-                  </TableCell>
-
-                  {/* Actions */}
-                  <TableCell align="right" sx={{ pr: 3 }}>
-                    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 0.5 }}>
-                      <Tooltip title="Xem chi tiết">
-                        <IconButton
-                          size="small"
-                          color="primary"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onItemClick(item);
-                          }}
-                        >
-                          <i className="tabler-eye" style={{ fontSize: 18 }} />
-                        </IconButton>
-                      </Tooltip>
 
                       <Tooltip title="Tải xuống">
                         <IconButton
@@ -292,18 +287,20 @@ export default function MediaListView({
                         </IconButton>
                       </Tooltip>
 
-                      <Tooltip title="Xóa">
-                        <IconButton
-                          size="small"
-                          color="error"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onDelete(item);
-                          }}
-                        >
-                          <i className="tabler-trash" style={{ fontSize: 18 }} />
-                        </IconButton>
-                      </Tooltip>
+                      {canDelete && (
+                        <Tooltip title="Xóa">
+                          <IconButton
+                            size="small"
+                            color="error"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onDelete(item);
+                            }}
+                          >
+                            <i className="tabler-trash" style={{ fontSize: 18 }} />
+                          </IconButton>
+                        </Tooltip>
+                      )}
                     </Box>
                   </TableCell>
                 </TableRow>

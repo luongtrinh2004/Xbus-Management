@@ -17,6 +17,7 @@ import Tooltip from "@mui/material/Tooltip";
 import Chip from "@mui/material/Chip";
 import Typography from "@mui/material/Typography";
 import CustomTextField from "@core/components/mui/TextField";
+import CustomAvatar from "@core/components/mui/Avatar";
 import Avatar from "@mui/material/Avatar";
 
 export default function MediaToolbar({
@@ -43,7 +44,7 @@ export default function MediaToolbar({
   counts = { all: 0, image: 0, video: 0 },
 }) {
   return (
-    <Card sx={{ mb: 4, borderRadius: 2 }}>
+    <Card sx={{ mb: 6 }}>
       <CardContent sx={{ p: { xs: 3, md: 4 } }}>
         {/* Top row: Title / Stats + Main Upload Action */}
         <Box
@@ -58,24 +59,12 @@ export default function MediaToolbar({
         >
           <Box>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-              <Box
-                sx={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 1.5,
-                  backgroundColor: "rgba(115, 103, 240, 0.12)",
-                  color: "primary.main",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 22,
-                }}
-              >
-                <i className="tabler-photo-video" />
-              </Box>
+              <CustomAvatar variant="rounded" skin="light" color="primary" sx={{ width: 44, height: 44 }}>
+                <i className="tabler-photo-video text-2xl" />
+              </CustomAvatar>
               <Box>
                 <Typography variant="h5" sx={{ fontWeight: 600 }}>
-                  Thư Viện Ảnh & Video (mới dựng UI trước thoy)
+                  Thư Viện Ảnh & Video
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   Kho tư liệu hình ảnh và video sự kiện, dự án xe tự hành Xbus
@@ -314,8 +303,8 @@ export default function MediaToolbar({
                   >
                     <MenuItem value="newest">Mới nhất trước</MenuItem>
                     <MenuItem value="oldest">Cũ nhất trước</MenuItem>
-                    <MenuItem value="name_asc">Tên file A → Z</MenuItem>
-                    <MenuItem value="name_desc">Tên file Z → A</MenuItem>
+                    <MenuItem value="likes_desc">Nhiều lượt tim nhất</MenuItem>
+                    <MenuItem value="comments_desc">Nhiều bình luận nhất</MenuItem>
                     <MenuItem value="size_desc">Dung lượng lớn nhất</MenuItem>
                     <MenuItem value="size_asc">Dung lượng nhỏ nhất</MenuItem>
                   </Select>

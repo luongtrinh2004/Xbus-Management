@@ -1404,6 +1404,18 @@ export async function saveAfternoonTea(data) {
     : json.saveAfternoonTea(data);
 }
 
+export async function getGallery() {
+  return mysqlEnabled()
+    ? getDocument("gallery", { items: [] })
+    : json.getGalleryData();
+}
+
+export async function saveGallery(data) {
+  return mysqlEnabled()
+    ? saveDocument("gallery", data)
+    : json.saveGalleryData(data);
+}
+
 export async function getAuditLogs() {
   if (!mysqlEnabled()) return json.getAuditLogs();
   const [rows] = await query(

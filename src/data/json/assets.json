@@ -10161,7 +10161,8 @@
       "location": "B-2-0",
       "active": true,
       "id": "product_mucgfum1_a2c35947a7c7f7d3",
-      "createdAt": "2026-09-22T09:11:27.673Z"
+      "createdAt": "2026-09-22T09:11:27.673Z",
+      "documentCode": "ublox_c102_f9r"
     },
     {
       "id": "product_mucgfum2_95365ea489ddc1e8",
@@ -10172,7 +10173,8 @@
       "description": "",
       "location": "",
       "active": true,
-      "createdAt": "2026-09-22T09:11:27.674Z"
+      "createdAt": "2026-09-22T09:11:27.674Z",
+      "documentCode": "altos_day_hubb"
     },
     {
       "code": "CB-003",
@@ -10183,7 +10185,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfum2_75076b310bbace81",
-      "createdAt": "2026-09-22T09:11:27.675Z"
+      "createdAt": "2026-09-22T09:11:27.675Z",
+      "documentCode": "cgi_230"
     },
     {
       "code": "CB-004",
@@ -10194,7 +10197,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfum4_cb07b08360a609f6",
-      "createdAt": "2026-09-22T09:11:27.676Z"
+      "createdAt": "2026-09-22T09:11:27.676Z",
+      "documentCode": "poe_ethernet_adapter"
     },
     {
       "code": "CB-005",
@@ -10205,7 +10209,8 @@
       "location": "B-2-0",
       "active": true,
       "id": "product_mucgfum4_7b5da28cf93227eb",
-      "createdAt": "2026-09-22T09:11:27.676Z"
+      "createdAt": "2026-09-22T09:11:27.676Z",
+      "documentCode": "antenna_gnss_cuav"
     },
     {
       "code": "CB-006",
@@ -10216,7 +10221,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfum5_64e06b7e368ff11a",
-      "createdAt": "2026-09-22T09:11:27.677Z"
+      "createdAt": "2026-09-22T09:11:27.677Z",
+      "documentCode": "c_rtk_9p"
     },
     {
       "code": "CB-007",
@@ -10227,7 +10233,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfum6_e9cc7d6e6fe078d5",
-      "createdAt": "2026-09-22T09:11:27.678Z"
+      "createdAt": "2026-09-22T09:11:27.678Z",
+      "documentCode": "gnss_check_lai_cung_bo_imu"
     },
     {
       "code": "CB-008",
@@ -10238,7 +10245,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfum7_2edf9995e4c6f382",
-      "createdAt": "2026-09-22T09:11:27.679Z"
+      "createdAt": "2026-09-22T09:11:27.679Z",
+      "documentCode": "cam_lui_zestech"
     },
     {
       "code": "CB-009",
@@ -10249,7 +10257,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfum8_5e723006c84d1343",
-      "createdAt": "2026-09-22T09:11:27.680Z"
+      "createdAt": "2026-09-22T09:11:27.680Z",
+      "documentCode": "camera_leopard_imaging_fov120"
     },
     {
       "code": "CB-010",
@@ -10260,7 +10269,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfum8_1d5a4f5c5c2fcfcf",
-      "createdAt": "2026-09-22T09:11:27.681Z"
+      "createdAt": "2026-09-22T09:11:27.681Z",
+      "documentCode": "adapter_camera_leopard_2_port_a_b"
     },
     {
       "code": "CB-011",
@@ -10271,7 +10281,8 @@
       "location": "B-1-2",
       "active": true,
       "id": "product_mucgfum9_239cfcd40fbf91b6",
-      "createdAt": "2026-09-22T09:11:27.681Z"
+      "createdAt": "2026-09-22T09:11:27.681Z",
+      "documentCode": "imu_xsen_mti100"
     },
     {
       "code": "CB-012",
@@ -10282,7 +10293,8 @@
       "location": "B-2-0",
       "active": true,
       "id": "product_mucgfuma_6882d2734f62ddae",
-      "createdAt": "2026-09-22T09:11:27.682Z"
+      "createdAt": "2026-09-22T09:11:27.682Z",
+      "documentCode": "lidar_airy_v"
     },
     {
       "code": "CB-013",
@@ -10293,7 +10305,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfumb_79da5e3a25658212",
-      "createdAt": "2026-09-22T09:11:27.683Z"
+      "createdAt": "2026-09-22T09:11:27.683Z",
+      "documentCode": "camera_leopard_imaging_adapter"
     },
     {
       "code": "CB-014",
@@ -10304,7 +10317,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfumb_4826d4f7dcbc4835",
-      "createdAt": "2026-09-22T09:11:27.683Z"
+      "createdAt": "2026-09-22T09:11:27.683Z",
+      "documentCode": "camera_econ_system"
     },
     {
       "code": "CB-015",
@@ -10315,7 +10329,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfumc_0ab0964fea2ecd7f",
-      "createdAt": "2026-09-22T09:11:27.684Z"
+      "createdAt": "2026-09-22T09:11:27.684Z",
+      "documentCode": "camera_leopard_fov120"
     },
     {
       "code": "CB-016",
@@ -10326,7 +10341,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfumd_76f523fa80597580",
-      "createdAt": "2026-09-22T09:11:27.685Z"
+      "createdAt": "2026-09-22T09:11:27.685Z",
+      "documentCode": "lidar_m1_plus"
     },
     {
       "code": "CB-017",
@@ -10337,7 +10353,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfumd_c372e4178212a05c",
-      "createdAt": "2026-09-22T09:11:27.685Z"
+      "createdAt": "2026-09-22T09:11:27.685Z",
+      "documentCode": "camera_ethernet_route_cam_econn"
     },
     {
       "code": "CB-018",
@@ -10348,7 +10365,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfume_49487ee29f3bb0f5",
-      "createdAt": "2026-09-22T09:11:27.686Z"
+      "createdAt": "2026-09-22T09:11:27.686Z",
+      "documentCode": "lidar_airy_new"
     },
     {
       "code": "CB-020",
@@ -10359,7 +10377,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfumf_9d76b853d8089685",
-      "createdAt": "2026-09-22T09:11:27.687Z"
+      "createdAt": "2026-09-22T09:11:27.687Z",
+      "documentCode": "lens_arducam"
     },
     {
       "code": "CB-021",
@@ -10370,7 +10389,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfumg_6c4fd35ba524787a",
-      "createdAt": "2026-09-22T09:11:27.688Z"
+      "createdAt": "2026-09-22T09:11:27.688Z",
+      "documentCode": "camera_leopard_imaging_fov60"
     },
     {
       "code": "CB-022",
@@ -10381,7 +10401,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfumh_5122e0b9ee00f1b9",
-      "createdAt": "2026-09-22T09:11:27.689Z"
+      "createdAt": "2026-09-22T09:11:27.689Z",
+      "documentCode": "airy_roboshen_h"
     },
     {
       "code": "CB-023",
@@ -10392,7 +10413,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfumh_881a729ad41d82f3",
-      "createdAt": "2026-09-22T09:11:27.689Z"
+      "createdAt": "2026-09-22T09:11:27.689Z",
+      "documentCode": "lidar_airy"
     },
     {
       "code": "CB-024",
@@ -10403,7 +10425,8 @@
       "location": "A-3-0",
       "active": true,
       "id": "product_mucgfumi_17b0fbf46cddc339",
-      "createdAt": "2026-09-22T09:11:27.690Z"
+      "createdAt": "2026-09-22T09:11:27.690Z",
+      "documentCode": "ac_isx031_h60"
     },
     {
       "code": "CB-025",
@@ -10414,7 +10437,8 @@
       "location": "A-1-0",
       "active": true,
       "id": "product_mucgfumj_7b887195d7f747d3",
-      "createdAt": "2026-09-22T09:11:27.691Z"
+      "createdAt": "2026-09-22T09:11:27.691Z",
+      "documentCode": "ac_isx031_h120"
     },
     {
       "code": "CB-026",
@@ -10425,7 +10449,8 @@
       "location": "A-2-0",
       "active": true,
       "id": "product_mucgfumj_22e2da59f43bb95e",
-      "createdAt": "2026-09-22T09:11:27.691Z"
+      "createdAt": "2026-09-22T09:11:27.691Z",
+      "documentCode": "ac_isx031_h190"
     },
     {
       "code": "CB-027",
@@ -10436,7 +10461,8 @@
       "location": "A-1-2",
       "active": true,
       "id": "product_mucgfumk_7d15811ec14e0ddd",
-      "createdAt": "2026-09-22T09:11:27.692Z"
+      "createdAt": "2026-09-22T09:11:27.692Z",
+      "documentCode": "cam_bien_e1r_hub"
     },
     {
       "code": "CB-028",
@@ -10447,7 +10473,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfuml_67e484bf6ff3c8fa",
-      "createdAt": "2026-09-22T09:11:27.693Z"
+      "createdAt": "2026-09-22T09:11:27.693Z",
+      "documentCode": "cam_bien_bp"
     },
     {
       "code": "CB-031",
@@ -10458,7 +10485,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfuml_a6cc9b309aa49435",
-      "createdAt": "2026-09-22T09:11:27.693Z"
+      "createdAt": "2026-09-22T09:11:27.693Z",
+      "documentCode": "rada_ars_408"
     },
     {
       "code": "MT&PK001",
@@ -10469,7 +10497,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfumm_8b3e48857c98f214",
-      "createdAt": "2026-09-22T09:11:27.694Z"
+      "createdAt": "2026-09-22T09:11:27.694Z",
+      "documentCode": "nru51v"
     },
     {
       "code": "MT&PK002",
@@ -10480,7 +10509,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfumn_170fc7b30fb5e666",
-      "createdAt": "2026-09-22T09:11:27.695Z"
+      "createdAt": "2026-09-22T09:11:27.695Z",
+      "documentCode": "bo_ga_nuvo"
     },
     {
       "code": "MT&PK003",
@@ -10491,7 +10521,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfumo_6b0ad48c830aae58",
-      "createdAt": "2026-09-22T09:11:27.696Z"
+      "createdAt": "2026-09-22T09:11:27.696Z",
+      "documentCode": "adapter_camera_orin"
     },
     {
       "code": "MT&PK004",
@@ -10502,7 +10533,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfump_9e3faecffb809501",
-      "createdAt": "2026-09-22T09:11:27.697Z"
+      "createdAt": "2026-09-22T09:11:27.697Z",
+      "documentCode": "card_pci_can"
     },
     {
       "code": "MT&PK005",
@@ -10513,7 +10545,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfump_ca9bd3b82dd98d23",
-      "createdAt": "2026-09-22T09:11:27.697Z"
+      "createdAt": "2026-09-22T09:11:27.697Z",
+      "documentCode": "can_hub_kvaser"
     },
     {
       "code": "MT&PK006",
@@ -10524,7 +10557,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfumq_b4f4dc73649f7192",
-      "createdAt": "2026-09-22T09:11:27.698Z"
+      "createdAt": "2026-09-22T09:11:27.698Z",
+      "documentCode": "pcan_usb_pro"
     },
     {
       "code": "MT&PK007",
@@ -10535,7 +10569,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfumr_6a36bcb6b8582acc",
-      "createdAt": "2026-09-22T09:11:27.699Z"
+      "createdAt": "2026-09-22T09:11:27.699Z",
+      "documentCode": "nuvo_10108gc_10g_5049"
     },
     {
       "code": "MT&PK009",
@@ -10546,7 +10581,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfums_9ef9e8c2f7bcda6d",
-      "createdAt": "2026-09-22T09:11:27.700Z"
+      "createdAt": "2026-09-22T09:11:27.700Z",
+      "documentCode": "laptop_l14"
     },
     {
       "code": "MT&PK010",
@@ -10557,7 +10593,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfumt_1ac7b05fefc5bb01",
-      "createdAt": "2026-09-22T09:11:27.701Z"
+      "createdAt": "2026-09-22T09:11:27.701Z",
+      "documentCode": "may_in_brother_l328"
     },
     {
       "code": "MT&PK011",
@@ -10568,7 +10605,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfumu_8a07f8742b1dd17f",
-      "createdAt": "2026-09-22T09:11:27.702Z"
+      "createdAt": "2026-09-22T09:11:27.702Z",
+      "documentCode": "view_sonic_va1650"
     },
     {
       "code": "MT&PK012",
@@ -10579,7 +10617,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfumu_c62be155aa1c9d71",
-      "createdAt": "2026-09-22T09:11:27.702Z"
+      "createdAt": "2026-09-22T09:11:27.702Z",
+      "documentCode": "logitech_k400"
     },
     {
       "code": "MT&PK013",
@@ -10590,7 +10629,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfumv_a68bbb48cd0507f5",
-      "createdAt": "2026-09-22T09:11:27.703Z"
+      "createdAt": "2026-09-22T09:11:27.703Z",
+      "documentCode": "logitech_g29"
     },
     {
       "code": "MT&PK014",
@@ -10601,7 +10641,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfumw_d2f04dcfb3c90c1f",
-      "createdAt": "2026-09-22T09:11:27.704Z"
+      "createdAt": "2026-09-22T09:11:27.704Z",
+      "documentCode": "shift_g29"
     },
     {
       "code": "MT&PK015",
@@ -10612,7 +10653,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfumx_55de1fcd4a839282",
-      "createdAt": "2026-09-22T09:11:27.705Z"
+      "createdAt": "2026-09-22T09:11:27.705Z",
+      "documentCode": "converter_dp_to_hdmi"
     },
     {
       "code": "MT&PK016",
@@ -10623,7 +10665,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfumy_08bb9bddead0fdb4",
-      "createdAt": "2026-09-22T09:11:27.706Z"
+      "createdAt": "2026-09-22T09:11:27.706Z",
+      "documentCode": "cat8_10m"
     },
     {
       "code": "MT&PK017",
@@ -10634,7 +10677,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfumz_39c9991ebd9a9557",
-      "createdAt": "2026-09-22T09:11:27.707Z"
+      "createdAt": "2026-09-22T09:11:27.707Z",
+      "documentCode": "cat8_2m"
     },
     {
       "code": "MT&PK019",
@@ -10645,7 +10689,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfun0_e721d116882a95a7",
-      "createdAt": "2026-09-22T09:11:27.708Z"
+      "createdAt": "2026-09-22T09:11:27.708Z",
+      "documentCode": "ban_phim_logitech"
     },
     {
       "code": "MT&PK020",
@@ -10656,7 +10701,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfun1_fa80e31123e7c108",
-      "createdAt": "2026-09-22T09:11:27.709Z"
+      "createdAt": "2026-09-22T09:11:27.709Z",
+      "documentCode": "day_ethernet_m8"
     },
     {
       "code": "MT&PK021",
@@ -10667,7 +10713,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfun1_8d3008ec49d4810f",
-      "createdAt": "2026-09-22T09:11:27.709Z"
+      "createdAt": "2026-09-22T09:11:27.709Z",
+      "documentCode": "hub_usb_orico_7_port"
     },
     {
       "code": "MT&PK022",
@@ -10678,7 +10725,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfun2_a71d524f967160a4",
-      "createdAt": "2026-09-22T09:11:27.710Z"
+      "createdAt": "2026-09-22T09:11:27.710Z",
+      "documentCode": "chuot_logitech_b100"
     },
     {
       "code": "MT&PK023",
@@ -10689,7 +10737,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfun3_d19471a2617a2fef",
-      "createdAt": "2026-09-22T09:11:27.711Z"
+      "createdAt": "2026-09-22T09:11:27.711Z",
+      "documentCode": "cat6a_1m_lidar"
     },
     {
       "code": "MT&PK024",
@@ -10700,7 +10749,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfun4_fc7b02976e099b90",
-      "createdAt": "2026-09-22T09:11:27.712Z"
+      "createdAt": "2026-09-22T09:11:27.712Z",
+      "documentCode": "hub_usb_acasis_10_port"
     },
     {
       "code": "MT&PK025",
@@ -10711,7 +10761,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfun5_6788e5bce4df4052",
-      "createdAt": "2026-09-22T09:11:27.713Z"
+      "createdAt": "2026-09-22T09:11:27.713Z",
+      "documentCode": "sim_vinaphone"
     },
     {
       "code": "MT&PK026",
@@ -10722,7 +10773,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfun5_938b0aa6173709a9",
-      "createdAt": "2026-09-22T09:11:27.713Z"
+      "createdAt": "2026-09-22T09:11:27.713Z",
+      "documentCode": "man_hinh_acer_ek241"
     },
     {
       "code": "MT&PK027",
@@ -10733,7 +10785,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfun6_380efdfd442903ca",
-      "createdAt": "2026-09-22T09:11:27.714Z"
+      "createdAt": "2026-09-22T09:11:27.714Z",
+      "documentCode": "ban_phim_chuot_mk200"
     },
     {
       "code": "MT&PK028",
@@ -10744,7 +10797,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfun7_9567b0a4b6788a92",
-      "createdAt": "2026-09-22T09:11:27.715Z"
+      "createdAt": "2026-09-22T09:11:27.715Z",
+      "documentCode": "man_hiinh_waveshare"
     },
     {
       "code": "MT&PK029",
@@ -10755,7 +10809,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfun8_a626fddcc0ca928c",
-      "createdAt": "2026-09-22T09:11:27.716Z"
+      "createdAt": "2026-09-22T09:11:27.716Z",
+      "documentCode": "usb_hub"
     },
     {
       "code": "MT&PK030",
@@ -10766,7 +10821,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfun9_4369162a358a9375",
-      "createdAt": "2026-09-22T09:11:27.717Z"
+      "createdAt": "2026-09-22T09:11:27.717Z",
+      "documentCode": "bo_phat_4g_tp_link"
     },
     {
       "code": "MT&PK031",
@@ -10777,7 +10833,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfun9_d808190d749b00f5",
-      "createdAt": "2026-09-22T09:11:27.718Z"
+      "createdAt": "2026-09-22T09:11:27.718Z",
+      "documentCode": "pin_sac_du_phong_ugreen"
     },
     {
       "code": "MT&PK032",
@@ -10788,7 +10845,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfuna_f214565610ef6d8b",
-      "createdAt": "2026-09-22T09:11:27.718Z"
+      "createdAt": "2026-09-22T09:11:27.718Z",
+      "documentCode": "cap_bo_chuyen_doi_typec_ugreen"
     },
     {
       "code": "MT&PK033",
@@ -10799,7 +10857,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfunb_aecafeb4c0a265c7",
-      "createdAt": "2026-09-22T09:11:27.719Z"
+      "createdAt": "2026-09-22T09:11:27.719Z",
+      "documentCode": "cap_mang_ugreen_1_5m"
     },
     {
       "code": "MT&PK034",
@@ -10810,7 +10869,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfunc_0a43a2af2ea2c268",
-      "createdAt": "2026-09-22T09:11:27.720Z"
+      "createdAt": "2026-09-22T09:11:27.720Z",
+      "documentCode": "thiet_bi_dinh_tuyen_mikrotik_routerosl6"
     },
     {
       "code": "MT&PK035",
@@ -10821,7 +10881,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfund_73c95f6cf37bfc07",
-      "createdAt": "2026-09-22T09:11:27.721Z"
+      "createdAt": "2026-09-22T09:11:27.721Z",
+      "documentCode": "cu_sac_nhanh_100w_ugreen"
     },
     {
       "code": "MT&PK036",
@@ -10832,7 +10893,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfund_b2bd163de0310b3e",
-      "createdAt": "2026-09-22T09:11:27.721Z"
+      "createdAt": "2026-09-22T09:11:27.721Z",
+      "documentCode": "sim_mobifone"
     },
     {
       "code": "MT&PK037",
@@ -10843,7 +10905,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfune_21f45368f97f98f9",
-      "createdAt": "2026-09-22T09:11:27.722Z"
+      "createdAt": "2026-09-22T09:11:27.722Z",
+      "documentCode": "ban_phim_logitech_mk200"
     },
     {
       "code": "MT&PK045",
@@ -10854,7 +10917,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfunf_33fb66026c6f3053",
-      "createdAt": "2026-09-22T09:11:27.723Z"
+      "createdAt": "2026-09-22T09:11:27.723Z",
+      "documentCode": "cap_chuyen_doi_displayport_qua_hdmi_dai_5m_ugreen"
     },
     {
       "code": "MT&PK046",
@@ -10865,7 +10929,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfung_87d84699e37becd8",
-      "createdAt": "2026-09-22T09:11:27.724Z"
+      "createdAt": "2026-09-22T09:11:27.724Z",
+      "documentCode": "cap_du_lieu_video_hdmi_8m_ugreen"
     },
     {
       "code": "MT&PK051",
@@ -10876,7 +10941,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfung_cf8a4d626170bf58",
-      "createdAt": "2026-09-22T09:11:27.724Z"
+      "createdAt": "2026-09-22T09:11:27.724Z",
+      "documentCode": "hub_usb_type_c_6_trong_1"
     },
     {
       "code": "MT&PK052",
@@ -10887,7 +10953,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfunh_be3b24534df15cbf",
-      "createdAt": "2026-09-22T09:11:27.725Z"
+      "createdAt": "2026-09-22T09:11:27.725Z",
+      "documentCode": "hub_usb_type_c_5_trong_2"
     },
     {
       "code": "MT&PK053",
@@ -10898,7 +10965,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfuni_ef31fe509c1d906e",
-      "createdAt": "2026-09-22T09:11:27.726Z"
+      "createdAt": "2026-09-22T09:11:27.726Z",
+      "documentCode": "cap_usb_3_0_to_usb_type_c"
     },
     {
       "code": "MT&PK054",
@@ -10909,7 +10977,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfunj_b0dd04374fa72104",
-      "createdAt": "2026-09-22T09:11:27.727Z"
+      "createdAt": "2026-09-22T09:11:27.727Z",
+      "documentCode": "cap_usb_type_c_to_usb_type_c"
     },
     {
       "code": "MT&PK055",
@@ -10920,7 +10989,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfunj_577d89b9575898a5",
-      "createdAt": "2026-09-22T09:11:27.727Z"
+      "createdAt": "2026-09-22T09:11:27.727Z",
+      "documentCode": "doc_o_cung_2_5_3_5_inches"
     },
     {
       "code": "MT&PK056",
@@ -10931,7 +11001,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfunk_fa29fbd6fcbf92ea",
-      "createdAt": "2026-09-22T09:11:27.728Z"
+      "createdAt": "2026-09-22T09:11:27.728Z",
+      "documentCode": "cap_displayport_2m_ugreen"
     },
     {
       "code": "MT&PK057",
@@ -10942,7 +11013,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfunl_eb359c5c0a0a1a07",
-      "createdAt": "2026-09-22T09:11:27.729Z"
+      "createdAt": "2026-09-22T09:11:27.729Z",
+      "documentCode": "view_sonic_va1655_3"
     },
     {
       "code": "MT&PK058",
@@ -10953,7 +11025,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfunm_ac6a452ac72b36c0",
-      "createdAt": "2026-09-22T09:11:27.730Z"
+      "createdAt": "2026-09-22T09:11:27.730Z",
+      "documentCode": "ban_phim_logitech_k400"
     },
     {
       "code": "MT&PK059",
@@ -10964,7 +11037,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfunn_a0876c28bf118b44",
-      "createdAt": "2026-09-22T09:11:27.731Z"
+      "createdAt": "2026-09-22T09:11:27.731Z",
+      "documentCode": "can_so_logitech"
     },
     {
       "code": "MT&PK060",
@@ -10975,7 +11049,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfuno_cea765ff94bb1358",
-      "createdAt": "2026-09-22T09:11:27.732Z"
+      "createdAt": "2026-09-22T09:11:27.732Z",
+      "documentCode": "vo_lang_logitech_g29"
     },
     {
       "code": "MT&PK061",
@@ -10986,7 +11061,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfunp_9a72d0d8cf1dd308",
-      "createdAt": "2026-09-22T09:11:27.733Z"
+      "createdAt": "2026-09-22T09:11:27.733Z",
+      "documentCode": "ban_phim_dagru"
     },
     {
       "code": "MT&PK062",
@@ -10997,7 +11073,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfunq_fa45950f867d526f",
-      "createdAt": "2026-09-22T09:11:27.734Z"
+      "createdAt": "2026-09-22T09:11:27.734Z",
+      "documentCode": "chuot_logitech"
     },
     {
       "code": "MT&PK063",
@@ -11008,7 +11085,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfunq_af12a54c2f62346f",
-      "createdAt": "2026-09-22T09:11:27.734Z"
+      "createdAt": "2026-09-22T09:11:27.734Z",
+      "documentCode": "chuot_logitech_pnkx_110650"
     },
     {
       "code": "MT&PK064",
@@ -11019,7 +11097,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfunr_c90ebc18942cf952",
-      "createdAt": "2026-09-22T09:11:27.735Z"
+      "createdAt": "2026-09-22T09:11:27.735Z",
+      "documentCode": "ban_phim_logitech_k120"
     },
     {
       "code": "MT&PK065",
@@ -11030,7 +11109,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfuns_e9a52cb5ddce75f3",
-      "createdAt": "2026-09-22T09:11:27.736Z"
+      "createdAt": "2026-09-22T09:11:27.736Z",
+      "documentCode": "ban_phim_fuhlen"
     },
     {
       "code": "PS001",
@@ -11041,7 +11121,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfunt_41c02af9ec44105b",
-      "createdAt": "2026-09-22T09:11:27.737Z"
+      "createdAt": "2026-09-22T09:11:27.737Z",
+      "documentCode": "nguon_120w_20v"
     },
     {
       "code": "PS002",
@@ -11052,7 +11133,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfunu_3cb689ff7c70dd81",
-      "createdAt": "2026-09-22T09:11:27.738Z"
+      "createdAt": "2026-09-22T09:11:27.738Z",
+      "documentCode": "nguon_600w_24v"
     },
     {
       "code": "PS003",
@@ -11063,7 +11145,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfunu_26b4bc35e7b0def0",
-      "createdAt": "2026-09-22T09:11:27.738Z"
+      "createdAt": "2026-09-22T09:11:27.738Z",
+      "documentCode": "nguon_1000w_24v"
     },
     {
       "code": "PS004",
@@ -11074,7 +11157,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfunv_3244cb2832315907",
-      "createdAt": "2026-09-22T09:11:27.739Z"
+      "createdAt": "2026-09-22T09:11:27.739Z",
+      "documentCode": "nguon_meanwell_480w_24v_advantech"
     },
     {
       "code": "PS005",
@@ -11085,7 +11169,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfunw_58c9ef48317ab53e",
-      "createdAt": "2026-09-22T09:11:27.740Z"
+      "createdAt": "2026-09-22T09:11:27.740Z",
+      "documentCode": "nguon_dc_12v_day_nguon"
     },
     {
       "code": "SC001",
@@ -11096,7 +11181,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfunx_8afc9448f252060c",
-      "createdAt": "2026-09-22T09:11:27.741Z"
+      "createdAt": "2026-09-22T09:11:27.741Z",
+      "documentCode": "sim_mang_data_viettel"
     },
     {
       "code": "TBĐ-000",
@@ -11107,7 +11193,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfunx_1c98b454f2b2ccbf",
-      "createdAt": "2026-09-22T09:11:27.741Z"
+      "createdAt": "2026-09-22T09:11:27.741Z",
+      "documentCode": "day_cam_bien_rada_ars_408"
     },
     {
       "code": "TBĐ-001",
@@ -11118,7 +11205,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfuny_349ed97b9794bc01",
-      "createdAt": "2026-09-22T09:11:27.742Z"
+      "createdAt": "2026-09-22T09:11:27.742Z",
+      "documentCode": "day_mang_day_tin_hieu_bo_cap_nguon_tin_hieu"
     },
     {
       "code": "TBĐ-002",
@@ -11129,7 +11217,8 @@
       "location": "B-2-0",
       "active": true,
       "id": "product_mucgfunz_511d364729101b3a",
-      "createdAt": "2026-09-22T09:11:27.743Z"
+      "createdAt": "2026-09-22T09:11:27.743Z",
+      "documentCode": "day_data_usb_to_usb_ugreen"
     },
     {
       "code": "TBĐ-003",
@@ -11140,7 +11229,8 @@
       "location": "B-2-0",
       "active": true,
       "id": "product_mucgfuo0_929e4d2227a28b32",
-      "createdAt": "2026-09-22T09:11:27.744Z"
+      "createdAt": "2026-09-22T09:11:27.744Z",
+      "documentCode": "day_mang_cat_5e_5m"
     },
     {
       "code": "TBĐ004",
@@ -11151,7 +11241,8 @@
       "location": "A-0-2",
       "active": true,
       "id": "product_mucgfuo0_4c49dc83ff97eb32",
-      "createdAt": "2026-09-22T09:11:27.745Z"
+      "createdAt": "2026-09-22T09:11:27.745Z",
+      "documentCode": "fk_ff_cable_15m"
     },
     {
       "code": "TBĐ005",
@@ -11162,7 +11253,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfuo2_24699d145c4ab97d",
-      "createdAt": "2026-09-22T09:11:27.746Z"
+      "createdAt": "2026-09-22T09:11:27.746Z",
+      "documentCode": "cbi_fakra_zfm_12m"
     },
     {
       "code": "TBĐ006",
@@ -11173,7 +11265,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfuo2_a40b29154bd4ec9c",
-      "createdAt": "2026-09-22T09:11:27.746Z"
+      "createdAt": "2026-09-22T09:11:27.746Z",
+      "documentCode": "dong_ho_do_dien_fluke"
     },
     {
       "code": "TBLT001",
@@ -11184,7 +11277,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfuo3_28e3dc25d4b401e9",
-      "createdAt": "2026-09-22T09:11:27.747Z"
+      "createdAt": "2026-09-22T09:11:27.747Z",
+      "documentCode": "nas_synology"
     },
     {
       "code": "TBLT002",
@@ -11195,7 +11289,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfuo4_f3c154b10ef9db94",
-      "createdAt": "2026-09-22T09:11:27.748Z"
+      "createdAt": "2026-09-22T09:11:27.748Z",
+      "documentCode": "o_ssd_advantech_512g"
     },
     {
       "code": "TBLT003",
@@ -11206,7 +11301,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfuo5_df07dfe799ddfb36",
-      "createdAt": "2026-09-22T09:11:27.749Z"
+      "createdAt": "2026-09-22T09:11:27.749Z",
+      "documentCode": "o_ssd_samsung_870evo_1tb"
     },
     {
       "code": "TBLT005",
@@ -11217,7 +11313,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfuo6_b7559044d1a054d8",
-      "createdAt": "2026-09-22T09:11:27.750Z"
+      "createdAt": "2026-09-22T09:11:27.750Z",
+      "documentCode": "o_hdd_20tb"
     },
     {
       "code": "",
@@ -11228,7 +11325,8 @@
       "location": "B-3-2",
       "active": true,
       "id": "product_mucgfuo6_1bfe7a1bc607abdf",
-      "createdAt": "2026-09-22T09:11:27.750Z"
+      "createdAt": "2026-09-22T09:11:27.750Z",
+      "documentCode": "uss_board"
     },
     {
       "code": "",
@@ -11239,7 +11337,8 @@
       "location": "B-3-2",
       "active": true,
       "id": "product_mucgfuo7_567ab5302f4b398d",
-      "createdAt": "2026-09-22T09:11:27.751Z"
+      "createdAt": "2026-09-22T09:11:27.751Z",
+      "documentCode": "uss5_sonar"
     },
     {
       "code": "",
@@ -11250,7 +11349,8 @@
       "location": "B-3-2",
       "active": true,
       "id": "product_mucgfuo8_b7df26fe024cf823",
-      "createdAt": "2026-09-22T09:11:27.752Z"
+      "createdAt": "2026-09-22T09:11:27.752Z",
+      "documentCode": "uss5_connector"
     },
     {
       "code": "",
@@ -11261,7 +11361,8 @@
       "location": "B-3-2",
       "active": true,
       "id": "product_mucgfuo9_9e4b7ede0ffce30b",
-      "createdAt": "2026-09-22T09:11:27.753Z"
+      "createdAt": "2026-09-22T09:11:27.753Z",
+      "documentCode": "uss_board_connector"
     },
     {
       "code": "",
@@ -11272,7 +11373,8 @@
       "location": "B-2-3",
       "active": true,
       "id": "product_mucgfuoa_7cdc37780c89a6be",
-      "createdAt": "2026-09-22T09:11:27.754Z"
+      "createdAt": "2026-09-22T09:11:27.754Z",
+      "documentCode": "moxa_eds_g2008_el_v1_0_0"
     },
     {
       "code": "",
@@ -11283,7 +11385,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfuoa_e0774c23e16d5dd4",
-      "createdAt": "2026-09-22T09:11:27.755Z"
+      "createdAt": "2026-09-22T09:11:27.755Z",
+      "documentCode": "ga_uss_sonar"
     },
     {
       "code": "",
@@ -11294,7 +11397,8 @@
       "location": "A-1-0 -> A-4-0",
       "active": true,
       "id": "product_mucgfuob_13fdfae4c5d04e9c",
-      "createdAt": "2026-09-22T09:11:27.755Z"
+      "createdAt": "2026-09-22T09:11:27.755Z",
+      "documentCode": "lidar_c32"
     },
     {
       "code": "",
@@ -11305,7 +11409,8 @@
       "location": "B-2-4",
       "active": true,
       "id": "product_mucgfuoc_b0632d1e237b17ca",
-      "createdAt": "2026-09-22T09:11:27.756Z"
+      "createdAt": "2026-09-22T09:11:27.756Z",
+      "documentCode": "bo_chuyen_doi_tp_link_uh6120c"
     },
     {
       "code": "",
@@ -11316,7 +11421,8 @@
       "location": "B-0-0, B-0-1",
       "active": true,
       "id": "product_mucgfuod_c8730bfd296de47a",
-      "createdAt": "2026-09-22T09:11:27.757Z"
+      "createdAt": "2026-09-22T09:11:27.757Z",
+      "documentCode": "hesei_ot128"
     },
     {
       "code": "",
@@ -11327,7 +11433,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfuoe_7f4e0efb925ebddb",
-      "createdAt": "2026-09-22T09:11:27.758Z"
+      "createdAt": "2026-09-22T09:11:27.758Z",
+      "documentCode": "hesei_at128"
     },
     {
       "code": "",
@@ -11338,7 +11445,8 @@
       "location": "B-0-2",
       "active": true,
       "id": "product_mucgfuof_1dca80c7ad2aec5e",
-      "createdAt": "2026-09-22T09:11:27.759Z"
+      "createdAt": "2026-09-22T09:11:27.759Z",
+      "documentCode": "o_hdd_16tb"
     },
     {
       "code": "",
@@ -11349,7 +11457,8 @@
       "location": "B-2-0",
       "active": true,
       "id": "product_mucgfuog_947119efb5d6fb83",
-      "createdAt": "2026-09-22T09:11:27.760Z"
+      "createdAt": "2026-09-22T09:11:27.760Z",
+      "documentCode": "lidar_m1_plus_hub"
     },
     {
       "code": "",
@@ -11360,7 +11469,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfuog_26e12cfbc7621f2a",
-      "createdAt": "2026-09-22T09:11:27.760Z"
+      "createdAt": "2026-09-22T09:11:27.760Z",
+      "documentCode": "a_v_capture_adapter_family"
     },
     {
       "code": "",
@@ -11371,7 +11481,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfuoh_9353db2a92a3eb61",
-      "createdAt": "2026-09-22T09:11:27.761Z"
+      "createdAt": "2026-09-22T09:11:27.761Z",
+      "documentCode": "camera_quan_sat_phia_sau_o_to_full_hd_ahd1080p"
     },
     {
       "code": "",
@@ -11382,7 +11493,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfuoi_e8bd5b05a3f232e5",
-      "createdAt": "2026-09-22T09:11:27.762Z"
+      "createdAt": "2026-09-22T09:11:27.762Z",
+      "documentCode": "may_tinh_de_ban_pc_asus"
     },
     {
       "code": "",
@@ -11393,7 +11505,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfuoj_1d4b79f2b0364ee2",
-      "createdAt": "2026-09-22T09:11:27.763Z"
+      "createdAt": "2026-09-22T09:11:27.763Z",
+      "documentCode": "o_cung_ssd_kingmax_zeus_256gb"
     },
     {
       "code": "",
@@ -11404,7 +11517,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfuok_336cc56852744d69",
-      "createdAt": "2026-09-22T09:11:27.764Z"
+      "createdAt": "2026-09-22T09:11:27.764Z",
+      "documentCode": "man_hinh_lg_23_8_inch"
     },
     {
       "code": "",
@@ -11415,7 +11529,8 @@
       "location": "B-1-0",
       "active": true,
       "id": "product_mucgfuok_09bdffd9adcc055d",
-      "createdAt": "2026-09-22T09:11:27.764Z"
+      "createdAt": "2026-09-22T09:11:27.764Z",
+      "documentCode": "a_v_capture_adapter_family_usb_3_video"
     },
     {
       "code": "",
@@ -11426,7 +11541,8 @@
       "location": "B-3-0",
       "active": true,
       "id": "product_mucgfuol_96f2042c2ce054f4",
-      "createdAt": "2026-09-22T09:11:27.765Z"
+      "createdAt": "2026-09-22T09:11:27.765Z",
+      "documentCode": "pcan_usb_x6"
     },
     {
       "code": "",
@@ -11437,7 +11553,8 @@
       "location": "B-3-0",
       "active": true,
       "id": "product_mucgfuom_577e47801da5fd0a",
-      "createdAt": "2026-09-22T09:11:27.766Z"
+      "createdAt": "2026-09-22T09:11:27.766Z",
+      "documentCode": "pcan_usb_pro_fd"
     },
     {
       "code": "",
@@ -11448,7 +11565,8 @@
       "location": "B-1-2",
       "active": true,
       "id": "product_mucgfuon_33de472a85fe66da",
-      "createdAt": "2026-09-22T09:11:27.767Z"
+      "createdAt": "2026-09-22T09:11:27.767Z",
+      "documentCode": "lidar_c32w_day"
     },
     {
       "code": "",
@@ -11459,7 +11577,8 @@
       "location": "B-3-2",
       "active": true,
       "id": "product_mucgfuoo_e6fbbbb746601905",
-      "createdAt": "2026-09-22T09:11:27.768Z"
+      "createdAt": "2026-09-22T09:11:27.768Z",
+      "documentCode": "cam_p_cu25_ethernet"
     },
     {
       "code": "",
@@ -11470,7 +11589,8 @@
       "location": "B-2-1",
       "active": true,
       "id": "product_mucgfuop_47f198f924ad343d",
-      "createdAt": "2026-09-22T09:11:27.769Z"
+      "createdAt": "2026-09-22T09:11:27.769Z",
+      "documentCode": "rut906_router"
     },
     {
       "code": "",
@@ -11481,7 +11601,8 @@
       "location": "B-4-4",
       "active": true,
       "id": "product_mucgfuoq_a1bb28d0b6cd6ff4",
-      "createdAt": "2026-09-22T09:11:27.770Z"
+      "createdAt": "2026-09-22T09:11:27.770Z",
+      "documentCode": "can_zlg_400u"
     },
     {
       "code": "",
@@ -11492,7 +11613,8 @@
       "location": "B-3-4",
       "active": true,
       "id": "product_mucgfuor_15f24dea4cd85df5",
-      "createdAt": "2026-09-22T09:11:27.771Z"
+      "createdAt": "2026-09-22T09:11:27.771Z",
+      "documentCode": "can_zlg_800u"
     },
     {
       "code": "",
@@ -11503,7 +11625,8 @@
       "location": "B-4-3",
       "active": true,
       "id": "product_mucgfuor_e1f5e99fac8c41bc",
-      "createdAt": "2026-09-22T09:11:27.771Z"
+      "createdAt": "2026-09-22T09:11:27.771Z",
+      "documentCode": "canopen_8di"
     },
     {
       "code": "",
@@ -11514,7 +11637,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfuos_f9646bc4ac8c3581",
-      "createdAt": "2026-09-22T09:11:27.772Z"
+      "createdAt": "2026-09-22T09:11:27.772Z",
+      "documentCode": "nuvo_9160gc_6119"
     },
     {
       "code": "",
@@ -11525,7 +11649,8 @@
       "location": "B-3-4",
       "active": true,
       "id": "product_mucgfuot_92911eb5007003ba",
-      "createdAt": "2026-09-22T09:11:27.773Z"
+      "createdAt": "2026-09-22T09:11:27.773Z",
+      "documentCode": "thiet_bi_dinh_tuyen_ci_thu_phat_vo_tuyen_rut906"
     },
     {
       "code": "",
@@ -11536,7 +11661,8 @@
       "location": "B-2-3",
       "active": true,
       "id": "product_mucgfuou_b8234491fcdf810c",
-      "createdAt": "2026-09-22T09:11:27.774Z"
+      "createdAt": "2026-09-22T09:11:27.774Z",
+      "documentCode": "switch"
     },
     {
       "code": "",
@@ -11547,7 +11673,8 @@
       "location": "B-3-0",
       "active": true,
       "id": "product_mucgfuov_1fc4e5bd7c9a1566",
-      "createdAt": "2026-09-22T09:11:27.775Z"
+      "createdAt": "2026-09-22T09:11:27.775Z",
+      "documentCode": "can_logger_canedge"
     },
     {
       "code": "",
@@ -11558,7 +11685,8 @@
       "location": "A-2-1",
       "active": true,
       "id": "product_mucgfuow_db588a65caa406c3",
-      "createdAt": "2026-09-22T09:11:27.776Z"
+      "createdAt": "2026-09-22T09:11:27.776Z",
+      "documentCode": "imu_aceinna"
     },
     {
       "code": "",
@@ -11569,7 +11697,8 @@
       "location": "B-0-2",
       "active": true,
       "id": "product_mucgfuox_1dc2ee75c2daebcf",
-      "createdAt": "2026-09-22T09:11:27.777Z"
+      "createdAt": "2026-09-22T09:11:27.777Z",
+      "documentCode": "hx_csx627a"
     },
     {
       "code": "",
@@ -11580,7 +11709,8 @@
       "location": "B-3-3",
       "active": true,
       "id": "product_mucgfuoy_c37797783c4f4611",
-      "createdAt": "2026-09-22T09:11:27.778Z"
+      "createdAt": "2026-09-22T09:11:27.778Z",
+      "documentCode": "rtx_5070_msi_12g"
     },
     {
       "code": "",
@@ -11591,7 +11721,8 @@
       "location": "B-3-3",
       "active": true,
       "id": "product_mucgfuoz_70701b77dafd7be3",
-      "createdAt": "2026-09-22T09:11:27.779Z"
+      "createdAt": "2026-09-22T09:11:27.779Z",
+      "documentCode": "rtx_5060_asus_8g"
     },
     {
       "code": "",
@@ -11602,7 +11733,8 @@
       "location": "Bàn thao tác",
       "active": true,
       "id": "product_mucgfup0_31c0769181ea3215",
-      "createdAt": "2026-09-22T09:11:27.780Z"
+      "createdAt": "2026-09-22T09:11:27.780Z",
+      "documentCode": "day_dien_200m"
     },
     {
       "code": "",
@@ -11613,7 +11745,8 @@
       "location": "Bàn thao tác",
       "active": true,
       "id": "product_mucgfup0_12245c82a1545058",
-      "createdAt": "2026-09-22T09:11:27.780Z"
+      "createdAt": "2026-09-22T09:11:27.780Z",
+      "documentCode": "bulong"
     },
     {
       "code": "",
@@ -11624,7 +11757,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfup1_0820309cbdfa63c1",
-      "createdAt": "2026-09-22T09:11:27.781Z"
+      "createdAt": "2026-09-22T09:11:27.781Z",
+      "documentCode": "ftx180_3_con_180_1_con_140"
     },
     {
       "code": "",
@@ -11635,7 +11769,8 @@
       "location": "A-2-2",
       "active": true,
       "id": "product_mucgfup2_98238337de1967ce",
-      "createdAt": "2026-09-22T09:11:27.782Z"
+      "createdAt": "2026-09-22T09:11:27.782Z",
+      "documentCode": "day_8m_e1r"
     },
     {
       "code": "",
@@ -11646,7 +11781,8 @@
       "location": "B-1-3",
       "active": true,
       "id": "product_mucgfup3_cea4535cdcd30f7c",
-      "createdAt": "2026-09-22T09:11:27.783Z"
+      "createdAt": "2026-09-22T09:11:27.783Z",
+      "documentCode": "can_rs485"
     },
     {
       "code": "",
@@ -11657,7 +11793,8 @@
       "location": "B-2-3",
       "active": true,
       "id": "product_mucgfup4_dc4d92d61f1641b4",
-      "createdAt": "2026-09-22T09:11:27.784Z"
+      "createdAt": "2026-09-22T09:11:27.784Z",
+      "documentCode": "den_vang"
     },
     {
       "code": "",
@@ -11668,7 +11805,8 @@
       "location": "B-2-3",
       "active": true,
       "id": "product_mucgfup5_61d4b2bd0803ae07",
-      "createdAt": "2026-09-22T09:11:27.785Z"
+      "createdAt": "2026-09-22T09:11:27.785Z",
+      "documentCode": "den_do"
     },
     {
       "code": "",
@@ -11679,7 +11817,8 @@
       "location": "B-2-3",
       "active": true,
       "id": "product_mucgfup6_34b40d4db63e202a",
-      "createdAt": "2026-09-22T09:11:27.786Z"
+      "createdAt": "2026-09-22T09:11:27.786Z",
+      "documentCode": "den_xanh_la"
     },
     {
       "code": "",
@@ -11690,7 +11829,8 @@
       "location": "B-2-3",
       "active": true,
       "id": "product_mucgfup7_9d0683ecc5b2bddf",
-      "createdAt": "2026-09-22T09:11:27.787Z"
+      "createdAt": "2026-09-22T09:11:27.787Z",
+      "documentCode": "den_xanh_duong"
     },
     {
       "code": "",
@@ -11701,7 +11841,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfup8_41283c3f42cca131",
-      "createdAt": "2026-09-22T09:11:27.788Z"
+      "createdAt": "2026-09-22T09:11:27.788Z",
+      "documentCode": "bo_mui_khoan_total_1_10"
     },
     {
       "code": "",
@@ -11712,7 +11853,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfup9_8a5720d0143a2a04",
-      "createdAt": "2026-09-22T09:11:27.789Z"
+      "createdAt": "2026-09-22T09:11:27.789Z",
+      "documentCode": "bo_mui_taro_sata_m4"
     },
     {
       "code": "",
@@ -11723,7 +11865,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfupa_b5238ff38c9d80e5",
-      "createdAt": "2026-09-22T09:11:27.790Z"
+      "createdAt": "2026-09-22T09:11:27.790Z",
+      "documentCode": "bo_mui_taro_sata_m5"
     },
     {
       "code": "",
@@ -11734,7 +11877,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfupa_90578615ab18e2b9",
-      "createdAt": "2026-09-22T09:11:27.790Z"
+      "createdAt": "2026-09-22T09:11:27.790Z",
+      "documentCode": "bo_mui_taro_sata_m6"
     },
     {
       "code": "",
@@ -11745,7 +11889,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfupb_86e7e5130dba7366",
-      "createdAt": "2026-09-22T09:11:27.791Z"
+      "createdAt": "2026-09-22T09:11:27.791Z",
+      "documentCode": "but_lay_dau"
     },
     {
       "code": "",
@@ -11756,7 +11901,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfupc_82165f34e43a7844",
-      "createdAt": "2026-09-22T09:11:27.792Z"
+      "createdAt": "2026-09-22T09:11:27.792Z",
+      "documentCode": "bo_luc_giac_total_bi"
     },
     {
       "code": "",
@@ -11767,7 +11913,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfupk_9b7fcb6cd81d6ded",
-      "createdAt": "2026-09-22T09:11:27.800Z"
+      "createdAt": "2026-09-22T09:11:27.800Z",
+      "documentCode": "bo_luc_giac_total_hoa_thi"
     },
     {
       "code": "",
@@ -11778,7 +11925,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfupl_815cd71611a6ab0e",
-      "createdAt": "2026-09-22T09:11:27.801Z"
+      "createdAt": "2026-09-22T09:11:27.801Z",
+      "documentCode": "may_cat_cam_tay_dekton_chua_pin"
     },
     {
       "code": "",
@@ -11789,7 +11937,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfupm_3778963ed9ac2ac8",
-      "createdAt": "2026-09-22T09:11:27.802Z"
+      "createdAt": "2026-09-22T09:11:27.802Z",
+      "documentCode": "thuoc_day_bosch_5m"
     },
     {
       "code": "",
@@ -11800,7 +11949,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfupn_d3d9c97ae9ac0a6e",
-      "createdAt": "2026-09-22T09:11:27.803Z"
+      "createdAt": "2026-09-22T09:11:27.803Z",
+      "documentCode": "may_khoan_makita"
     },
     {
       "code": "",
@@ -11811,7 +11961,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfupo_bf7c632c4128ce31",
-      "createdAt": "2026-09-22T09:11:27.804Z"
+      "createdAt": "2026-09-22T09:11:27.804Z",
+      "documentCode": "pin_makital_12v_1_5ah"
     },
     {
       "code": "",
@@ -11822,7 +11973,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfupp_4f40b809dfed5210",
-      "createdAt": "2026-09-22T09:11:27.805Z"
+      "createdAt": "2026-09-22T09:11:27.805Z",
+      "documentCode": "bo_sac_makita"
     },
     {
       "code": "",
@@ -11833,7 +11985,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfupq_b5a3fcb256b828f3",
-      "createdAt": "2026-09-22T09:11:27.806Z"
+      "createdAt": "2026-09-22T09:11:27.806Z",
+      "documentCode": "bo_dung_cu_workpro"
     },
     {
       "code": "",
@@ -11844,7 +11997,8 @@
       "location": "Bàn thao tác",
       "active": true,
       "id": "product_mucgfupr_9d339e05b94e5021",
-      "createdAt": "2026-09-22T09:11:27.807Z"
+      "createdAt": "2026-09-22T09:11:27.807Z",
+      "documentCode": "tay_quay_taro"
     },
     {
       "code": "",
@@ -11855,7 +12009,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfups_31c1ee4a0adc8ecd",
-      "createdAt": "2026-09-22T09:11:27.808Z"
+      "createdAt": "2026-09-22T09:11:27.808Z",
+      "documentCode": "card_cam"
     },
     {
       "code": "",
@@ -11866,7 +12021,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfups_7baaa8462157aa5f",
-      "createdAt": "2026-09-22T09:11:27.808Z"
+      "createdAt": "2026-09-22T09:11:27.808Z",
+      "documentCode": "thuoc_kep"
     },
     {
       "code": "",
@@ -11877,7 +12033,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfupt_cda876717fa139dc",
-      "createdAt": "2026-09-22T09:11:27.809Z"
+      "createdAt": "2026-09-22T09:11:27.809Z",
+      "documentCode": "o_ssd_kingston_4tb"
     },
     {
       "code": "",
@@ -11888,7 +12045,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfupu_7c6b2978c06e4598",
-      "createdAt": "2026-09-22T09:11:27.810Z"
+      "createdAt": "2026-09-22T09:11:27.810Z",
+      "documentCode": "tram_han_hakd"
     },
     {
       "code": "",
@@ -11899,7 +12057,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfupv_161b525bee9d6ec2",
-      "createdAt": "2026-09-22T09:11:27.811Z"
+      "createdAt": "2026-09-22T09:11:27.811Z",
+      "documentCode": "ftx180"
     },
     {
       "code": "",
@@ -11910,7 +12069,8 @@
       "location": "",
       "active": true,
       "id": "product_mucgfupw_e4e90d0e3068a97f",
-      "createdAt": "2026-09-22T09:11:27.812Z"
+      "createdAt": "2026-09-22T09:11:27.812Z",
+      "documentCode": "camera_hd"
     },
     {
       "id": "product_muf6f6br_f424a3de7c968022",
@@ -11921,7 +12081,8 @@
       "description": "sss",
       "location": "ss",
       "active": true,
-      "createdAt": "2026-09-24T06:54:18.568Z"
+      "createdAt": "2026-09-24T06:54:18.568Z",
+      "documentCode": "aaaa"
     }
   ],
   "categories": [

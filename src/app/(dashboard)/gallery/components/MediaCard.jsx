@@ -3,17 +3,18 @@
 import { useState } from "react";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
+import CardHeader from "@mui/material/CardHeader";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import Avatar from "@mui/material/Avatar";
 import Checkbox from "@mui/material/Checkbox";
-import Chip from "@mui/material/Chip";
 import IconButton from "@mui/material/IconButton";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Tooltip from "@mui/material/Tooltip";
+import { renderWithMentions } from "./mentionUtils";
 
 function formatRelativeTime(dateString) {
   try {
@@ -37,9 +38,14 @@ export default function MediaCard({
   onDownload,
   onShare,
   onDelete,
+  onEdit,
+  onToggleLike,
+  canEdit = true,
+  canDelete = true,
 }) {
   const [menuAnchor, setMenuAnchor] = useState(null);
   const [isHovered, setIsHovered] = useState(false);
+  const [isLikeAnimating, setIsLikeAnimating] = useState(false);
 
   const handleOpenMenu = (e) => {
     e.stopPropagation();
@@ -51,15 +57,62 @@ export default function MediaCard({
     setMenuAnchor(null);
   };
 
-  const isVideo = item.type === "video";
+  const handleLikeClick = (e) => {
+    e.stopPropagation();
+    setIsLikeAnimating(true);
+    setTimeout(() => setIsLikeAnimating(false), 400);
+    if (onToggleLike) onToggleLike(item.id);
+  };
+
+  const handleCommentClick = (e) => {
+    e.stopPropagation();
+    if (onClick) onClick();
+  };
+
+  const handleShareClick = (e) => {
+    e.stopPropagation();
+    if (onShare) onShare(item);
+  };
+
+  const handleDownloadClick = (e) => {
+    e.stopPropagation();
+    if (onDownload) onDownload(item);
+  };
+
+  const isVideo =
+    item.type === "video" || /\.(mp4|mov|webm|avi|mkv|m4v)$/i.test(item.url || "");
+  const hasImageThumbnail =
+    Boolean(item.thumbnail &&
+    item.thumbnail !== item.url &&
+    !/\.(mp4|mov|webm|avi|mkv|m4v)$/i.test(item.thumbnail));
+  const hasMultipleFiles = (item.totalFiles || item.postTotalFiles || 1) > 1;
+
+  // Title fallback formatting
+  const rawTitle = (item.title || "").trim();
+  const isNoTitle =
+    !rawTitle ||
+    rawTitle.startsWith("Gemini_Generated_Image") ||
+    /^\d{6,}_/.test(rawTitle) ||
+    /\.(jpe?g|png|webp|gif|mp4|mov|svg)$/i.test(rawTitle);
+  const displayTitle = isNoTitle ? "Bài viết không có tiêu đề" : rawTitle;
+
+  // Description fallback formatting
+  const rawDesc = (item.description || "").trim();
+  const isNoDesc =
+    !rawDesc ||
+    rawDesc === "Tệp media được tải lên hệ thống lưu trữ nội bộ Xbus." ||
+    rawDesc === "-";
+  const displayDescription = isNoDesc ? "Mô tả : -" : rawDesc;
 
   return (
     <Card
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      onClick={onClick}
       sx={{
-        cursor: "pointer",
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
         position: "relative",
         borderRadius: 2,
         overflow: "hidden",
@@ -68,105 +121,154 @@ export default function MediaCard({
         boxShadow: isSelected
           ? "0 0 0 2px rgba(115, 103, 240, 0.4), 0 8px 24px -4px rgba(115, 103, 240, 0.2)"
           : isHovered
-            ? "0 8px 24px -4px rgba(47, 43, 61, 0.16)"
+            ? "0 10px 28px -4px rgba(47, 43, 61, 0.16)"
             : "0 2px 6px 0 rgba(47, 43, 61, 0.06)",
         transform: isHovered ? "translateY(-4px)" : "none",
         transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
       }}
     >
-      {/* Thumbnail Area */}
+      {/* 1. Instagram-style Header: Uploader Avatar, Name, Time, Menu (Fixed Height 56px) */}
+      <CardHeader
+        avatar={
+          <Avatar
+            src={item.uploader?.avatar}
+            alt={item.uploader?.name}
+            sx={{ width: 34, height: 34, fontSize: 13, bgcolor: "primary.light" }}
+          >
+            {item.uploader?.name?.[0]}
+          </Avatar>
+        }
+        title={
+          <Typography
+            variant="body2"
+            sx={{
+              fontWeight: 600,
+              color: "text.primary",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              maxWidth: 160,
+            }}
+          >
+            {item.uploader?.name || "Thành viên Xbus"}
+          </Typography>
+        }
+        subheader={
+          <Typography variant="caption" color="text.disabled" sx={{ fontSize: "0.75rem" }}>
+            {formatRelativeTime(item.uploadedAt)}
+          </Typography>
+        }
+        action={
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            {/* Checkbox for batch mode */}
+            {(isSelected || isBatchMode || isHovered) && (
+              <Checkbox
+                checked={isSelected}
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onToggleSelect(item.id);
+                }}
+                sx={{
+                  p: 0.5,
+                  mr: 0.5,
+                  color: isSelected ? "primary.main" : "text.secondary",
+                  "&.Mui-checked": { color: "primary.main" },
+                }}
+              />
+            )}
+            <IconButton
+              size="small"
+              onClick={handleOpenMenu}
+              sx={{ color: "text.secondary", "&:hover": { color: "primary.main" } }}
+            >
+              <i className="tabler-dots-vertical" style={{ fontSize: 18 }} />
+            </IconButton>
+          </Box>
+        }
+        sx={{
+          p: "10px 14px 8px",
+          minHeight: 56,
+          boxSizing: "border-box",
+          alignItems: "center",
+        }}
+      />
+
+      {/* 2. Media Area: Fixed aspect ratio (Click to open full view) */}
       <Box
+        onClick={onClick}
         sx={{
           position: "relative",
           width: "100%",
-          paddingTop: "56.25%", // 16:9 Aspect Ratio
+          paddingTop: "70%", // Consistent aspect ratio
           bgcolor: "background.default",
           overflow: "hidden",
+          cursor: "pointer",
+          flexShrink: 0,
         }}
       >
-        <Box
-          component="img"
-          src={item.thumbnail || item.url}
-          alt={item.title || item.fileName}
-          sx={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-            transition: "transform 0.4s ease",
-            transform: isHovered ? "scale(1.05)" : "scale(1)",
-          }}
-        />
-
-        {/* Dark overlay gradient */}
-        <Box
-          sx={{
-            position: "absolute",
-            inset: 0,
-            background:
-              "linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0) 40%, rgba(0,0,0,0.65) 100%)",
-            opacity: isHovered ? 0.9 : 0.6,
-            transition: "opacity 0.2s ease",
-          }}
-        />
-
-        {/* Checkbox (Batch select) */}
-        <Box
-          sx={{
-            position: "absolute",
-            top: 8,
-            left: 8,
-            zIndex: 3,
-            opacity: isSelected || isBatchMode || isHovered ? 1 : 0,
-            transition: "opacity 0.2s ease",
-          }}
-          onClick={(e) => {
-            e.stopPropagation();
-            onToggleSelect(item.id);
-          }}
-        >
-          <Checkbox
-            checked={isSelected}
-            size="small"
+        {isVideo && !hasImageThumbnail ? (
+          <Box
+            component="video"
+            src={`${item.url}#t=0.5`}
+            preload="metadata"
+            muted
+            playsInline
             sx={{
-              p: 0.5,
-              bgcolor: isSelected ? "primary.main" : "rgba(0, 0, 0, 0.5)",
-              color: "#fff",
-              borderRadius: "6px",
-              backdropFilter: "blur(4px)",
-              "&.Mui-checked": {
-                bgcolor: "primary.main",
-                color: "#fff",
-              },
-              "&:hover": {
-                bgcolor: isSelected ? "primary.dark" : "rgba(0, 0, 0, 0.7)",
-              },
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              bgcolor: "#000",
+              pointerEvents: "none",
+              transition: "transform 0.4s ease",
+              transform: isHovered ? "scale(1.04)" : "scale(1)",
             }}
           />
-        </Box>
+        ) : (
+          <Box
+            component="img"
+            src={hasImageThumbnail ? item.thumbnail : item.url}
+            alt={displayTitle}
+            sx={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              transition: "transform 0.4s ease",
+              transform: isHovered ? "scale(1.04)" : "scale(1)",
+            }}
+          />
+        )}
 
-        {/* Top-Right Badge: First Tag */}
-        {item.tags?.[0] && (
-          <Box sx={{ position: "absolute", top: 10, right: 10, zIndex: 2 }}>
-            <Chip
-              label={item.tags[0]}
-              size="small"
-              sx={{
-                height: 22,
-                fontSize: "0.72rem",
-                fontWeight: 600,
-                color: "#fff",
-                bgcolor: "rgba(0, 0, 0, 0.55)",
-                backdropFilter: "blur(6px)",
-                border: "1px solid rgba(255, 255, 255, 0.2)",
-              }}
-            />
+        {/* Multi-file subtle icon indicator (No text, no hashtag) */}
+        {hasMultipleFiles && (
+          <Box
+            sx={{
+              position: "absolute",
+              top: 10,
+              right: 10,
+              zIndex: 2,
+              bgcolor: "rgba(0, 0, 0, 0.6)",
+              backdropFilter: "blur(4px)",
+              color: "#fff",
+              borderRadius: "6px",
+              p: "4px 6px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 2px 6px rgba(0,0,0,0.3)",
+            }}
+          >
+            <i className="tabler-copy" style={{ fontSize: 15 }} />
           </Box>
         )}
 
-        {/* Center: Play Icon if Video */}
+        {/* Center Play Button for Video */}
         {isVideo && (
           <Box
             sx={{
@@ -185,191 +287,228 @@ export default function MediaCard({
               justifyContent: "center",
               color: "#fff",
               boxShadow: "0 4px 16px rgba(0,0,0,0.4)",
-              transition: "transform 0.2s ease, background-color 0.2s ease",
+            }}
+          >
+            <i className="tabler-player-play-filled" style={{ fontSize: 20, marginLeft: 2 }} />
+          </Box>
+        )}
+      </Box>
+
+      {/* 3. Instagram-style Action Bar: Like, Comment, Share, Download (Fixed Height 42px) */}
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          px: 1,
+          pt: 0.5,
+          pb: 0.5,
+          minHeight: 42,
+          boxSizing: "border-box",
+          flexShrink: 0,
+        }}
+      >
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+          {/* Nút Tym (Like) kèm số lượng bên phải */}
+          <Tooltip title={item.isLiked ? "Bỏ thích" : "Thích bài viết"}>
+            <Box
+              component="button"
+              type="button"
+              onClick={handleLikeClick}
+              sx={{
+                border: 0,
+                py: 0.5,
+                px: 1,
+                bgcolor: "transparent",
+                color: item.isLiked ? "#ea5455" : "text.secondary",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 0.5,
+                cursor: "pointer",
+                borderRadius: 1.5,
+                transition: "all 0.15s ease",
+                "&:hover": {
+                  color: "#ea5455",
+                  bgcolor: "rgba(234, 84, 85, 0.08)",
+                },
+              }}
+            >
+              <i
+                className={item.isLiked ? "tabler-heart-filled" : "tabler-heart"}
+                style={{
+                  fontSize: 20,
+                  transition: "transform 0.15s ease",
+                  transform: isLikeAnimating ? "scale(1.35)" : "scale(1)",
+                }}
+              />
+              <Typography
+                variant="body2"
+                sx={{
+                  fontWeight: 600,
+                  fontSize: "0.8125rem",
+                  color: item.isLiked ? "#ea5455" : "text.secondary",
+                  userSelect: "none",
+                }}
+              >
+                {item.likes || 0}
+              </Typography>
+            </Box>
+          </Tooltip>
+
+          {/* Nút Bình luận kèm số lượng bên phải */}
+          <Tooltip title="Xem và viết bình luận">
+            <Box
+              component="button"
+              type="button"
+              onClick={handleCommentClick}
+              sx={{
+                border: 0,
+                py: 0.5,
+                px: 1,
+                bgcolor: "transparent",
+                color: "text.secondary",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 0.5,
+                cursor: "pointer",
+                borderRadius: 1.5,
+                transition: "all 0.15s ease",
+                "&:hover": {
+                  color: "primary.main",
+                  bgcolor: "rgba(115, 103, 240, 0.08)",
+                },
+              }}
+            >
+              <i className="tabler-message-circle-2" style={{ fontSize: 20 }} />
+              <Typography
+                variant="body2"
+                sx={{
+                  fontWeight: 600,
+                  fontSize: "0.8125rem",
+                  color: "text.secondary",
+                  userSelect: "none",
+                }}
+              >
+                {item.comments?.length || 0}
+              </Typography>
+            </Box>
+          </Tooltip>
+
+          {/* Nút Chia sẻ */}
+          <Tooltip title="Lấy liên kết bài đăng">
+            <IconButton
+              size="small"
+              onClick={handleShareClick}
+              sx={{
+                color: "text.secondary",
+                "&:hover": {
+                  color: "primary.main",
+                  bgcolor: "rgba(115, 103, 240, 0.08)",
+                },
+              }}
+            >
+              <i className="tabler-share" style={{ fontSize: 20 }} />
+            </IconButton>
+          </Tooltip>
+        </Box>
+
+        {/* Nút Tải xuống nhanh */}
+        <Tooltip title="Tải xuống tệp gốc">
+          <IconButton
+            size="small"
+            onClick={handleDownloadClick}
+            sx={{
+              color: "text.secondary",
               "&:hover": {
-                bgcolor: "primary.main",
-                transform: "translate(-50%, -50%) scale(1.1)",
+                color: "primary.main",
+                bgcolor: "rgba(115, 103, 240, 0.08)",
               },
             }}
           >
-            <i className="tabler-player-play-filled" style={{ fontSize: 22, marginLeft: 2 }} />
-          </Box>
-        )}
-
-        {/* Bottom Right: Duration (Video) or Format (Image) */}
-        <Box
-          sx={{
-            position: "absolute",
-            bottom: 8,
-            right: 8,
-            zIndex: 2,
-            display: "flex",
-            alignItems: "center",
-            gap: 0.5,
-            px: 1,
-            py: 0.25,
-            borderRadius: "4px",
-            bgcolor: "rgba(0, 0, 0, 0.75)",
-            backdropFilter: "blur(4px)",
-            color: "#fff",
-            fontSize: "0.72rem",
-            fontWeight: 600,
-          }}
-        >
-          {isVideo ? (
-            <>
-              <i className="tabler-video" style={{ fontSize: 13 }} />
-              <span>{item.duration || "Video"}</span>
-            </>
-          ) : (
-            <>
-              <i className="tabler-photo" style={{ fontSize: 13 }} />
-              <span>{item.fileFormat || "JPG"}</span>
-            </>
-          )}
-        </Box>
-
-        {/* Privacy Icon Bottom Left */}
-        <Box
-          sx={{
-            position: "absolute",
-            bottom: 8,
-            left: 8,
-            zIndex: 2,
-            display: "flex",
-            alignItems: "center",
-            gap: 0.5,
-            px: 0.8,
-            py: 0.25,
-            borderRadius: "4px",
-            bgcolor: "rgba(0, 0, 0, 0.65)",
-            color: "rgba(255,255,255,0.85)",
-            fontSize: "0.7rem",
-          }}
-        >
-          {item.privacy === "public" && (
-            <Tooltip title="Công khai">
-              <i className="tabler-world" style={{ fontSize: 13 }} />
-            </Tooltip>
-          )}
-          {item.privacy === "team" && (
-            <Tooltip title="Nội bộ team">
-              <i className="tabler-users" style={{ fontSize: 13 }} />
-            </Tooltip>
-          )}
-          {item.privacy === "private" && (
-            <Tooltip title="Chỉ mình tôi">
-              <i className="tabler-lock" style={{ fontSize: 13 }} />
-            </Tooltip>
-          )}
-        </Box>
+            <i className="tabler-download" style={{ fontSize: 20 }} />
+          </IconButton>
+        </Tooltip>
       </Box>
 
-      {/* Card Body */}
-      <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
-        {/* Title & Quick Action Menu */}
-        <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 1 }}>
-          <Tooltip title={item.title || item.fileName} placement="top">
-            <Typography
-              variant="body1"
-              sx={{
-                fontWeight: 600,
-                fontSize: "0.9375rem",
-                lineHeight: 1.35,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                display: "-webkit-box",
-                WebkitLineClamp: 1,
-                WebkitBoxOrient: "vertical",
-              }}
-            >
-              {item.title || item.fileName}
-            </Typography>
-          </Tooltip>
+      {/* 4. Content Area: Equal Height Flex Distribution */}
+      <CardContent
+        sx={{
+          px: 2,
+          pt: 1,
+          pb: 2,
+          flexGrow: 1,
+          display: "flex",
+          flexDirection: "column",
+          "&:last-child": { pb: 2 },
+        }}
+      >
 
-          <IconButton
-            size="small"
-            onClick={handleOpenMenu}
+        {/* Tiêu đề bài đăng (Fixed height box: 26px) */}
+        <Box sx={{ minHeight: 26, mb: 0.5, display: "flex", alignItems: "center" }}>
+          <Typography
+            variant="subtitle1"
             sx={{
-              p: 0.5,
-              mt: -0.5,
-              mr: -0.5,
-              color: "text.secondary",
+              fontWeight: isNoTitle ? 400 : 600,
+              fontStyle: isNoTitle ? "italic" : "normal",
+              fontSize: "0.9125rem",
+              lineHeight: 1.3,
+              color: isNoTitle ? "text.disabled" : "text.primary",
+              cursor: "pointer",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              width: "100%",
+            }}
+            onClick={onClick}
+          >
+            {isNoTitle ? displayTitle : renderWithMentions(displayTitle)}
+          </Typography>
+        </Box>
+
+        {/* Mô tả chi tiết bài đăng (Fixed height box: 36px) */}
+        <Box sx={{ minHeight: 36, mb: 1, display: "flex", alignItems: "flex-start" }}>
+          <Typography
+            variant="body2"
+            sx={{
+              fontSize: "0.825rem",
+              lineHeight: 1.4,
+              color: isNoDesc ? "text.disabled" : "text.secondary",
+              fontStyle: isNoDesc ? "italic" : "normal",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+              cursor: "pointer",
+              width: "100%",
+            }}
+            onClick={onClick}
+          >
+            {isNoDesc ? displayDescription : renderWithMentions(displayDescription)}
+          </Typography>
+        </Box>
+
+        {/* Link xem tất cả bình luận ở đáy card (mt: "auto", Fixed height box: 20px) */}
+        <Box sx={{ mt: "auto", minHeight: 20, display: "flex", alignItems: "center" }}>
+          <Typography
+            variant="caption"
+            sx={{
+              display: "block",
+              color: (item.comments?.length || 0) > 0 ? "text.secondary" : "text.disabled",
+              fontWeight: 500,
+              cursor: "pointer",
               "&:hover": { color: "primary.main" },
             }}
+            onClick={onClick}
           >
-            <i className="tabler-dots-vertical" style={{ fontSize: 18 }} />
-          </IconButton>
-        </Box>
-
-        {/* File size & format */}
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 0.5 }}>
-          <Typography variant="caption" color="text.secondary">
-            {item.fileSizeFormatted}
-          </Typography>
-          <Typography variant="caption" color="text.disabled">
-            •
-          </Typography>
-          <Typography variant="caption" color="text.secondary">
-            {item.dimensions || item.fileFormat}
-          </Typography>
-          {item.likes > 0 && (
-            <>
-              <Typography variant="caption" color="text.disabled">
-                •
-              </Typography>
-              <Typography variant="caption" sx={{ color: "error.main", display: "flex", alignItems: "center", gap: 0.3 }}>
-                <i className={item.isLiked ? "tabler-heart-filled" : "tabler-heart"} style={{ fontSize: 12 }} />
-                {item.likes}
-              </Typography>
-            </>
-          )}
-        </Box>
-
-        {/* Uploader Info */}
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            mt: 1.5,
-            pt: 1.5,
-            borderTop: "1px dashed",
-            borderColor: "divider",
-          }}
-        >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1, minWidth: 0 }}>
-            <Avatar
-              src={item.uploader?.avatar}
-              alt={item.uploader?.name}
-              sx={{ width: 26, height: 26, fontSize: 12, bgcolor: "primary.light" }}
-            >
-              {item.uploader?.name?.[0]}
-            </Avatar>
-            <Tooltip title={item.uploader?.name || ""}>
-              <Typography
-                variant="caption"
-                sx={{
-                  fontWeight: 500,
-                  color: "text.primary",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                  maxWidth: 150,
-                }}
-              >
-                {item.uploader?.name}
-              </Typography>
-            </Tooltip>
-          </Box>
-
-          <Typography variant="caption" color="text.disabled" sx={{ fontSize: "0.75rem", whiteSpace: "nowrap" }}>
-            {formatRelativeTime(item.uploadedAt)}
+            {(item.comments?.length || 0) > 0
+              ? `Xem tất cả ${item.comments.length} bình luận`
+              : "Chưa có bình luận"}
           </Typography>
         </Box>
       </CardContent>
 
-      {/* Quick Action Popup Menu */}
+      {/* Menu tác vụ (3 chấm) */}
       <Menu
         anchorEl={menuAnchor}
         open={Boolean(menuAnchor)}
@@ -393,6 +532,20 @@ export default function MediaCard({
           <ListItemText primary="Xem chi tiết" />
         </MenuItem>
 
+        {canEdit && onEdit && (
+          <MenuItem
+            onClick={() => {
+              handleCloseMenu();
+              onEdit(item);
+            }}
+          >
+            <ListItemIcon>
+              <i className="tabler-edit text-warning" style={{ fontSize: 18 }} />
+            </ListItemIcon>
+            <ListItemText primary="Chỉnh sửa bài" />
+          </MenuItem>
+        )}
+
         <MenuItem
           onClick={() => {
             handleCloseMenu();
@@ -402,7 +555,7 @@ export default function MediaCard({
           <ListItemIcon>
             <i className="tabler-download" style={{ fontSize: 18 }} />
           </ListItemIcon>
-          <ListItemText primary="Tải xuống" />
+          <ListItemText primary="Tải xuống tệp" />
         </MenuItem>
 
         <MenuItem
@@ -414,21 +567,23 @@ export default function MediaCard({
           <ListItemIcon>
             <i className="tabler-share" style={{ fontSize: 18 }} />
           </ListItemIcon>
-          <ListItemText primary="Lấy link chia sẻ" />
+          <ListItemText primary="Lấy liên kết" />
         </MenuItem>
 
-        <MenuItem
-          onClick={() => {
-            handleCloseMenu();
-            onDelete(item);
-          }}
-          sx={{ color: "error.main" }}
-        >
-          <ListItemIcon sx={{ color: "error.main" }}>
-            <i className="tabler-trash" style={{ fontSize: 18 }} />
-          </ListItemIcon>
-          <ListItemText primary="Xóa file" />
-        </MenuItem>
+        {canDelete && (
+          <MenuItem
+            onClick={() => {
+              handleCloseMenu();
+              onDelete(item);
+            }}
+            sx={{ color: "error.main" }}
+          >
+            <ListItemIcon sx={{ color: "error.main" }}>
+              <i className="tabler-trash" style={{ fontSize: 18 }} />
+            </ListItemIcon>
+            <ListItemText primary="Xóa bài đăng" />
+          </MenuItem>
+        )}
       </Menu>
     </Card>
   );

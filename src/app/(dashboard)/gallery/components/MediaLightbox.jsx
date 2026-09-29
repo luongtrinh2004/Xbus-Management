@@ -16,6 +16,8 @@ import Divider from "@mui/material/Divider";
 import { useTheme } from "@mui/material/styles";
 import CustomTextField from "@core/components/mui/TextField";
 import { toast } from "react-toastify";
+import MentionInput from "./MentionInput";
+import { renderWithMentions } from "./mentionUtils";
 
 function formatFullDateTime(dateString) {
   try {
@@ -50,6 +52,8 @@ export default function MediaLightbox({
   onNavigate,
   onToggleLike,
   onAddComment,
+  onEditComment,
+  onDeleteComment,
   onDownload,
   onShare,
   currentUser,
@@ -74,10 +78,46 @@ export default function MediaLightbox({
   const [speedMenuAnchor, setSpeedMenuAnchor] = useState(null);
   const [qualityMenuAnchor, setQualityMenuAnchor] = useState(null);
 
+  // Fullscreen state for media-only stage
+  const mediaStageRef = useRef(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    const handleFsChange = () => {
+      setIsFullscreen(Boolean(document.fullscreenElement));
+    };
+    document.addEventListener("fullscreenchange", handleFsChange);
+    document.addEventListener("webkitfullscreenchange", handleFsChange);
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFsChange);
+      document.removeEventListener("webkitfullscreenchange", handleFsChange);
+    };
+  }, []);
+
   // Comment input
   const [commentText, setCommentText] = useState("");
+  const [commentMentions, setCommentMentions] = useState({ isTagAll: false, taggedUserIds: [] });
 
-  // Reset image / video state when active item changes
+  // Comment editing state
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editingCommentText, setEditingCommentText] = useState("");
+  const [editingMentions, setEditingMentions] = useState({ isTagAll: false, taggedUserIds: [] });
+  const [isSubmittingEdit, setIsSubmittingEdit] = useState(false);
+
+  // Multi-file post navigation state
+  const [activeFileIndex, setActiveFileIndex] = useState(0);
+
+  // Group files in this post
+  const postFiles = Array.isArray(item?.files) && item.files.length > 0 ? item.files : [item];
+  const activeFile = postFiles[activeFileIndex] || item || {};
+  const isVideo = activeFile?.type === "video";
+
+  // Reset active file when active post item changes
+  useEffect(() => {
+    setActiveFileIndex(0);
+  }, [item?.id]);
+
+  // Reset image / video state when active file changes
   useEffect(() => {
     setZoomLevel(1);
     setRotation(0);
@@ -87,7 +127,27 @@ export default function MediaLightbox({
       videoRef.current.currentTime = 0;
       videoRef.current.playbackRate = 1;
     }
-  }, [item?.id]);
+  }, [item?.id, activeFileIndex]);
+
+  // Navigation handlers across files and posts
+  const hasPrev = activeFileIndex > 0 || currentIndex > 0;
+  const hasNext = activeFileIndex < postFiles.length - 1 || currentIndex < itemsList.length - 1;
+
+  const handlePrev = () => {
+    if (activeFileIndex > 0) {
+      setActiveFileIndex((prev) => prev - 1);
+    } else if (currentIndex > 0) {
+      onNavigate(currentIndex - 1);
+    }
+  };
+
+  const handleNext = () => {
+    if (activeFileIndex < postFiles.length - 1) {
+      setActiveFileIndex((prev) => prev + 1);
+    } else if (currentIndex < itemsList.length - 1) {
+      onNavigate(currentIndex + 1);
+    }
+  };
 
   // Keyboard navigation
   useEffect(() => {
@@ -95,9 +155,9 @@ export default function MediaLightbox({
 
     const handleKeyDown = (e) => {
       if (e.key === "ArrowLeft") {
-        if (currentIndex > 0) onNavigate(currentIndex - 1);
+        handlePrev();
       } else if (e.key === "ArrowRight") {
-        if (currentIndex < itemsList.length - 1) onNavigate(currentIndex + 1);
+        handleNext();
       } else if (e.key === "Escape") {
         onClose();
       }
@@ -105,13 +165,9 @@ export default function MediaLightbox({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [open, currentIndex, itemsList.length, onNavigate, onClose]);
+  }, [open, activeFileIndex, postFiles.length, currentIndex, itemsList.length, onNavigate, onClose]);
 
   if (!item) return null;
-
-  const isVideo = item.type === "video";
-  const hasPrev = currentIndex > 0;
-  const hasNext = currentIndex < itemsList.length - 1;
 
   // Video handlers
   const handleTogglePlay = () => {
@@ -132,7 +188,7 @@ export default function MediaLightbox({
 
   const handleLoadedMetadata = () => {
     if (!videoRef.current) return;
-    setDuration(videoRef.current.duration || item.durationSeconds || 0);
+    setDuration(videoRef.current.duration || activeFile.durationSeconds || 0);
   };
 
   const handleSeek = (_, val) => {
@@ -176,9 +232,20 @@ export default function MediaLightbox({
 
   const handleFullscreenToggle = () => {
     if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch(() => {});
+      const el = mediaStageRef.current;
+      if (el) {
+        if (el.requestFullscreen) {
+          el.requestFullscreen().catch(() => {});
+        } else if (el.webkitRequestFullscreen) {
+          el.webkitRequestFullscreen();
+        }
+      }
     } else {
-      document.exitFullscreen().catch(() => {});
+      if (document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      }
     }
   };
 
@@ -199,10 +266,92 @@ export default function MediaLightbox({
         department: matched?.department || "AP",
       },
       content: commentText.trim(),
+      taggedUserIds: commentMentions.taggedUserIds,
+      isTagAll: /@all\b/i.test(commentText) || commentMentions.isTagAll,
       createdAt: new Date().toISOString(),
     });
     setCommentText("");
+    setCommentMentions({ isTagAll: false, taggedUserIds: [] });
     toast.success("Đã đăng bình luận!");
+  };
+
+  const canManageComment = (cmt) => {
+    if (!currentUser) return false;
+    const userRole = (currentUser.role || "").toLowerCase();
+    const isAdminOrAssistant =
+      userRole === "admin" ||
+      userRole === "assistant" ||
+      currentUser.roles?.includes("admin") ||
+      currentUser.typeId === "quan_ly_du_an";
+    const isAuthor =
+      (cmt.author?.id && (cmt.author.id === currentUser.id || cmt.author.id === currentUser._id)) ||
+      (cmt.author?.email && currentUser.email && cmt.author.email.toLowerCase() === currentUser.email.toLowerCase()) ||
+      (cmt.author?.name && currentUser.name && cmt.author.name.trim().toLowerCase() === currentUser.name.trim().toLowerCase());
+    return isAdminOrAssistant || isAuthor;
+  };
+
+  const handleStartEditComment = (cmt) => {
+    setEditingCommentId(cmt.id);
+    setEditingCommentText(cmt.content || "");
+    setEditingMentions({ isTagAll: false, taggedUserIds: [] });
+  };
+
+  const handleCancelEditComment = () => {
+    setEditingCommentId(null);
+    setEditingCommentText("");
+  };
+
+  const handleSaveEditComment = async (commentId) => {
+    if (!editingCommentText.trim()) return;
+    try {
+      setIsSubmittingEdit(true);
+      const res = await fetch(`/api/gallery/${item.id}/comment`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          commentId,
+          content: editingCommentText.trim(),
+          taggedUserIds: editingMentions.taggedUserIds,
+          isTagAll: editingMentions.isTagAll,
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        toast.success("Đã cập nhật bình luận!");
+        setEditingCommentId(null);
+        setEditingCommentText("");
+        if (onEditComment) {
+          onEditComment(item.id, commentId, data.comment);
+        }
+      } else {
+        const err = await res.json();
+        toast.error(err.error || "Không thể cập nhật bình luận");
+      }
+    } catch (err) {
+      toast.error("Lỗi khi cập nhật bình luận");
+    } finally {
+      setIsSubmittingEdit(false);
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    if (!window.confirm("Bạn có chắc chắn muốn xóa bình luận này không?")) return;
+    try {
+      const res = await fetch(`/api/gallery/${item.id}/comment?commentId=${commentId}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        toast.success("Đã xóa bình luận!");
+        if (onDeleteComment) {
+          onDeleteComment(item.id, commentId);
+        }
+      } else {
+        const err = await res.json();
+        toast.error(err.error || "Không thể xóa bình luận");
+      }
+    } catch (err) {
+      toast.error("Lỗi khi xóa bình luận");
+    }
   };
 
   return (
@@ -240,22 +389,24 @@ export default function MediaLightbox({
           </IconButton>
           <Box>
             <Typography variant="body1" sx={{ fontWeight: 600, color: "text.primary", maxWidth: 450 }} noWrap>
-              {item.title || item.fileName}
+              {item.title || "Bài viết không có tiêu đề"}
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              {currentIndex + 1} / {itemsList.length} tệp • {item.fileSizeFormatted}
+              {postFiles.length > 1
+                ? `Tệp ${activeFileIndex + 1}/${postFiles.length} trong bài • ${activeFile.fileSizeFormatted || formatBytes(activeFile.fileSize)} (Bài ${currentIndex + 1}/${itemsList.length})`
+                : `Bài ${currentIndex + 1}/${itemsList.length} • ${item.fileSizeFormatted}`}
             </Typography>
           </Box>
         </Box>
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Tooltip title="Xem toàn màn hình">
+          <Tooltip title={isFullscreen ? "Thoát toàn màn hình" : "Xem toàn màn hình"}>
             <IconButton size="small" onClick={handleFullscreenToggle} color="inherit">
-              <i className="tabler-maximize" style={{ fontSize: 20 }} />
+              <i className={isFullscreen ? "tabler-minimize" : "tabler-maximize"} style={{ fontSize: 20 }} />
             </IconButton>
           </Tooltip>
-          <Tooltip title="Tải xuống tệp">
-            <IconButton size="small" onClick={() => onDownload(item)} color="inherit">
+          <Tooltip title="Tải xuống tệp đang xem">
+            <IconButton size="small" onClick={() => onDownload(activeFile)} color="inherit">
               <i className="tabler-download" style={{ fontSize: 20 }} />
             </IconButton>
           </Tooltip>
@@ -269,8 +420,9 @@ export default function MediaLightbox({
 
       {/* Main Lightbox Body (Center Stage + Side Panel) */}
       <Box sx={{ flexGrow: 1, display: "flex", overflow: "hidden", position: "relative" }}>
-        {/* Left / Center: Media Display Stage */}
+        {/* Left / Center: Media Display Stage (Full-screen target) */}
         <Box
+          ref={mediaStageRef}
           sx={{
             flexGrow: 1,
             position: "relative",
@@ -278,15 +430,44 @@ export default function MediaLightbox({
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            p: 2,
+            p: isFullscreen ? 0 : 2,
             overflow: "hidden",
-            bgcolor: isDark ? "#121420" : "#EDEEF2",
+            bgcolor: isFullscreen ? "#000 !important" : (isDark ? "#121420" : "#EDEEF2"),
+            "&:fullscreen": {
+              width: "100vw",
+              height: "100vh",
+              bgcolor: "#000 !important",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            },
           }}
         >
+          {/* Top-Right Exit Fullscreen Button */}
+          {isFullscreen && (
+            <Tooltip title="Thoát toàn màn hình (Esc)">
+              <IconButton
+                onClick={handleFullscreenToggle}
+                sx={{
+                  position: "absolute",
+                  top: 20,
+                  right: 20,
+                  zIndex: 30,
+                  bgcolor: "rgba(0, 0, 0, 0.65)",
+                  color: "#fff",
+                  backdropFilter: "blur(8px)",
+                  border: "1px solid rgba(255, 255, 255, 0.2)",
+                  "&:hover": { bgcolor: "rgba(0, 0, 0, 0.85)", color: "primary.main" },
+                }}
+              >
+                <i className="tabler-minimize" style={{ fontSize: 24 }} />
+              </IconButton>
+            </Tooltip>
+          )}
           {/* Previous Arrow */}
           {hasPrev && (
             <IconButton
-              onClick={() => onNavigate(currentIndex - 1)}
+              onClick={handlePrev}
               sx={{
                 position: "absolute",
                 left: 20,
@@ -308,7 +489,7 @@ export default function MediaLightbox({
           {/* Next Arrow */}
           {hasNext && (
             <IconButton
-              onClick={() => onNavigate(currentIndex + 1)}
+              onClick={handleNext}
               sx={{
                 position: "absolute",
                 right: 20,
@@ -342,8 +523,10 @@ export default function MediaLightbox({
               <Box
                 sx={{
                   position: "relative",
-                  maxWidth: "92%",
-                  maxHeight: "82%",
+                  width: isFullscreen ? "100%" : "auto",
+                  height: isFullscreen ? "100%" : "auto",
+                  maxWidth: isFullscreen ? "100%" : "92%",
+                  maxHeight: isFullscreen ? "100%" : "82%",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -351,20 +534,31 @@ export default function MediaLightbox({
               >
                 <video
                   ref={videoRef}
-                  src={item.url}
-                  poster={item.thumbnail}
+                  src={activeFile.url || item.url}
+                  poster={
+                    activeFile.thumbnail &&
+                    !/\.(mp4|mov|webm|avi|mkv|m4v)$/i.test(activeFile.thumbnail)
+                      ? activeFile.thumbnail
+                      : undefined
+                  }
                   onTimeUpdate={handleTimeUpdate}
                   onLoadedMetadata={handleLoadedMetadata}
                   onEnded={() => setIsPlaying(false)}
                   onClick={handleTogglePlay}
+                  onDoubleClick={handleFullscreenToggle}
                   style={{
-                    maxWidth: "100%",
-                    maxHeight: "75vh",
-                    borderRadius: 8,
+                    maxWidth: isFullscreen ? "100vw" : "100%",
+                    maxHeight: isFullscreen ? "100vh" : "75vh",
+                    width: isFullscreen ? "100%" : "auto",
+                    height: isFullscreen ? "100%" : "auto",
+                    objectFit: "contain",
+                    borderRadius: isFullscreen ? 0 : 8,
                     cursor: "pointer",
-                    boxShadow: isDark
-                      ? "0 10px 30px rgba(0,0,0,0.6)"
-                      : "0 10px 30px rgba(47, 43, 61, 0.16)",
+                    boxShadow: isFullscreen
+                      ? "none"
+                      : isDark
+                        ? "0 10px 30px rgba(0,0,0,0.6)"
+                        : "0 10px 30px rgba(47, 43, 61, 0.16)",
                   }}
                 />
 
@@ -390,44 +584,147 @@ export default function MediaLightbox({
             ) : (
               <Box
                 component="img"
-                src={item.url}
-                alt={item.title}
+                src={activeFile.url || item.url}
+                alt={activeFile.fileName || item.title}
+                onDoubleClick={handleFullscreenToggle}
                 sx={{
-                  maxWidth: "90%",
-                  maxHeight: "82%",
+                  maxWidth: isFullscreen ? "100vw" : "90%",
+                  maxHeight: isFullscreen ? "100vh" : "82%",
+                  width: isFullscreen ? "100%" : "auto",
+                  height: isFullscreen ? "100%" : "auto",
                   objectFit: "contain",
-                  borderRadius: 1.5,
-                  boxShadow: isDark
-                    ? "0 10px 30px rgba(0,0,0,0.6)"
-                    : "0 10px 30px rgba(47, 43, 61, 0.15)",
+                  borderRadius: isFullscreen ? 0 : 1.5,
+                  boxShadow: isFullscreen
+                    ? "none"
+                    : isDark
+                      ? "0 10px 30px rgba(0,0,0,0.6)"
+                      : "0 10px 30px rgba(47, 43, 61, 0.15)",
                   transition: "transform 0.2s ease",
                   transform: `scale(${zoomLevel}) rotate(${rotation}deg)`,
+                  cursor: "pointer",
                 }}
               />
             )}
           </Box>
 
+          {/* Multi-file Post Thumbnail Filmstrip (Hidden in Fullscreen) */}
+          {!isFullscreen && postFiles.length > 1 && (
+            <Box
+              sx={{
+                position: "absolute",
+                bottom: 84,
+                zIndex: 6,
+                display: "flex",
+                alignItems: "center",
+                gap: 1.25,
+                p: 1,
+                borderRadius: 2,
+                bgcolor: isDark ? "rgba(47, 51, 73, 0.85)" : "rgba(255, 255, 255, 0.9)",
+                backdropFilter: "blur(10px)",
+                border: "1px solid",
+                borderColor: "divider",
+                boxShadow: "0 6px 20px rgba(0,0,0,0.25)",
+                maxWidth: "85%",
+                overflowX: "auto",
+              }}
+            >
+              {postFiles.map((f, idx) => {
+                const isActive = idx === activeFileIndex;
+                return (
+                  <Box
+                    key={f.id || idx}
+                    onClick={() => setActiveFileIndex(idx)}
+                    sx={{
+                      width: 48,
+                      height: 48,
+                      borderRadius: 1.5,
+                      overflow: "hidden",
+                      cursor: "pointer",
+                      position: "relative",
+                      flexShrink: 0,
+                      border: "2px solid",
+                      borderColor: isActive ? "primary.main" : "transparent",
+                      boxShadow: isActive ? "0 0 0 2px rgba(115, 103, 240, 0.4)" : "none",
+                      opacity: isActive ? 1 : 0.6,
+                      transform: isActive ? "scale(1.08)" : "none",
+                      transition: "all 0.2s ease",
+                      "&:hover": { opacity: 1 },
+                    }}
+                  >
+                    {f.type === "video" && (!f.thumbnail || f.thumbnail === f.url || /\.(mp4|mov|webm|avi|mkv|m4v)$/i.test(f.thumbnail)) ? (
+                      <Box
+                        component="video"
+                        src={`${f.url}#t=0.5`}
+                        preload="metadata"
+                        muted
+                        playsInline
+                        sx={{ width: "100%", height: "100%", objectFit: "cover", pointerEvents: "none" }}
+                      />
+                    ) : (
+                      <Box
+                        component="img"
+                        src={f.thumbnail || f.url}
+                        alt=""
+                        sx={{ width: "100%", height: "100%", objectFit: "cover" }}
+                      />
+                    )}
+                    {f.type === "video" && (
+                      <Box
+                        sx={{
+                          position: "absolute",
+                          inset: 0,
+                          bgcolor: "rgba(0,0,0,0.3)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <i className="tabler-player-play text-white text-xs" />
+                      </Box>
+                    )}
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        bottom: 2,
+                        right: 2,
+                        fontSize: "0.6rem",
+                        fontWeight: 700,
+                        color: "#fff",
+                        bgcolor: "rgba(0,0,0,0.7)",
+                        borderRadius: "3px",
+                        px: 0.5,
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      {idx + 1}
+                    </Box>
+                  </Box>
+                );
+              })}
+            </Box>
+          )}
+
           {/* Floating Controls Bar at Bottom */}
           <Box
             sx={{
               position: "absolute",
-              bottom: 20,
-              bgcolor: isDark ? "rgba(47, 51, 73, 0.92)" : "rgba(255, 255, 255, 0.92)",
+              bottom: isFullscreen ? 28 : 20,
+              bgcolor: isDark || isFullscreen ? "rgba(20, 22, 34, 0.94)" : "rgba(255, 255, 255, 0.92)",
               backdropFilter: "blur(12px)",
               border: "1px solid",
-              borderColor: "divider",
-              boxShadow: isDark
-                ? "0 8px 24px rgba(0,0,0,0.4)"
+              borderColor: isFullscreen ? "rgba(255, 255, 255, 0.15)" : "divider",
+              boxShadow: isDark || isFullscreen
+                ? "0 8px 32px rgba(0,0,0,0.6)"
                 : "0 8px 24px -4px rgba(47, 43, 61, 0.15)",
-              color: "text.primary",
+              color: isFullscreen ? "#fff" : "text.primary",
               borderRadius: 3,
               px: 2.5,
               py: 1,
               display: "flex",
               alignItems: "center",
               gap: 2,
-              zIndex: 5,
-              maxWidth: "90%",
+              zIndex: 15,
+              maxWidth: "92%",
             }}
           >
             {isVideo ? (
@@ -478,7 +775,7 @@ export default function MediaLightbox({
                 <Button
                   size="small"
                   onClick={(e) => setSpeedMenuAnchor(e.currentTarget)}
-                  sx={{ color: "text.primary", textTransform: "none", fontSize: "0.75rem", minWidth: 42, px: 0.5, fontWeight: 600 }}
+                  sx={{ color: isFullscreen ? "#fff" : "text.primary", textTransform: "none", fontSize: "0.75rem", minWidth: 42, px: 0.5, fontWeight: 600 }}
                 >
                   {playbackSpeed}x
                 </Button>
@@ -498,7 +795,7 @@ export default function MediaLightbox({
                 <Button
                   size="small"
                   onClick={(e) => setQualityMenuAnchor(e.currentTarget)}
-                  sx={{ color: "text.primary", textTransform: "none", fontSize: "0.75rem", minWidth: 50, px: 0.5, fontWeight: 600 }}
+                  sx={{ color: isFullscreen ? "#fff" : "text.primary", textTransform: "none", fontSize: "0.75rem", minWidth: 50, px: 0.5, fontWeight: 600 }}
                 >
                   {videoQuality}
                 </Button>
@@ -520,6 +817,26 @@ export default function MediaLightbox({
                     </MenuItem>
                   ))}
                 </Menu>
+
+                <Divider
+                  orientation="vertical"
+                  flexItem
+                  sx={{ borderColor: isFullscreen ? "rgba(255,255,255,0.2)" : "divider" }}
+                />
+
+                {/* Fullscreen Button for Video */}
+                <Tooltip title={isFullscreen ? "Thoát toàn màn hình (Esc)" : "Toàn màn hình"}>
+                  <IconButton
+                    size="small"
+                    onClick={handleFullscreenToggle}
+                    sx={{ color: isFullscreen ? "primary.main" : "inherit" }}
+                  >
+                    <i
+                      className={isFullscreen ? "tabler-minimize" : "tabler-maximize"}
+                      style={{ fontSize: 20 }}
+                    />
+                  </IconButton>
+                </Tooltip>
               </>
             ) : (
               /* Image Zoom & Rotate Controls */
@@ -540,7 +857,7 @@ export default function MediaLightbox({
                   </IconButton>
                 </Tooltip>
 
-                <Divider orientation="vertical" flexItem sx={{ borderColor: "divider" }} />
+                <Divider orientation="vertical" flexItem sx={{ borderColor: isFullscreen ? "rgba(255,255,255,0.2)" : "divider" }} />
 
                 <Tooltip title="Xoay ảnh 90 độ">
                   <IconButton size="small" onClick={handleRotate} color="inherit">
@@ -551,6 +868,22 @@ export default function MediaLightbox({
                 <Tooltip title="Đặt lại kích thước ban đầu">
                   <IconButton size="small" onClick={handleResetImage} color="inherit">
                     <i className="tabler-refresh" style={{ fontSize: 18 }} />
+                  </IconButton>
+                </Tooltip>
+
+                <Divider orientation="vertical" flexItem sx={{ borderColor: isFullscreen ? "rgba(255,255,255,0.2)" : "divider" }} />
+
+                {/* Fullscreen Button for Image */}
+                <Tooltip title={isFullscreen ? "Thoát toàn màn hình (Esc)" : "Toàn màn hình"}>
+                  <IconButton
+                    size="small"
+                    onClick={handleFullscreenToggle}
+                    sx={{ color: isFullscreen ? "primary.main" : "inherit" }}
+                  >
+                    <i
+                      className={isFullscreen ? "tabler-minimize" : "tabler-maximize"}
+                      style={{ fontSize: 20 }}
+                    />
                   </IconButton>
                 </Tooltip>
               </>
@@ -642,11 +975,16 @@ export default function MediaLightbox({
 
           {/* Description & Tags */}
           <Box>
+            {item.title && (
+              <Typography variant="h6" sx={{ fontWeight: 600, color: "text.primary", mb: 1, fontSize: "1.05rem" }}>
+                {renderWithMentions(item.title, usersList)}
+              </Typography>
+            )}
             <Typography variant="subtitle2" sx={{ fontWeight: 600, color: "text.primary", mb: 0.5 }}>
               Mô tả:
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>
-              {item.description || "Không có mô tả bổ sung cho tệp này."}
+              {renderWithMentions(item.description || "-", usersList)}
             </Typography>
 
             {item.tags && item.tags.length > 0 && (
@@ -668,70 +1006,6 @@ export default function MediaLightbox({
             )}
           </Box>
 
-          {/* Technical Details (EXIF / Specs) */}
-          <Box
-            sx={{
-              bgcolor: isDark ? "rgba(255, 255, 255, 0.04)" : "action.hover",
-              p: 2,
-              borderRadius: 2,
-              border: "1px solid",
-              borderColor: "divider",
-            }}
-          >
-            <Typography variant="subtitle2" sx={{ fontWeight: 600, color: "text.primary", mb: 1.5 }}>
-              Chi tiết kỹ thuật (EXIF):
-            </Typography>
-
-            <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5, fontSize: "0.8rem" }}>
-              <Box>
-                <Typography variant="caption" color="text.secondary">
-                  Định dạng:
-                </Typography>
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                  {item.fileFormat || item.type.toUpperCase()}
-                </Typography>
-              </Box>
-
-              <Box>
-                <Typography variant="caption" color="text.secondary">
-                  Độ phân giải:
-                </Typography>
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                  {item.dimensions || "N/A"}
-                </Typography>
-              </Box>
-
-              <Box>
-                <Typography variant="caption" color="text.secondary">
-                  Dung lượng:
-                </Typography>
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                  {item.fileSizeFormatted}
-                </Typography>
-              </Box>
-
-              <Box>
-                <Typography variant="caption" color="text.secondary">
-                  Quyền xem:
-                </Typography>
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                  {item.privacy === "public" ? "Công khai" : item.privacy === "team" ? "Nội bộ" : "Chỉ mình tôi"}
-                </Typography>
-              </Box>
-
-              {item.exif?.camera && (
-                <Box sx={{ gridColumn: "1 / -1" }}>
-                  <Typography variant="caption" color="text.secondary">
-                    Thiết bị / Codec:
-                  </Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                    {item.exif.camera} {item.exif.codec ? `(${item.exif.codec})` : ""}
-                  </Typography>
-                </Box>
-              )}
-            </Box>
-          </Box>
-
           {/* Comments Section */}
           <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
             <Typography variant="subtitle2" sx={{ fontWeight: 600, color: "text.primary", mb: 1.5, display: "flex", alignItems: "center", gap: 1 }}>
@@ -745,61 +1019,139 @@ export default function MediaLightbox({
                   Chưa có bình luận nào. Hãy là người đầu tiên để lại ý kiến!
                 </Typography>
               ) : (
-                item.comments.map((cmt) => (
-                  <Box
-                    key={cmt.id}
-                    sx={{
-                      p: 1.5,
-                      borderRadius: 1.5,
-                      bgcolor: isDark ? "rgba(255, 255, 255, 0.04)" : "action.hover",
-                      border: "1px solid",
-                      borderColor: "divider",
-                      display: "flex",
-                      gap: 1.5,
-                    }}
-                  >
-                    <Avatar src={cmt.author?.avatar} sx={{ width: 30, height: 30, fontSize: 13, bgcolor: "primary.light" }}>
-                      {cmt.author?.name?.[0]}
-                    </Avatar>
-                    <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-                      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 0.5 }}>
-                        <Typography variant="caption" sx={{ fontWeight: 600, color: "text.primary" }}>
-                          {cmt.author?.name}
-                        </Typography>
-                        <Typography variant="caption" color="text.disabled" sx={{ fontSize: "0.68rem" }}>
-                          {formatFullDateTime(cmt.createdAt)}
-                        </Typography>
+                item.comments.map((cmt) => {
+                  const isEditing = editingCommentId === cmt.id;
+                  const canManage = canManageComment(cmt);
+
+                  return (
+                    <Box
+                      key={cmt.id}
+                      sx={{
+                        p: 1.5,
+                        borderRadius: 1.5,
+                        bgcolor: isDark ? "rgba(255, 255, 255, 0.04)" : "action.hover",
+                        border: "1px solid",
+                        borderColor: isEditing ? "primary.main" : "divider",
+                        display: "flex",
+                        gap: 1.5,
+                      }}
+                    >
+                      <Avatar src={cmt.author?.avatar} sx={{ width: 32, height: 32, fontSize: 13, bgcolor: "primary.light" }}>
+                        {cmt.author?.name?.[0] || "U"}
+                      </Avatar>
+                      <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 0.5 }}>
+                          <Typography variant="caption" sx={{ fontWeight: 600, color: "text.primary" }}>
+                            {cmt.author?.name}
+                          </Typography>
+                          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                            <Typography variant="caption" color="text.disabled" sx={{ fontSize: "0.68rem" }}>
+                              {formatFullDateTime(cmt.createdAt)}
+                            </Typography>
+                            {canManage && !isEditing && (
+                              <>
+                                <Tooltip title="Chỉnh sửa bình luận">
+                                  <IconButton
+                                    size="small"
+                                    onClick={() => handleStartEditComment(cmt)}
+                                    sx={{ p: 0.25, ml: 0.5, color: "text.secondary", "&:hover": { color: "primary.main" } }}
+                                  >
+                                    <i className="tabler-pencil" style={{ fontSize: 14 }} />
+                                  </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Xóa bình luận">
+                                  <IconButton
+                                    size="small"
+                                    onClick={() => handleDeleteComment(cmt.id)}
+                                    sx={{ p: 0.25, color: "text.secondary", "&:hover": { color: "error.main" } }}
+                                  >
+                                    <i className="tabler-trash" style={{ fontSize: 14 }} />
+                                  </IconButton>
+                                </Tooltip>
+                              </>
+                            )}
+                          </Box>
+                        </Box>
+
+                        {isEditing ? (
+                          <Box sx={{ mt: 1 }}>
+                            <MentionInput
+                              fullWidth
+                              size="small"
+                              placement="top-start"
+                              value={editingCommentText}
+                              onChange={(val) => setEditingCommentText(val)}
+                              usersList={usersList}
+                              onMentionsChange={setEditingMentions}
+                              autoFocus
+                            />
+                            <Box sx={{ display: "flex", gap: 1, justifyContent: "flex-end", mt: 1 }}>
+                              <Button
+                                size="small"
+                                variant="outlined"
+                                color="secondary"
+                                onClick={handleCancelEditComment}
+                                sx={{ textTransform: "none", py: 0.25, px: 1.25, fontSize: "0.75rem" }}
+                              >
+                                Hủy
+                              </Button>
+                              <Button
+                                size="small"
+                                variant="contained"
+                                color="primary"
+                                disabled={!editingCommentText.trim() || isSubmittingEdit}
+                                onClick={() => handleSaveEditComment(cmt.id)}
+                                sx={{ textTransform: "none", py: 0.25, px: 1.25, fontSize: "0.75rem" }}
+                              >
+                                {isSubmittingEdit ? "Đang lưu..." : "Lưu"}
+                              </Button>
+                            </Box>
+                          </Box>
+                        ) : (
+                          <>
+                            <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.825rem", lineHeight: 1.4, wordBreak: "break-word" }}>
+                              {renderWithMentions(cmt.content, usersList)}
+                            </Typography>
+                            {cmt.updatedAt && (
+                              <Typography variant="caption" color="text.disabled" sx={{ fontSize: "0.68rem", fontStyle: "italic", display: "block", mt: 0.25 }}>
+                                (Đã chỉnh sửa)
+                              </Typography>
+                            )}
+                          </>
+                        )}
                       </Box>
-                      <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.825rem", lineHeight: 1.4 }}>
-                        {cmt.content}
-                      </Typography>
                     </Box>
-                  </Box>
-                ))
+                  );
+                })
               )}
             </Box>
 
             {/* Comment Input Box */}
-            <Box sx={{ mt: "auto", display: "flex", gap: 1 }}>
-              <CustomTextField
-                fullWidth
-                size="small"
-                placeholder="Viết bình luận, gắn thẻ @tên..."
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    handleSendComment();
-                  }
-                }}
-              />
+            <Box sx={{ mt: "auto", display: "flex", gap: 1, alignItems: "flex-start" }}>
+              <Box sx={{ flexGrow: 1 }}>
+                <MentionInput
+                  fullWidth
+                  size="small"
+                  placement="top-start"
+                  placeholder="Viết bình luận, gắn thẻ @tên hoặc @All..."
+                  value={commentText}
+                  onChange={(val) => setCommentText(val)}
+                  usersList={usersList}
+                  onMentionsChange={setCommentMentions}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSendComment();
+                    }
+                  }}
+                />
+              </Box>
               <Button
                 variant="contained"
                 color="primary"
                 onClick={handleSendComment}
                 disabled={!commentText.trim()}
-                sx={{ minWidth: 44, px: 1.5, borderRadius: 1.5 }}
+                sx={{ minWidth: 44, height: 38, px: 1.5, borderRadius: 1.5 }}
               >
                 <i className="tabler-send" style={{ fontSize: 18 }} />
               </Button>

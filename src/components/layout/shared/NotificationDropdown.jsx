@@ -48,6 +48,24 @@ const getNotificationConfig = (type) => {
         color: "primary.main",
         bg: "rgba(115, 103, 240, 0.12)",
       };
+    case "gallery_like":
+      return {
+        icon: "tabler-heart-filled",
+        color: "error.main",
+        bg: "rgba(234, 84, 85, 0.12)",
+      };
+    case "gallery_comment":
+      return {
+        icon: "tabler-message-circle-2-filled",
+        color: "primary.main",
+        bg: "rgba(115, 103, 240, 0.12)",
+      };
+    case "gallery_tag":
+      return {
+        icon: "tabler-at",
+        color: "info.main",
+        bg: "rgba(0, 207, 232, 0.12)",
+      };
     default:
       return {
         icon: "tabler-bell-filled",

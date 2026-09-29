@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback, Suspense } from "react";
 import { useSession } from "next-auth/react";
+import { useSearchParams } from "next/navigation";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid2";
 import Typography from "@mui/material/Typography";
@@ -11,24 +12,45 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Chip from "@mui/material/Chip";
+import CircularProgress from "@mui/material/CircularProgress";
 import CustomTextField from "@core/components/mui/TextField";
 import { toast } from "react-toastify";
 import ConfirmDialog from "@components/ConfirmDialog";
 
-// Local gallery components & mock data
-import { INITIAL_MEDIA_LIST, POPULAR_TAGS } from "./components/mockData";
+// Local gallery components
+import { POPULAR_TAGS } from "./components/constants";
 import MediaToolbar from "./components/MediaToolbar";
+import StorageOverviewCard from "./components/StorageOverviewCard";
 import MediaCard from "./components/MediaCard";
 import MediaListView from "./components/MediaListView";
 import UploadModal from "./components/UploadModal";
 import MediaLightbox from "./components/MediaLightbox";
 import BatchActionBar from "./components/BatchActionBar";
+import EditPostModal from "./components/EditPostModal";
+import ManagePostsModal from "./components/ManagePostsModal";
 
-export default function GalleryPage() {
+function GalleryContent() {
   const { data: session } = useSession();
+  const searchParams = useSearchParams();
 
-  // Media list state
-  const [mediaList, setMediaList] = useState(INITIAL_MEDIA_LIST);
+  // Role permissions: Only admin and assistant can see storage management
+  const userRole = session?.user?.role || "user";
+  const isAdminOrAssistant = ["admin", "assistant"].includes(userRole);
+
+  // Media list & Storage state from real API
+  const [mediaList, setMediaList] = useState([]);
+  const [storageStats, setStorageStats] = useState({
+    maxBytes: 20 * 1024 * 1024 * 1024,
+    usedBytes: 0,
+    imageBytes: 0,
+    videoBytes: 0,
+    remainingBytes: 20 * 1024 * 1024 * 1024,
+    percentUsed: 0,
+    totalFiles: 0,
+    imageCount: 0,
+    videoCount: 0,
+  });
+  const [isLoading, setIsLoading] = useState(true);
 
   // Filter & Search states
   const [searchQuery, setSearchQuery] = useState("");
@@ -39,6 +61,7 @@ export default function GalleryPage() {
   const [uploaderFilter, setUploaderFilter] = useState("all");
   const [sortOption, setSortOption] = useState("newest");
   const [viewMode, setViewMode] = useState("grid"); // 'grid' | 'list'
+  const [isFilterLargest, setIsFilterLargest] = useState(false);
 
   // Batch selection states
   const [isBatchMode, setIsBatchMode] = useState(false);
@@ -49,9 +72,17 @@ export default function GalleryPage() {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [activeMediaId, setActiveMediaId] = useState(null);
 
+  // Edit post modal
+  const [editPostModalOpen, setEditPostModalOpen] = useState(false);
+  const [postToEdit, setPostToEdit] = useState(null);
+
+  // Manage posts dialog (Admin/Assistant)
+  const [managePostsOpen, setManagePostsOpen] = useState(false);
+
   // Delete confirm dialog
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Batch tag dialog
   const [batchTagModalOpen, setBatchTagModalOpen] = useState(false);
@@ -61,6 +92,7 @@ export default function GalleryPage() {
   // Users for uploader dropdown
   const [usersList, setUsersList] = useState([]);
 
+  // Fetch real users from /api/users
   useEffect(() => {
     const DEPARTMENT_NAMES = {
       ap: "AP",
@@ -73,10 +105,18 @@ export default function GalleryPage() {
     fetch("/api/users?limit=200")
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (data && Array.isArray(data.users)) {
+        const rawUsers = Array.isArray(data?.data)
+          ? data.data
+          : Array.isArray(data?.users)
+            ? data.users
+            : Array.isArray(data)
+              ? data
+              : [];
+
+        if (rawUsers.length > 0) {
           setUsersList(
-            data.users
-              .filter((u) => u.status === "able")
+            rawUsers
+              .filter((u) => u.status === "able" || !u.status)
               .map((u) => ({
                 id: u.id,
                 name: u.name,
@@ -103,129 +143,86 @@ export default function GalleryPage() {
       .catch(() => {});
   }, []);
 
-  // Compute available uploader options (combining actual authors in media + fetched users)
+  // Fetch real gallery data from API
+  const fetchGalleryData = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const params = new URLSearchParams();
+      if (searchQuery.trim()) params.set("search", searchQuery.trim());
+      if (typeFilter !== "all") params.set("type", typeFilter);
+      if (timeFilter !== "all") params.set("time", timeFilter);
+      if (uploaderFilter !== "all") params.set("uploader", uploaderFilter);
+      if (sortOption) params.set("sort", isFilterLargest ? "size_desc" : sortOption);
+      if (isFilterLargest) params.set("largestOnly", "true");
+
+      const res = await fetch(`/api/gallery?${params.toString()}`);
+      if (res.ok) {
+        const data = await res.json();
+        setMediaList(data.items || []);
+        if (data.storage) {
+          setStorageStats(data.storage);
+        }
+      }
+    } catch (err) {
+      console.error("[fetchGalleryData] Lỗi:", err);
+      toast.error("Không thể tải danh sách thư viện");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [searchQuery, typeFilter, timeFilter, uploaderFilter, sortOption, isFilterLargest]);
+
+  useEffect(() => {
+    fetchGalleryData();
+  }, [fetchGalleryData]);
+
+  // Handle auto-open post from notification link: /gallery?open=postId
+  useEffect(() => {
+    const openParam = searchParams.get("open") || searchParams.get("id");
+    if (openParam && mediaList.length > 0) {
+      const target = mediaList.find((i) => i.id === openParam || i.postId === openParam);
+      if (target) {
+        setActiveMediaId(target.id);
+        setLightboxOpen(true);
+      }
+    }
+  }, [searchParams, mediaList]);
+
+  // Active item for Lightbox
+  const activeMediaItem = useMemo(() => {
+    if (!activeMediaId) return null;
+    return mediaList.find((m) => m.id === activeMediaId) || null;
+  }, [activeMediaId, mediaList]);
+
+  const currentLightboxIndex = useMemo(() => {
+    if (!activeMediaId) return 0;
+    const idx = mediaList.findIndex((m) => m.id === activeMediaId);
+    return idx >= 0 ? idx : 0;
+  }, [activeMediaId, mediaList]);
+
+  // Dynamic counts for Toolbar chips
+  const counts = useMemo(() => {
+    const total = mediaList.length;
+    const images = mediaList.filter((m) => m.type === "image" || m.hasImage).length;
+    const videos = mediaList.filter((m) => m.type === "video" || m.hasVideo).length;
+    return { all: total, image: images, video: videos };
+  }, [mediaList]);
+
+  // Dynamic Uploader options
   const uploaderOptions = useMemo(() => {
     const map = new Map();
     mediaList.forEach((item) => {
-      if (item.uploader && item.uploader.name) {
-        map.set(item.uploader.name, item.uploader);
-      }
-    });
-    usersList.forEach((user) => {
-      if (!map.has(user.name)) {
-        map.set(user.name, user);
+      if (item.uploader?.id && !map.has(item.uploader.id)) {
+        map.set(item.uploader.id, {
+          id: item.uploader.id,
+          name: item.uploader.name,
+          avatar: item.uploader.avatar,
+        });
       }
     });
     return Array.from(map.values());
-  }, [mediaList, usersList]);
-
-  // Counts for format toggle buttons
-  const counts = useMemo(() => {
-    return {
-      all: mediaList.length,
-      image: mediaList.filter((item) => item.type === "image").length,
-      video: mediaList.filter((item) => item.type === "video").length,
-    };
   }, [mediaList]);
 
-  // Filtered and Sorted media list
-  const filteredMediaList = useMemo(() => {
-    return mediaList
-      .filter((item) => {
-        // 1. Search Query filter (title, filename, uploader name, tags)
-        if (searchQuery.trim()) {
-          const q = searchQuery.toLowerCase().trim();
-          const matchTitle = item.title?.toLowerCase().includes(q);
-          const matchFileName = item.fileName?.toLowerCase().includes(q);
-          const matchUploader = item.uploader?.name?.toLowerCase().includes(q);
-          const matchTags = item.tags?.some((t) => t.toLowerCase().includes(q));
-          if (!matchTitle && !matchFileName && !matchUploader && !matchTags) {
-            return false;
-          }
-        }
-
-        // 2. Type format filter
-        if (typeFilter !== "all" && item.type !== typeFilter) {
-          return false;
-        }
-
-        // 3. Time filter
-        if (timeFilter !== "all") {
-          const itemDate = new Date(item.uploadedAt);
-          const now = new Date();
-
-          if (timeFilter === "today") {
-            const isToday =
-              itemDate.getDate() === now.getDate() &&
-              itemDate.getMonth() === now.getMonth() &&
-              itemDate.getFullYear() === now.getFullYear();
-            if (!isToday) return false;
-          } else if (timeFilter === "this_week") {
-            const oneWeekAgo = new Date();
-            oneWeekAgo.setDate(now.getDate() - 7);
-            if (itemDate < oneWeekAgo) return false;
-          } else if (timeFilter === "this_month") {
-            const isThisMonth =
-              itemDate.getMonth() === now.getMonth() &&
-              itemDate.getFullYear() === now.getFullYear();
-            if (!isThisMonth) return false;
-          } else if (timeFilter === "custom") {
-            if (startDate) {
-              const start = new Date(startDate);
-              start.setHours(0, 0, 0, 0);
-              if (itemDate < start) return false;
-            }
-            if (endDate) {
-              const end = new Date(endDate);
-              end.setHours(23, 59, 59, 999);
-              if (itemDate > end) return false;
-            }
-          }
-        }
-
-        // 4. Uploader filter
-        if (uploaderFilter !== "all") {
-          if (item.uploader?.name !== uploaderFilter) {
-            return false;
-          }
-        }
-
-        return true;
-      })
-      .sort((a, b) => {
-        // Sorting logic
-        if (sortOption === "newest") {
-          return new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime();
-        }
-        if (sortOption === "oldest") {
-          return new Date(a.uploadedAt).getTime() - new Date(b.uploadedAt).getTime();
-        }
-        if (sortOption === "name_asc") {
-          return (a.title || a.fileName).localeCompare(b.title || b.fileName, "vi");
-        }
-        if (sortOption === "name_desc") {
-          return (b.title || b.fileName).localeCompare(a.title || a.fileName, "vi");
-        }
-        if (sortOption === "size_desc") {
-          return (b.fileSize || 0) - (a.fileSize || 0);
-        }
-        if (sortOption === "size_asc") {
-          return (a.fileSize || 0) - (b.fileSize || 0);
-        }
-        return 0;
-      });
-  }, [mediaList, searchQuery, typeFilter, timeFilter, startDate, endDate, uploaderFilter, sortOption]);
-
-  // Active item in lightbox
-  const currentLightboxIndex = useMemo(() => {
-    if (!activeMediaId) return 0;
-    const idx = filteredMediaList.findIndex((item) => item.id === activeMediaId);
-    return idx >= 0 ? idx : 0;
-  }, [activeMediaId, filteredMediaList]);
-
-  const activeMediaItem = filteredMediaList[currentLightboxIndex] || null;
-
-  // Multi-selection handlers
+  // Batch actions
   const handleToggleSelect = (id) => {
     setSelectedIds((prev) =>
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
@@ -233,10 +230,10 @@ export default function GalleryPage() {
   };
 
   const handleToggleSelectAll = () => {
-    if (selectedIds.length === filteredMediaList.length) {
+    if (selectedIds.length === mediaList.length) {
       setSelectedIds([]);
     } else {
-      setSelectedIds(filteredMediaList.map((item) => item.id));
+      setSelectedIds(mediaList.map((m) => m.id));
     }
   };
 
@@ -253,36 +250,36 @@ export default function GalleryPage() {
     setLightboxOpen(true);
   };
 
-  // Download simulation
+  // Download single file
   const handleDownload = (item) => {
-    toast.info(`Bắt đầu tải xuống: ${item.fileName}`);
+    toast.info(`Bắt đầu tải xuống: ${item.fileName || item.title || "tệp tin"}`);
     const link = document.createElement("a");
     link.href = item.url;
-    link.download = item.fileName;
+    link.download = item.fileName || "xbus-media";
     link.target = "_blank";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
-  // Batch download simulation
+  // Batch download
   const handleBatchDownload = () => {
-    toast.success(`Đang nén và chuẩn bị tải xuống ${selectedIds.length} tệp tin (.zip)...`);
+    toast.success(`Đang chuẩn bị tải xuống ${selectedIds.length} tệp tin...`);
   };
 
   // Share link
   const handleShare = (item) => {
-    const shareUrl = `${window.location.origin}/gallery?id=${item.id}`;
+    const shareUrl = `${window.location.origin}/gallery?open=${item.id}`;
     if (navigator.clipboard) {
       navigator.clipboard.writeText(shareUrl).then(() => {
-        toast.success("Đã sao chép liên kết chia sẻ vào clipboard!");
+        toast.success("Đã sao chép liên kết chia sẻ vào bộ nhớ tạm!");
       });
     } else {
       toast.success(`Liên kết: ${shareUrl}`);
     }
   };
 
-  // Delete single file
+  // Delete single file/post
   const handleDeleteRequest = (item) => {
     setItemToDelete(item);
     setDeleteConfirmOpen(true);
@@ -294,86 +291,233 @@ export default function GalleryPage() {
     setDeleteConfirmOpen(true);
   };
 
-  const handleConfirmDelete = () => {
-    if (itemToDelete === "batch") {
-      setMediaList((prev) => prev.filter((item) => !selectedIds.includes(item.id)));
-      toast.success(`Đã xóa thành công ${selectedIds.length} tệp!`);
-      setSelectedIds([]);
-    } else if (itemToDelete) {
-      setMediaList((prev) => prev.filter((item) => item.id !== itemToDelete.id));
-      setSelectedIds((prev) => prev.filter((id) => id !== itemToDelete.id));
-      toast.success(`Đã xóa tệp: ${itemToDelete.fileName}`);
-      if (lightboxOpen && activeMediaId === itemToDelete.id) {
-        setLightboxOpen(false);
+  // Confirm delete handler (real API)
+  const handleConfirmDelete = async () => {
+    try {
+      setIsDeleting(true);
+      if (itemToDelete === "batch") {
+        const res = await fetch("/api/gallery/batch", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "delete", ids: selectedIds }),
+        });
+        const data = await res.json();
+        if (res.ok) {
+          toast.success(`Đã xóa thành công ${selectedIds.length} bài đăng!`);
+          setSelectedIds([]);
+          if (data.storage) setStorageStats(data.storage);
+          fetchGalleryData();
+        } else {
+          toast.error(data.error || "Lỗi xóa bài đăng");
+        }
+      } else if (itemToDelete) {
+        const res = await fetch(`/api/gallery/${itemToDelete.id}`, {
+          method: "DELETE",
+        });
+        const data = await res.json();
+        if (res.ok) {
+          toast.success(`Đã xóa bài đăng: ${itemToDelete.title || "thành công"}`);
+          if (data.storage) setStorageStats(data.storage);
+          if (lightboxOpen && activeMediaId === itemToDelete.id) {
+            setLightboxOpen(false);
+          }
+          fetchGalleryData();
+        } else {
+          toast.error(data.error || "Lỗi xóa bài đăng");
+        }
       }
+    } catch (err) {
+      console.error("[handleConfirmDelete] Lỗi:", err);
+      toast.error("Không thể xóa bài đăng");
+    } finally {
+      setIsDeleting(false);
+      setDeleteConfirmOpen(false);
+      setItemToDelete(null);
     }
-    setDeleteConfirmOpen(false);
-    setItemToDelete(null);
   };
 
-  // Social interactions
-  const handleToggleLike = (id) => {
+  // Social interactions (Real API with optimistic state)
+  const handleToggleLike = async (id) => {
+    // Optimistic update
     setMediaList((prev) =>
       prev.map((item) => {
         if (item.id === id) {
-          const newLiked = !item.isLiked;
-          return {
-            ...item,
-            isLiked: newLiked,
-            likes: newLiked ? (item.likes || 0) + 1 : Math.max(0, (item.likes || 0) - 1),
-          };
+          const nextLiked = !item.isLiked;
+          const nextCount = Math.max(0, (item.likes || 0) + (nextLiked ? 1 : -1));
+          return { ...item, isLiked: nextLiked, likes: nextCount };
         }
         return item;
       })
     );
+
+    try {
+      const res = await fetch(`/api/gallery/${id}/like`, { method: "POST" });
+      if (res.ok) {
+        const data = await res.json();
+        setMediaList((prev) =>
+          prev.map((item) =>
+            item.id === id ? { ...item, isLiked: data.isLiked, likes: data.likes } : item
+          )
+        );
+      }
+    } catch (err) {
+      console.error("[handleToggleLike] Lỗi:", err);
+      fetchGalleryData(); // rollback if error
+    }
   };
 
-  const handleAddComment = (id, newComment) => {
+  const handleAddComment = async (id, newComment) => {
+    try {
+      const res = await fetch(`/api/gallery/${id}/comment`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          content: newComment.content,
+          taggedUserIds: newComment.taggedUserIds,
+          isTagAll: newComment.isTagAll,
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setMediaList((prev) =>
+          prev.map((item) => {
+            const isMatch =
+              item.id === id ||
+              (item.postId && activeMediaItem?.postId && item.postId === activeMediaItem.postId);
+            return isMatch
+              ? { ...item, comments: [...(item.comments || []), data.comment] }
+              : item;
+          })
+        );
+      }
+    } catch (err) {
+      console.error("[handleAddComment] Lỗi:", err);
+    }
+  };
+
+  const handleEditComment = (id, commentId, updatedComment) => {
     setMediaList((prev) =>
       prev.map((item) => {
-        if (item.id === id) {
-          return {
-            ...item,
-            comments: [...(item.comments || []), newComment],
-          };
-        }
-        return item;
+        const isMatch =
+          item.id === id ||
+          (item.postId && activeMediaItem?.postId && item.postId === activeMediaItem.postId);
+        if (!isMatch) return item;
+        return {
+          ...item,
+          comments: (item.comments || []).map((c) =>
+            c.id === commentId ? updatedComment : c
+          ),
+        };
       })
     );
   };
 
-  // Batch tag assignment
-  const handleApplyBatchTags = () => {
+  const handleDeleteComment = (id, commentId) => {
+    setMediaList((prev) =>
+      prev.map((item) => {
+        const isMatch =
+          item.id === id ||
+          (item.postId && activeMediaItem?.postId && item.postId === activeMediaItem.postId);
+        if (!isMatch) return item;
+        return {
+          ...item,
+          comments: (item.comments || []).filter((c) => c.id !== commentId),
+        };
+      })
+    );
+  };
+
+  // Batch tag assignment (Real API)
+  const handleApplyBatchTags = async () => {
     if (batchTagsSelected.length === 0) {
       toast.warning("Vui lòng chọn ít nhất 1 thẻ tag để gắn");
       return;
     }
 
-    setMediaList((prev) =>
-      prev.map((item) => {
-        if (selectedIds.includes(item.id)) {
-          const currentTags = item.tags || [];
-          const combined = Array.from(new Set([...currentTags, ...batchTagsSelected]));
-          return { ...item, tags: combined };
-        }
-        return item;
-      })
-    );
-
-    toast.success(`Đã gắn thẻ cho ${selectedIds.length} tệp thành công!`);
-    setBatchTagModalOpen(false);
-    setBatchTagsSelected([]);
-    setCustomBatchTag("");
+    try {
+      const res = await fetch("/api/gallery/batch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "tag",
+          ids: selectedIds,
+          tags: batchTagsSelected,
+        }),
+      });
+      if (res.ok) {
+        toast.success(`Đã gắn thẻ cho ${selectedIds.length} bài đăng thành công!`);
+        setBatchTagModalOpen(false);
+        setBatchTagsSelected([]);
+        setCustomBatchTag("");
+        fetchGalleryData();
+      }
+    } catch (err) {
+      console.error("[handleApplyBatchTags] Lỗi:", err);
+      toast.error("Không thể gắn thẻ hàng loạt");
+    }
   };
 
-  // Upload handler
-  const handleUploadSuccess = (newItems) => {
+  // Upload handler from UploadModal
+  const handleUploadSuccess = (newItems, updatedStorage) => {
     setMediaList((prev) => [...newItems, ...prev]);
+    if (updatedStorage) setStorageStats(updatedStorage);
+    fetchGalleryData();
   };
+
+  // Edit handler from EditPostModal
+  const handleEditSuccess = (updatedItem) => {
+    setMediaList((prev) =>
+      prev.map((item) =>
+        item.id === updatedItem.id || (item.postId && item.postId === updatedItem.postId)
+          ? { ...item, ...updatedItem }
+          : item
+      )
+    );
+    fetchGalleryData();
+  };
+
+  // Toggle filter largest files
+  const handleToggleFilterLargest = () => {
+    setIsFilterLargest((prev) => {
+      const next = !prev;
+      if (next) {
+        setSortOption("size_desc");
+      } else {
+        setSortOption("newest");
+      }
+      return next;
+    });
+  };
+
+  const isItemOwner = useCallback(
+    (item) => {
+      if (!session?.user) return false;
+      const userId = session.user.id;
+      const userEmail = session.user.email?.toLowerCase();
+      const uploaderId = item.uploader?.id;
+      const uploaderEmail = item.uploader?.email?.toLowerCase();
+
+      return (
+        (userId && uploaderId && userId === uploaderId) ||
+        (userEmail && uploaderEmail && userEmail === uploaderEmail)
+      );
+    },
+    [session]
+  );
 
   return (
-    <Box sx={{ p: { xs: 2, sm: 4, md: 6 } }}>
-      {/* 1. Toolbar & Filters */}
+    <Box>
+      {/* 1. Storage Overview & 20GB Limit Bar (Chỉ hiển thị cho Quản trị viên & Trợ lý) */}
+      {isAdminOrAssistant && (
+        <StorageOverviewCard
+          storage={storageStats}
+          isFilterLargest={isFilterLargest}
+          onToggleFilterLargest={handleToggleFilterLargest}
+          onOpenManagePosts={() => setManagePostsOpen(true)}
+        />
+      )}
+
+      {/* 2. Toolbar & Filters */}
       <MediaToolbar
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
@@ -398,8 +542,12 @@ export default function GalleryPage() {
         counts={counts}
       />
 
-      {/* Main Content: Grid View or List View */}
-      {filteredMediaList.length === 0 ? (
+      {/* 3. Main Content: Grid View or List View */}
+      {isLoading ? (
+        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", py: 12 }}>
+          <CircularProgress color="primary" />
+        </Box>
+      ) : mediaList.length === 0 ? (
         <Box
           sx={{
             py: 8,
@@ -425,31 +573,30 @@ export default function GalleryPage() {
               mb: 2,
             }}
           >
-            <i className="tabler-photo-off" style={{ fontSize: 32 }} />
+            <i className="tabler-photo-off text-3xl" />
           </Box>
-          <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-            Không tìm thấy ảnh hoặc video nào
+          <Typography variant="h6" fontWeight={600} gutterBottom>
+            Không tìm thấy bài đăng nào
           </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            Thử thay đổi từ khóa tìm kiếm hoặc làm mới bộ lọc ngày/định dạng.
+          <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 400, mx: "auto", mb: 3 }}>
+            {searchQuery || typeFilter !== "all" || timeFilter !== "all" || uploaderFilter !== "all"
+              ? "Hãy thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm để xem kết quả khác."
+              : "Hãy bắt đầu đăng tải ảnh và video kỷ niệm của bạn lên hệ thống."}
           </Typography>
           <Button
-            variant="outlined"
-            onClick={() => {
-              setSearchQuery("");
-              setTypeFilter("all");
-              setTimeFilter("all");
-              setUploaderFilter("all");
-            }}
+            variant="contained"
+            color="primary"
+            startIcon={<i className="tabler-upload" />}
+            onClick={() => setIsUploadOpen(true)}
           >
-            Xóa toàn bộ bộ lọc
+            Đăng ảnh & video ngay
           </Button>
         </Box>
       ) : viewMode === "grid" ? (
-        /* Grid View */
+        /* Grid View: Instagram Style Feed Cards */
         <Grid container spacing={3}>
-          {filteredMediaList.map((item) => (
-            <Grid key={item.id} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+          {mediaList.map((item) => (
+            <Grid key={item.id} size={{ xs: 12, sm: 6, md: 4, lg: 3 }} sx={{ display: "flex" }}>
               <MediaCard
                 item={item}
                 isSelected={selectedIds.includes(item.id)}
@@ -459,6 +606,13 @@ export default function GalleryPage() {
                 onDownload={handleDownload}
                 onShare={handleShare}
                 onDelete={handleDeleteRequest}
+                onEdit={(post) => {
+                  setPostToEdit(post);
+                  setEditPostModalOpen(true);
+                }}
+                onToggleLike={handleToggleLike}
+                canEdit={isAdminOrAssistant || isItemOwner(item)}
+                canDelete={isAdminOrAssistant || isItemOwner(item)}
               />
             </Grid>
           ))}
@@ -466,7 +620,7 @@ export default function GalleryPage() {
       ) : (
         /* List View */
         <MediaListView
-          items={filteredMediaList}
+          items={mediaList}
           selectedIds={selectedIds}
           onToggleSelect={handleToggleSelect}
           onToggleSelectAll={handleToggleSelectAll}
@@ -474,19 +628,24 @@ export default function GalleryPage() {
           onDownload={handleDownload}
           onShare={handleShare}
           onDelete={handleDeleteRequest}
+          onEdit={(post) => {
+            setPostToEdit(post);
+            setEditPostModalOpen(true);
+          }}
+          currentUser={session?.user}
+          isAdminOrAssistant={isAdminOrAssistant}
         />
       )}
 
-      {/* 2. Floating Action Bar for Batch Operations */}
+      {/* 4. Batch Floating Action Bar */}
       <BatchActionBar
+        open={isBatchMode && selectedIds.length > 0}
         selectedCount={selectedIds.length}
         onClearSelection={() => setSelectedIds([])}
-        onBatchDownload={handleBatchDownload}
-        onOpenBatchTag={() => setBatchTagModalOpen(true)}
         onBatchDelete={handleBatchDeleteRequest}
       />
 
-      {/* 3. Upload Modal */}
+      {/* 5. Upload Modal */}
       <UploadModal
         open={isUploadOpen}
         onClose={() => setIsUploadOpen(false)}
@@ -495,27 +654,53 @@ export default function GalleryPage() {
         usersList={usersList}
       />
 
-      {/* 4. Lightbox Viewer Modal */}
+      {/* 6. Lightbox Viewer Modal */}
       <MediaLightbox
         open={lightboxOpen}
         item={activeMediaItem}
-        itemsList={filteredMediaList}
+        itemsList={mediaList}
         currentIndex={currentLightboxIndex}
         onClose={() => setLightboxOpen(false)}
         onNavigate={(newIdx) => {
-          if (filteredMediaList[newIdx]) {
-            setActiveMediaId(filteredMediaList[newIdx].id);
+          if (mediaList[newIdx]) {
+            setActiveMediaId(mediaList[newIdx].id);
           }
         }}
         onToggleLike={handleToggleLike}
         onAddComment={handleAddComment}
+        onEditComment={handleEditComment}
+        onDeleteComment={handleDeleteComment}
         onDownload={handleDownload}
         onShare={handleShare}
         currentUser={session?.user}
         usersList={usersList}
       />
 
-      {/* 5. Batch Tag Modal */}
+      {/* 7. Edit Post Modal */}
+      <EditPostModal
+        open={editPostModalOpen}
+        onClose={() => {
+          setEditPostModalOpen(false);
+          setPostToEdit(null);
+        }}
+        post={postToEdit}
+        usersList={usersList}
+        onSaveSuccess={handleEditSuccess}
+      />
+
+      {/* 8. Manage Posts Modal (Admin / Assistant) */}
+      <ManagePostsModal
+        open={managePostsOpen}
+        onClose={() => setManagePostsOpen(false)}
+        posts={mediaList}
+        onEditPost={(post) => {
+          setPostToEdit(post);
+          setEditPostModalOpen(true);
+        }}
+        onDeletePost={(post) => handleDeleteRequest(post)}
+      />
+
+      {/* 9. Batch Tag Modal */}
       <Dialog
         open={batchTagModalOpen}
         onClose={() => setBatchTagModalOpen(false)}
@@ -526,7 +711,7 @@ export default function GalleryPage() {
         <DialogTitle sx={{ fontWeight: 600 }}>Gắn thẻ hàng loạt</DialogTitle>
         <DialogContent>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Chọn thẻ gắn đồng thời cho <strong>{selectedIds.length}</strong> tệp đang chọn:
+            Chọn thẻ gắn đồng thời cho <strong>{selectedIds.length}</strong> bài đăng đang chọn:
           </Typography>
 
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 2 }}>
@@ -579,14 +764,15 @@ export default function GalleryPage() {
         </DialogActions>
       </Dialog>
 
-      {/* 6. Delete Confirmation Dialog */}
+      {/* 10. Delete Confirmation Dialog */}
       <ConfirmDialog
         open={deleteConfirmOpen}
-        title={itemToDelete === "batch" ? "Xác nhận xóa nhiều tệp" : "Xác nhận xóa tệp"}
+        loading={isDeleting}
+        title={itemToDelete === "batch" ? "Xác nhận xóa nhiều bài đăng" : "Xác nhận xóa bài đăng"}
         message={
           itemToDelete === "batch"
-            ? `Bạn có chắc chắn muốn xóa ${selectedIds.length} tệp đã chọn? Hành động này không thể hoàn tác.`
-            : `Bạn có chắc chắn muốn xóa tệp "${itemToDelete?.fileName}"?`
+            ? `Bạn có chắc chắn muốn xóa vĩnh viễn ${selectedIds.length} bài đăng đã chọn? Dung lượng bộ nhớ sẽ được giải phóng ngay lập tức.`
+            : `Bạn có chắc chắn muốn xóa vĩnh viễn bài đăng "${itemToDelete?.title || "này"}"? Dung lượng bộ nhớ sẽ được giải phóng ngay lập tức.`
         }
         confirmText="Xóa vĩnh viễn"
         confirmColor="error"
@@ -597,5 +783,17 @@ export default function GalleryPage() {
         onConfirm={handleConfirmDelete}
       />
     </Box>
+  );
+}
+
+export default function GalleryPage() {
+  return (
+    <Suspense fallback={
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", py: 12 }}>
+        <CircularProgress color="primary" />
+      </Box>
+    }>
+      <GalleryContent />
+    </Suspense>
   );
 }
