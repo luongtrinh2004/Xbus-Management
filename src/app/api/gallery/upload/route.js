@@ -1,3 +1,4 @@
+import { auditGallery } from "@/libs/galleryAudit";
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import path from "path";
@@ -130,6 +131,7 @@ export async function POST(req) {
 
       currentItems.unshift(newPost);
       await saveGallery({ items: currentItems });
+    await auditGallery(token, "CREATE_GALLERY_POST", newPost, `${newPost.totalFiles} tệp; phạm vi: ${{public: "Công khai", team: "Nội bộ team", private: "Chỉ mình tôi"}[newPost.privacy] || "Không xác định"}`);
 
       // Gửi thông báo nếu có người dùng hoặc @All được gắn thẻ
       sendMentionNotifications({
@@ -329,6 +331,7 @@ export async function POST(req) {
 
     currentItems.unshift(newPost);
     await saveGallery({ items: currentItems });
+    await auditGallery(token, "CREATE_GALLERY_POST", newPost, `${newPost.totalFiles} tệp; phạm vi: ${{public: "Công khai", team: "Nội bộ team", private: "Chỉ mình tôi"}[newPost.privacy] || "Không xác định"}`);
 
     sendMentionNotifications({
       actor: uploader,

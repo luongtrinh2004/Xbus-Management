@@ -37,8 +37,6 @@ export default function MediaToolbar({
   onSortOptionChange,
   viewMode,
   onViewModeChange,
-  isBatchMode,
-  onToggleBatchMode,
   onOpenUpload,
   uploaderOptions = [],
   counts = { all: 0, image: 0, video: 0 },
@@ -74,17 +72,6 @@ export default function MediaToolbar({
           </Box>
 
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flexWrap: "wrap" }}>
-            <Button
-              variant={isBatchMode ? "tonal" : "outlined"}
-              color={isBatchMode ? "primary" : "secondary"}
-              size="medium"
-              startIcon={<i className={isBatchMode ? "tabler-checks" : "tabler-select"} />}
-              onClick={onToggleBatchMode}
-              sx={{ textTransform: "none", fontWeight: 500 }}
-            >
-              {isBatchMode ? "Thoát chọn nhiều" : "Chọn nhiều"}
-            </Button>
-
             <Button
               variant="contained"
               color="primary"

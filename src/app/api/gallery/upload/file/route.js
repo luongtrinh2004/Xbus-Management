@@ -1,3 +1,4 @@
+import { auditGallery } from "@/libs/galleryAudit";
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import path from "path";
@@ -137,6 +138,7 @@ export async function POST(req) {
       }
     }
 
+    await auditGallery(token, "UPLOAD_GALLERY_FILE", { fileName: file.name }, `${isVideo ? "Video" : "Ảnh"}; ${formatBytes(file.size)}; đường dẫn: ${objectKey}`);
     return NextResponse.json({
       success: true,
       fileData: {

@@ -1,3 +1,4 @@
+import { auditGallery } from "@/libs/galleryAudit";
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import { getGallery, saveGallery, getUsers } from "@/libs/dataRepository";
@@ -76,6 +77,7 @@ export async function POST(req, { params }) {
     }
 
     await saveGallery({ items });
+    await auditGallery(token, "CREATE_GALLERY_COMMENT", item, `Bình luận ${newComment.id}: ${newComment.content}`);
 
     // Send notification to post author if someone else commented
     const authorId = item.uploader?.id;
@@ -182,6 +184,7 @@ export async function PATCH(req, { params }) {
     }
 
     await saveGallery({ items });
+    await auditGallery(token, "UPDATE_GALLERY_COMMENT", item, `Bình luận ${cmt.id}: ${cmt.content}`);
 
     // Send mention notification for updated comment if new mentions
     sendMentionNotifications({
@@ -261,6 +264,7 @@ export async function DELETE(req, { params }) {
     }
 
     await saveGallery({ items });
+    await auditGallery(token, "DELETE_GALLERY_COMMENT", item, `Bình luận ${cmt.id}: ${cmt.content}`);
 
     return NextResponse.json({ success: true, message: "Đã xóa bình luận", commentId });
   } catch (error) {

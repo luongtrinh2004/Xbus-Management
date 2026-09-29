@@ -1,6 +1,7 @@
 "use client";
+import { trackGalleryActivity } from "@/libs/galleryActivity";
 
-import { useState, useMemo, useEffect, useCallback, Suspense } from "react";
+import { useState, useMemo, useEffect, useCallback, useRef, Suspense } from "react";
 import { useSession } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import Box from "@mui/material/Box";
@@ -175,12 +176,14 @@ function GalleryContent() {
     fetchGalleryData();
   }, [fetchGalleryData]);
 
-  // Handle auto-open post from notification link: /gallery?open=postId
+  // Handle auto-open post from notification link: /gallery?open=postId (only once on load)
+  const hasAutoOpenedRef = useRef(false);
   useEffect(() => {
     const openParam = searchParams.get("open") || searchParams.get("id");
-    if (openParam && mediaList.length > 0) {
+    if (openParam && mediaList.length > 0 && !hasAutoOpenedRef.current) {
       const target = mediaList.find((i) => i.id === openParam || i.postId === openParam);
       if (target) {
+        hasAutoOpenedRef.current = true;
         setActiveMediaId(target.id);
         setLightboxOpen(true);
       }
@@ -190,12 +193,18 @@ function GalleryContent() {
   // Active item for Lightbox
   const activeMediaItem = useMemo(() => {
     if (!activeMediaId) return null;
-    return mediaList.find((m) => m.id === activeMediaId) || null;
+    return (
+      mediaList.find(
+        (m) => m.id === activeMediaId || (m.postId && m.postId === activeMediaId)
+      ) || null
+    );
   }, [activeMediaId, mediaList]);
 
   const currentLightboxIndex = useMemo(() => {
     if (!activeMediaId) return 0;
-    const idx = mediaList.findIndex((m) => m.id === activeMediaId);
+    const idx = mediaList.findIndex(
+      (m) => m.id === activeMediaId || (m.postId && m.postId === activeMediaId)
+    );
     return idx >= 0 ? idx : 0;
   }, [activeMediaId, mediaList]);
 
@@ -252,6 +261,8 @@ function GalleryContent() {
 
   // Download single file
   const handleDownload = (item) => {
+    const parent = mediaList.find(post => post.id === item.id || post.files?.some(file => file.id === item.id));
+    trackGalleryActivity(parent?.id || item.postId || item.id, "DOWNLOAD_GALLERY_MEDIA", item.id);
     toast.info(`Bắt đầu tải xuống: ${item.fileName || item.title || "tệp tin"}`);
     const link = document.createElement("a");
     link.href = item.url;
@@ -264,7 +275,10 @@ function GalleryContent() {
 
   // Batch download
   const handleBatchDownload = () => {
-    toast.success(`Đang chuẩn bị tải xuống ${selectedIds.length} tệp tin...`);
+    mediaList.filter(item => selectedIds.includes(item.id)).forEach(item => {
+      const files = item.files?.length ? item.files : [item];
+      files.forEach(handleDownload);
+    });
   };
 
   // Share link
@@ -272,6 +286,7 @@ function GalleryContent() {
     const shareUrl = `${window.location.origin}/gallery?open=${item.id}`;
     if (navigator.clipboard) {
       navigator.clipboard.writeText(shareUrl).then(() => {
+        trackGalleryActivity(item.id, "SHARE_GALLERY_POST");
         toast.success("Đã sao chép liên kết chia sẻ vào bộ nhớ tạm!");
       });
     } else {

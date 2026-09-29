@@ -1,4 +1,5 @@
 "use client";
+import { trackGalleryActivity } from "@/libs/galleryActivity";
 
 import { useState, useEffect, useRef } from "react";
 import Box from "@mui/material/Box";
@@ -13,6 +14,7 @@ import Tooltip from "@mui/material/Tooltip";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import Divider from "@mui/material/Divider";
+import CircularProgress from "@mui/material/CircularProgress";
 import { useTheme } from "@mui/material/styles";
 import CustomTextField from "@core/components/mui/TextField";
 import { toast } from "react-toastify";
@@ -68,7 +70,11 @@ export default function MediaLightbox({
 
   // Video controls
   const videoRef = useRef(null);
+  const viewerOpenRef = useRef(open);
+  viewerOpenRef.current = open;
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isBuffering, setIsBuffering] = useState(false);
+  const [videoError, setVideoError] = useState("");
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(0.8);
@@ -123,11 +129,50 @@ export default function MediaLightbox({
     setRotation(0);
     setIsPlaying(false);
     setCurrentTime(0);
+    setDuration(0);
+    setPlaybackSpeed(1);
+    setVideoError("");
+    setIsBuffering(false);
     if (videoRef.current) {
       videoRef.current.currentTime = 0;
       videoRef.current.playbackRate = 1;
     }
   }, [item?.id, activeFileIndex]);
+
+  // Start on opening/reopening; metadata also starts newly mounted dialog content.
+  useEffect(() => {
+    const video = videoRef.current;
+    if (open && video) startPlayback(video);
+    return () => { (video || videoRef.current)?.pause(); };
+  }, [open, activeFile.url, item?.id, activeFileIndex]);
+
+  async function startPlayback(video, userInitiated = false) {
+    if (!open || !video) return;
+    const source = video.getAttribute("src");
+    const isCurrent = () => viewerOpenRef.current && videoRef.current === video && video.isConnected &&
+      video.getAttribute("src") === source;
+    setVideoError("");
+    setIsBuffering(true);
+    try {
+      await video.play();
+      if (userInitiated && isCurrent()) trackGalleryActivity(item.id, "PLAY_GALLERY_VIDEO", activeFile.id);
+    } catch (error) {
+      if (!isCurrent() || error.name === "AbortError") return;
+      if (error.name === "NotAllowedError" && !video.muted) {
+        video.muted = true;
+        setIsMuted(true);
+        try {
+          await video.play();
+      if (userInitiated && isCurrent()) trackGalleryActivity(item.id, "PLAY_GALLERY_VIDEO", activeFile.id);
+          return;
+        } catch (retryError) {
+          if (!isCurrent() || retryError.name === "AbortError") return;
+        }
+      }
+      setIsBuffering(false);
+      setIsPlaying(false);
+    }
+  }
 
   // Navigation handlers across files and posts
   const hasPrev = activeFileIndex > 0 || currentIndex > 0;
@@ -154,6 +199,18 @@ export default function MediaLightbox({
     if (!open) return;
 
     const handleKeyDown = (e) => {
+      // Ignore if typing in an input, textarea, or contentEditable
+      const target = e.target;
+      if (
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement ||
+        target?.isContentEditable ||
+        target?.tagName === "INPUT" ||
+        target?.tagName === "TEXTAREA"
+      ) {
+        return;
+      }
+
       if (e.key === "ArrowLeft") {
         handlePrev();
       } else if (e.key === "ArrowRight") {
@@ -172,12 +229,11 @@ export default function MediaLightbox({
   // Video handlers
   const handleTogglePlay = () => {
     if (!videoRef.current) return;
-    if (isPlaying) {
+    if (!videoRef.current.paused) {
       videoRef.current.pause();
-      setIsPlaying(false);
+      trackGalleryActivity(item.id, "PAUSE_GALLERY_VIDEO", activeFile.id);
     } else {
-      videoRef.current.play().catch(() => {});
-      setIsPlaying(true);
+      startPlayback(videoRef.current, true);
     }
   };
 
@@ -188,7 +244,9 @@ export default function MediaLightbox({
 
   const handleLoadedMetadata = () => {
     if (!videoRef.current) return;
-    setDuration(videoRef.current.duration || activeFile.durationSeconds || 0);
+    setDuration(Number.isFinite(videoRef.current.duration) ? videoRef.current.duration : 0);
+    videoRef.current.volume = volume;
+    startPlayback(videoRef.current);
   };
 
   const handleSeek = (_, val) => {
@@ -533,7 +591,11 @@ export default function MediaLightbox({
                 }}
               >
                 <video
+                  key={activeFile.url || item.url}
                   ref={videoRef}
+                  preload="auto"
+                  playsInline
+                  muted={isMuted}
                   src={activeFile.url || item.url}
                   poster={
                     activeFile.thumbnail &&
@@ -543,7 +605,19 @@ export default function MediaLightbox({
                   }
                   onTimeUpdate={handleTimeUpdate}
                   onLoadedMetadata={handleLoadedMetadata}
-                  onEnded={() => setIsPlaying(false)}
+                  onPlaying={() => {
+                    setIsPlaying(true); setIsBuffering(false);
+
+                  }}
+                  onPause={() => { setIsPlaying(false); setIsBuffering(false); }}
+                  onWaiting={() => setIsBuffering(true)}
+                  onCanPlay={() => setIsBuffering(false)}
+                  onError={() => {
+                    setIsPlaying(false);
+                    setIsBuffering(false);
+                    setVideoError("Không thể phát video. Vui lòng thử lại hoặc tải video xuống.");
+                  }}
+                  onEnded={() => { setIsPlaying(false); setIsBuffering(false); }}
                   onClick={handleTogglePlay}
                   onDoubleClick={handleFullscreenToggle}
                   style={{
@@ -562,8 +636,19 @@ export default function MediaLightbox({
                   }}
                 />
 
+                {isBuffering && !videoError && (
+                  <Box sx={{ position: "absolute", pointerEvents: "none", display: "flex", alignItems: "center", gap: 1, bgcolor: "rgba(0,0,0,0.65)", color: "#fff", borderRadius: 2, p: 2 }}>
+                    <CircularProgress size={24} color="inherit" />
+                    <Typography variant="body2">Đang tải video…</Typography>
+                  </Box>
+                )}
+                {videoError && (
+                  <Typography role="alert" sx={{ position: "absolute", bgcolor: "rgba(0,0,0,0.75)", color: "#fff", p: 2, borderRadius: 2 }}>
+                    {videoError}
+                  </Typography>
+                )}
                 {/* Center Play Button when paused */}
-                {!isPlaying && (
+                {!isPlaying && !isBuffering && !videoError && (
                   <IconButton
                     onClick={handleTogglePlay}
                     sx={{
@@ -745,6 +830,7 @@ export default function MediaLightbox({
                   max={duration || item.durationSeconds || 100}
                   value={currentTime}
                   onChange={handleSeek}
+                    onChangeCommitted={() => trackGalleryActivity(item.id, "SEEK_GALLERY_VIDEO", activeFile.id)}
                   sx={{
                     width: { xs: 100, sm: 180, md: 240 },
                     color: "primary.main",

@@ -1,3 +1,4 @@
+import { auditGallery } from "@/libs/galleryAudit";
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import { getGallery, saveGallery } from "@/libs/dataRepository";
@@ -50,6 +51,7 @@ export async function POST(req, { params }) {
     }
 
     await saveGallery({ items });
+    await auditGallery(token, isLiked ? "LIKE_GALLERY_POST" : "UNLIKE_GALLERY_POST", item);
 
     // Send notification to post author if someone else liked
     const authorId = item.uploader?.id;

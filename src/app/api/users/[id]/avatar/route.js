@@ -1,40 +1,10 @@
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
-import { getUsers, saveUsers } from "@/libs/dataRepository";
-import path from "path";
-import fs from "fs";
+import { getUsers, saveUsers, appendAuditLog } from "@/libs/dataRepository";
+import { isSafeStaffCode, storeAvatar, removeAvatar } from "@/libs/avatarStorage";
 
 const secret = process.env.NEXTAUTH_SECRET;
-const AVATARS_DIR = path.join(process.cwd(), "public", "images", "avatars");
 const MAX_SIZE_MB = 5;
-const DEFAULT_AVATAR_FILES = new Set([
-  "male-admin.png",
-  "female-admin.png",
-  "male-user.png",
-  "female-user.png",
-  "assistant.png",
-]);
-const isSafeStaffCode = (value) =>
-  /^[\p{L}\p{N}_-]+$/u.test(String(value || ""));
-const avatarRoot = path.resolve(AVATARS_DIR);
-
-const getAvatarFilePath = (avatarUrl) => {
-  const prefixes = ["/images/avatars/", "/api/media/avatars/"];
-  const prefix = prefixes.find((item) => avatarUrl?.startsWith(item));
-  if (!prefix) return null;
-  let relativePath;
-  try {
-    relativePath = decodeURIComponent(
-      avatarUrl.split("?")[0].replace(prefix, ""),
-    );
-  } catch {
-    return null;
-  }
-  const fileName = path.basename(relativePath);
-  if (DEFAULT_AVATAR_FILES.has(fileName)) return null;
-  const filePath = path.resolve(AVATARS_DIR, relativePath);
-  return filePath.startsWith(`${avatarRoot}${path.sep}`) ? filePath : null;
-};
 
 export async function POST(req, { params }) {
   try {
@@ -43,7 +13,7 @@ export async function POST(req, { params }) {
       return NextResponse.json({ error: "Chưa xác thực" }, { status: 401 });
     }
 
-    const { id } = params;
+    const { id } = await params;
     const users = await getUsers();
     const user = users.find((u) => u.id === id);
 
@@ -90,11 +60,6 @@ export async function POST(req, { params }) {
       );
     }
 
-    // Đảm bảo thư mục tồn tại
-    if (!fs.existsSync(AVATARS_DIR)) {
-      fs.mkdirSync(AVATARS_DIR, { recursive: true });
-    }
-
     const staffCode = String(user.code || "")
       .trim()
       .toUpperCase();
@@ -114,38 +79,18 @@ export async function POST(req, { params }) {
         : file.type === "image/png"
           ? "png"
           : "jpg";
-    const fileName = `${staffCode}.${ext}`;
-    const userAvatarDir = path.join(AVATARS_DIR, staffCode);
-
-    // Xóa avatar cũ (kể cả cấu trúc tên-file cũ), sau đó xóa toàn bộ nội dung
-    // thư mục của mã để bảo đảm chỉ còn đúng một ảnh mới.
-    const oldPath = getAvatarFilePath(user.avatarUrl);
-    if (oldPath && fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
-    if (fs.existsSync(userAvatarDir))
-      fs.rmSync(userAvatarDir, { recursive: true, force: true });
-    fs.mkdirSync(userAvatarDir, { recursive: true });
-    const filePath = path.join(userAvatarDir, fileName);
-
-    const buffer = Buffer.from(bytes);
-    fs.writeFileSync(filePath, buffer);
-    if (
-      !fs.existsSync(filePath) ||
-      fs.statSync(filePath).size !== buffer.length
-    ) {
-      throw new Error("Không thể lưu file ảnh");
-    }
-
-    // Cập nhật avatarUrl trong user record
-    const avatarPath = `/api/media/avatars/${encodeURIComponent(staffCode)}/${encodeURIComponent(fileName)}`;
-    // File được ghi đè theo mã nhân sự để thư mục luôn gọn, còn version trong
-    // URL buộc browser/CDN tải ảnh mới thay vì dùng bản đã cache.
-    const avatarUrl = `${avatarPath}?v=${Date.now()}`;
+    const avatarUrl = await storeAvatar(staffCode, ext, Buffer.from(bytes));
     const updatedUsers = users.map((u) =>
       u.id === id
         ? { ...u, avatarUrl, updatedAt: new Date().toISOString() }
         : u,
     );
     await saveUsers(updatedUsers);
+    await appendAuditLog({ adminId: token.id, adminName: token.name, adminEmail: token.email,
+      action: "UPDATE_USER_AVATAR", targetType: "USER", targetId: id,
+      details: `Cập nhật ảnh đại diện của ${user.name} (${user.code})` });
+    await removeAvatar(user.avatarUrl, avatarUrl).catch(error =>
+      console.error("[Avatar] Không thể dọn ảnh cũ:", error));
 
     // avatarUrl đã có version và được lưu vào nguồn dữ liệu để mọi màn hình,
     // kể cả session sau khi đăng nhập lại, đều nhận đúng ảnh mới nhất.
@@ -165,7 +110,7 @@ export async function DELETE(req, { params }) {
     if (!token)
       return NextResponse.json({ error: "Chưa xác thực" }, { status: 401 });
 
-    const { id } = params;
+    const { id } = await params;
     const users = await getUsers();
     const user = users.find((u) => u.id === id);
     if (!user)
@@ -180,15 +125,7 @@ export async function DELETE(req, { params }) {
       );
     }
 
-    const filePath = getAvatarFilePath(user.avatarUrl);
-    if (filePath && fs.existsSync(filePath)) fs.unlinkSync(filePath);
-    const avatarDir = filePath && path.dirname(filePath);
-    if (
-      avatarDir &&
-      path.dirname(avatarDir) === avatarRoot &&
-      fs.existsSync(avatarDir)
-    )
-      fs.rmSync(avatarDir, { recursive: true, force: true });
+    await removeAvatar(user.avatarUrl);
     await saveUsers(
       users.map((u) =>
         u.id === id
@@ -196,6 +133,9 @@ export async function DELETE(req, { params }) {
           : u,
       ),
     );
+    await appendAuditLog({ adminId: token.id, adminName: token.name, adminEmail: token.email,
+      action: "DELETE_USER_AVATAR", targetType: "USER", targetId: id,
+      details: `Xóa ảnh đại diện của ${user.name} (${user.code})` });
     return NextResponse.json({ avatarUrl: "" });
   } catch (error) {
     console.error("[API Avatar] DELETE error:", error);

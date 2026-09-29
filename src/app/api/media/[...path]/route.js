@@ -1,6 +1,8 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { NextResponse } from "next/server";
+import { getMinioClient, MINIO_BUCKET } from "@/libs/minioClient";
+import { Readable } from "node:stream";
 
 const imagesRoot = path.resolve(process.cwd(), "public", "images");
 const allowedRoots = new Set(["avatars", "afternoon-tea"]);
@@ -22,7 +24,7 @@ export async function GET(_req, { params }) {
         !segment ||
         segment === "." ||
         segment === ".." ||
-        segment.includes("/"),
+        segment.includes("/") || segment.includes("\\") || segment.includes("\0"),
     )
   )
     return NextResponse.json(
@@ -46,6 +48,13 @@ export async function GET(_req, { params }) {
         { status: 415 },
       );
 
+    if (segments[0] === "avatars" && new URL(_req.url).searchParams.get("storage") === "minio") {
+      const stream = await getMinioClient().getObject(MINIO_BUCKET, segments.join("/"));
+      return new NextResponse(Readable.toWeb(stream), {
+        headers: { "Content-Type": contentType, "Cache-Control": "no-store, max-age=0" },
+      });
+    }
+
     const image = await fs.readFile(filePath);
     return new NextResponse(image, {
       headers: {
@@ -54,7 +63,7 @@ export async function GET(_req, { params }) {
       },
     });
   } catch (error) {
-    if (error?.code === "ENOENT")
+    if (["ENOENT", "NoSuchKey", "NotFound"].includes(error?.code))
       return NextResponse.json(
         { error: "Không tìm thấy ảnh" },
         { status: 404 },

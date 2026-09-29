@@ -1,3 +1,4 @@
+import { auditGallery } from "@/libs/galleryAudit";
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import { getGallery, saveGallery } from "@/libs/dataRepository";
@@ -80,6 +81,7 @@ export async function DELETE(req, { params }) {
     );
 
     await saveGallery({ items: remainingItems });
+    await auditGallery(token, "DELETE_GALLERY_POST", targetItem);
 
     const newUsedBytes = remainingItems.reduce((acc, i) => acc + (Number(i.fileSize) || 0), 0);
 
@@ -158,6 +160,7 @@ export async function PATCH(req, { params }) {
     }
 
     await saveGallery({ items });
+    await auditGallery(token, "UPDATE_GALLERY_POST", target, `Tiêu đề: ${target.title || "(trống)"}; mô tả: ${target.description || "(trống)"}; thẻ: ${(target.tags || []).join(", ")}; phạm vi: ${{public: "Công khai", team: "Nội bộ team", private: "Chỉ mình tôi"}[target.privacy] || "Không xác định"}`);
 
     // Gửi thông báo nếu có người dùng hoặc @All được gắn thẻ khi chỉnh sửa
     const postTitle = target.title || "";

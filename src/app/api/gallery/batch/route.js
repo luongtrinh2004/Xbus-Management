@@ -1,3 +1,4 @@
+import { auditGallery } from "@/libs/galleryAudit";
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import { getGallery, saveGallery } from "@/libs/dataRepository";
@@ -21,6 +22,11 @@ export async function POST(req) {
     const data = await getGallery();
     const items = Array.isArray(data.items) ? data.items : [];
 
+    const targets = items.filter(item => ids.includes(item.id));
+    if (targets.some(item => !["admin", "assistant"].includes(token.role) &&
+      item.uploader?.id !== token.id && !(token.email && item.uploader?.email?.toLowerCase() === token.email.toLowerCase()))) {
+      return NextResponse.json({ error: "Bạn không có quyền thao tác với bài đăng này" }, { status: 403 });
+    }
     if (action === "delete") {
       // Delete objects from MinIO / fallback
       for (const id of ids) {
@@ -40,6 +46,7 @@ export async function POST(req) {
       // Filter remaining
       const remainingItems = items.filter((i) => !ids.includes(i.id));
       await saveGallery({ items: remainingItems });
+      for (const item of targets) await auditGallery(token, "DELETE_GALLERY_POST", item, "Xóa hàng loạt");
 
       const newUsedBytes = remainingItems.reduce((acc, i) => acc + (Number(i.fileSize) || 0), 0);
 
@@ -68,6 +75,7 @@ export async function POST(req) {
       });
 
       await saveGallery({ items });
+      for (const item of targets) await auditGallery(token, "TAG_GALLERY_POST", item, `Thẻ: ${tags.join(", ")}`);
 
       return NextResponse.json({ success: true, updatedCount: ids.length });
     }

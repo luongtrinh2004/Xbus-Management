@@ -1,84 +1,63 @@
 import { NextResponse } from "next/server";
-import path from "path";
-import fs from "fs";
+import path from "node:path";
+import fs from "node:fs";
 import { getMinioClient, MINIO_BUCKET, ensureBucket } from "@/libs/minioClient";
+import { createMediaResponse } from "@/libs/mediaResponse";
+
+export const runtime = "nodejs";
+
+const contentTypes = {
+  ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png",
+  ".webp": "image/webp", ".gif": "image/gif", ".mp4": "video/mp4",
+  ".m4v": "video/mp4", ".mov": "video/quicktime", ".webm": "video/webm",
+};
 
 export async function GET(req, { params }) {
   try {
     const { path: pathSegments } = await params;
     const objectKey = Array.isArray(pathSegments) ? pathSegments.join("/") : pathSegments;
-
-    if (!objectKey) {
+    if (!objectKey || objectKey.includes("\\") || objectKey.includes("\0") ||
+        objectKey.split("/").some(segment => segment === ".." || segment === ".")) {
       return new NextResponse("Not Found", { status: 404 });
     }
-
-    // Try reading from MinIO
+    const fallbackType = contentTypes[path.extname(objectKey).toLowerCase()] || "application/octet-stream";
     try {
-      const isAvailable = await ensureBucket();
-      if (isAvailable) {
+      if (await ensureBucket()) {
         const client = getMinioClient();
         const stat = await client.statObject(MINIO_BUCKET, objectKey);
-        const stream = await client.getObject(MINIO_BUCKET, objectKey);
-
-        const contentType = stat.metaData?.["content-type"] || "application/octet-stream";
-
-        // Convert Node.js readable stream to Web ReadableStream
-        const webStream = new ReadableStream({
-          start(controller) {
-            stream.on("data", (chunk) => controller.enqueue(chunk));
-            stream.on("end", () => controller.close());
-            stream.on("error", (err) => controller.error(err));
-          },
-        });
-
-        return new NextResponse(webStream, {
-          status: 200,
-          headers: {
-            "Content-Type": contentType,
-            "Content-Length": String(stat.size),
-            "Cache-Control": "public, max-age=31536000, immutable",
-          },
+        return await createMediaResponse(req, {
+          size: stat.size,
+          contentType: stat.metaData?.["content-type"] || fallbackType,
+          getStream: range => range
+            ? client.getPartialObject(MINIO_BUCKET, objectKey, range.start, range.end - range.start + 1)
+            : client.getObject(MINIO_BUCKET, objectKey),
         });
       }
-    } catch (minioErr) {
-      // If object not in MinIO or MinIO is offline, continue to fallback below
+    } catch {
+      // Older uploads and uploads made while MinIO was offline may be local.
     }
 
-    // Fallback: Check local public/uploads/gallery
-    const localPath = path.join(process.cwd(), "public", "uploads", "gallery", objectKey);
-    if (fs.existsSync(localPath)) {
-      const stat = fs.statSync(localPath);
-      const fileStream = fs.createReadStream(localPath);
-
-      const ext = path.extname(localPath).toLowerCase();
-      let contentType = "application/octet-stream";
-      if (ext === ".jpg" || ext === ".jpeg") contentType = "image/jpeg";
-      else if (ext === ".png") contentType = "image/png";
-      else if (ext === ".webp") contentType = "image/webp";
-      else if (ext === ".mp4") contentType = "video/mp4";
-      else if (ext === ".webm") contentType = "video/webm";
-
-      const webStream = new ReadableStream({
-        start(controller) {
-          fileStream.on("data", (chunk) => controller.enqueue(chunk));
-          fileStream.on("end", () => controller.close());
-          fileStream.on("error", (err) => controller.error(err));
-        },
-      });
-
-      return new NextResponse(webStream, {
-        status: 200,
-        headers: {
-          "Content-Type": contentType,
-          "Content-Length": String(stat.size),
-          "Cache-Control": "public, max-age=31536000, immutable",
-        },
-      });
+    const root = path.resolve(process.cwd(), "public", "uploads", "gallery");
+    const localPath = path.resolve(root, objectKey);
+    if (!localPath.startsWith(root + path.sep)) {
+      return new NextResponse("Not Found", { status: 404 });
     }
-
-    return new NextResponse("File not found", { status: 404 });
+    let stat;
+    try {
+      stat = await fs.promises.stat(localPath);
+    } catch (error) {
+      if (error.code !== "ENOENT") throw error;
+    }
+    if (!stat?.isFile()) return new NextResponse("File not found", { status: 404 });
+    return await createMediaResponse(req, {
+      size: stat.size,
+      contentType: fallbackType,
+      getStream: range => fs.createReadStream(localPath, range || undefined),
+    });
   } catch (err) {
     console.error("[Media Stream Proxy] Lỗi:", err);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
+
+export const HEAD = GET;

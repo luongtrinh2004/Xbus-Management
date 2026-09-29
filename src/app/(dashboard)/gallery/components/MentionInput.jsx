@@ -227,6 +227,8 @@ export default function MentionInput({
   };
 
   const handleKeyDown = (e) => {
+    e.stopPropagation();
+
     if (open && suggestions.length > 0) {
       if (e.key === "ArrowDown") {
         e.preventDefault();

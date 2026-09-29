@@ -8,8 +8,7 @@ import {
   getWaterSchedules,
   getAssets,
 } from "@/libs/dataRepository";
-import fs from "fs";
-import path from "path";
+import { moveAvatarToStaffCode, removeAvatar } from "@/libs/avatarStorage";
 
 const secret = process.env.NEXTAUTH_SECRET;
 const normalizeStaffCode = (value) =>
@@ -23,50 +22,6 @@ const normalizeProfileDate = (value) => {
     return `${match[3]}-${match[2].padStart(2, "0")}-${match[1].padStart(2, "0")}`;
   return text;
 };
-const AVATARS_DIR = path.join(process.cwd(), "public", "images", "avatars");
-const DEFAULT_AVATAR_FILES = new Set([
-  "male-admin.png",
-  "female-admin.png",
-  "male-user.png",
-  "female-user.png",
-  "assistant.png",
-]);
-
-const moveAvatarToStaffCode = (avatarUrl, previousCode, nextCode) => {
-  const prefixes = ["/images/avatars/", "/api/media/avatars/"];
-  const prefix = prefixes.find((item) => avatarUrl?.startsWith(item));
-  if (!prefix || previousCode === nextCode) return avatarUrl;
-  let relativePath;
-  try {
-    relativePath = decodeURIComponent(
-      avatarUrl.split("?")[0].replace(prefix, ""),
-    );
-  } catch {
-    return avatarUrl;
-  }
-  const fileName = path.basename(relativePath);
-  if (DEFAULT_AVATAR_FILES.has(fileName)) return avatarUrl;
-
-  const sourcePath = path.resolve(AVATARS_DIR, relativePath);
-  const avatarRoot = path.resolve(AVATARS_DIR);
-  if (
-    !sourcePath.startsWith(`${avatarRoot}${path.sep}`) ||
-    !fs.existsSync(sourcePath)
-  )
-    return avatarUrl;
-
-  const extension = path.extname(fileName) || ".jpg";
-  const targetDir = path.join(AVATARS_DIR, nextCode);
-  const targetPath = path.join(targetDir, `${nextCode}${extension}`);
-  fs.rmSync(targetDir, { recursive: true, force: true });
-  fs.mkdirSync(targetDir, { recursive: true });
-  fs.renameSync(sourcePath, targetPath);
-  const sourceDir = path.dirname(sourcePath);
-  if (path.dirname(sourceDir) === avatarRoot && fs.existsSync(sourceDir))
-    fs.rmSync(sourceDir, { recursive: true, force: true });
-  return `/api/media/avatars/${encodeURIComponent(nextCode)}/${encodeURIComponent(`${nextCode}${extension}`)}?v=${Date.now()}`;
-};
-
 export async function PATCH(req, { params }) {
   try {
     const token = await getToken({ req, secret });
@@ -226,7 +181,7 @@ export async function PATCH(req, { params }) {
       );
     }
     if (updatedUser.code !== normalizeStaffCode(oldUser.code)) {
-      updatedUser.avatarUrl = moveAvatarToStaffCode(
+      updatedUser.avatarUrl = await moveAvatarToStaffCode(
         oldUser.avatarUrl,
         normalizeStaffCode(oldUser.code),
         updatedUser.code,
@@ -241,6 +196,10 @@ export async function PATCH(req, { params }) {
 
     users[index] = updatedUser;
     await saveUsers(users);
+    if (updatedUser.avatarUrl !== oldUser.avatarUrl) {
+      await removeAvatar(oldUser.avatarUrl, updatedUser.avatarUrl).catch(error =>
+        console.error("[Avatar] Không thể dọn ảnh sau đổi mã:", error));
+    }
 
     await appendAuditLog({
       adminId: token?.id || "admin",

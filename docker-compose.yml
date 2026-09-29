@@ -9,6 +9,9 @@ services:
       - "127.0.0.1:3000:3000"
     env_file:
       - .env
+    environment:
+      - MINIO_ENDPOINT=${MINIO_ENDPOINT:-minio}
+      - MINIO_PORT=${MINIO_PORT:-9000}
     volumes:
       - xbus_data:/app/src/data/json
       - xbus_avatars:/app/public/images/avatars
@@ -25,7 +28,7 @@ services:
       start_period: 30s
 
   minio:
-    image: minio/minio:latest
+    image: cgr.dev/chainguard/minio:latest
     container_name: xbus-minio
     # Port 9000: S3 API, Port 9001: MinIO Web Console (giao diện quản trị S3)
     ports:
@@ -36,15 +39,11 @@ services:
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:-xbus_admin}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-xbus_secret_password}
+      MINIO_BROWSER_REDIRECT_URL: ${MINIO_BROWSER_REDIRECT_URL:-https://xbus-office.xmobility.vn/minio/}
     volumes:
       - minio_data:/data
     command: server /data --console-address ":9001"
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "mc", "ready", "local"]
-      interval: 15s
-      timeout: 5s
-      retries: 5
 
   mysql:
     image: mysql:8.4

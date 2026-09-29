@@ -1,3 +1,4 @@
+import { actionLabel, targetLabels } from "@/libs/auditLabels";
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import { getAuditLogs, getUsers, getFunds } from "@/libs/dataRepository";
@@ -162,6 +163,8 @@ export async function GET(req) {
           log.adminName?.toLowerCase().includes(search) ||
           log.details?.toLowerCase().includes(search) ||
           log.action?.toLowerCase().includes(search) ||
+          actionLabel(log.action).toLowerCase().includes(search) ||
+          targetLabels[log.targetType]?.toLowerCase().includes(search) ||
           log.targetType?.toLowerCase().includes(search),
       );
     }
