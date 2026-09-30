@@ -9,16 +9,32 @@ const formatSize = size => `${(size / 1024 / 1024).toFixed(2)} MB`;
 // Database owns post content. MinIO owns the file list for folder-based posts.
 // Listing failure is propagated: an unavailable bucket must not look empty.
 export async function resolveGalleryMinioFiles(items, client = getMinioClient()) {
-  const folderPosts = items.filter(post => post.mediaSource === 'minio' ||
-    post.files?.some(file => (file.filePath || '').startsWith(`posts/${post.id}/`)));
-  if (!folderPosts.length) return items;
   const objects = [];
   for await (const object of client.listObjectsV2(MINIO_BUCKET, 'posts/', true)) {
     if (object.name && !object.name.endsWith('/')) objects.push(object);
   }
+  // A file manually copied to posts/<postId>/ must be visible even when its
+  // database entry has not been created yet.
+  const knownIds = new Set(items.map(post => post.id));
+  const discoveredIds = new Set(objects.map(object => object.name.split('/')[1]).filter(Boolean));
+  const discoveredPosts = [...discoveredIds]
+    .filter(id => !knownIds.has(id))
+    .map(id => {
+      const first = objects.find(object => object.name.startsWith(`posts/${id}/`));
+      return {
+        id, postId: id, mediaSource: 'minio', title: `Tệp trong ${id}`,
+        description: 'Tệp được đồng bộ từ thư mục MinIO.', uploader: { name: 'MinIO' },
+        uploadedAt: first?.lastModified ? new Date(first.lastModified).toISOString() : new Date(0).toISOString(),
+        privacy: 'public', tags: [], likes: 0, isLiked: false, likedBy: [], comments: [], files: [],
+      };
+    });
+  const allItems = [...items, ...discoveredPosts];
+  const folderPosts = allItems.filter(post => post.mediaSource === 'minio' ||
+    post.files?.some(file => (file.filePath || '').startsWith(`posts/${post.id}/`)));
+  if (!folderPosts.length) return allItems;
   const byName = new Map(objects.map(object => [object.name, object]));
   const eligible = new Set(folderPosts.map(post => post.id));
-  return items.map(post => {
+  return allItems.map(post => {
     if (!eligible.has(post.id)) return post;
     const prefix = `posts/${post.id}/`;
     const previous = new Map((post.files || []).map(file => [file.filePath, file]));

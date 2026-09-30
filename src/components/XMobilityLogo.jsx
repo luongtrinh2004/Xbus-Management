@@ -1,0 +1,283 @@
+'use client';
+
+import { useEffect, useRef, useState, useId } from 'react';
+
+export default function XMobilityLogo({ onComplete, className = '', style = {} }) {
+  const [isDone, setIsDone] = useState(false);
+  const iconRef = useRef(null);
+  const piecesRef = useRef([]);
+  const revealRef = useRef(null);
+  const hasStartedRef = useRef(false);
+  const onCompleteRef = useRef(onComplete);
+
+  const rawId = useId();
+  const clipId = `xm-clip-${rawId.replace(/[^a-zA-Z0-9_-]/g, '')}`;
+
+  // Giữ ref onComplete luôn trỏ đến hàm mới nhất mà không gây re-run effect
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
+
+  useEffect(() => {
+    // Đảm bảo animation chỉ chạy 1 lần duy nhất, không bị reset khi component cha re-render
+    if (hasStartedRef.current) return;
+    hasStartedRef.current = true;
+
+    let frameId = null;
+    let isDead = false;
+
+    const clamp = (t) => Math.max(0, Math.min(1, t));
+    const ease = (t) => 1 - Math.pow(1 - clamp(t), 3);
+
+    const render = (t) => {
+      const reveal = ease((t - 0.85) / 0.5);
+
+      if (iconRef.current) {
+        iconRef.current.setAttribute('transform', `translate(${375 * (1 - reveal)}, 0)`);
+      }
+
+      const offsets = [
+        [70, -95],
+        [-80, -80],
+        [65, 65],
+        [-75, 95]
+      ];
+
+      piecesRef.current.forEach((p, i) => {
+        if (!p) return;
+        const u = ease((t - 0.05 - i * 0.035) / 0.6);
+        p.setAttribute('transform', `translate(${offsets[i][0] * (1 - u)}, ${offsets[i][1] * (1 - u)})`);
+        p.setAttribute('opacity', clamp((t - 0.04 - i * 0.035) / 0.18));
+      });
+
+      if (revealRef.current) {
+        revealRef.current.setAttribute('width', 750 * reveal);
+      }
+    };
+
+    const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    if (motionQuery.matches) {
+      render(1.6);
+      setIsDone(true);
+      if (onCompleteRef.current) onCompleteRef.current();
+      return;
+    }
+
+    render(0);
+    const start = performance.now();
+    let completed = false;
+
+    const tick = (now) => {
+      if (isDead) return;
+      const elapsed = (now - start) / 1000;
+      const t = elapsed;
+      render(Math.min(t * 1.4, 1.6));
+
+      if (t * 1.4 >= 1.45 && !completed) {
+        completed = true;
+        setIsDone(true);
+        if (onCompleteRef.current) onCompleteRef.current();
+      }
+
+      if (t * 1.4 < 1.6) {
+        frameId = requestAnimationFrame(tick);
+      } else {
+        frameId = null;
+        render(1.6);
+        setIsDone(true);
+      }
+    };
+
+    frameId = requestAnimationFrame(tick);
+
+    return () => {
+      isDead = true;
+      if (frameId) cancelAnimationFrame(frameId);
+    };
+  }, []);
+
+  return (
+    <div
+      className={className}
+      style={{
+        width: '100%',
+        maxWidth: '100%',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        overflow: 'visible',
+        ...style
+      }}
+    >
+      <svg
+        viewBox="-240 -100 1480 460"
+        role="img"
+        aria-label="XMobility Logo"
+        style={{
+          display: 'block',
+          width: '100%',
+          height: 'auto',
+          overflow: 'visible'
+        }}
+      >
+        <defs>
+          <linearGradient
+            id="paint0_linear_2076_11"
+            x1="219.392"
+            y1="8.64773e-06"
+            x2="35.7231"
+            y2="257.136"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop offset="0.25" stopColor="#233871" />
+            <stop offset="0.5" stopColor="#00103C" />
+            <stop offset="0.8" stopColor="#233871" />
+          </linearGradient>
+
+          <linearGradient
+            id="paint1_linear_2076_11"
+            x1="62.2053"
+            y1="50.4025"
+            x2="177.105"
+            y2="214.423"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop stopColor="#216BD4" />
+            <stop offset="0.451923" stopColor="#26418C" />
+            <stop offset="1" stopColor="#233871" />
+          </linearGradient>
+
+          <linearGradient
+            id="paint2_linear_2076_11"
+            x1="62.6322"
+            y1="50.4026"
+            x2="177.532"
+            y2="214.423"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop stopColor="#216BD4" />
+            <stop offset="0.451923" stopColor="#26418C" />
+            <stop offset="1" stopColor="#233871" />
+          </linearGradient>
+
+          <linearGradient
+            id="paint3_linear_2076_11"
+            x1="78.8661"
+            y1="151.56"
+            x2="59.6586"
+            y2="257.971"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop stopColor="#B42400" />
+            <stop offset="0.788462" stopColor="#FF7E36" />
+          </linearGradient>
+
+          <clipPath id={clipId}>
+            <rect ref={revealRef} x="280" y="0" width={isDone ? 750 : 0} height="258" />
+          </clipPath>
+        </defs>
+
+        {/* Biểu tượng chữ X: khi xong giữ nguyên translate(0, 0) */}
+        <g
+          ref={iconRef}
+          transform={isDone ? 'translate(0, 0)' : undefined}
+        >
+          <g
+            ref={(el) => (piecesRef.current[0] = el)}
+            transform={isDone ? 'translate(0, 0)' : undefined}
+            opacity={isDone ? 1 : undefined}
+          >
+            <path
+              d="M148.487 134.975L119.015 93.543L191.201 0H251L148.487 134.975Z"
+              fill="url(#paint0_linear_2076_11)"
+            />
+          </g>
+          <g
+            ref={(el) => (piecesRef.current[1] = el)}
+            transform={isDone ? 'translate(0, 0)' : undefined}
+            opacity={isDone ? 1 : undefined}
+          >
+            <path
+              d="M88.2606 49.9753H30.5971L117.733 175.126L148.487 134.975L88.2606 49.9753Z"
+              fill="url(#paint1_linear_2076_11)"
+            />
+          </g>
+          <g
+            ref={(el) => (piecesRef.current[2] = el)}
+            transform={isDone ? 'translate(0, 0)' : undefined}
+            opacity={isDone ? 1 : undefined}
+          >
+            <path
+              d="M157.029 147.79L127.13 187.086L146.351 214.423H204.014L157.029 147.79Z"
+              fill="url(#paint2_linear_2076_11)"
+            />
+          </g>
+          <g
+            ref={(el) => (piecesRef.current[3] = el)}
+            transform={isDone ? 'translate(0, 0)' : undefined}
+            opacity={isDone ? 1 : undefined}
+          >
+            <path
+              d="M106.784 188.367L77.3118 146.935L0 257.136H59.7992L106.784 188.367Z"
+              fill="url(#paint3_linear_2076_11)"
+            />
+          </g>
+        </g>
+
+        {/* Chữ Mobility: khi hoàn thành không bị clip nữa, luôn hiển thị FULL XMOBILITY */}
+        <g clipPath={isDone ? undefined : `url(#${clipId})`}>
+          {/* M */}
+          <path
+            d="M308.343 80.51H343.435L365.581 170.705H367.158L419.138 80.51H454.23L431.887 214.754H404.286L418.875 127.377H417.692L368.538 214.098H349.678L329.437 127.05H328.32L313.6 214.754H286L308.343 80.51Z"
+            fill="#243972"
+          />
+          {/* o */}
+          <path
+            d="M497.821 216.72C487.525 216.72 479.004 214.535 472.258 210.165C465.511 205.752 460.758 199.634 457.998 191.812C455.281 183.946 454.778 174.791 456.486 164.347C458.151 154.034 461.612 145.01 466.869 137.275C472.126 129.541 478.807 123.532 486.912 119.249C495.017 114.923 504.151 112.76 514.315 112.76C524.567 112.76 533.066 114.967 539.812 119.38C546.559 123.75 551.312 129.868 554.072 137.734C556.832 145.6 557.358 154.755 555.65 165.199C553.941 175.468 550.436 184.47 545.135 192.205C539.834 199.94 533.153 205.97 525.092 210.297C517.031 214.579 507.941 216.72 497.821 216.72ZM500.581 195.089C505.312 195.089 509.496 193.756 513.132 191.091C516.812 188.381 519.857 184.711 522.267 180.079C524.72 175.403 526.428 170.115 527.392 164.216C528.356 158.404 528.422 153.247 527.589 148.746C526.757 144.202 525.005 140.618 522.332 137.996C519.704 135.374 516.089 134.063 511.489 134.063C506.758 134.063 502.552 135.418 498.872 138.127C495.192 140.793 492.147 144.464 489.738 149.14C487.328 153.815 485.642 159.125 484.678 165.068C483.758 170.836 483.692 175.993 484.481 180.537C485.269 185.038 487 188.6 489.672 191.222C492.344 193.8 495.981 195.089 500.581 195.089Z"
+            fill="#243972"
+          />
+          {/* b */}
+          <path
+            d="M563.377 214.754L585.72 80.51H613.714L605.434 130.983H606.223C607.888 128.273 610.122 125.52 612.926 122.723C615.773 119.883 619.256 117.523 623.374 115.644C627.493 113.721 632.377 112.76 638.029 112.76C645.389 112.76 651.851 114.683 657.415 118.528C662.979 122.33 666.987 128.077 669.44 135.768C671.894 143.415 672.157 153.007 670.229 164.544C668.389 175.774 664.994 185.257 660.043 192.992C655.137 200.683 649.244 206.517 642.366 210.493C635.532 214.426 628.281 216.393 620.614 216.393C615.182 216.393 610.713 215.497 607.209 213.705C603.748 211.913 601.053 209.663 599.126 206.954C597.198 204.201 595.818 201.426 594.986 198.629H593.606L590.977 214.754H563.377ZM599.191 164.412C598.228 170.399 598.206 175.621 599.126 180.079C600.089 184.536 601.93 188.01 604.646 190.501C607.406 192.948 611.02 194.172 615.489 194.172C620.089 194.172 624.163 192.926 627.712 190.435C631.304 187.901 634.283 184.405 636.649 179.948C639.015 175.446 640.679 170.268 641.643 164.412C642.563 158.6 642.585 153.488 641.709 149.074C640.833 144.66 639.036 141.208 636.32 138.717C633.604 136.226 629.924 134.981 625.28 134.981C620.768 134.981 616.715 136.183 613.123 138.586C609.574 140.99 606.595 144.398 604.186 148.812C601.82 153.225 600.155 158.426 599.191 164.412Z"
+            fill="#243972"
+          />
+          {/* i */}
+          <path
+            d="M677.776 214.754L694.599 114.071H722.593L705.77 214.754H677.776Z"
+            fill="#243972"
+          />
+          {/* l */}
+          <path
+            d="M775.811 80.51L753.468 214.754H725.474L747.817 80.51H775.811Z"
+            fill="#243972"
+          />
+          {/* i */}
+          <path
+            d="M773.172 214.754L789.995 114.071H817.989L801.166 214.754H773.172Z"
+            fill="#243972"
+          />
+          {/* t */}
+          <path
+            d="M891.382 114.071L887.899 135.047H827.047L830.596 114.071H891.382ZM848.339 89.949H876.333L860.693 183.815C860.255 186.393 860.321 188.403 860.891 189.845C861.46 191.244 862.402 192.227 863.716 192.795C865.074 193.363 866.695 193.647 868.579 193.647C869.893 193.647 871.23 193.538 872.588 193.319C873.946 193.057 874.975 192.861 875.676 192.73L876.728 213.508C875.151 213.989 873.026 214.514 870.353 215.082C867.725 215.65 864.614 215.999 861.022 216.13C854.188 216.393 848.405 215.497 843.673 213.443C838.942 211.345 835.547 208.133 833.487 203.807C831.428 199.481 830.99 194.04 832.173 187.486L848.339 89.949Z"
+            fill="#243972"
+          />
+          {/* y */}
+          <path
+            d="M901.179 252.51C897.587 252.51 894.301 252.226 891.322 251.658C888.343 251.133 885.89 250.456 883.962 249.626L893.819 228.781C896.93 229.786 899.756 230.311 902.297 230.355C904.881 230.398 907.247 229.743 909.394 228.388C911.54 227.033 913.512 224.805 915.308 221.702L917.805 217.441L898.879 114.071H927.268L935.811 188.141H936.862L970.311 114.071H1001L943.237 225.635C940.389 231.097 937.016 235.839 933.117 239.859C929.261 243.879 924.683 246.982 919.382 249.167C914.125 251.396 908.058 252.51 901.179 252.51Z"
+            fill="#243972"
+          />
+          {/* 2 dấu chấm cam thương hiệu */}
+          <path
+            d="M797.452 90.8977C800.213 93.6326 803.708 95 807.939 95C812.169 95 815.932 93.6326 819.227 90.8977C822.567 88.1194 824.459 84.8202 824.905 81C825.35 77.093 824.237 73.7938 821.565 71.1023C818.893 68.3674 815.442 67 811.212 67C806.981 67 803.196 68.3674 799.857 71.1023C796.517 73.7938 794.602 77.093 794.112 81C793.622 84.8202 794.736 88.1194 797.452 90.8977Z"
+            fill="#E06E2E"
+          />
+          <path
+            d="M701.341 90.8977C704.012 93.6326 707.395 95 711.489 95C715.583 95 719.224 93.6326 722.413 90.8977C725.645 88.1194 727.477 84.8202 727.908 81C728.339 77.093 727.261 73.7938 724.676 71.1023C722.09 68.3674 718.75 67 714.656 67C710.563 67 706.9 68.3674 703.668 71.1023C700.436 73.7938 698.583 77.093 698.109 81C697.635 84.8202 698.712 88.1194 701.341 90.8977Z"
+            fill="#E06E2E"
+          />
+        </g>
+      </svg>
+    </div>
+  );
+}

@@ -9,7 +9,7 @@ const imageMimes = {
   rw2: 'image/x-panasonic-rw2', ppm: 'image/x-portable-pixmap', pgm: 'image/x-portable-graymap',
   pbm: 'image/x-portable-bitmap', tga: 'image/x-tga', eps: 'image/x-eps', ai: 'image/x-adobe-illustrator',
 };
-export const galleryMediaAccept = `image/*,video/*,${Object.keys(imageMimes).map(ext => `.${ext}`).join(',')}`;
+export const galleryMediaAccept = `image/*,video/*,.zip,.rar,${Object.keys(imageMimes).map(ext => `.${ext}`).join(',')}`;
 export function classifyGalleryMedia(file) {
   const extension = (file.name || '').split('.').pop().toLowerCase();
   const mimeType = imageMimes[extension] || file.type || 'application/octet-stream';

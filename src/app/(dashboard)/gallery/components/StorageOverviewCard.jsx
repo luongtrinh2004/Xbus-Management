@@ -221,7 +221,7 @@ export default function StorageOverviewCard({
           </Box>
 
           <Typography variant="caption" color="text.disabled" sx={{ fontSize: "0.75rem" }}>
-            Tổng số: {storage.totalFiles || 0} tệp · Tối đa 500MB/tệp
+            Tổng số: {storage.totalFiles || 0} tệp · Không giới hạn tệp/kích cỡ (tạm thời)
           </Typography>
         </Box>
       </CardContent>

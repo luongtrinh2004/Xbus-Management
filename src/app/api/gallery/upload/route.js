@@ -11,8 +11,6 @@ import { uploadMediaObject } from "@/libs/minioClient";
 import { sendMentionNotifications } from "@/libs/galleryMentions";
 
 const secret = process.env.NEXTAUTH_SECRET;
-const MAX_STORAGE_BYTES = 20 * 1024 * 1024 * 1024; // 20 GB
-const MAX_FILE_SIZE = 500 * 1024 * 1024; // 500 MB per file
 
 function formatBytes(bytes, decimals = 1) {
   if (!+bytes) return "0 Bytes";
@@ -162,10 +160,10 @@ export async function POST(req) {
         post: newPost,
         items: [newPost],
         storage: {
-          maxBytes: MAX_STORAGE_BYTES,
+          maxBytes: null,
           usedBytes: newUsedBytes,
-          remainingBytes: Math.max(0, MAX_STORAGE_BYTES - newUsedBytes),
-          percentUsed: Number(((newUsedBytes / MAX_STORAGE_BYTES) * 100).toFixed(1)),
+          remainingBytes: null,
+          percentUsed: 0,
         },
       });
     }
@@ -200,29 +198,11 @@ export async function POST(req) {
       if (rawTags) tagsInput = rawTags.split(",").map((t) => t.trim());
     }
 
-    const currentUsedBytes = currentItems.reduce((acc, i) => acc + (Number(i.fileSize) || 0), 0);
-    const totalNewBytes = allFilesToUpload.reduce((acc, f) => acc + f.size, 0);
-    if (currentUsedBytes + totalNewBytes > MAX_STORAGE_BYTES) {
-      return NextResponse.json(
-        {
-          error: `Dung lượng MinIO lưu trữ sẽ vượt quá hạn ngạch 20 GB (${formatBytes(currentUsedBytes)} / 20 GB).`,
-        },
-        { status: 400 }
-      );
-    }
-
     const postId = `post_${randomUUID()}`;
     const uploadedFilesList = [];
 
     for (let i = 0; i < allFilesToUpload.length; i++) {
       const file = allFilesToUpload[i];
-      if (file.size > MAX_FILE_SIZE) {
-        return NextResponse.json(
-          { error: `Tệp "${file.name}" vượt quá giới hạn tối đa 500 MB/file` },
-          { status: 400 }
-        );
-      }
-
       const { mimeType, isVideo, isImage } = classifyGalleryMedia(file);
 
       if (!isVideo && !isImage) {
@@ -345,10 +325,10 @@ export async function POST(req) {
       post: newPost,
       items: [newPost],
       storage: {
-        maxBytes: MAX_STORAGE_BYTES,
+        maxBytes: null,
         usedBytes: newUsedBytes,
-        remainingBytes: Math.max(0, MAX_STORAGE_BYTES - newUsedBytes),
-        percentUsed: Number(((newUsedBytes / MAX_STORAGE_BYTES) * 100).toFixed(1)),
+        remainingBytes: null,
+        percentUsed: 0,
       },
     });
   } catch (error) {

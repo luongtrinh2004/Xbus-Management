@@ -1,5 +1,8 @@
 "use client";
-import { classifyGalleryMedia, galleryMediaAccept } from "@/libs/galleryMediaTypes";
+import {
+  classifyGalleryMedia,
+  galleryMediaAccept,
+} from "@/libs/galleryMediaTypes";
 
 import { useState, useRef, useEffect } from "react";
 import Box from "@mui/material/Box";
@@ -52,7 +55,7 @@ function captureVideoThumbnail(file) {
           const canvas = document.createElement("canvas");
           const width = Math.min(800, video.videoWidth || 640);
           const height = Math.round(
-            (width / (video.videoWidth || 16)) * (video.videoHeight || 9)
+            (width / (video.videoWidth || 16)) * (video.videoHeight || 9),
           );
           canvas.width = width;
           canvas.height = height;
@@ -67,7 +70,7 @@ function captureVideoThumbnail(file) {
               });
             },
             "image/jpeg",
-            0.85
+            0.85,
           );
         } catch {
           URL.revokeObjectURL(url);
@@ -92,7 +95,13 @@ function captureVideoThumbnail(file) {
   });
 }
 
-export default function UploadModal({ open, onClose, onUploadSuccess, currentUser, usersList = [] }) {
+export default function UploadModal({
+  open,
+  onClose,
+  onUploadSuccess,
+  currentUser,
+  usersList = [],
+}) {
   const fileInputRef = useRef(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [filesQueue, setFilesQueue] = useState([]);
@@ -102,8 +111,12 @@ export default function UploadModal({ open, onClose, onUploadSuccess, currentUse
   const [customTagInput, setCustomTagInput] = useState("");
   const [privacy, setPrivacy] = useState("public");
   const [isUploading, setIsUploading] = useState(false);
-  const [mentionsInfo, setMentionsInfo] = useState({ isTagAll: false, taggedUserIds: [] });
+  const [mentionsInfo, setMentionsInfo] = useState({
+    isTagAll: false,
+    taggedUserIds: [],
+  });
   const queueRef = useRef([]);
+  const uploadChainRef = useRef(Promise.resolve());
 
   const draftPostIdRef = useRef(null);
 
@@ -112,85 +125,127 @@ export default function UploadModal({ open, onClose, onUploadSuccess, currentUse
     queueRef.current = filesQueue;
   }, [filesQueue]);
 
-  // Upload single file immediately to MinIO S3 in the background
+  // One request at a time prevents many simultaneous multipart uploads from
+  // exhausting the browser, Next.js server, or MinIO connection pool.
   const uploadSingleFile = (uploadItem) => {
-    const formData = new FormData();
-    formData.append("file", uploadItem.file);
-    formData.append("postId", uploadItem.postId);
-    if (uploadItem.thumbnailBlob) {
-      formData.append("thumbnail", uploadItem.thumbnailBlob, `thumb_${Date.now()}.jpg`);
-    }
+    return new Promise((resolve) => {
+      const formData = new FormData();
+      formData.append("file", uploadItem.file);
+      formData.append("postId", uploadItem.postId);
+      if (uploadItem.thumbnailBlob) {
+        formData.append(
+          "thumbnail",
+          uploadItem.thumbnailBlob,
+          `thumb_${Date.now()}.jpg`,
+        );
+      }
+      setFilesQueue((prev) =>
+        prev.map((q) =>
+          q.id === uploadItem.id ? { ...q, status: "uploading" } : q,
+        ),
+      );
 
-    const xhr = new XMLHttpRequest();
-    xhr.open("POST", "/api/gallery/upload/file", true);
-
-    xhr.upload.onprogress = (e) => {
-      if (e.lengthComputable) {
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", "/api/gallery/upload/file", true);
+      xhr.upload.onprogress = (e) => {
+        if (!e.lengthComputable) return;
         const percent = Math.min(99, Math.round((e.loaded / e.total) * 100));
         setFilesQueue((prev) =>
           prev.map((q) =>
             q.id === uploadItem.id
               ? { ...q, progress: percent, status: "uploading" }
-              : q
-          )
+              : q,
+          ),
         );
-      }
-    };
+      };
 
-    xhr.onload = () => {
-      if (xhr.status === 200) {
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try {
+            const res = JSON.parse(xhr.responseText);
+            if (res.success && res.fileData) {
+              const uploadedData = res.fileDataList || [res.fileData];
+              setFilesQueue((prev) =>
+                prev.map((q) =>
+                  q.id === uploadItem.id
+                    ? {
+                        ...q,
+                        progress: 100,
+                        status: "ready",
+                        uploadedData,
+                        extractedFiles:
+                          res.extractedFiles || uploadedData.length,
+                        previewUrl: res.fileData.thumbnail || q.previewUrl,
+                      }
+                    : q,
+                ),
+              );
+              resolve();
+              return;
+            }
+          } catch {}
+        }
+        let errorMsg = "Lỗi tải lên";
         try {
-          const res = JSON.parse(xhr.responseText);
-          if (res.success && res.fileData) {
-            setFilesQueue((prev) =>
-              prev.map((q) =>
-                q.id === uploadItem.id
-                  ? {
-                      ...q,
-                      progress: 100,
-                      status: "ready",
-                      uploadedData: res.fileData,
-                      previewUrl: res.fileData.thumbnail || q.previewUrl,
-                    }
-                  : q
-              )
-            );
-            return;
-          }
+          errorMsg = JSON.parse(xhr.responseText)?.error || errorMsg;
         } catch {}
-      }
+        setFilesQueue((prev) =>
+          prev.map((q) =>
+            q.id === uploadItem.id ? { ...q, status: "error", errorMsg } : q,
+          ),
+        );
+        resolve();
+      };
+      xhr.onerror = () => {
+        setFilesQueue((prev) =>
+          prev.map((q) =>
+            q.id === uploadItem.id
+              ? { ...q, status: "error", errorMsg: "Lỗi mạng" }
+              : q,
+          ),
+        );
+        resolve();
+      };
+      xhr.send(formData);
+    });
+  };
 
-      setFilesQueue((prev) =>
-        prev.map((q) =>
-          q.id === uploadItem.id
-            ? { ...q, status: "error", errorMsg: "Lỗi tải lên" }
-            : q
-        )
-      );
-    };
+  const enqueueUpload = (item) => {
+    uploadChainRef.current = uploadChainRef.current
+      .catch(() => {})
+      .then(() => uploadSingleFile(item));
+    return uploadChainRef.current;
+  };
 
-    xhr.onerror = () => {
-      setFilesQueue((prev) =>
-        prev.map((q) =>
-          q.id === uploadItem.id
-            ? { ...q, status: "error", errorMsg: "Lỗi mạng" }
-            : q
-        )
-      );
-    };
-
-    xhr.send(formData);
+  const canBrowserPreviewImage = (file) => {
+    const ext = file.name.split(".").pop()?.toLowerCase();
+    return [
+      "jpg",
+      "jpeg",
+      "jfif",
+      "png",
+      "gif",
+      "webp",
+      "avif",
+      "svg",
+      "bmp",
+      "ico",
+    ].includes(ext);
   };
 
   const handleFilesSelected = async (filesList) => {
     const filesToProcess = Array.from(filesList);
-    if (!draftPostIdRef.current) draftPostIdRef.current = `post_${crypto.randomUUID()}`;
+    if (!draftPostIdRef.current)
+      draftPostIdRef.current = `post_${crypto.randomUUID()}`;
     const postId = draftPostIdRef.current;
 
     for (let idx = 0; idx < filesToProcess.length; idx++) {
       const file = filesToProcess[idx];
       const { isVideo, isImage } = classifyGalleryMedia(file);
-      let previewUrl = isImage ? URL.createObjectURL(file) : "";
+      let previewUrl =
+        isImage && canBrowserPreviewImage(file)
+          ? URL.createObjectURL(file)
+          : "";
       let thumbnailBlob = null;
 
       if (isVideo) {
@@ -212,12 +267,12 @@ export default function UploadModal({ open, onClose, onUploadSuccess, currentUse
         previewUrl,
         thumbnailBlob,
         progress: 0,
-        status: "uploading",
+        status: "queued",
         uploadedData: null,
       };
 
       setFilesQueue((prev) => [...prev, item]);
-      uploadSingleFile(item);
+      enqueueUpload(item);
     }
   };
 
@@ -247,15 +302,19 @@ export default function UploadModal({ open, onClose, onUploadSuccess, currentUse
     const item = filesQueue.find((q) => q.id === id);
     if (item) {
       setFilesQueue((prev) =>
-        prev.map((q) => (q.id === id ? { ...q, progress: 0, status: "uploading" } : q))
+        prev.map((q) =>
+          q.id === id
+            ? { ...q, progress: 0, status: "queued", errorMsg: "" }
+            : q,
+        ),
       );
-      uploadSingleFile(item);
+      enqueueUpload(item);
     }
   };
 
   const handleToggleTag = (tag) => {
     setSelectedTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
     );
   };
 
@@ -279,14 +338,20 @@ export default function UploadModal({ open, onClose, onUploadSuccess, currentUse
     }
 
     // Check if any files are still uploading
-    const stillUploading = filesQueue.some((q) => q.status === "uploading");
+    const stillUploading = filesQueue.some((q) =>
+      ["queued", "uploading"].includes(q.status),
+    );
     if (stillUploading) {
       setIsUploading(true);
-      toast.info("Đang hoàn tất tải lên các tệp, vui lòng chờ trong giây lát...");
+      toast.info(
+        "Đang hoàn tất tải lên các tệp, vui lòng chờ trong giây lát...",
+      );
       // Poll briefly until ready
       const checkInterval = setInterval(async () => {
         const currentQueue = queueRef.current;
-        const pending = currentQueue.some((q) => q.status === "uploading");
+        const pending = currentQueue.some((q) =>
+          ["queued", "uploading"].includes(q.status),
+        );
         if (!pending) {
           clearInterval(checkInterval);
           await finalizePost(currentQueue);
@@ -303,7 +368,9 @@ export default function UploadModal({ open, onClose, onUploadSuccess, currentUse
     try {
       const readyFiles = queue
         .filter((q) => q.status === "ready" && q.uploadedData)
-        .map((q) => q.uploadedData);
+        .flatMap((q) =>
+          Array.isArray(q.uploadedData) ? q.uploadedData : [q.uploadedData],
+        );
 
       if (readyFiles.length === 0) {
         toast.error("Không có tệp nào tải lên thành công. Vui lòng thử lại.");
@@ -322,7 +389,8 @@ export default function UploadModal({ open, onClose, onUploadSuccess, currentUse
           tags: selectedTags,
           postId: draftPostIdRef.current,
           uploadedFiles: readyFiles,
-          isTagAll: /@all\b/i.test(`${title} ${description}`) || mentionsInfo.isTagAll,
+          isTagAll:
+            /@all\b/i.test(`${title} ${description}`) || mentionsInfo.isTagAll,
           taggedUserIds: mentionsInfo.taggedUserIds,
         }),
       });
@@ -330,7 +398,9 @@ export default function UploadModal({ open, onClose, onUploadSuccess, currentUse
       const data = await res.json();
       if (res.ok && data.success) {
         onUploadSuccess(data.items, data.storage);
-        toast.success(`Đã đăng tải thành công bài viết với ${readyFiles.length} tệp!`);
+        toast.success(
+          `Đã đăng tải thành công bài viết với ${readyFiles.length} tệp!`,
+        );
         handleResetAndClose();
       } else {
         toast.error(data.error || "Lỗi tạo bài đăng");
@@ -399,7 +469,11 @@ export default function UploadModal({ open, onClose, onUploadSuccess, currentUse
           </Box>
         </Box>
 
-        <IconButton size="small" onClick={handleResetAndClose} disabled={isUploading}>
+        <IconButton
+          size="small"
+          onClick={handleResetAndClose}
+          disabled={isUploading}
+        >
           <i className="tabler-x" style={{ fontSize: 20 }} />
         </IconButton>
       </DialogTitle>
@@ -456,27 +530,51 @@ export default function UploadModal({ open, onClose, onUploadSuccess, currentUse
           </Box>
 
           <Typography variant="body1" sx={{ fontWeight: 600, mb: 0.5 }}>
-            Kéo thả file vào đây hoặc <span style={{ color: "#7367F0" }}>Chọn từ máy tính</span>
+            Kéo thả file vào đây hoặc{" "}
+            <span style={{ color: "#7367F0" }}>Chọn từ máy tính</span>
           </Typography>
 
-          <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.5 }}>
-            Có thể chọn nhiều ảnh/video cho một bài đăng • Định dạng: <strong>Ảnh (HEIC, HEIF, JPG, PNG, TIFF, RAW…) và video</strong> (Max 500MB/tệp)
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{ display: "block", mt: 0.5 }}
+          >
+            Có thể chọn không giới hạn ảnh/video cho một bài đăng • Định dạng:{" "}
+            <strong>Ảnh (HEIC, HEIF, JPG, PNG, TIFF, RAW…) và video</strong>
           </Typography>
         </Box>
 
         {/* Upload Queue List */}
         {filesQueue.length > 0 && (
           <Box sx={{ mt: 3 }}>
-            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1.5 }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                mb: 1.5,
+              }}
+            >
               <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                Danh sách tệp trong bài đăng ({filesQueue.length}/20 tệp):
+                Danh sách tệp trong bài đăng ({filesQueue.length} tệp):
               </Typography>
-              <Typography variant="caption" color="primary.main" sx={{ fontWeight: 600 }}>
-                {20 - filesQueue.length > 0 ? `Còn có thể thêm ${20 - filesQueue.length} tệp` : "Đã đạt tối đa 20 tệp"}
-              </Typography>
+              <Typography
+                variant="caption"
+                color="primary.main"
+                sx={{ fontWeight: 600 }}
+              ></Typography>
             </Box>
 
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, maxHeight: 220, overflowY: "auto", pr: 0.5 }}>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 1.5,
+                maxHeight: 220,
+                overflowY: "auto",
+                pr: 0.5,
+              }}
+            >
               {filesQueue.map((item) => (
                 <Box
                   key={item.id}
@@ -510,11 +608,19 @@ export default function UploadModal({ open, onClose, onUploadSuccess, currentUse
                         component="img"
                         src={item.previewUrl}
                         alt=""
-                        sx={{ width: "100%", height: "100%", objectFit: "cover" }}
+                        sx={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                        }}
                       />
                     ) : (
                       <i
-                        className={item.type === "video" ? "tabler-video text-primary" : "tabler-photo text-success"}
+                        className={
+                          item.type === "video"
+                            ? "tabler-video text-primary"
+                            : "tabler-photo text-success"
+                        }
                         style={{ fontSize: 24 }}
                       />
                     )}
@@ -522,23 +628,46 @@ export default function UploadModal({ open, onClose, onUploadSuccess, currentUse
 
                   {/* File info & Progress */}
                   <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-                    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 0.5 }}>
-                      <Typography variant="body2" sx={{ fontWeight: 500 }} noWrap>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        mb: 0.5,
+                      }}
+                    >
+                      <Typography
+                        variant="body2"
+                        sx={{ fontWeight: 500 }}
+                        noWrap
+                      >
                         {item.name}
+                        {item.extractedFiles > 1
+                          ? ` (${item.extractedFiles} media đã giải nén)`
+                          : ""}
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
                         {item.sizeFormatted}
                       </Typography>
                     </Box>
 
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                    <Box
+                      sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
+                    >
                       <LinearProgress
                         variant="determinate"
                         value={item.progress}
                         sx={{ flexGrow: 1, height: 6, borderRadius: 3 }}
                         color={item.progress === 100 ? "success" : "primary"}
                       />
-                      <Typography variant="caption" sx={{ minWidth: 40, textAlign: "right", fontWeight: 600 }}>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          minWidth: 40,
+                          textAlign: "right",
+                          fontWeight: 600,
+                        }}
+                      >
                         {item.progress}%
                       </Typography>
                     </Box>
@@ -548,7 +677,10 @@ export default function UploadModal({ open, onClose, onUploadSuccess, currentUse
                   <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
                     {item.status === "error" && (
                       <Tooltip title="Tải lại">
-                        <IconButton size="small" onClick={() => handleRetryQueueItem(item.id)}>
+                        <IconButton
+                          size="small"
+                          onClick={() => handleRetryQueueItem(item.id)}
+                        >
                           <i className="tabler-refresh text-warning" />
                         </IconButton>
                       </Tooltip>
@@ -573,7 +705,7 @@ export default function UploadModal({ open, onClose, onUploadSuccess, currentUse
 
         {/* Metadata Inputs */}
         <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>
-          Thông tin tệp tải lên (Metadata):
+          Thông tin tệp tải lên:
         </Typography>
 
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
@@ -603,7 +735,11 @@ export default function UploadModal({ open, onClose, onUploadSuccess, currentUse
 
           {/* Tags */}
           <Box>
-            <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 1, fontWeight: 500 }}>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ display: "block", mb: 1, fontWeight: 500 }}
+            >
               Gắn thẻ phân loại (Tags):
             </Typography>
 
@@ -698,8 +834,21 @@ export default function UploadModal({ open, onClose, onUploadSuccess, currentUse
         </Box>
       </DialogContent>
 
-      <DialogActions sx={{ px: 3, pb: 3, pt: 1, borderTop: "1px solid", borderColor: "divider" }}>
-        <Button variant="outlined" color="secondary" onClick={handleResetAndClose} disabled={isUploading}>
+      <DialogActions
+        sx={{
+          px: 3,
+          pb: 3,
+          pt: 1,
+          borderTop: "1px solid",
+          borderColor: "divider",
+        }}
+      >
+        <Button
+          variant="outlined"
+          color="secondary"
+          onClick={handleResetAndClose}
+          disabled={isUploading}
+        >
           Hủy bỏ
         </Button>
         <Button
@@ -707,10 +856,18 @@ export default function UploadModal({ open, onClose, onUploadSuccess, currentUse
           color="primary"
           onClick={handleStartUpload}
           disabled={isUploading || filesQueue.length === 0}
-          startIcon={isUploading ? <CircularProgress size={18} color="inherit" /> : <i className="tabler-cloud-upload" />}
+          startIcon={
+            isUploading ? (
+              <CircularProgress size={18} color="inherit" />
+            ) : (
+              <i className="tabler-cloud-upload" />
+            )
+          }
           sx={{ minWidth: 140 }}
         >
-          {isUploading ? "Đang tải lên..." : `Tải lên (${filesQueue.length} file)`}
+          {isUploading
+            ? "Đang tải lên..."
+            : `Tải lên (${filesQueue.length} file)`}
         </Button>
       </DialogActions>
     </Dialog>

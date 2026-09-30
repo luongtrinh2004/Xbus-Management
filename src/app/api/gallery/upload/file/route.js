@@ -1,5 +1,6 @@
 import { classifyGalleryMedia } from "@/libs/galleryMediaTypes";
 import { createGalleryImagePreview } from "@/libs/galleryImagePreview";
+import { extractGalleryArchive, isGalleryArchive } from "@/libs/galleryArchive";
 import { auditGallery } from "@/libs/galleryAudit";
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
@@ -9,163 +10,90 @@ import { uploadMediaObject } from "@/libs/minioClient";
 import { getGallery } from "@/libs/dataRepository";
 
 const secret = process.env.NEXTAUTH_SECRET;
-const MAX_STORAGE_BYTES = 20 * 1024 * 1024 * 1024; // 20 GB
-const MAX_FILE_SIZE = 500 * 1024 * 1024; // 500 MB per file
 
 function formatBytes(bytes, decimals = 1) {
   if (!+bytes) return "0 Bytes";
-  const k = 1024;
-  const dm = decimals < 0 ? 0 : decimals;
-  const sizes = ["Bytes", "KB", "MB", "GB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+  return `${parseFloat((bytes / Math.pow(1024, i)).toFixed(decimals < 0 ? 0 : decimals))} ${["Bytes", "KB", "MB", "GB"][i]}`;
+}
+
+async function uploadOneMedia({ name, buffer, postId, thumbnailBuffer }) {
+  const { mimeType, isVideo, isImage } = classifyGalleryMedia({ name, type: "" });
+  if (!isVideo && !isImage) return null;
+
+  const ext = path.extname(name).toLowerCase() || (isVideo ? ".mp4" : ".jpg");
+  const cleanBaseName = path.basename(name, ext).replace(/[^a-zA-Z0-9_-]/g, "_") || "media";
+  const uniqueFileName = `${Date.now()}_${Math.random().toString(36).slice(2, 7)}_${cleanBaseName}${ext}`;
+  const objectKey = `posts/${postId}/${isVideo ? "videos" : "images"}/${uniqueFileName}`;
+  const mainUpload = await uploadMediaObject({ objectName: objectKey, buffer, mimeType });
+  let thumbnail = mainUpload.url;
+  let dimensions = "1920 x 1080";
+
+  try {
+    let preview;
+    if (isImage) preview = await createGalleryImagePreview(buffer, mimeType);
+    else if (thumbnailBuffer) {
+      preview = await sharp(thumbnailBuffer).resize({ width: 800, withoutEnlargement: true })
+        .webp({ quality: 80 }).toBuffer({ resolveWithObject: true });
+    }
+    if (preview) {
+      const thumbKey = `posts/${postId}/thumbnails/thumb_${path.basename(uniqueFileName, ext)}.webp`;
+      const thumbUpload = await uploadMediaObject({ objectName: thumbKey, buffer: preview.data, mimeType: "image/webp" });
+      thumbnail = thumbUpload.url;
+      if (preview.info.width && preview.info.height) dimensions = `${preview.info.width} x ${preview.info.height}`;
+    }
+  } catch (error) {
+    // A preview failure must never make a valid original image/video fail.
+    console.warn("[Gallery upload] Không tạo được thumbnail:", error?.message || error);
+    if (isImage) thumbnail = "/images/gallery-image-unavailable.svg";
+  }
+
+  return {
+    id: `media_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+    fileName: path.basename(name), type: isVideo ? "video" : "image", url: mainUpload.url,
+    thumbnail, filePath: objectKey, objectKey, storageType: "minio", fileSize: buffer.length,
+    fileSizeFormatted: formatBytes(buffer.length), fileFormat: ext.slice(1).toUpperCase(), dimensions,
+    duration: isVideo ? "02:30" : undefined, durationSeconds: isVideo ? 150 : undefined, mimeType, postId,
+  };
 }
 
 export async function POST(req) {
   try {
     const token = await getToken({ req, secret });
-    if (!token?.id) {
-      return NextResponse.json({ error: "Chưa xác thực" }, { status: 401 });
-    }
-
+    if (!token?.id) return NextResponse.json({ error: "Chưa xác thực" }, { status: 401 });
     const formData = await req.formData();
     const file = formData.get("file");
     const postId = String(formData.get("postId") || "");
-    if (!/^post_[a-f0-9-]{36}$/.test(postId)) {
-      return NextResponse.json({ error: "Mã bài đăng không hợp lệ" }, { status: 400 });
-    }
+    if (!/^post_[a-f0-9-]{36}$/.test(postId)) return NextResponse.json({ error: "Mã bài đăng không hợp lệ" }, { status: 400 });
+    if (!(file instanceof File) || file.size <= 0) return NextResponse.json({ error: "Không tìm thấy tệp để tải lên" }, { status: 400 });
 
-    if (!file || !(file instanceof File)) {
-      return NextResponse.json({ error: "Không tìm thấy tệp để tải lên" }, { status: 400 });
-    }
-
-    if (file.size > MAX_FILE_SIZE) {
-      return NextResponse.json(
-        { error: `Tệp "${file.name}" vượt quá giới hạn tối đa 500 MB/file` },
-        { status: 400 }
-      );
-    }
-
-    // Check storage limit
-    const currentData = await getGallery();
-    const currentItems = Array.isArray(currentData.items) ? currentData.items : [];
+    const currentItems = (await getGallery()).items || [];
     if (currentItems.some(item => item.id === postId || item.postId === postId)) {
       return NextResponse.json({ error: "Bài đăng đã được lưu, vui lòng tạo bài mới" }, { status: 409 });
     }
-    const currentUsedBytes = currentItems.reduce((acc, i) => acc + (Number(i.fileSize) || 0), 0);
 
-    if (currentUsedBytes + file.size > MAX_STORAGE_BYTES) {
-      return NextResponse.json(
-        {
-          error: `Dung lượng MinIO lưu trữ sẽ vượt quá hạn ngạch 20 GB (${formatBytes(currentUsedBytes)} / 20 GB).`,
-        },
-        { status: 400 }
-      );
+    const sourceBuffer = Buffer.from(await file.arrayBuffer());
+    const archive = isGalleryArchive(file.name);
+    const extracted = archive ? await extractGalleryArchive(file.name, sourceBuffer) : null;
+    const entries = extracted?.files || [{ name: file.name, buffer: sourceBuffer }];
+    const thumbnailFile = formData.get("thumbnail");
+    const thumbnailBuffer = !archive && thumbnailFile instanceof File && thumbnailFile.size > 0
+      ? Buffer.from(await thumbnailFile.arrayBuffer()) : null;
+    const uploaded = [];
+    let skippedFiles = extracted?.skippedFiles || 0;
+    for (const entry of entries) {
+      const media = await uploadOneMedia({ name: entry.name, buffer: entry.buffer, postId, thumbnailBuffer });
+      if (media) uploaded.push(media);
+      else skippedFiles += 1;
     }
-
-    const { mimeType, isVideo, isImage } = classifyGalleryMedia(file);
-
-    if (!isVideo && !isImage) {
-      return NextResponse.json(
-        { error: `Định dạng "${file.name}" không được hỗ trợ. Vui lòng chỉ tải ảnh hoặc video.` },
-        { status: 400 }
-      );
+    if (!uploaded.length) {
+      return NextResponse.json({ error: "Archive không có ảnh hoặc video được hỗ trợ" }, { status: 400 });
     }
-
-    const ext = path.extname(file.name).toLowerCase() || (isVideo ? ".mp4" : ".jpg");
-    const cleanBaseName = path.basename(file.name, ext).replace(/[^a-zA-Z0-9_-]/g, "_");
-    const uniqueFileName = `${Date.now()}_${Math.random().toString(36).slice(2, 7)}_${cleanBaseName}${ext}`;
-    const objectFolder = isVideo ? "videos" : "images";
-    const objectKey = `posts/${postId}/${objectFolder}/${uniqueFileName}`;
-
-    const buffer = Buffer.from(await file.arrayBuffer());
-
-    // Upload to MinIO
-    const mainUpload = await uploadMediaObject({
-      objectName: objectKey,
-      buffer,
-      mimeType,
-    });
-
-    const publicUrl = mainUpload.url;
-    let thumbnailUrl = publicUrl;
-    let dimensions = isVideo ? "1920 x 1080" : "1920 x 1080";
-
-    // If image: generate WebP thumbnail via sharp
-    if (isImage) {
-      try {
-        const thumbFileName = `thumb_${path.basename(uniqueFileName, ext)}.webp`;
-        const thumbKey = `posts/${postId}/thumbnails/${thumbFileName}`;
-
-        const imageInfo = await createGalleryImagePreview(buffer, mimeType);
-
-        const thumbUpload = await uploadMediaObject({
-          objectName: thumbKey,
-          buffer: imageInfo.data,
-          mimeType: "image/webp",
-        });
-
-        thumbnailUrl = thumbUpload.url;
-        if (imageInfo.info.width && imageInfo.info.height) {
-          dimensions = `${imageInfo.info.width} x ${imageInfo.info.height}`;
-        }
-      } catch (sharpErr) {
-        console.warn("[Upload] Không tạo được thumbnail:", sharpErr);
-        thumbnailUrl = "/images/gallery-image-unavailable.svg";
-      }
-    } else if (isVideo) {
-      const thumbFile = formData.get("thumbnail");
-      if (thumbFile && thumbFile instanceof File && thumbFile.size > 0) {
-        try {
-          const thumbBuffer = Buffer.from(await thumbFile.arrayBuffer());
-          const thumbFileName = `thumb_${path.basename(uniqueFileName, ext)}.webp`;
-          const thumbKey = `posts/${postId}/thumbnails/${thumbFileName}`;
-
-          const imageInfo = await sharp(thumbBuffer)
-            .resize({ width: 800, withoutEnlargement: true })
-            .webp({ quality: 80 })
-            .toBuffer({ resolveWithObject: true });
-
-          const thumbUpload = await uploadMediaObject({
-            objectName: thumbKey,
-            buffer: imageInfo.data,
-            mimeType: "image/webp",
-          });
-
-          thumbnailUrl = thumbUpload.url;
-          if (imageInfo.info.width && imageInfo.info.height) {
-            dimensions = `${imageInfo.info.width} x ${imageInfo.info.height}`;
-          }
-        } catch (thumbErr) {
-          console.warn("[Upload Video] Không tạo được thumbnail:", thumbErr);
-        }
-      }
-    }
-
-    await auditGallery(token, "UPLOAD_GALLERY_FILE", { fileName: file.name }, `${isVideo ? "Video" : "Ảnh"}; ${formatBytes(file.size)}; đường dẫn: ${objectKey}`);
-    return NextResponse.json({
-      success: true,
-      fileData: {
-        id: `media_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
-        fileName: file.name,
-        type: isVideo ? "video" : "image",
-        url: publicUrl,
-        thumbnail: thumbnailUrl,
-        filePath: objectKey,
-        storageType: mainUpload.storageType || "minio",
-        fileSize: file.size,
-        fileSizeFormatted: formatBytes(file.size),
-        fileFormat: ext.replace(".", "").toUpperCase(),
-        dimensions,
-        duration: isVideo ? "02:30" : undefined,
-        durationSeconds: isVideo ? 150 : undefined,
-        mimeType,
-        objectKey,
-        postId,
-      },
-    });
+    await auditGallery(token, archive ? "UPLOAD_GALLERY_ARCHIVE" : "UPLOAD_GALLERY_FILE",
+      { fileName: file.name }, `${uploaded.length} media; bỏ qua ${skippedFiles} tệp; đường dẫn: posts/${postId}`);
+    return NextResponse.json({ success: true, fileData: uploaded[0], fileDataList: uploaded, extractedFiles: uploaded.length, skippedFiles });
   } catch (error) {
     console.error("[POST /api/gallery/upload/file] Lỗi:", error);
-    return NextResponse.json({ error: "Lỗi tải tệp lên máy chủ" }, { status: 500 });
+    return NextResponse.json({ error: "Không thể giải nén hoặc tải tệp lên máy chủ" }, { status: 500 });
   }
 }
