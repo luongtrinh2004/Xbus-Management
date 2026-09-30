@@ -28,6 +28,10 @@ export async function POST(req) {
 
     const formData = await req.formData();
     const file = formData.get("file");
+    const postId = String(formData.get("postId") || "");
+    if (!/^post_[a-f0-9-]{36}$/.test(postId)) {
+      return NextResponse.json({ error: "Mã bài đăng không hợp lệ" }, { status: 400 });
+    }
 
     if (!file || !(file instanceof File)) {
       return NextResponse.json({ error: "Không tìm thấy tệp để tải lên" }, { status: 400 });
@@ -43,6 +47,9 @@ export async function POST(req) {
     // Check storage limit
     const currentData = await getGallery();
     const currentItems = Array.isArray(currentData.items) ? currentData.items : [];
+    if (currentItems.some(item => item.id === postId || item.postId === postId)) {
+      return NextResponse.json({ error: "Bài đăng đã được lưu, vui lòng tạo bài mới" }, { status: 409 });
+    }
     const currentUsedBytes = currentItems.reduce((acc, i) => acc + (Number(i.fileSize) || 0), 0);
 
     if (currentUsedBytes + file.size > MAX_STORAGE_BYTES) {
@@ -69,7 +76,7 @@ export async function POST(req) {
     const cleanBaseName = path.basename(file.name, ext).replace(/[^a-zA-Z0-9_-]/g, "_");
     const uniqueFileName = `${Date.now()}_${Math.random().toString(36).slice(2, 7)}_${cleanBaseName}${ext}`;
     const objectFolder = isVideo ? "videos" : "images";
-    const objectKey = `${objectFolder}/${uniqueFileName}`;
+    const objectKey = `posts/${postId}/${objectFolder}/${uniqueFileName}`;
 
     const buffer = Buffer.from(await file.arrayBuffer());
 
@@ -88,7 +95,7 @@ export async function POST(req) {
     if (isImage) {
       try {
         const thumbFileName = `thumb_${path.basename(uniqueFileName, ext)}.webp`;
-        const thumbKey = `thumbnails/${thumbFileName}`;
+        const thumbKey = `posts/${postId}/thumbnails/${thumbFileName}`;
 
         const imageInfo = await sharp(buffer)
           .resize({ width: 800, withoutEnlargement: true })
@@ -115,7 +122,7 @@ export async function POST(req) {
         try {
           const thumbBuffer = Buffer.from(await thumbFile.arrayBuffer());
           const thumbFileName = `thumb_${path.basename(uniqueFileName, ext)}.webp`;
-          const thumbKey = `thumbnails/${thumbFileName}`;
+          const thumbKey = `posts/${postId}/thumbnails/${thumbFileName}`;
 
           const imageInfo = await sharp(thumbBuffer)
             .resize({ width: 800, withoutEnlargement: true })
@@ -157,6 +164,7 @@ export async function POST(req) {
         durationSeconds: isVideo ? 150 : undefined,
         mimeType,
         objectKey,
+        postId,
       },
     });
   } catch (error) {

@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { auditGallery } from "@/libs/galleryAudit";
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
@@ -78,7 +79,14 @@ export async function POST(req) {
         return NextResponse.json({ error: "Chưa có tệp tin nào được tải lên" }, { status: 400 });
       }
 
-      const postId = `post_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+      const postId = String(body.postId || "");
+      if (!/^post_[a-f0-9-]{36}$/.test(postId) || uploadedFiles.some(file =>
+        file.postId !== postId || !String(file.filePath || file.objectKey || "").startsWith(`posts/${postId}/`))) {
+        return NextResponse.json({ error: "Tệp tải lên không thuộc bài đăng này" }, { status: 400 });
+      }
+      if (currentItems.some(item => item.id === postId || item.postId === postId)) {
+        return NextResponse.json({ error: "Bài đăng đã tồn tại" }, { status: 409 });
+      }
       const firstFile = uploadedFiles[0];
       const postTitle = title.trim();
       const postDescription = description.trim();
@@ -176,16 +184,6 @@ export async function POST(req) {
       return NextResponse.json({ error: "Không tìm thấy tệp để tải lên" }, { status: 400 });
     }
 
-    const MAX_FILES_PER_POST = 20;
-    if (allFilesToUpload.length > MAX_FILES_PER_POST) {
-      return NextResponse.json(
-        {
-          error: `Một bài đăng chỉ được tải lên tối đa ${MAX_FILES_PER_POST} ảnh/video (Bạn đang tải ${allFilesToUpload.length} tệp).`,
-        },
-        { status: 400 }
-      );
-    }
-
     const titleInput = String(formData.get("title") || "").trim();
     const descriptionInput = String(formData.get("description") || "").trim();
     const privacyInput = String(formData.get("privacy") || "public").trim();
@@ -209,6 +207,7 @@ export async function POST(req) {
       );
     }
 
+    const postId = `post_${randomUUID()}`;
     const uploadedFilesList = [];
 
     for (let i = 0; i < allFilesToUpload.length; i++) {
@@ -235,7 +234,7 @@ export async function POST(req) {
       const cleanBaseName = path.basename(file.name, ext).replace(/[^a-zA-Z0-9_-]/g, "_");
       const uniqueFileName = `${Date.now()}_${Math.random().toString(36).slice(2, 7)}_${cleanBaseName}${ext}`;
       const objectFolder = isVideo ? "videos" : "images";
-      const objectKey = `${objectFolder}/${uniqueFileName}`;
+      const objectKey = `posts/${postId}/${objectFolder}/${uniqueFileName}`;
 
       const buffer = Buffer.from(await file.arrayBuffer());
 
@@ -252,7 +251,7 @@ export async function POST(req) {
       if (isImage) {
         try {
           const thumbFileName = `thumb_${path.basename(uniqueFileName, ext)}.webp`;
-          const thumbKey = `thumbnails/${thumbFileName}`;
+          const thumbKey = `posts/${postId}/thumbnails/${thumbFileName}`;
 
           const imageInfo = await sharp(buffer)
             .resize({ width: 800, withoutEnlargement: true })
@@ -292,7 +291,6 @@ export async function POST(req) {
       });
     }
 
-    const postId = `post_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
     const firstFile = uploadedFilesList[0];
     const postTitle = titleInput || firstFile.fileName.replace(/\.[^/.]+$/, "");
     const totalSize = uploadedFilesList.reduce((acc, f) => acc + f.fileSize, 0);

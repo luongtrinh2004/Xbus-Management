@@ -104,7 +104,7 @@ export default function UploadModal({ open, onClose, onUploadSuccess, currentUse
   const [mentionsInfo, setMentionsInfo] = useState({ isTagAll: false, taggedUserIds: [] });
   const queueRef = useRef([]);
 
-  const MAX_FILES_PER_POST = 20;
+  const draftPostIdRef = useRef(null);
 
   // Keep queueRef in sync with filesQueue state for async handlers
   useEffect(() => {
@@ -115,6 +115,7 @@ export default function UploadModal({ open, onClose, onUploadSuccess, currentUse
   const uploadSingleFile = (uploadItem) => {
     const formData = new FormData();
     formData.append("file", uploadItem.file);
+    formData.append("postId", uploadItem.postId);
     if (uploadItem.thumbnailBlob) {
       formData.append("thumbnail", uploadItem.thumbnailBlob, `thumb_${Date.now()}.jpg`);
     }
@@ -180,21 +181,9 @@ export default function UploadModal({ open, onClose, onUploadSuccess, currentUse
   };
 
   const handleFilesSelected = async (filesList) => {
-    const rawFiles = Array.from(filesList);
-    const availableSlots = MAX_FILES_PER_POST - filesQueue.length;
-
-    if (availableSlots <= 0) {
-      toast.warning(`Một bài đăng chỉ được chứa tối đa ${MAX_FILES_PER_POST} ảnh hoặc video.`);
-      return;
-    }
-
-    if (rawFiles.length > availableSlots) {
-      toast.info(
-        `Đã tự động chọn ${availableSlots} tệp hợp lệ (Đạt giới hạn tối đa ${MAX_FILES_PER_POST} tệp/bài đăng).`
-      );
-    }
-
-    const filesToProcess = rawFiles.slice(0, availableSlots);
+    const filesToProcess = Array.from(filesList);
+    if (!draftPostIdRef.current) draftPostIdRef.current = `post_${crypto.randomUUID()}`;
+    const postId = draftPostIdRef.current;
 
     for (let idx = 0; idx < filesToProcess.length; idx++) {
       const file = filesToProcess[idx];
@@ -214,6 +203,7 @@ export default function UploadModal({ open, onClose, onUploadSuccess, currentUse
       const item = {
         id: `upload_${Date.now()}_${idx}_${Math.random().toString(36).slice(2, 6)}`,
         file,
+        postId,
         name: file.name,
         size: file.size,
         sizeFormatted: formatBytes(file.size),
@@ -329,6 +319,7 @@ export default function UploadModal({ open, onClose, onUploadSuccess, currentUse
           description: description.trim(),
           privacy,
           tags: selectedTags,
+          postId: draftPostIdRef.current,
           uploadedFiles: readyFiles,
           isTagAll: /@all\b/i.test(`${title} ${description}`) || mentionsInfo.isTagAll,
           taggedUserIds: mentionsInfo.taggedUserIds,
@@ -352,6 +343,7 @@ export default function UploadModal({ open, onClose, onUploadSuccess, currentUse
   };
 
   const handleResetAndClose = () => {
+    draftPostIdRef.current = null;
     setFilesQueue([]);
     setTitle("");
     setDescription("");
@@ -467,7 +459,7 @@ export default function UploadModal({ open, onClose, onUploadSuccess, currentUse
           </Typography>
 
           <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.5 }}>
-            Tối đa <strong>20 ảnh/video</strong> cho một bài đăng • Định dạng: <strong>JPG, PNG, WEBP, GIF, MP4, MOV...</strong> (Max 500MB/tệp)
+            Có thể chọn nhiều ảnh/video cho một bài đăng • Định dạng: <strong>JPG, PNG, WEBP, GIF, MP4, MOV...</strong> (Max 500MB/tệp)
           </Typography>
         </Box>
 
