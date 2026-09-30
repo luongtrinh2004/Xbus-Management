@@ -5,6 +5,7 @@ import { useEffect, useRef, useState, useId } from 'react';
 export default function XMobilityLogo({ onComplete, className = '', style = {} }) {
   const [isDone, setIsDone] = useState(false);
   const iconRef = useRef(null);
+  const wordRef = useRef(null);
   const piecesRef = useRef([]);
   const revealRef = useRef(null);
   const hasStartedRef = useRef(false);
@@ -13,13 +14,11 @@ export default function XMobilityLogo({ onComplete, className = '', style = {} }
   const rawId = useId();
   const clipId = `xm-clip-${rawId.replace(/[^a-zA-Z0-9_-]/g, '')}`;
 
-  // Giữ ref onComplete luôn trỏ đến hàm mới nhất mà không gây re-run effect
   useEffect(() => {
     onCompleteRef.current = onComplete;
   }, [onComplete]);
 
   useEffect(() => {
-    // Đảm bảo animation chỉ chạy 1 lần duy nhất, không bị reset khi component cha re-render
     if (hasStartedRef.current) return;
     hasStartedRef.current = true;
 
@@ -30,10 +29,20 @@ export default function XMobilityLogo({ onComplete, className = '', style = {} }
     const ease = (t) => 1 - Math.pow(1 - clamp(t), 3);
 
     const render = (t) => {
+      // reveal tăng từ 0 -> 1 trong khoảng t từ 0.85s đến 1.35s
       const reveal = ease((t - 0.85) / 0.5);
 
+      // Icon X ban đầu ở translate(375, 0) - CHÍNH GIỮA SVG
+      // Sau đó trượt sang trái về translate(0, 0) khi reveal tăng
       if (iconRef.current) {
         iconRef.current.setAttribute('transform', `translate(${375 * (1 - reveal)}, 0)`);
+      }
+
+      // Nhóm chữ Mobility CŨNG trượt cùng nhịp từ translate(375, 0) về translate(0, 0)
+      // Nhờ đó, chữ M luôn xuất hiện ở BÊN CẠNH chữ X (cách mép phải X ~30px), KHÔNG BAO GIỜ DÍNH VÀO X!
+      if (wordRef.current) {
+        wordRef.current.setAttribute('transform', `translate(${375 * (1 - reveal)}, 0)`);
+        wordRef.current.setAttribute('opacity', clamp((reveal - 0.02) / 0.35));
       }
 
       const offsets = [
@@ -43,6 +52,7 @@ export default function XMobilityLogo({ onComplete, className = '', style = {} }
         [-75, 95]
       ];
 
+      // 4 pieces ghép vào chữ X từ t = 0 đến t = 0.7s
       piecesRef.current.forEach((p, i) => {
         if (!p) return;
         const u = ease((t - 0.05 - i * 0.035) / 0.6);
@@ -50,6 +60,7 @@ export default function XMobilityLogo({ onComplete, className = '', style = {} }
         p.setAttribute('opacity', clamp((t - 0.04 - i * 0.035) / 0.18));
       });
 
+      // Clip rect mở rộng chữ Mobility dần từ trái sang phải
       if (revealRef.current) {
         revealRef.current.setAttribute('width', 750 * reveal);
       }
@@ -64,6 +75,7 @@ export default function XMobilityLogo({ onComplete, className = '', style = {} }
       return;
     }
 
+    // Khởi tạo ban đầu: Chữ X ở chính giữa SVG (translate 375, 0), chữ Mobility ẩn
     render(0);
     const start = performance.now();
     let completed = false;
@@ -102,7 +114,6 @@ export default function XMobilityLogo({ onComplete, className = '', style = {} }
       className={className}
       style={{
         width: '100%',
-        maxWidth: '100%',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
@@ -178,15 +189,15 @@ export default function XMobilityLogo({ onComplete, className = '', style = {} }
           </clipPath>
         </defs>
 
-        {/* Biểu tượng chữ X: khi xong giữ nguyên translate(0, 0) */}
+        {/* Biểu tượng chữ X: Ban đầu ở translate(375, 0) chính giữa SVG */}
         <g
           ref={iconRef}
-          transform={isDone ? 'translate(0, 0)' : undefined}
+          transform={isDone ? 'translate(0, 0)' : 'translate(375, 0)'}
         >
           <g
             ref={(el) => (piecesRef.current[0] = el)}
             transform={isDone ? 'translate(0, 0)' : undefined}
-            opacity={isDone ? 1 : undefined}
+            opacity={isDone ? 1 : 0}
           >
             <path
               d="M148.487 134.975L119.015 93.543L191.201 0H251L148.487 134.975Z"
@@ -196,7 +207,7 @@ export default function XMobilityLogo({ onComplete, className = '', style = {} }
           <g
             ref={(el) => (piecesRef.current[1] = el)}
             transform={isDone ? 'translate(0, 0)' : undefined}
-            opacity={isDone ? 1 : undefined}
+            opacity={isDone ? 1 : 0}
           >
             <path
               d="M88.2606 49.9753H30.5971L117.733 175.126L148.487 134.975L88.2606 49.9753Z"
@@ -206,7 +217,7 @@ export default function XMobilityLogo({ onComplete, className = '', style = {} }
           <g
             ref={(el) => (piecesRef.current[2] = el)}
             transform={isDone ? 'translate(0, 0)' : undefined}
-            opacity={isDone ? 1 : undefined}
+            opacity={isDone ? 1 : 0}
           >
             <path
               d="M157.029 147.79L127.13 187.086L146.351 214.423H204.014L157.029 147.79Z"
@@ -216,7 +227,7 @@ export default function XMobilityLogo({ onComplete, className = '', style = {} }
           <g
             ref={(el) => (piecesRef.current[3] = el)}
             transform={isDone ? 'translate(0, 0)' : undefined}
-            opacity={isDone ? 1 : undefined}
+            opacity={isDone ? 1 : 0}
           >
             <path
               d="M106.784 188.367L77.3118 146.935L0 257.136H59.7992L106.784 188.367Z"
@@ -225,8 +236,16 @@ export default function XMobilityLogo({ onComplete, className = '', style = {} }
           </g>
         </g>
 
-        {/* Chữ Mobility: khi hoàn thành không bị clip nữa, luôn hiển thị FULL XMOBILITY */}
-        <g clipPath={isDone ? undefined : `url(#${clipId})`}>
+        {/* Chữ Mobility:
+            - Di chuyển đồng bộ bên cạnh chữ X (không bị dính vào X)
+            - Mở rộng dần từ trái sang phải
+        */}
+        <g
+          ref={wordRef}
+          transform={isDone ? 'translate(0, 0)' : 'translate(375, 0)'}
+          opacity={isDone ? 1 : 0}
+          clipPath={isDone ? undefined : `url(#${clipId})`}
+        >
           {/* M */}
           <path
             d="M308.343 80.51H343.435L365.581 170.705H367.158L419.138 80.51H454.23L431.887 214.754H404.286L418.875 127.377H417.692L368.538 214.098H349.678L329.437 127.05H328.32L313.6 214.754H286L308.343 80.51Z"
