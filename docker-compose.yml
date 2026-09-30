@@ -20,6 +20,28 @@ services:
     restart: unless-stopped
     depends_on:
       - minio
+      - redis
+
+  gallery-worker:
+    image: ${XBUS_IMAGE:-luongtrinh462004/xbus-office:latest}
+    container_name: xbus-gallery-worker
+    env_file:
+      - .env
+    environment:
+      - REDIS_URL=redis://redis:6379
+    command: node scripts/gallery-upload-worker.mjs
+    depends_on:
+      - redis
+      - minio
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: xbus-redis
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3000/login"]
       interval: 30s
@@ -81,4 +103,5 @@ volumes:
   xbus_tea_images:
   xbus_gallery:
   minio_data:
+  redis_data:
   mysql_data:

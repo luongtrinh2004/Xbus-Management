@@ -210,10 +210,44 @@ export default function UploadModal({
     });
   };
 
+  const uploadChunkedFile = async (uploadItem) => {
+    const chunkSize = 50 * 1024 * 1024;
+    const sessionId = crypto.randomUUID();
+    const totalChunks = Math.ceil(uploadItem.file.size / chunkSize);
+    setFilesQueue(prev => prev.map(q => q.id === uploadItem.id ? { ...q, status: "uploading" } : q));
+    for (let index = 0; index < totalChunks; index += 1) {
+      const form = new FormData();
+      form.append("sessionId", sessionId);
+      form.append("index", String(index));
+      form.append("chunk", uploadItem.file.slice(index * chunkSize, Math.min(uploadItem.file.size, (index + 1) * chunkSize)));
+      const response = await fetch("/api/gallery/upload/chunk", { method: "POST", body: form });
+      if (!response.ok) throw new Error((await response.json()).error || "Không thể tải chunk");
+      const progress = Math.round(((index + 1) / totalChunks) * 50);
+      setFilesQueue(prev => prev.map(q => q.id === uploadItem.id ? { ...q, progress } : q));
+    }
+    const complete = await fetch("/api/gallery/upload/complete", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sessionId, postId: uploadItem.postId, fileName: uploadItem.file.name, totalChunks }) });
+    const created = await complete.json();
+    if (!complete.ok) throw new Error(created.error || "Không thể tạo job xử lý");
+    while (true) {
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      const status = await fetch(`/api/gallery/upload/job/${created.jobId}`).then(r => r.json());
+      if (status.state === "completed") {
+        const uploadedData = status.result?.files || [];
+        if (!uploadedData.length) throw new Error("Không tìm thấy ảnh hoặc video trong tệp");
+        setFilesQueue(prev => prev.map(q => q.id === uploadItem.id ? { ...q, progress: 100, status: "ready", uploadedData, extractedFiles: uploadedData.length } : q));
+        return;
+      }
+      if (["failed", "unknown"].includes(status.state)) throw new Error(status.error || "Job xử lý thất bại");
+      const progress = typeof status.progress === "number" ? 50 + Math.round(status.progress / 2) : 50;
+      setFilesQueue(prev => prev.map(q => q.id === uploadItem.id ? { ...q, progress } : q));
+    }
+  };
+
   const enqueueUpload = (item) => {
     uploadChainRef.current = uploadChainRef.current
       .catch(() => {})
-      .then(() => uploadSingleFile(item));
+      .then(() => item.file.size > 50 * 1024 * 1024 ? uploadChunkedFile(item) : uploadSingleFile(item))
+      .catch(error => setFilesQueue(prev => prev.map(q => q.id === item.id ? { ...q, status: "error", errorMsg: error.message || "Lỗi tải lên" } : q)));
     return uploadChainRef.current;
   };
 
