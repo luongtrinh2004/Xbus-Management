@@ -32,6 +32,19 @@ const fundLabels = {
 // Ngày nhập trong form là ngày nghiệp vụ Việt Nam, không phải ngày UTC.
 const businessDateToIso = (date, fallback) =>
   date ? new Date(`${date}T12:00:00+07:00`).toISOString() : fallback;
+const validBusinessDate = (value) => {
+  if (value === undefined || value === null || value === "") return true;
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const date = new Date(`${value}T00:00:00Z`);
+  return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value;
+};
+const validFundPeriod = (month, year) =>
+  Number.isInteger(month) && month >= 1 && month <= 12 &&
+  Number.isInteger(year) && year >= 2000 && year <= 2100;
+const invalidTransactionInput = (body) => !body || typeof body !== "object" ||
+  Array.isArray(body) || !validBusinessDate(body.date) ||
+  (body.note != null && typeof body.note !== "string");
+
 const reminderDefaults = (period, settings) => {
   const reminder = settings.fundReminderSettings;
   if (!reminder) return {};
@@ -223,6 +236,10 @@ export async function POST(req) {
         { status: 400 },
       );
     }
+    if (invalidTransactionInput(body)) {
+      return NextResponse.json({ error: "Ngày hoặc nội dung giao dịch không hợp lệ" }, { status: 400 });
+    }
+    const amount = Number(body.amount);
     let month = Number(body.month);
     let year = Number(body.year);
     if (body.date && /^\d{4}-\d{2}-\d{2}$/.test(body.date)) {
@@ -236,8 +253,7 @@ export async function POST(req) {
       !["income", "expense"].includes(body.kind) ||
       !Number.isFinite(amount) ||
       amount <= 0 ||
-      !month ||
-      !year
+      !validFundPeriod(month, year)
     ) {
       return NextResponse.json(
         { error: "Vui lòng nhập đầy đủ nội dung và số tiền hợp lệ" },
@@ -340,7 +356,7 @@ export async function POST(req) {
       {
         error:
           process.env.NODE_ENV === "development"
-            ? `Không thể lưu khoản import: ${error.message}`
+            ? `Không thể lưu khoản thu/chi: ${error.message}`
             : "Lỗi hệ thống",
       },
       { status: 500 },
@@ -356,7 +372,12 @@ async function changeTransaction(req, removing) {
         { error: "Bạn không có quyền cập nhật quỹ phòng" },
         { status: 403 },
       );
-    const body = await req.json();
+    const body = await req.json().catch(() => null);
+    if (invalidTransactionInput(body) ||
+        !["income", "expense", "member"].includes(body.kind) ||
+        !validFundPeriod(Number(body.month), Number(body.year))) {
+      return NextResponse.json({ error: "Thông tin giao dịch hoặc kỳ quỹ không hợp lệ" }, { status: 400 });
+    }
     const funds = await getFunds();
     const fundIndex = funds.findIndex(
       (item) =>
@@ -495,7 +516,7 @@ async function changeTransaction(req, removing) {
       const person = personRequired
         ? users.find((user) => user.id === body.userId)
         : null;
-      if (!(Number(body.amount) > 0) || (personRequired && !person))
+      if (!Number.isFinite(Number(body.amount)) || !(Number(body.amount) > 0) || (personRequired && !person))
         return NextResponse.json(
           { error: "Vui lòng nhập đầy đủ thông tin giao dịch" },
           { status: 400 },

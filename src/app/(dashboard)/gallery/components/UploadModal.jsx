@@ -1,4 +1,5 @@
 "use client";
+import { classifyGalleryMedia, galleryMediaAccept } from "@/libs/galleryMediaTypes";
 
 import { useState, useRef, useEffect } from "react";
 import Box from "@mui/material/Box";
@@ -149,6 +150,7 @@ export default function UploadModal({ open, onClose, onUploadSuccess, currentUse
                       progress: 100,
                       status: "ready",
                       uploadedData: res.fileData,
+                      previewUrl: res.fileData.thumbnail || q.previewUrl,
                     }
                   : q
               )
@@ -187,8 +189,7 @@ export default function UploadModal({ open, onClose, onUploadSuccess, currentUse
 
     for (let idx = 0; idx < filesToProcess.length; idx++) {
       const file = filesToProcess[idx];
-      const isVideo = file.type.startsWith("video/");
-      const isImage = file.type.startsWith("image/");
+      const { isVideo, isImage } = classifyGalleryMedia(file);
       let previewUrl = isImage ? URL.createObjectURL(file) : "";
       let thumbnailBlob = null;
 
@@ -409,7 +410,7 @@ export default function UploadModal({ open, onClose, onUploadSuccess, currentUse
           ref={fileInputRef}
           type="file"
           multiple
-          accept="image/*,video/*"
+          accept={galleryMediaAccept}
           style={{ display: "none" }}
           onChange={(e) => {
             if (e.target.files) handleFilesSelected(e.target.files);
@@ -459,7 +460,7 @@ export default function UploadModal({ open, onClose, onUploadSuccess, currentUse
           </Typography>
 
           <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.5 }}>
-            Có thể chọn nhiều ảnh/video cho một bài đăng • Định dạng: <strong>JPG, PNG, WEBP, GIF, MP4, MOV...</strong> (Max 500MB/tệp)
+            Có thể chọn nhiều ảnh/video cho một bài đăng • Định dạng: <strong>Ảnh (HEIC, HEIF, JPG, PNG, TIFF, RAW…) và video</strong> (Max 500MB/tệp)
           </Typography>
         </Box>
 

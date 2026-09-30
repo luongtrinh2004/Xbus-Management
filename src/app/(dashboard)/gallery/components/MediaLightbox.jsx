@@ -1,4 +1,5 @@
 "use client";
+import { galleryImageSource } from "@/libs/galleryMediaTypes";
 import { trackGalleryActivity } from "@/libs/galleryActivity";
 
 import { useState, useEffect, useRef } from "react";
@@ -669,7 +670,7 @@ export default function MediaLightbox({
             ) : (
               <Box
                 component="img"
-                src={activeFile.url || item.url}
+                src={galleryImageSource(activeFile) || item.url}
                 alt={activeFile.fileName || item.title}
                 onDoubleClick={handleFullscreenToggle}
                 sx={{

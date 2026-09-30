@@ -145,9 +145,9 @@ function GalleryContent() {
   }, []);
 
   // Fetch real gallery data from API
-  const fetchGalleryData = useCallback(async () => {
+  const fetchGalleryData = useCallback(async (silent = false) => {
     try {
-      setIsLoading(true);
+      if (!silent) setIsLoading(true);
       const params = new URLSearchParams();
       if (searchQuery.trim()) params.set("search", searchQuery.trim());
       if (typeFilter !== "all") params.set("type", typeFilter);
@@ -168,7 +168,7 @@ function GalleryContent() {
       console.error("[fetchGalleryData] Lỗi:", err);
       toast.error("Không thể tải danh sách thư viện");
     } finally {
-      setIsLoading(false);
+      if (!silent) setIsLoading(false);
     }
   }, [searchQuery, typeFilter, timeFilter, uploaderFilter, sortOption, isFilterLargest]);
 
@@ -189,6 +189,14 @@ function GalleryContent() {
       }
     }
   }, [searchParams, mediaList]);
+
+  // Refresh object lists while the gallery is visible, and on return to the tab.
+  useEffect(() => {
+    const refresh = () => { if (document.visibilityState === "visible") fetchGalleryData(true); };
+    const timer = setInterval(refresh, 30000);
+    window.addEventListener("focus", refresh);
+    return () => { clearInterval(timer); window.removeEventListener("focus", refresh); };
+  }, [fetchGalleryData]);
 
   // Active item for Lightbox
   const activeMediaItem = useMemo(() => {

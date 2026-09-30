@@ -1,3 +1,4 @@
+import { resolveGalleryMinioFiles } from "@/libs/galleryMinioFiles";
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import { getGallery } from "@/libs/dataRepository";
@@ -12,7 +13,8 @@ export async function POST(req, { params }) {
     const { id } = await params;
     const { action, fileId } = await req.json();
     if (!actions.has(action)) return NextResponse.json({ error: "Hành động không hợp lệ" }, { status: 400 });
-    const { items = [] } = await getGallery();
+    const data = await getGallery();
+    const items = await resolveGalleryMinioFiles(data.items || []);
     const item = items.find(item => item.id === id || item.postId === id);
     if (!item) return NextResponse.json({ error: "Không tìm thấy bài đăng" }, { status: 404 });
     const file = fileId && fileId !== item.id ? item.files?.find(file => file.id === fileId) : item;

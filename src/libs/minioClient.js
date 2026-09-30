@@ -114,7 +114,7 @@ export async function deleteMediaObject(objectName) {
   if (!objectName) return;
 
   // Clean path format if full URL or leading slashes
-  const cleanKey = objectName
+  const cleanKey = decodeURIComponent(objectName.split("?")[0])
     .replace(/^\/?api\/gallery\/media\//, "")
     .replace(/^\/?uploads\/gallery\//, "")
     .replace(/^https?:\/\/[^/]+\/[^/]+\//, "");

@@ -1,3 +1,5 @@
+import { classifyGalleryMedia } from "@/libs/galleryMediaTypes";
+import { createGalleryImagePreview } from "@/libs/galleryImagePreview";
 import { auditGallery } from "@/libs/galleryAudit";
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
@@ -61,9 +63,7 @@ export async function POST(req) {
       );
     }
 
-    const mimeType = file.type || "application/octet-stream";
-    const isVideo = mimeType.startsWith("video/");
-    const isImage = mimeType.startsWith("image/");
+    const { mimeType, isVideo, isImage } = classifyGalleryMedia(file);
 
     if (!isVideo && !isImage) {
       return NextResponse.json(
@@ -97,10 +97,7 @@ export async function POST(req) {
         const thumbFileName = `thumb_${path.basename(uniqueFileName, ext)}.webp`;
         const thumbKey = `posts/${postId}/thumbnails/${thumbFileName}`;
 
-        const imageInfo = await sharp(buffer)
-          .resize({ width: 800, withoutEnlargement: true })
-          .webp({ quality: 80 })
-          .toBuffer({ resolveWithObject: true });
+        const imageInfo = await createGalleryImagePreview(buffer, mimeType);
 
         const thumbUpload = await uploadMediaObject({
           objectName: thumbKey,
@@ -114,7 +111,7 @@ export async function POST(req) {
         }
       } catch (sharpErr) {
         console.warn("[Upload] Không tạo được thumbnail:", sharpErr);
-        thumbnailUrl = publicUrl;
+        thumbnailUrl = "/images/gallery-image-unavailable.svg";
       }
     } else if (isVideo) {
       const thumbFile = formData.get("thumbnail");

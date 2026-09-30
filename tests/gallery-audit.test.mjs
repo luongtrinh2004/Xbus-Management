@@ -11,6 +11,7 @@ async function route(file, { token = { id: 'viewer', name: 'Người xem' }, ite
     NextResponse: { json: (data, options) => ({ data, status: options?.status || 200 }) },
     getToken: async () => token,
     getGallery: async () => ({ items }),
+    resolveGalleryMinioFiles: async items => items,
     saveGallery: async () => { saves++; },
     auditGallery: async (...args) => logs.push(args),
     createNotification: () => {},

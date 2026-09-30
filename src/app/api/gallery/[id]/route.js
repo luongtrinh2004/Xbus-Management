@@ -1,3 +1,4 @@
+import { resolveGalleryMinioFiles } from "@/libs/galleryMinioFiles";
 import { auditGallery } from "@/libs/galleryAudit";
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
@@ -17,7 +18,7 @@ export async function DELETE(req, { params }) {
 
     const { id } = await params;
     const data = await getGallery();
-    const items = Array.isArray(data.items) ? data.items : [];
+    const items = await resolveGalleryMinioFiles(Array.isArray(data.items) ? data.items : []);
 
     // Find all items matching by id or postId
     const targetItems = items.filter(

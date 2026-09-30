@@ -1,3 +1,4 @@
+import { resolveGalleryMinioFiles } from "@/libs/galleryMinioFiles";
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import { getGallery } from "@/libs/dataRepository";
@@ -20,7 +21,7 @@ function normalizeToPosts(rawItems = []) {
 
   for (const item of rawItems) {
     // If it's already a full Post with files array:
-    if (Array.isArray(item.files) && item.files.length > 0) {
+    if (Array.isArray(item.files)) {
       result.push(item);
       continue;
     }
@@ -107,7 +108,7 @@ export async function GET(req) {
     const rawItems = Array.isArray(data.items) ? data.items : [];
 
     // Normalize to Post-based representation (1 Post = 1 Card on UI)
-    const allPosts = normalizeToPosts(rawItems);
+    const allPosts = await resolveGalleryMinioFiles(normalizeToPosts(rawItems));
 
     // Calculate real storage statistics across every sub-file
     let usedBytes = 0;
@@ -118,7 +119,7 @@ export async function GET(req) {
     let totalFiles = 0;
 
     for (const post of allPosts) {
-      if (Array.isArray(post.files) && post.files.length > 0) {
+      if (Array.isArray(post.files)) {
         for (const f of post.files) {
           const sz = Number(f.fileSize) || 0;
           usedBytes += sz;

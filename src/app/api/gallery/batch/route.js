@@ -1,3 +1,4 @@
+import { resolveGalleryMinioFiles } from "@/libs/galleryMinioFiles";
 import { auditGallery } from "@/libs/galleryAudit";
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
@@ -20,7 +21,7 @@ export async function POST(req) {
     }
 
     const data = await getGallery();
-    const items = Array.isArray(data.items) ? data.items : [];
+    const items = await resolveGalleryMinioFiles(Array.isArray(data.items) ? data.items : []);
 
     const targets = items.filter(item => ids.includes(item.id));
     if (targets.some(item => !["admin", "assistant"].includes(token.role) &&
@@ -32,6 +33,11 @@ export async function POST(req) {
       for (const id of ids) {
         const item = items.find((i) => i.id === id);
         if (item) {
+          for (const file of item.files || []) {
+            await deleteMediaObject(file.filePath || file.url);
+            if (file.thumbnail && file.thumbnail !== file.url && !file.thumbnail.startsWith("/images/")) await deleteMediaObject(file.thumbnail);
+          }
+
           if (item.filePath) {
             await deleteMediaObject(item.filePath);
           } else if (item.url) {
