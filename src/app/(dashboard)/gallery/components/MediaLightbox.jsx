@@ -1,4 +1,6 @@
 "use client";
+import CopyAlbumUrlButton from "./CopyAlbumUrlButton";
+import { getAlbumLink } from "@/libs/galleryAlbumLink";
 import { galleryImageSource } from "@/libs/galleryMediaTypes";
 import { trackGalleryActivity } from "@/libs/galleryActivity";
 
@@ -140,22 +142,41 @@ export default function MediaLightbox({
     }
   }, [item?.id, activeFileIndex]);
 
-  // Start on opening/reopening; metadata also starts newly mounted dialog content.
+  // Reset video player states and cleanup on media change
   useEffect(() => {
     const video = videoRef.current;
-    if (open && video) startPlayback(video);
-    return () => { (video || videoRef.current)?.pause(); };
+    setIsBuffering(false);
+    setIsPlaying(false);
+    return () => {
+      if (video) {
+        try {
+          video.pause();
+        } catch {}
+      }
+    };
   }, [open, activeFile.url, item?.id, activeFileIndex]);
+
+  // Safety timer to prevent buffering spinner from ever hanging indefinitely
+  useEffect(() => {
+    if (!isBuffering) return;
+    const timer = setTimeout(() => {
+      setIsBuffering(false);
+    }, 3500);
+    return () => clearTimeout(timer);
+  }, [isBuffering]);
 
   async function startPlayback(video, userInitiated = false) {
     if (!open || !video) return;
     const source = video.getAttribute("src");
-    const isCurrent = () => viewerOpenRef.current && videoRef.current === video && video.isConnected &&
+    const isCurrent = () =>
+      viewerOpenRef.current && videoRef.current === video && video.isConnected &&
       video.getAttribute("src") === source;
     setVideoError("");
     setIsBuffering(true);
     try {
       await video.play();
+      setIsPlaying(true);
+      setIsBuffering(false);
       if (userInitiated && isCurrent()) trackGalleryActivity(item.id, "PLAY_GALLERY_VIDEO", activeFile.id);
     } catch (error) {
       if (!isCurrent() || error.name === "AbortError") return;
@@ -164,7 +185,9 @@ export default function MediaLightbox({
         setIsMuted(true);
         try {
           await video.play();
-      if (userInitiated && isCurrent()) trackGalleryActivity(item.id, "PLAY_GALLERY_VIDEO", activeFile.id);
+          setIsPlaying(true);
+          setIsBuffering(false);
+          if (userInitiated && isCurrent()) trackGalleryActivity(item.id, "PLAY_GALLERY_VIDEO", activeFile.id);
           return;
         } catch (retryError) {
           if (!isCurrent() || retryError.name === "AbortError") return;
@@ -247,7 +270,6 @@ export default function MediaLightbox({
     if (!videoRef.current) return;
     setDuration(Number.isFinite(videoRef.current.duration) ? videoRef.current.duration : 0);
     videoRef.current.volume = volume;
-    startPlayback(videoRef.current);
   };
 
   const handleSeek = (_, val) => {
@@ -580,8 +602,12 @@ export default function MediaLightbox({
           >
             {isVideo ? (
               <Box
+                key={`video-${activeFile.url || item.url}`}
                 sx={{
                   position: "relative",
+                  isolation: "isolate",
+                  bgcolor: "#000",
+                  overflow: "hidden",
                   width: isFullscreen ? "100%" : "auto",
                   height: isFullscreen ? "100%" : "auto",
                   maxWidth: isFullscreen ? "100%" : "92%",
@@ -594,31 +620,46 @@ export default function MediaLightbox({
                 <video
                   key={activeFile.url || item.url}
                   ref={videoRef}
-                  preload="auto"
+                  preload="metadata"
                   playsInline
                   muted={isMuted}
                   src={activeFile.url || item.url}
                   poster={
                     activeFile.thumbnail &&
-                    !/\.(mp4|mov|webm|avi|mkv|m4v)$/i.test(activeFile.thumbnail)
+                    activeFile.thumbnail !== activeFile.url &&
+                    !/\.(mp4|mov|webm|avi|mkv|m4v)(?:[?#]|$)/i.test(activeFile.thumbnail)
                       ? activeFile.thumbnail
                       : undefined
                   }
-                  onTimeUpdate={handleTimeUpdate}
-                  onLoadedMetadata={handleLoadedMetadata}
-                  onPlaying={() => {
-                    setIsPlaying(true); setIsBuffering(false);
-
+                  onTimeUpdate={() => {
+                    handleTimeUpdate();
+                    if (isBuffering) setIsBuffering(false);
                   }}
-                  onPause={() => { setIsPlaying(false); setIsBuffering(false); }}
-                  onWaiting={() => setIsBuffering(true)}
+                  onLoadedMetadata={handleLoadedMetadata}
+                  onLoadedData={() => setIsBuffering(false)}
                   onCanPlay={() => setIsBuffering(false)}
+                  onCanPlayThrough={() => setIsBuffering(false)}
+                  onSeeked={() => setIsBuffering(false)}
+                  onPlaying={() => {
+                    setIsPlaying(true);
+                    setIsBuffering(false);
+                  }}
+                  onPause={() => {
+                    setIsPlaying(false);
+                    setIsBuffering(false);
+                  }}
+                  onWaiting={() => {
+                    if (isPlaying) setIsBuffering(true);
+                  }}
                   onError={() => {
                     setIsPlaying(false);
                     setIsBuffering(false);
                     setVideoError("Không thể phát video. Vui lòng thử lại hoặc tải video xuống.");
                   }}
-                  onEnded={() => { setIsPlaying(false); setIsBuffering(false); }}
+                  onEnded={() => {
+                    setIsPlaying(false);
+                    setIsBuffering(false);
+                  }}
                   onClick={handleTogglePlay}
                   onDoubleClick={handleFullscreenToggle}
                   style={{
@@ -637,19 +678,47 @@ export default function MediaLightbox({
                   }}
                 />
 
-                {isBuffering && !videoError && (
-                  <Box sx={{ position: "absolute", pointerEvents: "none", display: "flex", alignItems: "center", gap: 1, bgcolor: "rgba(0,0,0,0.65)", color: "#fff", borderRadius: 2, p: 2 }}>
-                    <CircularProgress size={24} color="inherit" />
-                    <Typography variant="body2">Đang tải video…</Typography>
+                {/* Show buffering only when actively playing and network needs more data */}
+                {isPlaying && isBuffering && !videoError && (
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      pointerEvents: "none",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                      bgcolor: "rgba(0,0,0,0.75)",
+                      color: "#fff",
+                      borderRadius: 2,
+                      px: 2,
+                      py: 1,
+                    }}
+                  >
+                    <CircularProgress size={20} color="inherit" />
+                    <Typography variant="body2" sx={{ fontSize: "0.85rem" }}>
+                      Đang tải video…
+                    </Typography>
                   </Box>
                 )}
+
                 {videoError && (
-                  <Typography role="alert" sx={{ position: "absolute", bgcolor: "rgba(0,0,0,0.75)", color: "#fff", p: 2, borderRadius: 2 }}>
+                  <Typography
+                    role="alert"
+                    sx={{
+                      position: "absolute",
+                      bgcolor: "rgba(0,0,0,0.85)",
+                      color: "#fff",
+                      p: 2,
+                      borderRadius: 2,
+                      textAlign: "center",
+                    }}
+                  >
                     {videoError}
                   </Typography>
                 )}
-                {/* Center Play Button when paused */}
-                {!isPlaying && !isBuffering && !videoError && (
+
+                {/* Center Play Button always visible when paused */}
+                {!isPlaying && !videoError && (
                   <IconButton
                     onClick={handleTogglePlay}
                     sx={{
@@ -669,6 +738,7 @@ export default function MediaLightbox({
               </Box>
             ) : (
               <Box
+                key={`image-${activeFile.url || item.url}`}
                 component="img"
                 src={galleryImageSource(activeFile) || item.url}
                 alt={activeFile.fileName || item.title}
@@ -737,15 +807,8 @@ export default function MediaLightbox({
                       "&:hover": { opacity: 1 },
                     }}
                   >
-                    {f.type === "video" && (!f.thumbnail || f.thumbnail === f.url || /\.(mp4|mov|webm|avi|mkv|m4v)$/i.test(f.thumbnail)) ? (
-                      <Box
-                        component="video"
-                        src={`${f.url}#t=0.5`}
-                        preload="metadata"
-                        muted
-                        playsInline
-                        sx={{ width: "100%", height: "100%", objectFit: "cover", pointerEvents: "none" }}
-                      />
+                    {f.type === "video" && (!f.thumbnail || f.thumbnail === f.url || /\.(mp4|mov|webm|avi|mkv|m4v)(?:[?#]|$)/i.test(f.thumbnail)) ? (
+                      <Box sx={{ width: "100%", height: "100%", bgcolor: "grey.800" }} />
                     ) : (
                       <Box
                         component="img"
@@ -1067,13 +1130,34 @@ export default function MediaLightbox({
                 {renderWithMentions(item.title, usersList)}
               </Typography>
             )}
-            <Typography variant="subtitle2" sx={{ fontWeight: 600, color: "text.primary", mb: 0.5 }}>
-              Mô tả:
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>
-              {renderWithMentions(item.description || "-", usersList)}
-            </Typography>
-
+            {item.postType === "album_link" ? (
+              <Box sx={{ p: 2, mt: 1.5, borderRadius: 2, border: "1px solid", borderColor: "divider", bgcolor: "action.hover" }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2 }}>
+                  <Box sx={{ display: "grid", placeItems: "center", width: 36, height: 36, borderRadius: 1.5, bgcolor: "background.paper", color: "primary.main", flexShrink: 0 }}>
+                    <i className="tabler-link" style={{ fontSize: 20 }} />
+                  </Box>
+                  <Box>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>Album liên kết</Typography>
+                    <Typography variant="caption" color="text.secondary">Mở album để xem toàn bộ ảnh và video</Typography>
+                  </Box>
+                </Box>
+                <Box sx={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 1 }}>
+                  {getAlbumLink(item.description) && (
+                    <Button size="small" component="a" href={getAlbumLink(item.description)} target="_blank" rel="noopener noreferrer" variant="contained" disableElevation sx={{ minHeight: 36, borderRadius: 1.5, flexGrow: 1 }} startIcon={<i className="tabler-external-link" />}>
+                      Mở album
+                    </Button>
+                  )}
+                  <CopyAlbumUrlButton description={item.description} />
+                </Box>
+              </Box>
+            ) : (
+              <>
+                <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>Mô tả:</Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>
+                  {renderWithMentions(item.description || "-", usersList)}
+                </Typography>
+              </>
+            )}
             {item.tags && item.tags.length > 0 && (
               <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.8, mt: 1.5 }}>
                 {item.tags.map((tag) => (
@@ -1094,7 +1178,7 @@ export default function MediaLightbox({
           </Box>
 
           {/* Comments Section */}
-          <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
+          <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column", borderTop: "1px solid", borderColor: "divider", pt: 2, mt: 1 }}>
             <Typography variant="subtitle2" sx={{ fontWeight: 600, color: "text.primary", mb: 1.5, display: "flex", alignItems: "center", gap: 1 }}>
               <i className="tabler-message-circle" /> Bình luận ({item.comments?.length || 0})
             </Typography>

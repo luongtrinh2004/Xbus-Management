@@ -12,6 +12,7 @@ services:
     environment:
       - MINIO_ENDPOINT=${MINIO_ENDPOINT:-minio}
       - MINIO_PORT=${MINIO_PORT:-9000}
+      - REDIS_URL=redis://redis:6379
     volumes:
       - xbus_data:/app/src/data/json
       - xbus_avatars:/app/public/images/avatars
@@ -29,6 +30,8 @@ services:
       - .env
     environment:
       - REDIS_URL=redis://redis:6379
+      - MINIO_ENDPOINT=${MINIO_ENDPOINT:-minio}
+      - MINIO_PORT=${MINIO_PORT:-9000}
     command: node scripts/gallery-upload-worker.mjs
     depends_on:
       - redis
@@ -39,11 +42,13 @@ services:
     image: redis:7-alpine
     container_name: xbus-redis
     command: redis-server --appendonly yes
+    ports:
+      - "127.0.0.1:6379:6379"
     volumes:
       - redis_data:/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3000/login"]
+      test: ["CMD", "redis-cli", "ping"]
       interval: 30s
       timeout: 5s
       retries: 3

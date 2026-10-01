@@ -143,7 +143,7 @@ export default function MediaListView({
                           <Box
                             component="video"
                             src={`${item.url}#t=0.5`}
-                            preload="metadata"
+                            preload="none"
                             muted
                             playsInline
                             sx={{ width: "100%", height: "100%", objectFit: "cover", pointerEvents: "none", bgcolor: "#000" }}

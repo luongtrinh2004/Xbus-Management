@@ -14,6 +14,7 @@ import Chip from "@mui/material/Chip";
 import CircularProgress from "@mui/material/CircularProgress";
 import Divider from "@mui/material/Divider";
 import LinearProgress from "@mui/material/LinearProgress";
+import MenuItem from "@mui/material/MenuItem";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import useMediaQuery from "@mui/material/useMediaQuery";
@@ -233,9 +234,19 @@ export default function HomePage() {
   const [trashSchedules, setTrashSchedules] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [fund, setFund] = useState(null);
-  const [period, setPeriod] = useState("month");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const [allFunds, setAllFunds] = useState(null);
+  const [contributorPeriod, setContributorPeriod] = useState("");
+  const [period, setPeriod] = useState("custom");
+  const [startDate, setStartDate] = useState(() => {
+    const [year, month, day] = toVietnamDateKey().split("-").map(Number);
+    const d = new Date(year, month - 1, day);
+    d.setDate(d.getDate() - 30);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const dt = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${dt}`;
+  });
+  const [endDate, setEndDate] = useState(() => toVietnamDateKey());
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -243,15 +254,17 @@ export default function HomePage() {
       fetch("/api/users?limit=200"),
       fetch("/api/water-schedules"),
       fetch("/api/funds"),
+      fetch("/api/funds?all=1"),
       fetch("/api/water-schedules/trash?weekOffset=0"),
       fetch("/api/departments"),
     ])
-      .then(async ([usersRes, waterRes, fundRes, trashRes, departmentsRes]) => {
-        const [usersData, waterData, fundData, trashData, departmentsData] =
+      .then(async ([usersRes, waterRes, fundRes, allFundsRes, trashRes, departmentsRes]) => {
+        const [usersData, waterData, fundData, allFundsData, trashData, departmentsData] =
           await Promise.all([
             usersRes.json(),
             waterRes.json(),
             fundRes.json(),
+            allFundsRes.json(),
             trashRes.json(),
             departmentsRes.json(),
           ]);
@@ -271,6 +284,32 @@ export default function HomePage() {
             .sort((a, b) => parseWaterDate(a.date) - parseWaterDate(b.date)),
         );
         setFund(fundData);
+        setAllFunds(allFundsData);
+
+        const currentPaid = (fundData?.members || []).filter(
+          (m) => m.paid && Number(m.amount) > 0,
+        ).length;
+        const currentKey = fundData
+          ? `${fundData.year}-${String(fundData.month).padStart(2, "0")}`
+          : "";
+        if (currentPaid > 0) {
+          setContributorPeriod(currentKey);
+        } else {
+          const memberIncomes = (allFundsData?.incomes || []).filter(
+            (i) => i.category === "monthly_fund" && Number(i.amount) > 0,
+          );
+          const latestIncome = [...memberIncomes].sort(
+            (a, b) => b.year - a.year || b.month - a.month,
+          )[0];
+          if (latestIncome) {
+            setContributorPeriod(
+              `${latestIncome.year}-${String(latestIncome.month).padStart(2, "0")}`,
+            );
+          } else {
+            setContributorPeriod(currentKey || "all");
+          }
+        }
+
         setTrashSchedules(trashData.schedules || []);
       })
       .catch(console.error)
@@ -328,64 +367,150 @@ export default function HomePage() {
       )
       .slice(0, 5);
   }, [activeUsers]);
-  const fundEvents = useMemo(
-    () =>
-      [
-        ...(fund?.members || [])
-          .filter((member) => member.paid && member.paidAt)
-          .map((member) => ({
-            date: member.paidAt,
-            amount: member.amount || 0,
-          })),
-        ...(fund?.expenses || []).map((expense) => ({
-          date: expense.spentAt || expense.createdAt,
-          amount: -(expense.amount || 0),
-        })),
-      ]
-        .filter((event) => event.date)
-        .sort((a, b) => new Date(a.date) - new Date(b.date)),
-    [fund],
-  );
-  const topContributors = useMemo(
-    () =>
-      (fund?.members || [])
-        .filter((member) => member.paid && member.amount > 0)
-        .map((member) => ({
-          ...member,
-          user:
-            users.find((user) => user.id === member.userId) ||
-            activeUsers.find((user) => user.id === member.userId),
+  const availablePeriods = useMemo(() => {
+    return allFunds?.availablePeriods || [];
+  }, [allFunds]);
+
+  const latestActivePeriodKey = useMemo(() => {
+    const memberIncomes = (allFunds?.incomes || []).filter(
+      (i) => i.category === "monthly_fund" && Number(i.amount) > 0,
+    );
+    const sorted = [...memberIncomes].sort(
+      (a, b) => b.year - a.year || b.month - a.month,
+    );
+    if (!sorted[0]) return "";
+    return `${sorted[0].year}-${String(sorted[0].month).padStart(2, "0")}`;
+  }, [allFunds]);
+
+  const latestActivePeriodLabel = useMemo(() => {
+    if (!latestActivePeriodKey) return "";
+    const [y, m] = latestActivePeriodKey.split("-");
+    return `${m}/${y}`;
+  }, [latestActivePeriodKey]);
+
+  const fundEvents = useMemo(() => {
+    const list = [
+      ...(allFunds?.incomes || []).map((income) => ({
+        date: income.receivedAt || income.date || income.createdAt,
+        amount: Number(income.amount) || 0,
+      })),
+      ...(allFunds?.expenses || []).map((expense) => ({
+        date: expense.spentAt || expense.date || expense.createdAt,
+        amount: -(Number(expense.amount) || 0),
+      })),
+    ];
+    return list
+      .filter((event) => event.date)
+      .sort((a, b) => new Date(a.date) - new Date(b.date));
+  }, [allFunds]);
+
+  const topContributors = useMemo(() => {
+    if (!contributorPeriod) return [];
+
+    if (contributorPeriod === "all") {
+      const map = new Map();
+      (allFunds?.incomes || [])
+        .filter(
+          (inc) => inc.category === "monthly_fund" && Number(inc.amount) > 0,
+        )
+        .forEach((inc) => {
+          const key = inc.userId || inc.userName;
+          const cur = map.get(key) || {
+            userId: inc.userId,
+            name: inc.userName,
+            amount: 0,
+          };
+          cur.amount += Number(inc.amount) || 0;
+          map.set(key, cur);
+        });
+
+      return [...map.values()]
+        .map((item) => ({
+          ...item,
+          user: users.find(
+            (u) => u.id === item.userId || u.name === item.name,
+          ),
         }))
         .sort((a, b) => b.amount - a.amount)
-        .slice(0, 5),
-    [users, activeUsers, fund?.members],
-  );
+        .slice(0, 5);
+    }
+
+    const [pYear, pMonth] = contributorPeriod.split("-").map(Number);
+    if (
+      fund &&
+      fund.year === pYear &&
+      fund.month === pMonth &&
+      fund.members?.length
+    ) {
+      return (fund.members || [])
+        .filter((member) => member.paid && Number(member.amount) > 0)
+        .map((member) => ({
+          ...member,
+          user: users.find(
+            (u) => u.id === member.userId || u.name === member.memberName,
+          ),
+        }))
+        .sort((a, b) => b.amount - a.amount)
+        .slice(0, 5);
+    }
+
+    return (allFunds?.incomes || [])
+      .filter(
+        (inc) =>
+          inc.category === "monthly_fund" &&
+          inc.year === pYear &&
+          inc.month === pMonth &&
+          Number(inc.amount) > 0,
+      )
+      .map((inc) => ({
+        userId: inc.userId,
+        name: inc.userName,
+        amount: Number(inc.amount) || 0,
+        user: users.find(
+          (u) => u.id === inc.userId || u.name === inc.userName,
+        ),
+      }))
+      .sort((a, b) => b.amount - a.amount)
+      .slice(0, 5);
+  }, [allFunds, contributorPeriod, fund, users]);
 
   const fundChart = useMemo(() => {
     const now = new Date();
-    const start = startDate ? new Date(`${startDate}T00:00:00`) : new Date(now);
+    const start = startDate
+      ? new Date(`${startDate}T00:00:00`)
+      : new Date(now.getTime() - 30 * 86400000);
     const end = endDate ? new Date(`${endDate}T23:59:59.999`) : now;
-    if (!startDate && period === "week") start.setDate(now.getDate() - 6);
-    if (!startDate && period === "month") start.setDate(1);
-    if (!startDate && period === "year") start.setMonth(0, 1);
-    let balance = fund?.openingBalance || 0;
-    const points = fundEvents
-      .filter((event) => new Date(event.date) <= end)
-      .map((event) => {
-        balance += event.amount;
-        return { x: new Date(event.date).getTime(), y: balance };
-      });
-    const beforeStart = fundEvents
-      .filter((event) => new Date(event.date) < start)
-      .reduce((sum, event) => sum + event.amount, fund?.openingBalance || 0);
-    const inRange = points.filter(
-      (point) => point.x >= start.getTime() && point.x <= end.getTime(),
+
+    const totalBalance = allFunds?.balance ?? fund?.balance ?? 0;
+    const netSum = fundEvents.reduce((sum, e) => sum + e.amount, 0);
+    const initialBalance = totalBalance - netSum;
+
+    let runningBalance = initialBalance;
+    const pointsWithBalance = fundEvents.map((event) => {
+      runningBalance += event.amount;
+      return {
+        x: new Date(event.date).getTime(),
+        y: runningBalance,
+      };
+    });
+
+    const beforeStart =
+      pointsWithBalance.filter((p) => p.x < start.getTime()).slice(-1)[0]?.y ??
+      initialBalance;
+    const inRange = pointsWithBalance.filter(
+      (p) => p.x >= start.getTime() && p.x <= end.getTime(),
     );
-    return [{ x: start.getTime(), y: beforeStart }, ...inRange];
-  }, [endDate, fund?.openingBalance, fundEvents, period, startDate]);
+
+    const result = [{ x: start.getTime(), y: beforeStart }, ...inRange];
+    const lastY =
+      inRange.length > 0 ? inRange[inRange.length - 1].y : beforeStart;
+    result.push({ x: end.getTime(), y: lastY });
+
+    return result;
+  }, [allFunds?.balance, fund?.balance, fundEvents, startDate, endDate]);
 
   const isAdmin = ["admin", "assistant"].includes(session?.user?.role);
-  const balance = fund?.balance || 0;
+  const balance = allFunds?.balance ?? fund?.balance ?? 0;
 
   if (loading) {
     return (
@@ -522,9 +647,31 @@ export default function HomePage() {
         <Card sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
           <CardHeader
             title={
-              <SectionTitle icon="tabler-trophy" color={WARNING}>
+              <SectionTitle icon="tabler-award" color={WARNING}>
                 Top Người Đóng Quỹ
               </SectionTitle>
+            }
+            action={
+              <TextField
+                select
+                size="small"
+                value={contributorPeriod}
+                onChange={(e) => setContributorPeriod(e.target.value)}
+                sx={{ minWidth: 145 }}
+              >
+                <MenuItem value="all">Tất cả các kỳ</MenuItem>
+                {availablePeriods.map((p) => {
+                  const val = `${p.year}-${String(p.month).padStart(2, "0")}`;
+                  const isCurrent =
+                    fund && fund.year === p.year && fund.month === p.month;
+                  return (
+                    <MenuItem key={val} value={val}>
+                      Tháng {String(p.month).padStart(2, "0")}/{p.year}
+                      {isCurrent ? " (Kỳ này)" : ""}
+                    </MenuItem>
+                  );
+                })}
+              </TextField>
             }
           />
           <Divider />
@@ -536,89 +683,149 @@ export default function HomePage() {
               color="text.secondary"
               sx={{ mb: 1.25 }}
             >
-              Kỳ quỹ tháng {fund?.month || new Date().getMonth() + 1}/
-              {fund?.year || new Date().getFullYear()}
+              {contributorPeriod === "all"
+                ? "Tất cả các kỳ quỹ đã ghi nhận"
+                : contributorPeriod
+                  ? `Kỳ quỹ tháng ${contributorPeriod.split("-")[1]}/${contributorPeriod.split("-")[0]}`
+                  : ""}
             </Typography>
             <Box sx={{ mt: "auto" }}>
-              <ReactApexChart
-                type="bar"
-                height={270}
-                options={{
-                  chart: {
-                    toolbar: { show: false },
-                    foreColor: "var(--mui-palette-text-secondary)",
-                  },
-                  colors: [WARNING],
-                  plotOptions: { bar: { borderRadius: 5, columnWidth: "48%" } },
-                  xaxis: {
-                    categories: topContributors.map((member) => {
-                      const code = member.user?.code || member.code;
-                      const name =
-                        member.user?.name ||
-                        member.name ||
-                        member.memberName ||
-                        "Thành viên";
-                      return isMobile && code ? code : name;
-                    }),
-                    labels: {
-                      rotate: 0,
-                      trim: true,
-                      maxHeight: 40,
-                      style: { fontSize: "11px" },
+              {topContributors.length === 0 ? (
+                <Box
+                  sx={{
+                    height: 270,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    textAlign: "center",
+                    p: 2,
+                    bgcolor: "action.hover",
+                    borderRadius: 2,
+                    border: "1px dashed",
+                    borderColor: "divider",
+                  }}
+                >
+                  <i
+                    className="tabler-coin-off"
+                    style={{
+                      fontSize: 36,
+                      opacity: 0.5,
+                      marginBottom: 8,
+                      color: WARNING,
+                    }}
+                  />
+                  <Typography variant="subtitle2" fontWeight={600} gutterBottom>
+                    Chưa có thành viên đóng quỹ kỳ này
+                  </Typography>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ maxWidth: 260, mb: 1.5 }}
+                  >
+                    Kỳ quỹ vừa bắt đầu hoặc thành viên chưa hoàn tất đóng quỹ.
+                  </Typography>
+                  {latestActivePeriodKey &&
+                    latestActivePeriodKey !== contributorPeriod && (
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        color="warning"
+                        onClick={() =>
+                          setContributorPeriod(latestActivePeriodKey)
+                        }
+                        sx={{ textTransform: "none" }}
+                      >
+                        Xem kỳ tháng {latestActivePeriodLabel}
+                      </Button>
+                    )}
+                </Box>
+              ) : (
+                <ReactApexChart
+                  key={contributorPeriod}
+                  type="bar"
+                  height={270}
+                  options={{
+                    chart: {
+                      toolbar: { show: false },
+                      foreColor: "var(--mui-palette-text-secondary)",
                     },
-                  },
-                  yaxis: {
-                    labels: { formatter: (value) => `${fmt(value)} đ` },
-                  },
-                  dataLabels: { enabled: false },
-                  grid: {
-                    borderColor: "rgba(47,43,61,.12)",
-                    strokeDashArray: 4,
-                  },
-                  tooltip: {
-                    theme: muiTheme.palette.mode,
-                    x: {
-                      formatter: (value, { dataPointIndex }) => {
-                        const member = topContributors[dataPointIndex];
-                        if (!member) return value;
+                    colors: [WARNING],
+                    plotOptions: {
+                      bar: { borderRadius: 5, columnWidth: "48%" },
+                    },
+                    xaxis: {
+                      categories: topContributors.map((member) => {
+                        const code = member.user?.code || member.code;
                         const name =
                           member.user?.name ||
                           member.name ||
                           member.memberName ||
                           "Thành viên";
-                        const code = member.user?.code || member.code;
-                        return code ? `${name} (${code})` : name;
+                        return isMobile && code ? code : name;
+                      }),
+                      labels: {
+                        rotate: 0,
+                        trim: true,
+                        maxHeight: 40,
+                        style: { fontSize: "11px" },
                       },
                     },
-                    y: { formatter: (value) => `${fmt(value)} đ` },
-                  },
-                  responsive: [
-                    {
-                      breakpoint: 600,
-                      options: {
-                        xaxis: {
-                          categories: topContributors.map((member) => {
-                            const code = member.user?.code || member.code;
-                            return (
-                              code ||
-                              member.user?.name ||
-                              member.name ||
-                              member.memberName ||
-                              "Thành viên"
-                            );
-                          }),
+                    yaxis: {
+                      min: 0,
+                      forceNiceScale: true,
+                      labels: { formatter: (value) => `${fmt(value)} đ` },
+                    },
+                    dataLabels: { enabled: false },
+                    grid: {
+                      borderColor: "rgba(47,43,61,.12)",
+                      strokeDashArray: 4,
+                    },
+                    tooltip: {
+                      theme: muiTheme.palette.mode,
+                      x: {
+                        formatter: (value, { dataPointIndex }) => {
+                          const member = topContributors[dataPointIndex];
+                          if (!member) return value;
+                          const name =
+                            member.user?.name ||
+                            member.name ||
+                            member.memberName ||
+                            "Thành viên";
+                          const code = member.user?.code || member.code;
+                          return code ? `${name} (${code})` : name;
                         },
                       },
+                      y: { formatter: (value) => `${fmt(value)} đ` },
                     },
-                  ],
-                }}
-                series={[
-                  {
-                    name: "Đã đóng",
-                    data: topContributors.map((member) => member.amount),
-                  },
-                ]}
-              />
+                    responsive: [
+                      {
+                        breakpoint: 600,
+                        options: {
+                          xaxis: {
+                            categories: topContributors.map((member) => {
+                              const code = member.user?.code || member.code;
+                              return (
+                                code ||
+                                member.user?.name ||
+                                member.name ||
+                                member.memberName ||
+                                "Thành viên"
+                              );
+                            }),
+                          },
+                        },
+                      },
+                    ],
+                  }}
+                  series={[
+                    {
+                      name: "Đã đóng",
+                      data: topContributors.map((member) => member.amount),
+                    },
+                  ]}
+                />
+              )}
             </Box>
           </CardContent>
         </Card>
@@ -675,6 +882,7 @@ export default function HomePage() {
             </Box>
             <Box sx={{ mt: "auto" }}>
               <ReactApexChart
+                key={`${startDate}_${endDate}_${fundChart.length}`}
                 type="area"
                 height={180}
                 options={{
@@ -689,11 +897,23 @@ export default function HomePage() {
                     type: "gradient",
                     gradient: { opacityFrom: 0.32, opacityTo: 0.03 },
                   },
-                  xaxis: { type: "datetime" },
+                  xaxis: {
+                    type: "datetime",
+                    labels: {
+                      datetimeUTC: false,
+                      format: "dd/MM",
+                    },
+                  },
                   yaxis: {
+                    min: 0,
+                    forceNiceScale: true,
                     labels: { formatter: (value) => `${fmt(value)} đ` },
                   },
                   dataLabels: { enabled: false },
+                  grid: {
+                    borderColor: "rgba(47,43,61,.12)",
+                    strokeDashArray: 4,
+                  },
                   tooltip: {
                     theme: muiTheme.palette.mode,
                     x: { format: "dd/MM/yyyy" },

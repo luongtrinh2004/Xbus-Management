@@ -1,3 +1,5 @@
+import { getAlbumLink } from "@/libs/galleryAlbumLink";
+import { createUploadSessions } from "@/libs/galleryUploadSessions";
 import { classifyGalleryMedia } from "@/libs/galleryMediaTypes";
 import { createGalleryImagePreview } from "@/libs/galleryImagePreview";
 import { randomUUID } from "node:crypto";
@@ -75,7 +77,7 @@ export async function POST(req) {
       const body = await req.json();
       const { title = "", description = "", tags = [], privacy = "public", uploadedFiles = [] } = body;
 
-      if (!Array.isArray(uploadedFiles) || uploadedFiles.length === 0) {
+      if (!Array.isArray(uploadedFiles) || (!body.background && uploadedFiles.length === 0)) {
         return NextResponse.json({ error: "Chưa có tệp tin nào được tải lên" }, { status: 400 });
       }
 
@@ -87,7 +89,12 @@ export async function POST(req) {
       if (currentItems.some(item => item.id === postId || item.postId === postId)) {
         return NextResponse.json({ error: "Bài đăng đã tồn tại" }, { status: 409 });
       }
-      const firstFile = uploadedFiles[0];
+      let uploadSessions;
+      if (body.background) {
+        try { uploadSessions = await createUploadSessions(postId, token.id, body.uploads); }
+        catch (error) { return NextResponse.json({ error: error.message }, { status: 400 }); }
+      }
+      const firstFile = uploadedFiles[0] || {};
       const postTitle = title.trim();
       const postDescription = description.trim();
       const totalSize = uploadedFiles.reduce((acc, f) => acc + (Number(f.fileSize) || 0), 0);
@@ -98,6 +105,7 @@ export async function POST(req) {
         id: postId,
         postId,
         mediaSource: "minio",
+        ...(uploadSessions ? { uploadSessions } : {}),
         title: postTitle,
         description: postDescription,
         uploader,
@@ -198,6 +206,18 @@ export async function POST(req) {
       if (rawTags) tagsInput = rawTags.split(",").map((t) => t.trim());
     }
 
+    const isAlbumLink = formData.get("postType") === "album_link";
+    if (isAlbumLink) {
+      if (!getAlbumLink(descriptionInput) || allFilesToUpload.length !== 1) {
+        return NextResponse.json({ error: "Nhập mô tả có link album hợp lệ và chọn đúng 1 ảnh thumbnail" }, { status: 400 });
+      }
+      const cover = allFilesToUpload[0];
+      if (cover.size > 10 * 1024 ** 2) return NextResponse.json({ error: "Ảnh thumbnail tối đa 10 MB" }, { status: 400 });
+      try {
+        const info = await sharp(Buffer.from(await cover.arrayBuffer())).metadata();
+        if (!["jpeg", "png", "webp"].includes(info.format)) throw Error();
+      } catch { return NextResponse.json({ error: "Thumbnail phải là ảnh JPG, PNG hoặc WebP hợp lệ" }, { status: 400 }); }
+    }
     const postId = `post_${randomUUID()}`;
     const uploadedFilesList = [];
 
@@ -271,7 +291,7 @@ export async function POST(req) {
     }
 
     const firstFile = uploadedFilesList[0];
-    const postTitle = titleInput || firstFile.fileName.replace(/\.[^/.]+$/, "");
+    const postTitle = titleInput || (isAlbumLink ? "Album liên kết" : firstFile.fileName.replace(/\.[^/.]+$/, ""));
     const totalSize = uploadedFilesList.reduce((acc, f) => acc + f.fileSize, 0);
     const hasVideo = uploadedFilesList.some((f) => f.type === "video");
     const hasImage = uploadedFilesList.some((f) => f.type === "image");
@@ -281,6 +301,7 @@ export async function POST(req) {
       postId,
       mediaSource: "minio",
       title: postTitle,
+      ...(isAlbumLink ? { postType: "album_link" } : {}),
       description: descriptionInput || "Tệp media được tải lên hệ thống lưu trữ nội bộ Xbus.",
       uploader,
       uploadedAt: new Date().toISOString(),

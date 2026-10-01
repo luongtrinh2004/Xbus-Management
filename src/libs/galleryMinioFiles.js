@@ -1,18 +1,24 @@
 import { createHash } from "node:crypto";
-import { getMinioClient, MINIO_BUCKET } from "./minioClient";
-import { classifyGalleryMedia } from "./galleryMediaTypes";
+import { ensureBucket, getMinioClient, MINIO_BUCKET } from "./minioClient.js";
+import { classifyGalleryMedia } from "./galleryMediaTypes.js";
 
 const videoTypes = { mp4: 'video/mp4', mov: 'video/quicktime', webm: 'video/webm', avi: 'video/x-msvideo', mkv: 'video/x-matroska', m4v: 'video/mp4', mpg: 'video/mpeg', mpeg: 'video/mpeg', '3gp': 'video/3gpp', mts: 'video/mp2t' };
 const mediaUrl = (key, version) => `/api/gallery/media/${key.split('/').map(encodeURIComponent).join('/')}?v=${encodeURIComponent(version || '')}`;
 const formatSize = size => `${(size / 1024 / 1024).toFixed(2)} MB`;
 
 // Database owns post content. MinIO owns the file list for folder-based posts.
-// Listing failure is propagated: an unavailable bucket must not look empty.
+// If MinIO is offline, gracefully return existing database items instead of crashing.
 export async function resolveGalleryMinioFiles(items, client = getMinioClient()) {
-  const objects = [];
-  for await (const object of client.listObjectsV2(MINIO_BUCKET, 'posts/', true)) {
-    if (object.name && !object.name.endsWith('/')) objects.push(object);
-  }
+  try {
+    const isAvailable = await ensureBucket();
+    if (!isAvailable) {
+      return items;
+    }
+
+    const objects = [];
+    for await (const object of client.listObjectsV2(MINIO_BUCKET, 'posts/', true)) {
+      if (object.name && !object.name.endsWith('/')) objects.push(object);
+    }
   // A file manually copied to posts/<postId>/ must be visible even when its
   // database entry has not been created yet.
   const knownIds = new Set(items.map(post => post.id));
@@ -73,4 +79,9 @@ export async function resolveGalleryMinioFiles(items, client = getMinioClient())
       url: files[0]?.url || '', thumbnail: files[0]?.thumbnail || '/images/gallery-image-unavailable.svg',
     };
   });
+  } catch (err) {
+    console.warn('[MinIO] Không thể lấy danh sách files từ MinIO, sử dụng dữ liệu database:', err?.message || err);
+    return items;
+  }
 }
+

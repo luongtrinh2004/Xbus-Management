@@ -20,14 +20,20 @@ export async function GET(req, { params }) {
         objectKey.split("/").some(segment => segment === ".." || segment === ".")) {
       return new NextResponse("Not Found", { status: 404 });
     }
-    const fallbackType = contentTypes[path.extname(objectKey).toLowerCase()] || "application/octet-stream";
+    const ext = path.extname(objectKey).toLowerCase();
+    const isMov = ext === ".mov";
+    const fallbackType = isMov ? "video/mp4" : (contentTypes[ext] || "application/octet-stream");
     try {
       if (await ensureBucket()) {
         const client = getMinioClient();
         const stat = await client.statObject(MINIO_BUCKET, objectKey);
+        const rawType = stat.metaData?.["content-type"];
+        const resolvedType = isMov ? "video/mp4" : (rawType || fallbackType);
         return await createMediaResponse(req, {
           size: stat.size,
-          contentType: stat.metaData?.["content-type"] || fallbackType,
+          etag: stat.etag ? `"${stat.etag}"` : undefined,
+          lastModified: stat.lastModified,
+          contentType: resolvedType,
           getStream: range => range
             ? client.getPartialObject(MINIO_BUCKET, objectKey, range.start, range.end - range.start + 1)
             : client.getObject(MINIO_BUCKET, objectKey),

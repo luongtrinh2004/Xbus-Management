@@ -79,7 +79,7 @@ const buildFundResponse = (fund, allFunds) => {
   };
 };
 
-const buildAllFundsResponse = (funds, users = []) => {
+const buildAllFundsResponse = (funds, users = [], allFundsList = null) => {
   const names = new Map(users.map((user) => [user.id, user.name]));
   const incomes = funds.flatMap((fund) => [
     ...(fund.incomes || []).map((income) => ({
@@ -111,20 +111,55 @@ const buildAllFundsResponse = (funds, users = []) => {
   ]);
   const expenses = funds.flatMap((fund) => fund.expenses || []);
 
+  const membersMap = new Map();
+  for (const fund of funds) {
+    for (const m of fund.members || []) {
+      if (m.rosterHidden) continue;
+      const key = m.userId;
+      const existing = membersMap.get(key) || {
+        ...m,
+        id: m.userId,
+        name: m.memberName || names.get(m.userId) || "Nhân sự",
+        requiredAmount: 0,
+        amount: 0,
+        paidCount: 0,
+        totalPeriods: 0,
+        paidAt: null,
+      };
+      existing.requiredAmount += Number(m.requiredAmount || 0);
+      existing.amount += m.paid ? Number(m.amount || 0) : 0;
+      existing.totalPeriods += 1;
+      if (m.paid) {
+        existing.paidCount += 1;
+        if (
+          !existing.paidAt ||
+          (m.paidAt && new Date(m.paidAt) > new Date(existing.paidAt))
+        ) {
+          existing.paidAt = m.paidAt;
+        }
+      }
+      membersMap.set(key, existing);
+    }
+  }
+  const members = [...membersMap.values()].map((m) => ({
+    ...m,
+    paid: m.amount >= m.requiredAmount && m.requiredAmount > 0,
+    difference: m.amount - m.requiredAmount,
+  }));
+
   return {
     id: "all",
     month: null,
     year: null,
     isAllPeriods: true,
-    members: [],
+    members,
     incomes,
     expenses,
     ...summarizeFundCash(funds),
-    // Member payments are already included as income rows in all-period mode.
     memberIncome: 0,
-    paidCount: 0,
-    totalMembers: 0,
-    availablePeriods: funds
+    paidCount: members.filter((m) => m.paid).length,
+    totalMembers: members.length,
+    availablePeriods: (allFundsList || funds)
       .map((item) => ({ month: item.month, year: item.year }))
       .sort((a, b) => b.year - a.year || b.month - a.month),
   };
@@ -139,6 +174,8 @@ export async function GET(req) {
     const month = searchParams.get("month") || null;
     const year = searchParams.get("year") || null;
     const allPeriods = searchParams.get("all") === "1";
+    const fromParam = searchParams.get("from") || null;
+    const toParam = searchParams.get("to") || null;
 
     const allFunds = await getFunds();
     const current = currentFundPeriod();
@@ -182,7 +219,23 @@ export async function GET(req) {
     if (changed) await saveFundSnapshots(allFunds);
 
     if (allPeriods)
-      return NextResponse.json(buildAllFundsResponse(allFunds, users));
+      return NextResponse.json(buildAllFundsResponse(allFunds, users, allFunds));
+
+    if (fromParam && toParam) {
+      if (fromParam === toParam) {
+        const [y, m] = fromParam.split("-").map(Number);
+        const singleFund = allFunds.find((f) => f.month === m && f.year === y);
+        if (singleFund)
+          return NextResponse.json(buildFundResponse(singleFund, allFunds));
+      }
+      const filteredFunds = allFunds.filter((f) => {
+        const k = periodKey(f);
+        return k >= fromParam && k <= toParam;
+      });
+      return NextResponse.json(
+        buildAllFundsResponse(filteredFunds, users, allFunds),
+      );
+    }
 
     // Lấy quỹ hiện tại (mới nhất hoặc theo tháng/năm)
     let fund = null;

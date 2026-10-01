@@ -1,9 +1,14 @@
 "use client";
+import { getAlbumLink } from "@/libs/galleryAlbumLink";
+import { startGalleryBackgroundUpload, isGalleryUploadActive } from "@/libs/galleryBackgroundUpload";
+import { toast } from "react-toastify";
+import Button from "@mui/material/Button";
 
 import { useState } from "react";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardHeader from "@mui/material/CardHeader";
+import LinearProgress from "@mui/material/LinearProgress";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import Avatar from "@mui/material/Avatar";
@@ -15,6 +20,12 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Tooltip from "@mui/material/Tooltip";
 import { renderWithMentions } from "./mentionUtils";
+
+const uploadSize = value => {
+  const bytes = Number(value) || 0;
+  if (bytes >= 1e9) return `${(bytes / 1e9).toFixed(2)} GB`;
+  return `${(bytes / 1e6).toFixed(1)} MB`;
+};
 
 function formatRelativeTime(dateString) {
   try {
@@ -196,7 +207,7 @@ export default function MediaCard({
 
       {/* 2. Media Area: Fixed aspect ratio (Click to open full view) */}
       <Box
-        onClick={onClick}
+        onClick={item.files?.length === 0 ? undefined : onClick}
         sx={{
           position: "relative",
           width: "100%",
@@ -211,7 +222,7 @@ export default function MediaCard({
           <Box
             component="video"
             src={`${item.url}#t=0.5`}
-            preload="metadata"
+            preload="none"
             muted
             playsInline
             sx={{
@@ -430,7 +441,105 @@ export default function MediaCard({
         </Tooltip>
       </Box>
 
-      {/* 4. Content Area: Equal Height Flex Distribution */}
+      {/* 4. Content Area: Minimal Upload Progress */}
+      {item.uploadState && item.uploadState.state !== "completed" && (() => {
+        const sessions = item.uploadState.sessions || [];
+        const uploadedTotal = sessions.reduce((sum, s) => sum + (s.uploadedBytes || 0), 0);
+        const sizeTotal = sessions.reduce((sum, s) => sum + s.size, 0);
+
+        return (
+          <Box
+            sx={{
+              mx: 2,
+              my: 1.5,
+              p: 2,
+              borderRadius: 1.5,
+              bgcolor: "action.hover",
+              border: "1px solid",
+              borderColor: "divider",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 0.75 }}>
+              <Typography variant="body2" sx={{ fontWeight: 600, fontSize: "0.825rem" }}>
+                {item.uploadState.state === "failed" ? "Tải lên gặp sự cố" : "Đang tải lên / xử lý tệp"}
+              </Typography>
+              <Typography variant="caption" sx={{ fontWeight: 700, color: "primary.main" }}>
+                {item.uploadState.progress || 0}%
+              </Typography>
+            </Box>
+
+            <LinearProgress
+              variant="determinate"
+              value={item.uploadState.progress || 0}
+              sx={{ height: 6, borderRadius: 1, mb: 1 }}
+            />
+
+            <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.75rem", display: "block" }}>
+              Đã tải {uploadSize(uploadedTotal)} / {uploadSize(sizeTotal)}
+            </Typography>
+
+            <Typography variant="caption" sx={{ display: "block", mt: 1 }}>
+              Đã sẵn sàng: {item.files?.length || 0} ảnh/video · File hoàn tất sẽ xuất hiện tự động.
+            </Typography>
+            {sessions.filter(s => s.state === "processing").map(s => (
+              <Typography key={`processing-${s.sessionId}`} variant="caption" sx={{ display: "block" }}>
+                {s.name}: {s.totalFiles ? `Đã xử lý ${s.readyFiles || 0}/${s.totalFiles} file` : "Đang ghép file / mở tệp nén…"}
+              </Typography>
+            ))}
+            {sessions.some(s => s.state === "uploading") && !isGalleryUploadActive(item.id) && (
+              <Typography variant="caption" color="warning.main" sx={{ display: "block", mt: 1 }}>
+                Tab này không truyền file. Nếu đã F5 hoặc mất kết nối, chọn lại file gốc để tiếp tục từ phần đã lưu.
+              </Typography>
+            )}
+            {sessions.filter(s => s.error).map(s => <Typography key={s.sessionId} variant="caption" color="error" sx={{ display: "block" }}>{s.name}: {s.error}</Typography>)}
+            {canEdit && sessions.some((session) => session.state === "uploading") && (
+              <Box sx={{ mt: 1 }}>
+                <Button
+                  component="label"
+                  size="small"
+                  variant="outlined"
+                  fullWidth
+                  sx={{ fontSize: "0.72rem", py: 0.25, textTransform: "none" }}
+                  onClick={(event) => event.stopPropagation()}
+                >
+                  Chọn lại file gốc để tiếp tục sau F5
+                  <input
+                    hidden
+                    type="file"
+                    multiple
+                    onChange={async (event) => {
+                      const selected = Array.from(event.target.files || []);
+                      event.target.value = "";
+                      const uploads = selected.map((file) => {
+                        const session = item.uploadState.sessions.find(
+                          (s) =>
+                            s.name === file.name &&
+                            s.size === file.size &&
+                            s.state === "uploading"
+                        );
+                        return session ? { file, sessionId: session.sessionId, resume: true } : null;
+                      });
+                      if (uploads.some((file) => !file))
+                        return toast.error("Hãy chọn đúng file gốc đang tải của bài đăng này");
+                      try {
+                        await startGalleryBackgroundUpload(item.id, uploads);
+                      } catch (error) {
+                        toast.error(error.message);
+                      }
+                    }}
+                  />
+                </Button>
+              </Box>
+            )}
+          </Box>
+        );
+      })()}
+      {item.postType === "album_link" && getAlbumLink(item.description) && (
+        <Button component="a" href={getAlbumLink(item.description)} target="_blank" rel="noopener noreferrer" onClick={event => event.stopPropagation()} sx={{ mx: 2, mt: 1 }} variant="outlined" startIcon={<i className="tabler-external-link" />}>
+          Mở album
+        </Button>
+      )}
       <CardContent
         sx={{
           px: 2,
@@ -459,13 +568,14 @@ export default function MediaCard({
               whiteSpace: "nowrap",
               width: "100%",
             }}
-            onClick={onClick}
+            onClick={item.files?.length === 0 ? undefined : onClick}
           >
             {isNoTitle ? displayTitle : renderWithMentions(displayTitle)}
           </Typography>
         </Box>
 
         {/* Mô tả chi tiết bài đăng (Fixed height box: 36px) */}
+        {item.postType !== "album_link" && (
         <Box sx={{ minHeight: 36, mb: 1, display: "flex", alignItems: "flex-start" }}>
           <Typography
             variant="body2"
@@ -482,11 +592,12 @@ export default function MediaCard({
               cursor: "pointer",
               width: "100%",
             }}
-            onClick={onClick}
+            onClick={item.files?.length === 0 ? undefined : onClick}
           >
             {isNoDesc ? displayDescription : renderWithMentions(displayDescription)}
           </Typography>
         </Box>
+        )}
 
         {/* Link xem tất cả bình luận ở đáy card (mt: "auto", Fixed height box: 20px) */}
         <Box sx={{ mt: "auto", minHeight: 20, display: "flex", alignItems: "center" }}>
@@ -499,7 +610,7 @@ export default function MediaCard({
               cursor: "pointer",
               "&:hover": { color: "primary.main" },
             }}
-            onClick={onClick}
+            onClick={item.files?.length === 0 ? undefined : onClick}
           >
             {(item.comments?.length || 0) > 0
               ? `Xem tất cả ${item.comments.length} bình luận`

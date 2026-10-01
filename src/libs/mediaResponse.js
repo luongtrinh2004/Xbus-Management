@@ -24,15 +24,20 @@ export function parseMediaRange(header, size) {
   return { start, end };
 }
 
-export async function createMediaResponse(req, { size, contentType, getStream }) {
-  // Without a matching validator, If-Range must receive the full representation.
-  const range = req.method === "HEAD" || req.headers.has("if-range")
+export async function createMediaResponse(req, { size, contentType, getStream, etag, lastModified }) {
+  const validator = req.headers.get("if-range");
+  const modified = lastModified ? new Date(lastModified).toUTCString() : null;
+  const matches = validator && ((etag && !etag.startsWith("W/") && validator === etag) || (modified && validator === modified));
+  const range = req.method === "HEAD" || (validator && !matches)
     ? null : parseMediaRange(req.headers.get("range"), size);
   const headers = {
     "Content-Type": contentType,
     "Accept-Ranges": "bytes",
     "Cache-Control": "public, max-age=31536000, immutable",
+    "X-Accel-Buffering": "no",
   };
+  if (etag) headers["ETag"] = etag;
+  if (modified) headers["Last-Modified"] = modified;
   if (range?.unsatisfiable) {
     return new Response(null, {
       status: 416,

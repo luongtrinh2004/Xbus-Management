@@ -12,8 +12,9 @@ const imageMimes = {
 export const galleryMediaAccept = `image/*,video/*,.zip,.rar,${Object.keys(imageMimes).map(ext => `.${ext}`).join(',')}`;
 export function classifyGalleryMedia(file) {
   const extension = (file.name || '').split('.').pop().toLowerCase();
-  const mimeType = imageMimes[extension] || file.type || 'application/octet-stream';
-  return { mimeType, isImage: mimeType.startsWith('image/'), isVideo: mimeType.startsWith('video/') };
+  const videoMimes = { mp4: 'video/mp4', mov: 'video/quicktime', webm: 'video/webm', m4v: 'video/mp4', mkv: 'video/x-matroska', avi: 'video/x-msvideo', mpg: 'video/mpeg', mpeg: 'video/mpeg', mts: 'video/mp2t', '3gp': 'video/3gpp' };
+  const mimeType = imageMimes[extension] || videoMimes[extension] || file.type || 'application/octet-stream';
+  return { mimeType, isArchive: ['zip', 'rar'].includes(extension), isImage: mimeType.startsWith('image/'), isVideo: mimeType.startsWith('video/') };
 }
 export function galleryImageSource(file) {
   if (file?.thumbnail === '/images/gallery-image-unavailable.svg') return file.thumbnail;

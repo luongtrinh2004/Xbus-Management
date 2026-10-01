@@ -16,6 +16,7 @@ export const MINIO_BUCKET = process.env.MINIO_BUCKET || "xbus-gallery";
 
 let clientInstance = null;
 let bucketInitialized = false;
+let lastWarnTime = 0;
 
 export function getMinioClient() {
   if (!clientInstance) {
@@ -58,7 +59,11 @@ export async function ensureBucket() {
     bucketInitialized = true;
     return true;
   } catch (err) {
-    console.warn("[MinIO] Không thể kết nối hoặc khởi tạo bucket MinIO:", err?.message || err);
+    const now = Date.now();
+    if (now - lastWarnTime > 30000) {
+      console.warn("[MinIO] Không thể kết nối hoặc khởi tạo bucket MinIO:", err?.message || err);
+      lastWarnTime = now;
+    }
     return false;
   }
 }

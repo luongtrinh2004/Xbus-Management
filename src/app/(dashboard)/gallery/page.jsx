@@ -159,7 +159,21 @@ function GalleryContent() {
       const res = await fetch(`/api/gallery?${params.toString()}`);
       if (res.ok) {
         const data = await res.json();
-        setMediaList(data.items || []);
+        setMediaList(previous => (data.items || []).map(post => {
+          const local = previous.find(item => item.id === post.id)?.uploadState;
+          if (!local || !post.uploadState || post.uploadState.state === "completed") return post;
+          const sessions = post.uploadState.sessions.map(session => {
+            const before = local.sessions?.find(item => item.sessionId === session.sessionId);
+            return before && ["uploading", "processing"].includes(session.state)
+              ? { ...session, progress: Math.max(session.progress, before.progress || 0),
+                uploadedBytes: Math.max(session.uploadedBytes || 0, before.uploadedBytes || 0),
+                bytesPerSecond: session.state === "uploading" && Date.now() - (before.measuredAt || 0) < 10000 ? before.bytesPerSecond || 0 : 0,
+                measuredAt: before.measuredAt } : session;
+          });
+          const size = sessions.reduce((sum, session) => sum + session.size, 0);
+          return { ...post, uploadState: { ...post.uploadState, sessions,
+            progress: size ? Math.round(sessions.reduce((sum, session) => sum + session.size * session.progress, 0) / size) : 0 } };
+        }));
         if (data.storage) {
           setStorageStats(data.storage);
         }
@@ -190,13 +204,30 @@ function GalleryContent() {
     }
   }, [searchParams, mediaList]);
 
-  // Refresh object lists while the gallery is visible, and on return to the tab.
+  const hasPendingUploads = mediaList.some(post => post.uploadState?.sessions?.some(s => ["uploading", "processing"].includes(s.state)));
+  // Refresh completed MinIO objects even while other files in a post are processing.
   useEffect(() => {
     const refresh = () => { if (document.visibilityState === "visible") fetchGalleryData(true); };
-    const timer = setInterval(refresh, 30000);
+    const timer = setInterval(refresh, hasPendingUploads ? 2000 : 5000);
     window.addEventListener("focus", refresh);
     return () => { clearInterval(timer); window.removeEventListener("focus", refresh); };
-  }, [fetchGalleryData]);
+  }, [fetchGalleryData, hasPendingUploads]);
+
+  useEffect(() => {
+    const progress = event => {
+      const { postId, sessionId, progress, state, error, uploadedBytes, totalBytes, bytesPerSecond, measuredAt } = event.detail;
+      setMediaList(previous => previous.map(post => {
+        if (post.id !== postId) return post;
+        const sessions = (post.uploadState?.sessions || post.uploadSessions || []).map(session =>
+          session.sessionId === sessionId ? { ...session, progress, state, error, uploadedBytes, totalBytes, bytesPerSecond, measuredAt } : session);
+        const size = sessions.reduce((n,s) => n+s.size,0);
+        return { ...post, uploadState: { sessions, state: sessions.some(s=>s.state==="failed") ? "failed" : "uploading",
+          progress: size ? Math.round(sessions.reduce((n,s)=>n+s.size*(s.progress||0),0)/size) : 0 } };
+      }));
+    };
+    window.addEventListener("gallery-upload-progress", progress);
+    return () => window.removeEventListener("gallery-upload-progress", progress);
+  }, []);
 
   // Active item for Lightbox
   const activeMediaItem = useMemo(() => {

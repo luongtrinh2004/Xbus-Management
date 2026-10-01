@@ -89,9 +89,9 @@ else
 fi
 
 export XBUS_IMAGE="${IMAGE_NAME}"
-$DOCKER_COMPOSE pull minio xbus-office
-$DOCKER_COMPOSE up --detach --no-build minio
-$DOCKER_COMPOSE up --detach --no-build --force-recreate xbus-office
+$DOCKER_COMPOSE pull minio redis xbus-office gallery-worker
+$DOCKER_COMPOSE up --detach --no-build minio redis
+$DOCKER_COMPOSE up --detach --no-build --force-recreate xbus-office gallery-worker
 $DOCKER_COMPOSE ps
 docker image prune --force
 REMOTE_SCRIPT

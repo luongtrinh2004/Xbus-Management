@@ -1,3 +1,4 @@
+import { withGalleryUploadProgress } from "@/libs/galleryUploadSessions";
 import { resolveGalleryMinioFiles } from "@/libs/galleryMinioFiles";
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
@@ -108,7 +109,7 @@ export async function GET(req) {
     const rawItems = Array.isArray(data.items) ? data.items : [];
 
     // Normalize to Post-based representation (1 Post = 1 Card on UI)
-    const allPosts = await resolveGalleryMinioFiles(normalizeToPosts(rawItems));
+    const allPosts = await withGalleryUploadProgress(await resolveGalleryMinioFiles(normalizeToPosts(rawItems)));
 
     // Calculate real storage statistics across every sub-file
     let usedBytes = 0;

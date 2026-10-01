@@ -1,0 +1,20 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import vm from 'node:vm';
+import ejs from 'ejs';
+import {match} from 'path-to-regexp';
+import {createBullBoard} from '@bull-board/api';
+import {BullMQAdapter} from '@bull-board/api/bullMQAdapter';
+const source=fs.readFileSync('src/libs/nextBullBoardAdapter.js','utf8').replace(/^import .*;\n/gm,'').replaceAll('export ','');
+test('native Bull Board renders its assets and denies non-admin access',async()=>{
+ let token={id:'admin',role:'admin'};
+ const ctx=vm.createContext({fs,path,ejs,match,createBullBoard,BullMQAdapter,Response,URL,process,getToken:async()=>token,getGalleryQueue:()=>({name:'gallery-upload',opts:{},metaValues:{version:'bullmq:6'}})});
+ vm.runInContext(source,ctx);
+ const request=segments=>ctx.handleBullBoardRequest(new Request('http://localhost/bull-board/'+segments.join('/')),{params:{path:segments}});
+ const html=await request([]);assert.equal(html.status,200);const body=await html.text();assert.match(body,/Xbus/);assert.match(body,/static/);
+ const asset=await request(['static','images','logo.svg']);assert.equal(asset.status,200);assert.match(await asset.text(),/<svg/);
+ token={id:'user',role:'user'};assert.equal((await request([])).status,403);assert.equal((await request(['static','images','logo.svg'])).status,403);
+ token=null;assert.equal((await request(['api','queues'])).status,401);
+});

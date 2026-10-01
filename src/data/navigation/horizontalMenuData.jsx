@@ -18,26 +18,10 @@ const horizontalMenuData = [
     roles: ["user", "assistant", "admin"],
   },
   {
-    label: "Quỹ phòng",
+    label: "Tài chính",
+    href: "/fund",
     icon: "tabler-wallet",
     roles: ["user", "assistant", "admin"],
-    children: [
-      {
-        label: "Nguồn thu",
-        href: "/fund?section=income",
-        roles: ["user", "assistant", "admin"],
-      },
-      {
-        label: "Tiền chi",
-        href: "/fund?section=expense",
-        roles: ["user", "assistant", "admin"],
-      },
-      {
-        label: "Danh sách đóng quỹ ",
-        href: "/fund?section=members",
-        roles: ["user", "assistant", "admin"],
-      },
-    ],
   },
   {
     label: "Quản lý tài sản",
@@ -82,6 +66,12 @@ const horizontalMenuData = [
         label: "QR đóng quỹ",
         href: "/settings?section=qr",
         roles: ["assistant", "admin"],
+      },
+      {
+        label: "Hàng đợi Bull Board",
+        href: "/bull-board",
+        icon: "tabler-cpu",
+        roles: ["admin"],
       },
     ],
   },

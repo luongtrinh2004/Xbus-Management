@@ -43,6 +43,7 @@ import { resolveAvatar } from "@/utils/getDefaultAvatar";
 import { toast } from "react-toastify";
 import ConfirmDialog from "@components/ConfirmDialog";
 import FundStatistics from "./components/FundStatistics";
+import FundOverview from "./components/FundOverview";
 import {
   fundPaymentStatus,
   minimumOnlinePaymentAmount,
@@ -105,7 +106,7 @@ export default function FundPage() {
   const [periodPickerYear, setPeriodPickerYear] = useState(2026);
   const [loading, setLoading] = useState(true);
   const [membersOpen, setMembersOpen] = useState(true);
-  const [activeSection, setActiveSection] = useState("income");
+  const [activeSection, setActiveSection] = useState("overview");
   const [dialog, setDialog] = useState("");
   const [editingId, setEditingId] = useState("");
   const [incomeFilter, setIncomeFilter] = useState("all");
@@ -158,7 +159,7 @@ export default function FundPage() {
   useEffect(() => {
     const section = searchParams.get("section");
     setActiveSection(
-      ["income", "expense", "members"].includes(section) ? section : "income",
+      ["overview", "income", "expense", "members"].includes(section) ? section : "overview",
     );
     const returnedOrderCode = searchParams.get("orderCode");
     if (
@@ -167,6 +168,10 @@ export default function FundPage() {
     )
       setPendingOrderCode(returnedOrderCode);
   }, [searchParams]);
+
+  const [isAll, setIsAll] = useState(false);
+  const [fromMonth, setFromMonth] = useState("");
+  const [toMonth, setToMonth] = useState("");
 
   const loadFund = async (selected) => {
     const isAllPeriods = selected === "all";
@@ -181,8 +186,21 @@ export default function FundPage() {
     if (!response.ok) throw new Error("Không thể tải dữ liệu quỹ");
     const data = await response.json();
     setFund(data);
-    if (!selected && data.month)
-      setPeriod(`${String(data.month).padStart(2, "0")}/${data.year}`);
+    if (!selected && data.month && data.year) {
+      const p = `${String(data.month).padStart(2, "0")}/${data.year}`;
+      setPeriod(p);
+      const k = `${data.year}-${String(data.month).padStart(2, "0")}`;
+      setFromMonth(k);
+      setToMonth(k);
+      setIsAll(false);
+    }
+  };
+
+  const loadFundRange = async (from, to) => {
+    const response = await fetch(`/api/funds?from=${from}&to=${to}`);
+    if (!response.ok) throw new Error("Không thể tải dữ liệu quỹ");
+    const data = await response.json();
+    setFund(data);
   };
 
   useEffect(() => {
@@ -391,13 +409,120 @@ export default function FundPage() {
     [users, fund, session?.user?.id, minimumAmounts],
   );
 
-  const isAllPeriods = period === "all";
+  const isAllPeriods =
+    isAll ||
+    period === "all" ||
+    (fromMonth && toMonth && fromMonth !== toMonth);
+
+  const [allAvailablePeriods, setAllAvailablePeriods] = useState([]);
+
+  useEffect(() => {
+    if (fund?.availablePeriods?.length) {
+      setAllAvailablePeriods((prev) => {
+        if (!prev.length || fund.availablePeriods.length > prev.length) {
+          return fund.availablePeriods
+            .map((p) => ({
+              key: `${p.year}-${String(p.month).padStart(2, "0")}`,
+              label: `Tháng ${String(p.month).padStart(2, "0")}/${p.year}`,
+              month: p.month,
+              year: p.year,
+            }))
+            .sort((a, b) => a.key.localeCompare(b.key));
+        }
+        return prev;
+      });
+    }
+  }, [fund?.availablePeriods]);
+
+  const availablePeriods = useMemo(() => {
+    if (allAvailablePeriods.length > 0) return allAvailablePeriods;
+    return (fund?.availablePeriods || [])
+      .map((p) => ({
+        key: `${p.year}-${String(p.month).padStart(2, "0")}`,
+        label: `Tháng ${String(p.month).padStart(2, "0")}/${p.year}`,
+        month: p.month,
+        year: p.year,
+      }))
+      .sort((a, b) => a.key.localeCompare(b.key));
+  }, [allAvailablePeriods, fund?.availablePeriods]);
+
+  const handleSelectAll = async () => {
+    setIsAll(true);
+    setLoadingPeriod(true);
+    try {
+      await loadFund("all");
+      setPeriod("all");
+    } catch (e) {
+      toast.error(e.message);
+    } finally {
+      setLoadingPeriod(false);
+    }
+  };
+
+  const handleFromChange = async (val) => {
+    if (val === "all") {
+      handleSelectAll();
+      return;
+    }
+    const currentTo = toMonth || val;
+    const finalTo = currentTo < val ? val : currentTo;
+    setIsAll(false);
+    setFromMonth(val);
+    setToMonth(finalTo);
+    setLoadingPeriod(true);
+    try {
+      if (val === finalTo) {
+        const [y, m] = val.split("-").map(Number);
+        await loadFund(`${String(m).padStart(2, "0")}/${y}`);
+        setPeriod(`${String(m).padStart(2, "0")}/${y}`);
+      } else {
+        await loadFundRange(val, finalTo);
+        setPeriod(`${val}_${finalTo}`);
+      }
+    } catch (e) {
+      toast.error(e.message);
+    } finally {
+      setLoadingPeriod(false);
+    }
+  };
+
+  const handleToChange = async (val) => {
+    if (val === "all") {
+      handleSelectAll();
+      return;
+    }
+    const currentFrom = fromMonth || val;
+    const finalFrom = currentFrom > val ? val : currentFrom;
+    setIsAll(false);
+    setFromMonth(finalFrom);
+    setToMonth(val);
+    setLoadingPeriod(true);
+    try {
+      if (finalFrom === val) {
+        const [y, m] = val.split("-").map(Number);
+        await loadFund(`${String(m).padStart(2, "0")}/${y}`);
+        setPeriod(`${String(m).padStart(2, "0")}/${y}`);
+      } else {
+        await loadFundRange(finalFrom, val);
+        setPeriod(`${finalFrom}_${val}`);
+      }
+    } catch (e) {
+      toast.error(e.message);
+    } finally {
+      setLoadingPeriod(false);
+    }
+  };
 
   const incomeTotals = useMemo(() => {
     const values = Object.fromEntries(incomeTypes.map(([key]) => [key, 0]));
-    if (!isAllPeriods) {
-      values.monthly_fund = fund?.memberIncome || 0;
+    if (fund?.isAllPeriods) {
+      (fund?.incomes || []).forEach((item) => {
+        values[item.category || "other"] =
+          (values[item.category || "other"] || 0) + (Number(item.amount) || 0);
+      });
+      return values;
     }
+    values.monthly_fund = fund?.memberIncome || 0;
     (fund?.incomes || []).forEach((item) => {
       if (!isAllPeriods && fund?.month && fund?.year) {
         const d = item.receivedAt || item.createdAt;
@@ -417,7 +542,7 @@ export default function FundPage() {
   const expenseTotals = useMemo(() => {
     const values = Object.fromEntries(expenseTypes.map(([key]) => [key, 0]));
     (fund?.expenses || []).forEach((item) => {
-      if (!isAllPeriods && fund?.month && fund?.year) {
+      if (!isAllPeriods && !fund?.isAllPeriods && fund?.month && fund?.year) {
         const d = item.spentAt || item.createdAt;
         if (d) {
           const key = toVietnamDateKey(d);
@@ -428,7 +553,7 @@ export default function FundPage() {
         }
       }
       values[item.category || "other"] =
-        (values[item.category || "other"] || 0) + (item.amount || 0);
+        (values[item.category || "other"] || 0) + (Number(item.amount) || 0);
     });
     return values;
   }, [fund, isAllPeriods]);
@@ -620,37 +745,42 @@ export default function FundPage() {
     }
   };
 
-  const incomeRows = useMemo(
-    () =>
-      [
-        ...(fund?.members || [])
-          .filter((member) => member.paid)
-          .map((member) => ({
-            id: `monthly-fund-${member.userId}`,
-            category: "monthly_fund",
-            userId: member.userId,
-            userName:
-              users.find((user) => user.id === member.userId)?.name || "—",
-            amount: member.amount || 0,
-            receivedAt: member.paidAt,
-            locked: true,
-          })),
-        ...(fund?.incomes || []).filter((item) => {
-          if (isAllPeriods || !fund?.month || !fund?.year) return true;
-          const d = item.receivedAt || item.createdAt;
-          if (!d) return true;
-          const key = toVietnamDateKey(d);
-          if (!/^\d{4}-\d{2}/.test(key)) return true;
-          const [y, m] = key.split("-").map(Number);
-          return y === fund.year && m === fund.month;
-        }),
-      ].sort(
+  const incomeRows = useMemo(() => {
+    if (fund?.isAllPeriods) {
+      return (fund?.incomes || []).sort(
         (a, b) =>
-          new Date(a.receivedAt || a.createdAt) -
-          new Date(b.receivedAt || b.createdAt),
-      ),
-    [fund, users, isAllPeriods],
-  );
+          new Date(a.receivedAt || a.createdAt || a.date) -
+          new Date(b.receivedAt || b.createdAt || b.date),
+      );
+    }
+    return [
+      ...(fund?.members || [])
+        .filter((member) => member.paid)
+        .map((member) => ({
+          id: `monthly-fund-${member.userId}`,
+          category: "monthly_fund",
+          userId: member.userId,
+          userName:
+            users.find((user) => user.id === member.userId)?.name || "—",
+          amount: member.amount || 0,
+          receivedAt: member.paidAt,
+          locked: true,
+        })),
+      ...(fund?.incomes || []).filter((item) => {
+        if (isAllPeriods || !fund?.month || !fund?.year) return true;
+        const d = item.receivedAt || item.createdAt;
+        if (!d) return true;
+        const key = toVietnamDateKey(d);
+        if (!/^\d{4}-\d{2}/.test(key)) return true;
+        const [y, m] = key.split("-").map(Number);
+        return y === fund.year && m === fund.month;
+      }),
+    ].sort(
+      (a, b) =>
+        new Date(a.receivedAt || a.createdAt) -
+        new Date(b.receivedAt || b.createdAt),
+    );
+  }, [fund, users, isAllPeriods]);
   const filteredIncomeRows = useMemo(
     () =>
       incomeFilter === "all"
@@ -670,7 +800,13 @@ export default function FundPage() {
   );
   const filteredExpenseRows = useMemo(() => {
     const baseList = (fund?.expenses || []).filter((item) => {
-      if (isAllPeriods || !fund?.month || !fund?.year) return true;
+      if (
+        isAllPeriods ||
+        fund?.isAllPeriods ||
+        !fund?.month ||
+        !fund?.year
+      )
+        return true;
       const d = item.spentAt || item.createdAt;
       if (!d) return true;
       const key = toVietnamDateKey(d);
@@ -840,6 +976,82 @@ export default function FundPage() {
       `quy_phong_${period.replace("/", "_")}.xlsx`,
     );
 
+  const exportIncomes = () => {
+    if (!visibleIncomeRows.length) return;
+    const rows = visibleIncomeRows.map((item) => ({
+      "Nguồn thu":
+        incomeTypes.find(([k]) => k === item.category)?.[1] ||
+        (item.category === "monthly_fund" ? "Quỹ đóng thành viên" : "Thu khác"),
+      "Nội dung": item.note || item.title || "—",
+      "Người nộp": item.userName || "—",
+      "Kỳ quỹ":
+        item.month && item.year
+          ? `Tháng ${String(item.month).padStart(2, "0")}/${item.year}`
+          : isAll
+            ? "Tất cả"
+            : period,
+      "Ngày thu": formatVietnamDate(item.receivedAt || item.createdAt),
+      "Số tiền (VNĐ)": item.amount || 0,
+    }));
+    exportJsonToExcel(
+      rows,
+      `danh_sach_nguon_thu_${Date.now()}.xlsx`,
+      "Nguồn thu",
+    );
+  };
+
+  const exportExpenses = () => {
+    if (!visibleExpenseRows.length) return;
+    const rows = visibleExpenseRows.map((item) => ({
+      "Khoản chi":
+        expenseTypes.find(([k]) => k === item.category)?.[1] || "Chi khác",
+      "Nội dung": item.note || item.title || "—",
+      "Người thực hiện": item.createdByName || "—",
+      "Ngày chi": formatVietnamDate(item.spentAt || item.createdAt),
+      "Số tiền (VNĐ)": item.amount || 0,
+    }));
+    exportJsonToExcel(
+      rows,
+      `danh_sach_khoan_chi_${Date.now()}.xlsx`,
+      "Khoản chi",
+    );
+  };
+
+  const handleExportExcel = () => {
+    if (activeSection === "income") {
+      exportIncomes();
+    } else if (activeSection === "expense") {
+      exportExpenses();
+    } else if (activeSection === "members") {
+      exportMembers();
+    }
+  };
+
+  const handleSectionChange = (val) => {
+    setActiveSection(val);
+    router.push(`/fund?section=${val}`);
+    if (val === "members") {
+      if (isAll || fund?.isAllPeriods || (fromMonth && toMonth && fromMonth !== toMonth)) {
+        const targetPeriod = (period && period !== "all")
+          ? period
+          : (availablePeriods?.[availablePeriods.length - 1]?.key
+            ? `${String(availablePeriods[availablePeriods.length - 1].month).padStart(2, "0")}/${availablePeriods[availablePeriods.length - 1].year}`
+            : "");
+        if (targetPeriod) {
+          choosePeriod(targetPeriod);
+        }
+      }
+    } else if (val === "income" || val === "expense") {
+      if (isAll) {
+        if (!fund?.isAllPeriods) {
+          loadFund("all");
+        }
+      } else if (fromMonth && toMonth && fromMonth !== toMonth) {
+        loadFundRange(fromMonth, toMonth);
+      }
+    }
+  };
+
   if (loading)
     return (
       <Box sx={{ minHeight: 360, display: "grid", placeItems: "center" }}>
@@ -854,195 +1066,266 @@ export default function FundPage() {
 
   return (
     <Box>
-      <Card sx={{ mb: 4 }}>
-        <CardHeader
+      {/* Thanh điều hướng Tab giữa 4 phân hệ Tài chính */}
+      <Box sx={{ mb: 4, borderBottom: "1px solid", borderColor: "divider" }}>
+        <Tabs
+          value={activeSection}
+          onChange={(_, val) => handleSectionChange(val)}
+          variant="scrollable"
+          scrollButtons="auto"
+          allowScrollButtonsMobile
           sx={{
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: 2,
-            "& .MuiCardHeader-action": {
-              m: 0,
-              width: { xs: "100%", sm: "auto" },
+            "& .MuiTab-root": {
+              minHeight: 48,
+              fontSize: "0.9375rem",
+              fontWeight: 600,
+              textTransform: "none",
+              gap: 1,
             },
           }}
-          title={
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-              <Avatar
-                variant="rounded"
-                sx={{ bgcolor: "rgba(115,103,240,.12)", color: "primary.main" }}
-              >
-                <i className="tabler-wallet" />
-              </Avatar>
-              <Box>
-                <Typography variant="h5" fontWeight={700}>
-                  Quản lý quỹ phòng
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Theo dõi nguồn thu, khoản chi và số dư minh bạch theo từng kỳ
-                </Typography>
-              </Box>
-            </Box>
-          }
-          action={
-            <Box
-              sx={{
-                display: "flex",
-                gap: 1,
-                alignItems: "center",
-                width: { xs: "100%", sm: "auto" },
-              }}
-            >
-              <Button
-                variant="outlined"
-                color="inherit"
-                disabled={loadingPeriod}
-                endIcon={<i className="tabler-chevron-down" />}
-                onClick={(event) => {
-                  const selectedYear = Number(period?.split("/")[1]);
-                  setPeriodPickerYear(
-                    periodYears.includes(selectedYear)
-                      ? selectedYear
-                      : periodYears[0] || 2026,
-                  );
-                  setPeriodPickerAnchor(event.currentTarget);
-                }}
-                sx={{
-                  minWidth: { xs: "100%", sm: 180 },
-                  height: 40,
-                  justifyContent: "space-between",
-                  textTransform: "none",
-                }}
-              >
-                {period === "all" ? "Tất cả kỳ" : period || "Kỳ theo dõi"}
-              </Button>
-              <Popover
-                open={Boolean(periodPickerAnchor)}
-                anchorEl={periodPickerAnchor}
-                onClose={() => setPeriodPickerAnchor(null)}
-                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-                transformOrigin={{ vertical: "top", horizontal: "right" }}
-                slotProps={{ paper: { sx: { mt: 1, p: 2, width: 300 } } }}
-              >
-                <CustomTextField
-                  select
-                  fullWidth
-                  size="small"
-                  label="Năm"
-                  value={periodPickerYear}
-                  onChange={(event) =>
-                    setPeriodPickerYear(Number(event.target.value))
-                  }
-                  sx={{ mb: 2 }}
-                >
-                  {periodYears.map((year) => (
-                    <MenuItem key={year} value={year}>
-                      {year}
-                    </MenuItem>
-                  ))}
-                </CustomTextField>
-                <Box
-                  sx={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
-                    gap: 1,
-                  }}
-                >
-                  {Array.from({ length: 12 }, (_, index) => {
-                    const month = index + 1;
-                    const value = `${String(month).padStart(2, "0")}/${periodPickerYear}`;
-                    return (
-                      <Button
-                        key={value}
-                        variant={period === value ? "contained" : "tonal"}
-                        onClick={() => choosePeriod(value)}
-                        sx={{ minWidth: 0, aspectRatio: "1 / 1", p: 0 }}
-                      >
-                        {String(month).padStart(2, "0")}
-                      </Button>
-                    );
-                  })}
-                  <Button
-                    variant={isAllPeriods ? "contained" : "outlined"}
-                    onClick={() => choosePeriod("all")}
-                    sx={{ gridColumn: "span 4", textTransform: "none" }}
-                  >
-                    Tất cả kỳ
-                  </Button>
-                </Box>
-              </Popover>
-            </Box>
-          }
+        >
+          <Tab
+            value="overview"
+            label="Tổng quan"
+            icon={<i className="tabler-chart-pie" style={{ fontSize: 20 }} />}
+            iconPosition="start"
+          />
+          <Tab
+            value="income"
+            label="Nguồn thu"
+            icon={<i className="tabler-trending-up" style={{ fontSize: 20 }} />}
+            iconPosition="start"
+          />
+          <Tab
+            value="expense"
+            label="Tiền chi"
+            icon={<i className="tabler-trending-down" style={{ fontSize: 20 }} />}
+            iconPosition="start"
+          />
+          <Tab
+            value="members"
+            label="Quỹ phòng"
+            icon={<i className="tabler-users" style={{ fontSize: 20 }} />}
+            iconPosition="start"
+          />
+        </Tabs>
+      </Box>
+
+      {/* Phân hệ Tổng quan Tài chính */}
+      {activeSection === "overview" && (
+        <FundOverview
+          onNavigateSection={(sec) => {
+            setActiveSection(sec);
+            router.push(`/fund?section=${sec}`);
+          }}
         />
-        <CardContent sx={{ pt: 0 }} aria-busy={loadingPeriod}>
-          <Grid container spacing={3} sx={{ mt: 0.5 }}>
-            {[
-              {
-                label: "Tổng thu",
-                value: fund?.allTimeSummary?.totalIncome ?? fund?.totalIncome,
-                icon: "tabler-trending-up",
-                color: "success",
-              },
-              {
-                label: "Tổng chi",
-                value: fund?.allTimeSummary?.totalExpense ?? fund?.totalExpense,
-                icon: "tabler-trending-down",
-                color: "error",
-              },
-              {
-                label: "Còn lại",
-                value: fund?.allTimeSummary?.balance ?? fund?.balance,
-                icon: "tabler-wallet",
-                color:
-                  Number(fund?.allTimeSummary?.balance ?? fund?.balance) < 0
-                    ? "error"
-                    : "primary",
-              },
-            ].map((item) => (
-              <Grid key={item.label} size={{ xs: 12, sm: 4 }}>
-                <Box
-                  sx={{
-                    p: 3,
-                    height: "100%",
-                    border: "1px solid",
-                    borderColor: "divider",
-                    borderRadius: 2,
-                  }}
-                >
+      )}
+
+      {/* Các phân hệ chi tiết theo kỳ */}
+      {activeSection !== "overview" && (
+        <>
+          {/* Thanh điều khiển bộ lọc thời gian duy nhất cho từng tab */}
+          <Card
+            sx={{
+              mb: 4,
+              border: "1px solid",
+              borderColor: "divider",
+              boxShadow: "none",
+            }}
+          >
+            <CardContent sx={{ py: "12px !important", px: 3 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  flexWrap: "wrap",
+                  gap: 2,
+                }}
+              >
+                {/* Riêng tab Quỹ phòng: chọn theo kỳ tháng như ban đầu */}
+                {activeSection === "members" ? (
                   <Box
                     sx={{
                       display: "flex",
                       alignItems: "center",
-                      gap: 2,
-                      mb: 2,
+                      gap: 1.5,
+                      flexWrap: "wrap",
                     }}
                   >
-                    <Box
+                    <Typography variant="body2" fontWeight={600} color="text.secondary">
+                      Kỳ quỹ:
+                    </Typography>
+                    <Button
+                      variant="outlined"
+                      color="inherit"
+                      disabled={loadingPeriod}
+                      endIcon={<i className="tabler-chevron-down" />}
+                      onClick={(event) => {
+                        const selectedYear = Number(period?.split("/")[1]);
+                        setPeriodPickerYear(
+                          periodYears.includes(selectedYear)
+                            ? selectedYear
+                            : periodYears[0] || 2026,
+                        );
+                        setPeriodPickerAnchor(event.currentTarget);
+                      }}
                       sx={{
-                        display: "grid",
-                        placeItems: "center",
-                        color: `${item.color}.main`,
+                        minWidth: { xs: "100%", sm: 180 },
+                        height: 38,
+                        justifyContent: "space-between",
+                        textTransform: "none",
+                        fontWeight: 600,
                       }}
                     >
-                      <i className={item.icon} />
-                    </Box>
-                    <Typography color="text.secondary">{item.label}</Typography>
+                      {period === "all" ? "Tất cả kỳ" : period ? `Tháng ${period}` : "Kỳ theo dõi"}
+                    </Button>
+                    <Popover
+                      open={Boolean(periodPickerAnchor)}
+                      anchorEl={periodPickerAnchor}
+                      onClose={() => setPeriodPickerAnchor(null)}
+                      anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+                      transformOrigin={{ vertical: "top", horizontal: "left" }}
+                      slotProps={{ paper: { sx: { mt: 1, p: 2, width: 300 } } }}
+                    >
+                      <CustomTextField
+                        select
+                        fullWidth
+                        size="small"
+                        label="Năm"
+                        value={periodPickerYear}
+                        onChange={(event) =>
+                          setPeriodPickerYear(Number(event.target.value))
+                        }
+                        sx={{ mb: 2 }}
+                      >
+                        {periodYears.map((year) => (
+                          <MenuItem key={year} value={year}>
+                            {year}
+                          </MenuItem>
+                        ))}
+                      </CustomTextField>
+                      <Box
+                        sx={{
+                          display: "grid",
+                          gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+                          gap: 1,
+                        }}
+                      >
+                        {Array.from({ length: 12 }, (_, index) => {
+                          const month = index + 1;
+                          const value = `${String(month).padStart(2, "0")}/${periodPickerYear}`;
+                          return (
+                            <Button
+                              key={value}
+                              variant={period === value ? "contained" : "tonal"}
+                              onClick={() => choosePeriod(value)}
+                              sx={{ minWidth: 0, aspectRatio: "1 / 1", p: 0 }}
+                            >
+                              {String(month).padStart(2, "0")}
+                            </Button>
+                          );
+                        })}
+                        <Button
+                          variant={isAllPeriods ? "contained" : "outlined"}
+                          onClick={() => choosePeriod("all")}
+                          sx={{ gridColumn: "span 4", textTransform: "none", mt: 0.5 }}
+                        >
+                          Tất cả kỳ
+                        </Button>
+                      </Box>
+                    </Popover>
                   </Box>
-                  <Typography
-                    variant="h4"
-                    fontWeight={700}
+                ) : (
+                  /* Cụm lọc khoảng thời gian Từ kỳ - Đến kỳ cho Nguồn thu & Tiền chi */
+                  <Box
                     sx={{
-                      color: `${item.color}.main`,
-                      overflowWrap: "anywhere",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1.5,
+                      flexWrap: "wrap",
                     }}
                   >
-                    {loadingPeriod ? "—" : money(item.value || 0)}
-                  </Typography>
-                </Box>
-              </Grid>
-            ))}
-          </Grid>
-        </CardContent>
-      </Card>
+                    {/* Nút Tất cả */}
+                    <Button
+                      variant={isAll ? "contained" : "tonal"}
+                      color="primary"
+                      startIcon={<i className="tabler-calendar-stats" />}
+                      onClick={handleSelectAll}
+                      disabled={loadingPeriod}
+                      sx={{
+                        height: 38,
+                        textTransform: "none",
+                        fontWeight: 600,
+                        px: 2.5,
+                      }}
+                    >
+                      Tất cả
+                    </Button>
+
+                    {/* Lọc khoảng thời gian Từ kỳ - Đến kỳ */}
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <CustomTextField
+                        select
+                        size="small"
+                        label="Từ kỳ"
+                        value={isAll ? "all" : fromMonth}
+                        onChange={(e) => handleFromChange(e.target.value)}
+                        disabled={loadingPeriod}
+                        sx={{ width: 160 }}
+                      >
+                        <MenuItem value="all">
+                          <Typography variant="body2" color="text.secondary">
+                            — —
+                          </Typography>
+                        </MenuItem>
+                        {[...(availablePeriods || [])].reverse().map((p) => (
+                          <MenuItem key={p.key} value={p.key}>
+                            {p.label}
+                          </MenuItem>
+                        ))}
+                      </CustomTextField>
+                      <Typography variant="body2" color="text.secondary">
+                        đến
+                      </Typography>
+                      <CustomTextField
+                        select
+                        size="small"
+                        label="Đến kỳ"
+                        value={isAll ? "all" : toMonth}
+                        onChange={(e) => handleToChange(e.target.value)}
+                        disabled={loadingPeriod}
+                        sx={{ width: 160 }}
+                      >
+                        <MenuItem value="all">
+                          <Typography variant="body2" color="text.secondary">
+                            — —
+                          </Typography>
+                        </MenuItem>
+                        {[...(availablePeriods || [])].reverse().map((p) => (
+                          <MenuItem key={p.key} value={p.key}>
+                            {p.label}
+                          </MenuItem>
+                        ))}
+                      </CustomTextField>
+                    </Box>
+                  </Box>
+                )}
+
+                {/* Nút Xuất Excel */}
+                <Button
+                  variant="tonal"
+                  color="primary"
+                  startIcon={<i className="tabler-file-spreadsheet" />}
+                  onClick={handleExportExcel}
+                  disabled={loadingPeriod}
+                  sx={{ height: 38, textTransform: "none", fontWeight: 600 }}
+                >
+                  Xuất Excel
+                </Button>
+              </Box>
+            </CardContent>
+          </Card>
 
       <input
         ref={importFileRef}
@@ -2144,6 +2427,8 @@ export default function FundPage() {
 
       {activeSection === "members" && (
         <FundStatistics period={period} revision={fund} />
+      )}
+        </>
       )}
       <Dialog
         open={Boolean(cancelObligationTarget)}

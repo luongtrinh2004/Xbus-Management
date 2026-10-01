@@ -12,5 +12,5 @@ export async function GET(req) {
     queue.getJobCounts("waiting", "active", "completed", "failed", "delayed"),
     queue.getJobs(["active", "waiting", "failed", "completed"], 0, 99, true),
   ]);
-  return NextResponse.json({ counts, jobs: jobs.map(job => ({ id: job.id, name: job.name, data: job.data, progress: job.progress, failedReason: job.failedReason, timestamp: job.timestamp, finishedOn: job.finishedOn })) });
+  return NextResponse.json({ counts, jobs: await Promise.all(jobs.map(async job => ({ state: await job.getState(), id: job.id, name: job.name, data: job.data, progress: job.progress, failedReason: job.failedReason, timestamp: job.timestamp, finishedOn: job.finishedOn }))) });
 }

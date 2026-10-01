@@ -1,6 +1,30 @@
 {
   "auditLogs": [
     {
+      "id": "log_1790850439152_g0f0",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "PLAY_GALLERY_VIDEO",
+      "targetType": "GALLERY",
+      "targetId": "post_1790668794202_98v1h",
+      "details": "Phát video: @Nhân viên hệ thống — Tệp: CORTIS (코르티스) 'REDRED' Official MV - HYBE LABELS (720p, h264).mp4",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-10-01T10:27:19.152Z"
+    },
+    {
+      "id": "log_1790848065954_b1hm",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "CREATE_GALLERY_POST",
+      "targetType": "GALLERY",
+      "targetId": "post_790c198d-8ca6-48b0-aed2-f6e99ab8183e",
+      "details": "Đăng bài ảnh/video: adsfasfsfa — 1 tệp; phạm vi: Công khai",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-10-01T09:47:45.954Z"
+    },
+    {
       "id": "log_1790758006349_l9w5",
       "adminId": "usr_admin_001",
       "adminName": "Quản trị viên Hệ thống",

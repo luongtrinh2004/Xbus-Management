@@ -1,10 +1,14 @@
 "use client";
+import { startGalleryBackgroundUpload } from "@/libs/galleryBackgroundUpload";
 import {
   classifyGalleryMedia,
   galleryMediaAccept,
 } from "@/libs/galleryMediaTypes";
 
-import { useState, useRef, useEffect } from "react";
+import Tabs from "@mui/material/Tabs";
+import Tab from "@mui/material/Tab";
+import AlbumLinkUpload from "./AlbumLinkUpload";
+import { useState, useRef } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
@@ -103,6 +107,7 @@ export default function UploadModal({
   usersList = [],
 }) {
   const fileInputRef = useRef(null);
+  const [mode, setMode] = useState("media");
   const [isDragOver, setIsDragOver] = useState(false);
   const [filesQueue, setFilesQueue] = useState([]);
   const [title, setTitle] = useState("");
@@ -115,141 +120,7 @@ export default function UploadModal({
     isTagAll: false,
     taggedUserIds: [],
   });
-  const queueRef = useRef([]);
-  const uploadChainRef = useRef(Promise.resolve());
-
   const draftPostIdRef = useRef(null);
-
-  // Keep queueRef in sync with filesQueue state for async handlers
-  useEffect(() => {
-    queueRef.current = filesQueue;
-  }, [filesQueue]);
-
-  // One request at a time prevents many simultaneous multipart uploads from
-  // exhausting the browser, Next.js server, or MinIO connection pool.
-  const uploadSingleFile = (uploadItem) => {
-    return new Promise((resolve) => {
-      const formData = new FormData();
-      formData.append("file", uploadItem.file);
-      formData.append("postId", uploadItem.postId);
-      if (uploadItem.thumbnailBlob) {
-        formData.append(
-          "thumbnail",
-          uploadItem.thumbnailBlob,
-          `thumb_${Date.now()}.jpg`,
-        );
-      }
-      setFilesQueue((prev) =>
-        prev.map((q) =>
-          q.id === uploadItem.id ? { ...q, status: "uploading" } : q,
-        ),
-      );
-
-      const xhr = new XMLHttpRequest();
-      xhr.open("POST", "/api/gallery/upload/file", true);
-      xhr.upload.onprogress = (e) => {
-        if (!e.lengthComputable) return;
-        const percent = Math.min(99, Math.round((e.loaded / e.total) * 100));
-        setFilesQueue((prev) =>
-          prev.map((q) =>
-            q.id === uploadItem.id
-              ? { ...q, progress: percent, status: "uploading" }
-              : q,
-          ),
-        );
-      };
-
-      xhr.onload = () => {
-        if (xhr.status >= 200 && xhr.status < 300) {
-          try {
-            const res = JSON.parse(xhr.responseText);
-            if (res.success && res.fileData) {
-              const uploadedData = res.fileDataList || [res.fileData];
-              setFilesQueue((prev) =>
-                prev.map((q) =>
-                  q.id === uploadItem.id
-                    ? {
-                        ...q,
-                        progress: 100,
-                        status: "ready",
-                        uploadedData,
-                        extractedFiles:
-                          res.extractedFiles || uploadedData.length,
-                        previewUrl: res.fileData.thumbnail || q.previewUrl,
-                      }
-                    : q,
-                ),
-              );
-              resolve();
-              return;
-            }
-          } catch {}
-        }
-        let errorMsg = "Lỗi tải lên";
-        try {
-          errorMsg = JSON.parse(xhr.responseText)?.error || errorMsg;
-        } catch {}
-        setFilesQueue((prev) =>
-          prev.map((q) =>
-            q.id === uploadItem.id ? { ...q, status: "error", errorMsg } : q,
-          ),
-        );
-        resolve();
-      };
-      xhr.onerror = () => {
-        setFilesQueue((prev) =>
-          prev.map((q) =>
-            q.id === uploadItem.id
-              ? { ...q, status: "error", errorMsg: "Lỗi mạng" }
-              : q,
-          ),
-        );
-        resolve();
-      };
-      xhr.send(formData);
-    });
-  };
-
-  const uploadChunkedFile = async (uploadItem) => {
-    const chunkSize = 50 * 1024 * 1024;
-    const sessionId = crypto.randomUUID();
-    const totalChunks = Math.ceil(uploadItem.file.size / chunkSize);
-    setFilesQueue(prev => prev.map(q => q.id === uploadItem.id ? { ...q, status: "uploading" } : q));
-    for (let index = 0; index < totalChunks; index += 1) {
-      const form = new FormData();
-      form.append("sessionId", sessionId);
-      form.append("index", String(index));
-      form.append("chunk", uploadItem.file.slice(index * chunkSize, Math.min(uploadItem.file.size, (index + 1) * chunkSize)));
-      const response = await fetch("/api/gallery/upload/chunk", { method: "POST", body: form });
-      if (!response.ok) throw new Error((await response.json()).error || "Không thể tải chunk");
-      const progress = Math.round(((index + 1) / totalChunks) * 50);
-      setFilesQueue(prev => prev.map(q => q.id === uploadItem.id ? { ...q, progress } : q));
-    }
-    const complete = await fetch("/api/gallery/upload/complete", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sessionId, postId: uploadItem.postId, fileName: uploadItem.file.name, totalChunks }) });
-    const created = await complete.json();
-    if (!complete.ok) throw new Error(created.error || "Không thể tạo job xử lý");
-    while (true) {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      const status = await fetch(`/api/gallery/upload/job/${created.jobId}`).then(r => r.json());
-      if (status.state === "completed") {
-        const uploadedData = status.result?.files || [];
-        if (!uploadedData.length) throw new Error("Không tìm thấy ảnh hoặc video trong tệp");
-        setFilesQueue(prev => prev.map(q => q.id === uploadItem.id ? { ...q, progress: 100, status: "ready", uploadedData, extractedFiles: uploadedData.length } : q));
-        return;
-      }
-      if (["failed", "unknown"].includes(status.state)) throw new Error(status.error || "Job xử lý thất bại");
-      const progress = typeof status.progress === "number" ? 50 + Math.round(status.progress / 2) : 50;
-      setFilesQueue(prev => prev.map(q => q.id === uploadItem.id ? { ...q, progress } : q));
-    }
-  };
-
-  const enqueueUpload = (item) => {
-    uploadChainRef.current = uploadChainRef.current
-      .catch(() => {})
-      .then(() => item.file.size > 50 * 1024 * 1024 ? uploadChunkedFile(item) : uploadSingleFile(item))
-      .catch(error => setFilesQueue(prev => prev.map(q => q.id === item.id ? { ...q, status: "error", errorMsg: error.message || "Lỗi tải lên" } : q)));
-    return uploadChainRef.current;
-  };
 
   const canBrowserPreviewImage = (file) => {
     const ext = file.name.split(".").pop()?.toLowerCase();
@@ -275,7 +146,11 @@ export default function UploadModal({
 
     for (let idx = 0; idx < filesToProcess.length; idx++) {
       const file = filesToProcess[idx];
-      const { isVideo, isImage } = classifyGalleryMedia(file);
+      const { isVideo, isImage, isArchive } = classifyGalleryMedia(file);
+      if ((!isVideo && !isImage && !isArchive) || !file.size) {
+        toast.error(`Tệp không hợp lệ: ${file.name}`);
+        continue;
+      }
       let previewUrl =
         isImage && canBrowserPreviewImage(file)
           ? URL.createObjectURL(file)
@@ -306,7 +181,7 @@ export default function UploadModal({
       };
 
       setFilesQueue((prev) => [...prev, item]);
-      enqueueUpload(item);
+
     }
   };
 
@@ -332,20 +207,6 @@ export default function UploadModal({
     setFilesQueue((prev) => prev.filter((item) => item.id !== id));
   };
 
-  const handleRetryQueueItem = (id) => {
-    const item = filesQueue.find((q) => q.id === id);
-    if (item) {
-      setFilesQueue((prev) =>
-        prev.map((q) =>
-          q.id === id
-            ? { ...q, progress: 0, status: "queued", errorMsg: "" }
-            : q,
-        ),
-      );
-      enqueueUpload(item);
-    }
-  };
-
   const handleToggleTag = (tag) => {
     setSelectedTags((prev) =>
       prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
@@ -364,90 +225,32 @@ export default function UploadModal({
     }
   };
 
-  // When user clicks "Tải lên" / "Đăng bài" -> files already uploaded to MinIO!
   const handleStartUpload = async () => {
-    if (filesQueue.length === 0) {
-      toast.warning("Vui lòng chọn ít nhất 1 file ảnh hoặc video để tải lên");
-      return;
-    }
-
-    // Check if any files are still uploading
-    const stillUploading = filesQueue.some((q) =>
-      ["queued", "uploading"].includes(q.status),
-    );
-    if (stillUploading) {
-      setIsUploading(true);
-      toast.info(
-        "Đang hoàn tất tải lên các tệp, vui lòng chờ trong giây lát...",
-      );
-      // Poll briefly until ready
-      const checkInterval = setInterval(async () => {
-        const currentQueue = queueRef.current;
-        const pending = currentQueue.some((q) =>
-          ["queued", "uploading"].includes(q.status),
-        );
-        if (!pending) {
-          clearInterval(checkInterval);
-          await finalizePost(currentQueue);
-        }
-      }, 300);
-      return;
-    }
-
-    await finalizePost(filesQueue);
-  };
-
-  const finalizePost = async (queue) => {
+    if (!filesQueue.length || isUploading) return;
     setIsUploading(true);
     try {
-      const readyFiles = queue
-        .filter((q) => q.status === "ready" && q.uploadedData)
-        .flatMap((q) =>
-          Array.isArray(q.uploadedData) ? q.uploadedData : [q.uploadedData],
-        );
-
-      if (readyFiles.length === 0) {
-        toast.error("Không có tệp nào tải lên thành công. Vui lòng thử lại.");
-        setIsUploading(false);
-        return;
-      }
-
-      // Fast JSON submit: Post is created in ~10ms
-      const res = await fetch("/api/gallery/upload", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: title.trim(),
-          description: description.trim(),
-          privacy,
-          tags: selectedTags,
-          postId: draftPostIdRef.current,
-          uploadedFiles: readyFiles,
-          isTagAll:
-            /@all\b/i.test(`${title} ${description}`) || mentionsInfo.isTagAll,
-          taggedUserIds: mentionsInfo.taggedUserIds,
-        }),
+      const postId = draftPostIdRef.current;
+      const uploads = filesQueue.map(item => ({ ...item, sessionId: crypto.randomUUID() }));
+      const response = await fetch("/api/gallery/upload", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ background: true, postId, title: title.trim(), description: description.trim(),
+          privacy, tags: selectedTags, uploadedFiles: [],
+          uploads: uploads.map(item => ({ sessionId: item.sessionId, name: item.file.name, size: item.file.size })),
+          isTagAll: /@all\b/i.test(`${title} ${description}`) || mentionsInfo.isTagAll,
+          taggedUserIds: mentionsInfo.taggedUserIds }),
       });
-
-      const data = await res.json();
-      if (res.ok && data.success) {
-        onUploadSuccess(data.items, data.storage);
-        toast.success(
-          `Đã đăng tải thành công bài viết với ${readyFiles.length} tệp!`,
-        );
-        handleResetAndClose();
-      } else {
-        toast.error(data.error || "Lỗi tạo bài đăng");
-      }
-    } catch (err) {
-      console.error("[finalizePost] Lỗi:", err);
-      toast.error("Lỗi gửi dữ liệu bài đăng");
-    } finally {
-      setIsUploading(false);
-    }
+      const data = await response.json();
+      if (!response.ok) throw Error(data.error || "Không thể tạo bài đăng");
+      onUploadSuccess(data.items, data.storage);
+      void startGalleryBackgroundUpload(postId, uploads);
+      toast.info("Đã tạo bài đăng. Các tệp đang được tải lên ngầm.");
+      handleResetAndClose();
+    } catch(error) { toast.error(error.message); }
+    finally { setIsUploading(false); }
   };
 
   const handleResetAndClose = () => {
+    setMode("media");
     draftPostIdRef.current = null;
     setFilesQueue([]);
     setTitle("");
@@ -513,6 +316,11 @@ export default function UploadModal({
       </DialogTitle>
 
       <DialogContent sx={{ py: 3 }}>
+        <Tabs value={mode} onChange={(_, value) => setMode(value)} sx={{ mb: 2 }}>
+          <Tab value="media" label="Tải ảnh / video" disabled={isUploading} />
+          <Tab value="album" label="Upload URL Album" disabled={isUploading} />
+        </Tabs>
+        {mode === "album" ? <AlbumLinkUpload onUploadSuccess={onUploadSuccess} onClose={handleResetAndClose} onBusyChange={setIsUploading} /> : <>
         {/* Hidden File Input */}
         <input
           ref={fileInputRef}
@@ -713,7 +521,7 @@ export default function UploadModal({
                       <Tooltip title="Tải lại">
                         <IconButton
                           size="small"
-                          onClick={() => handleRetryQueueItem(item.id)}
+                          onClick={() => {}}
                         >
                           <i className="tabler-refresh text-warning" />
                         </IconButton>
@@ -866,6 +674,7 @@ export default function UploadModal({
             </RadioGroup>
           </FormControl>
         </Box>
+        </>}
       </DialogContent>
 
       <DialogActions
@@ -888,6 +697,7 @@ export default function UploadModal({
         <Button
           variant="contained"
           color="primary"
+          sx={{ display: mode === "album" ? "none" : undefined, minWidth: 140 }}
           onClick={handleStartUpload}
           disabled={isUploading || filesQueue.length === 0}
           startIcon={
@@ -897,7 +707,7 @@ export default function UploadModal({
               <i className="tabler-cloud-upload" />
             )
           }
-          sx={{ minWidth: 140 }}
+
         >
           {isUploading
             ? "Đang tải lên..."

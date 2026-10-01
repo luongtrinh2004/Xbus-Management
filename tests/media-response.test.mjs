@@ -77,3 +77,12 @@ test('cancelling the response destroys the source stream', async () => {
   await response.body.cancel();
   assert.equal(stream.destroyed, true);
 });
+
+test('matching If-Range ETag streams only requested video bytes', async () => {
+ const response = await createMediaResponse(new Request('http://localhost/video', {headers:{Range:'bytes=3-5','If-Range':'"video-version"'}}), {
+  size:10,contentType:'video/mp4',etag:'"video-version"',getStream:range=>{
+   assert.deepEqual(range,{start:3,end:5});return Readable.from([data.subarray(3,6)]);
+  }
+ });
+ assert.equal(response.status,206);assert.equal(response.headers.get('etag'),'"video-version"');assert.equal(await response.text(),'345');
+});
