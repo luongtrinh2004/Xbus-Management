@@ -22,7 +22,7 @@ import { useTheme } from "@mui/material/styles";
 import CustomTextField from "@core/components/mui/TextField";
 import { toast } from "react-toastify";
 import MentionInput from "./MentionInput";
-import { renderWithMentions } from "./mentionUtils";
+import { renderWithMentions, resolveAuthorAvatar } from "./mentionUtils";
 
 function formatFullDateTime(dateString) {
   try {
@@ -1050,15 +1050,16 @@ export default function MediaLightbox({
             bgcolor: "background.paper",
             display: "flex",
             flexDirection: "column",
+            height: "100%",
             overflowY: "auto",
             p: 3,
-            gap: 3,
+            gap: 2.5,
           }}
         >
           {/* Uploader Profile */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <Avatar
-              src={item.uploader?.avatar}
+              src={resolveAuthorAvatar(item.uploader, usersList)}
               sx={{ width: 48, height: 48, border: "2px solid #7367F0", bgcolor: "primary.light" }}
             >
               {item.uploader?.name?.[0]}
@@ -1178,13 +1179,13 @@ export default function MediaLightbox({
           </Box>
 
           {/* Comments Section */}
-          <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column", borderTop: "1px solid", borderColor: "divider", pt: 2, mt: 1 }}>
+          <Box sx={{ flexGrow: 1, minHeight: 0, display: "flex", flexDirection: "column", borderTop: "1px solid", borderColor: "divider", pt: 2, mt: 1 }}>
             <Typography variant="subtitle2" sx={{ fontWeight: 600, color: "text.primary", mb: 1.5, display: "flex", alignItems: "center", gap: 1 }}>
               <i className="tabler-message-circle" /> Bình luận ({item.comments?.length || 0})
             </Typography>
 
             {/* Comments List */}
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, mb: 2, maxHeight: 220, overflowY: "auto", pr: 0.5 }}>
+            <Box sx={{ flexGrow: 1, minHeight: 120, display: "flex", flexDirection: "column", gap: 1.5, mb: 2, overflowY: "auto", pr: 0.5 }}>
               {(!item.comments || item.comments.length === 0) ? (
                 <Typography variant="caption" color="text.disabled" sx={{ py: 2, textAlign: "center" }}>
                   Chưa có bình luận nào. Hãy là người đầu tiên để lại ý kiến!
@@ -1207,7 +1208,7 @@ export default function MediaLightbox({
                         gap: 1.5,
                       }}
                     >
-                      <Avatar src={cmt.author?.avatar} sx={{ width: 32, height: 32, fontSize: 13, bgcolor: "primary.light" }}>
+                      <Avatar src={resolveAuthorAvatar(cmt.author, usersList)} sx={{ width: 32, height: 32, fontSize: 13, bgcolor: "primary.light" }}>
                         {cmt.author?.name?.[0] || "U"}
                       </Avatar>
                       <Box sx={{ flexGrow: 1, minWidth: 0 }}>

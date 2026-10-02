@@ -1,5 +1,6 @@
 "use client";
 
+import ZoomableMenuImage from "./components/ZoomableMenuImage";
 import { useEffect, useState, useMemo } from "react";
 import { useSession } from "next-auth/react";
 import Box from "@mui/material/Box";
@@ -1705,18 +1706,7 @@ export default function AfternoonTeaPage() {
                       {menu.shop}
                     </Typography>
                   </Box>
-                  <Box
-                    component="img"
-                    src={menu.imageUrl}
-                    alt={`Menu ${menu.shop}`}
-                    sx={{
-                      width: "100%",
-                      maxHeight: "72vh",
-                      objectFit: "contain",
-                      borderRadius: 2,
-                      bgcolor: "action.hover",
-                    }}
-                  />
+                  <ZoomableMenuImage key={`${viewingShopId}-${menu.id}-${menu.imageUrl}`} src={menu.imageUrl} alt={`Menu ${menu.shop}`} />
                 </Box>
               ))}
             </Box>
@@ -1727,18 +1717,7 @@ export default function AfternoonTeaPage() {
               );
               if (!menu) return null;
               return (
-                <Box
-                  component="img"
-                  src={menu.imageUrl}
-                  alt={`Menu ${menu.shop}`}
-                  sx={{
-                    width: "100%",
-                    maxHeight: "80vh",
-                    objectFit: "contain",
-                    borderRadius: 2,
-                    bgcolor: "action.hover",
-                  }}
-                />
+                <ZoomableMenuImage key={`${viewingShopId}-${menu.id}-${menu.imageUrl}`} src={menu.imageUrl} alt={`Menu ${menu.shop}`} />
               );
             })()
           )}

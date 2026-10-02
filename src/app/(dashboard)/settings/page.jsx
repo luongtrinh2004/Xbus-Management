@@ -1,4 +1,5 @@
 "use client";
+import TeaNotificationSender from "./components/TeaNotificationSender";
 
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
@@ -516,6 +517,17 @@ export default function SettingsPage() {
                     ? `Có thể gửi lại sau ${scheduleReminderCooldown}s`
                     : "Gửi nhắc lịch gần nhất"}
                 </Button>
+              </Box>
+            </Box>
+          </Card>
+          <Card>
+            <CardHeader title="Thông báo Happy Hour / trà chiều" subheader="Gửi lời mời hôm nay kèm ảnh menu cho nhân sự đang hoạt động. Nút Đặt ngay dẫn đến trang Trà chiều." />
+            <Box sx={{ p: 4, pt: 0, display: "grid", gap: 3 }}>
+              <TeaNotificationSender disabled={saving} settings={config.teaReminder || {enabled:false,sendTime:"10:00"}} onChange={teaReminder => setConfig(value => ({...value,teaReminder}))} />
+              <CustomTextField label="Giờ gửi trong ngày diễn ra (giờ Việt Nam)" type="time" value={config.teaReminder?.sendTime || "10:00"} onChange={event => setConfig(value => ({...value,teaReminder:{...value.teaReminder,sendTime:event.target.value}}))} InputLabelProps={{shrink:true}} />
+              <Box sx={{display:"flex",gap:2,flexWrap:"wrap"}}>
+                <Button variant="contained" disabled={saving} onClick={() => saveConfig({action:"saveTeaReminder",excludedUserIds:config.teaReminder?.excludedUserIds || [],enabled:Boolean(config.teaReminder?.enabled),sendTime:config.teaReminder?.sendTime || "10:00"},"Đã lưu thông báo Happy Hour / trà chiều")}>Lưu cài đặt</Button>
+
               </Box>
             </Box>
           </Card>

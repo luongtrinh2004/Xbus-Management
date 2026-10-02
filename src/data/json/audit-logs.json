@@ -1,6 +1,102 @@
 {
   "auditLogs": [
     {
+      "id": "log_1790911090919_48rg",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "CREATE_GALLERY_COMMENT",
+      "targetType": "GALLERY",
+      "targetId": "post_1790656146313_egxmy",
+      "details": "Bình luận ảnh/video: alo — Bình luận cmt_1790911090918_1uis: ádasdasd",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-10-02T03:18:10.919Z"
+    },
+    {
+      "id": "log_1790911089363_j89l",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "CREATE_GALLERY_COMMENT",
+      "targetType": "GALLERY",
+      "targetId": "post_1790656146313_egxmy",
+      "details": "Bình luận ảnh/video: alo — Bình luận cmt_1790911089363_u835: ádasdsadasadasdasd",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-10-02T03:18:09.363Z"
+    },
+    {
+      "id": "log_1790911087221_k639",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "CREATE_GALLERY_COMMENT",
+      "targetType": "GALLERY",
+      "targetId": "post_1790656146313_egxmy",
+      "details": "Bình luận ảnh/video: alo — Bình luận cmt_1790911087220_iqux: ádasdsadsadasd",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-10-02T03:18:07.221Z"
+    },
+    {
+      "id": "log_1790911085470_pec6",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "CREATE_GALLERY_COMMENT",
+      "targetType": "GALLERY",
+      "targetId": "post_1790656146313_egxmy",
+      "details": "Bình luận ảnh/video: alo — Bình luận cmt_1790911085469_qbej: ádsadasd",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-10-02T03:18:05.470Z"
+    },
+    {
+      "id": "log_1790911083945_ztop",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "CREATE_GALLERY_COMMENT",
+      "targetType": "GALLERY",
+      "targetId": "post_1790656146313_egxmy",
+      "details": "Bình luận ảnh/video: alo — Bình luận cmt_1790911083945_0q7s: ssdsdsad",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-10-02T03:18:03.945Z"
+    },
+    {
+      "id": "log_1790911082315_8r4m",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "CREATE_GALLERY_COMMENT",
+      "targetType": "GALLERY",
+      "targetId": "post_1790656146313_egxmy",
+      "details": "Bình luận ảnh/video: alo — Bình luận cmt_1790911082315_pcli: ádsđsdsd",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-10-02T03:18:02.315Z"
+    },
+    {
+      "id": "log_1790911081899_ocjy",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "CREATE_GALLERY_COMMENT",
+      "targetType": "GALLERY",
+      "targetId": "post_1790656146313_egxmy",
+      "details": "Bình luận ảnh/video: alo — Bình luận cmt_1790911081899_lckv: sadsad",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-10-02T03:18:01.899Z"
+    },
+    {
+      "id": "log_1790911080171_b40d",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "CREATE_GALLERY_COMMENT",
+      "targetType": "GALLERY",
+      "targetId": "post_1790656146313_egxmy",
+      "details": "Bình luận ảnh/video: alo — Bình luận cmt_1790911080169_419z: sdasd",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-10-02T03:18:00.171Z"
+    },
+    {
       "id": "log_1790850439152_g0f0",
       "adminId": "usr_admin_001",
       "adminName": "Quản trị viên Hệ thống",

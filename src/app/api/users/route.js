@@ -1,6 +1,7 @@
+import { staffExportRow } from "@/libs/staffExcel";
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
-import { getUsers, saveUsers, appendAuditLog } from "@/libs/dataRepository";
+import { getUsers, saveUsers, appendAuditLog, getTypes } from "@/libs/dataRepository";
 import { generateExcelBuffer } from "@/libs/excelHelper";
 import { formatVietnamDate } from "@/libs/dateTime";
 
@@ -114,29 +115,9 @@ export async function GET(req) {
 
     // Xuất Excel nếu có param export=excel
     if (isExport) {
-      const exportData = users.map((u) => ({
-        "Mã nhân sự": u.code || "",
-        "Họ và tên": u.name || "",
-        Email: u.email || "",
-        "Giới tính":
-          u.gender === "male" ? "Nam" : u.gender === "female" ? "Nữ" : "Khác",
-        "Số điện thoại": u.phone || "",
-        "Vai trò":
-          u.role === "admin"
-            ? "Quản trị viên"
-            : u.role === "assistant"
-              ? "Trợ lý"
-              : "Nhân viên",
-        "Bộ phận": u.typeId || "",
-        "Hình thức": u.categoryId || "",
-        "Trạng thái":
-          u.status === "able"
-            ? "Đang hoạt động"
-            : "Chờ kích hoạt / Vô hiệu hóa",
-        "Điểm bê nước": u.schedulingPoints || 0,
-        "Số lượt bê nước": u.waterTripCount || 0,
-        "Ngày tạo": formatVietnamDate(u.createdAt),
-      }));
+      const departments = await getTypes();
+      const departmentNames = new Map(departments.map(item => [item.id, item.name]));
+      const exportData = users.map(user => staffExportRow(user, departmentNames, formatVietnamDate));
 
       const buffer = generateExcelBuffer(exportData, "Danh sách nhân sự");
       return new Response(buffer, {

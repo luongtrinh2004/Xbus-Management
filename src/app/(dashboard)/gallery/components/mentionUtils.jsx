@@ -191,3 +191,31 @@ export function renderWithMentions(text, usersList = []) {
 
   return parts.length > 0 ? parts : text;
 }
+
+/**
+ * Resolves the latest avatar URL for a given author or uploader from usersList.
+ * If the user updated their avatar, this guarantees older comments/posts display the new avatar.
+ */
+export function resolveAuthorAvatar(author, usersList = []) {
+  if (!author) return "/images/avatars/male-user.png";
+
+  const authorId = author.id || author._id;
+  const authorEmail = author.email?.toLowerCase();
+  const authorName = author.name?.trim()?.toLowerCase();
+
+  const matchedUser = Array.isArray(usersList)
+    ? usersList.find((u) => {
+        if (authorId && (u.id === authorId || u._id === authorId)) return true;
+        if (authorEmail && u.email && u.email.toLowerCase() === authorEmail) return true;
+        if (authorName && u.name && u.name.trim().toLowerCase() === authorName) return true;
+        return false;
+      })
+    : null;
+
+  if (matchedUser?.avatar) {
+    return matchedUser.avatar;
+  }
+
+  return author.avatar || "/images/avatars/male-user.png";
+}
+

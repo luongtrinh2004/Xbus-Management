@@ -12,7 +12,13 @@ const escapeHtml = (value) =>
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
 
-export function createNotificationContent({ name, title, message }) {
+export function createNotificationContent({ name, title, message, actionUrl = XBUS_OFFICE_URL, actionLabel = "Truy cập Xbus Office", images = [] }) {
+  const safeUrl = value => {
+    try { const url = new URL(value, XBUS_OFFICE_URL); return ['http:', 'https:'].includes(url.protocol) ? url.href : ''; } catch { return ''; }
+  };
+  const link = safeUrl(actionUrl) || XBUS_OFFICE_URL;
+  const menuImages = images.map(image => ({url:safeUrl(image.url),label:image.label || 'Menu'})).filter(image => image.url);
+  const imageHtml = menuImages.map(image => `<p style="margin:16px 0"><strong>${escapeHtml(image.label)}</strong><br><a href="${escapeHtml(link)}"><img src="${escapeHtml(image.url)}" alt="${escapeHtml(image.label)}" width="544" style="display:block;width:100%;max-width:544px;height:auto;margin-top:8px;border-radius:8px" /></a></p>`).join('');
   const safeName = escapeHtml(name);
   const safeTitle = escapeHtml(title || "Thông báo");
   const messageParagraphs = String(message)
@@ -25,7 +31,7 @@ export function createNotificationContent({ name, title, message }) {
     )
     .join("");
   return {
-    text: `Xbus Office - ${title || "Thông báo"}\n\nXin chào ${name},\n\n${message}\n\nTruy cập Xbus Office: ${XBUS_OFFICE_URL}\n\nTrân trọng,\nXbus Office`,
+    text: `Xbus Office - ${title || "Thông báo"}\n\nXin chào ${name},\n\n${message}\n\n${actionLabel}: ${link}\n\nTrân trọng,\nXbus Office`,
     html: `
       <div style="margin:0;background:#f4f7fb;padding:32px 12px;font-family:Arial,sans-serif;color:#273142">
         <div style="max-width:600px;margin:0 auto;background:#fff;border:1px solid #e5e9f0;border-radius:12px;overflow:hidden">
@@ -36,8 +42,9 @@ export function createNotificationContent({ name, title, message }) {
           <div style="padding:28px;line-height:1.65;font-size:15px">
             <p style="margin:0 0 16px">Xin chào <strong>${safeName}</strong>,</p>
             <div style="margin:0 0 8px">${safeMessage}</div>
+            ${imageHtml}
             <p style="margin:0 0 26px;text-align:center">
-              <a href="${XBUS_OFFICE_URL}" target="_blank" style="display:inline-block;background:#1769e0;color:#fff;text-decoration:none;padding:12px 24px;border-radius:8px;font-weight:700">Truy cập Xbus Office</a>
+              <a href="${escapeHtml(link)}" target="_blank" style="display:inline-block;background:#1769e0;color:#fff;text-decoration:none;padding:12px 24px;border-radius:8px;font-weight:700">${escapeHtml(actionLabel)}</a>
             </p>
             <p style="margin:0">Trân trọng cảm ơn,<br><strong>Đội ngũ Xbus Office</strong></p>
           </div>

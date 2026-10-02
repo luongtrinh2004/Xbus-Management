@@ -1,5 +1,6 @@
 "use client";
 
+import { mapStaffImportRow } from "@/libs/staffExcel";
 import { useEffect, useState, useMemo, useRef } from "react";
 import * as XLSX from "xlsx";
 import Card from "@mui/material/Card";
@@ -127,35 +128,9 @@ const UserListTable = ({
     event.target.value = "";
     if (!file) return;
     try {
-      const workbook = XLSX.read(await file.arrayBuffer(), { type: "array" });
+      const workbook = XLSX.read(await file.arrayBuffer(), { type: "array", dateNF: "dd/mm/yyyy" });
       const sheet = workbook.Sheets[workbook.SheetNames[0]];
-      const rows = XLSX.utils
-        .sheet_to_json(sheet, { defval: "" })
-        .map((row) => {
-          const mapped = {
-            code: row["Mã nhân sự"] || row["Mã NV"] || row.Code || row.code,
-            name: row["Họ và tên"] ?? row["Họ tên"],
-            email: row.Email ?? row.email,
-            phone: row["Số điện thoại"] ?? row.Phone,
-            gender: row["Giới tính"],
-            birthday: row["Ngày sinh"],
-            citizenId: row.CCCD ?? row["Số CCCD"],
-            citizenIssuedDate: row["Ngày cấp"],
-            address: row["Địa chỉ"],
-            position: row["Chức vụ"],
-            jiraAccount: row["Tk Jira"] ?? row.Jira,
-            joinedDate: row["Ngày tham gia"],
-            typeId: row["Bộ phận"],
-            categoryId: row["Hình thức"],
-            role: row["Vai trò"],
-            status: row["Trạng thái"],
-            schedulingPoints: row["Điểm bê nước"],
-            waterTripCount: row["Số lượt bê nước"],
-          };
-          return Object.fromEntries(
-            Object.entries(mapped).filter(([, value]) => value !== undefined),
-          );
-        });
+      const rows = XLSX.utils.sheet_to_json(sheet, { defval: "", raw: false }).map(mapStaffImportRow);
       const response = await fetch("/api/users/import", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -165,8 +140,9 @@ const UserListTable = ({
       if (!response.ok)
         return toast.error(result.error || "Không thể import nhân sự");
       toast.success(
-        `Đã cập nhật ${result.updated} nhân sự; bỏ qua ${result.skipped} dòng không khớp mã`,
+        `Đã cập nhật ${result.updated} nhân sự; ${result.unchanged || 0} không đổi; bỏ qua ${result.skipped} dòng không khớp mã`,
       );
+      if (result.auditWarning) toast.warning("Dữ liệu đã lưu nhưng chưa ghi được nhật ký import");
       fetchUsers();
     } catch {
       toast.error("Không thể đọc file Excel");
@@ -360,6 +336,26 @@ const UserListTable = ({
           />
         ),
       }),
+      ...(isAdmin ? [
+        columnHelper.accessor("jiraAccount", {
+          header: "Tài khoản Jira",
+          cell: ({ row }) => (
+            <Typography variant="body2">{row.original.jiraAccount || "—"}</Typography>
+          ),
+        }),
+        columnHelper.accessor("citizenId", {
+          header: "CCCD",
+          cell: ({ row }) => (
+            <Typography variant="body2" sx={{ whiteSpace: "nowrap" }}>{row.original.citizenId || "—"}</Typography>
+          ),
+        }),
+        columnHelper.accessor("citizenIssuedDate", {
+          header: "Ngày cấp",
+          cell: ({ row }) => (
+            <Typography variant="body2" sx={{ whiteSpace: "nowrap" }}>{formatBirthday(row.original.citizenIssuedDate)}</Typography>
+          ),
+        }),
+      ] : []),
       columnHelper.accessor("birthday", {
         header: "Ngày sinh",
         cell: ({ row }) => (

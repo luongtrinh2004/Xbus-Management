@@ -27,6 +27,7 @@ const payload = (settings) => ({
     daysBefore: 1,
     sendTime: "14:00",
   },
+  teaReminder: settings.teaReminderSettings || { enabled: false, sendTime: "10:00" },
   channels: (settings.payosPaymentChannels || [])
     .filter((item) => !item.archived)
     .map((item) => publicPayosChannel(item, settings.activePayosChannelId)),
@@ -82,6 +83,13 @@ export async function PATCH(req) {
       }
       await saveFunds(funds);
       details = "Cập nhật cài đặt nhắc lịch đóng quỹ";
+    } else if (body.action === "saveTeaReminder") {
+      const sendTime = String(body.sendTime || "");
+      if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(sendTime)) throw Error("Giờ gửi không hợp lệ");
+            const excludedUserIds = body.excludedUserIds ?? settings.teaReminderSettings?.excludedUserIds ?? [];
+      if (!Array.isArray(excludedUserIds) || excludedUserIds.some(id => typeof id !== "string")) throw Error("Danh sách gửi không hợp lệ");
+      settings.teaReminderSettings = { enabled: Boolean(body.enabled), sendTime, excludedUserIds:[...new Set(excludedUserIds)] };
+      details = "Cập nhật thông báo Happy Hour / trà chiều";
     } else if (body.action === "saveScheduleReminder") {
       const daysBefore = Number(body.daysBefore);
       const sendTime = String(body.sendTime || "");

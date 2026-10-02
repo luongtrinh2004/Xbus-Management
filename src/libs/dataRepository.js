@@ -1,3 +1,4 @@
+import { prepareStaffImport } from "./staffImport.js";
 import {
   trashStateToRecords,
   trashRecordsToState,
@@ -1540,4 +1541,30 @@ export async function saveTrashScheduleState(state) {
   } finally {
     connection.release();
   }
+}
+
+// Update only imported profile columns; never replace or delete the users list.
+export async function importStaffProfiles(rows, types) {
+  if (!mysqlEnabled()) {
+    const users = await json.getUsers();
+    const result = prepareStaffImport(rows, users, types);
+    const patches = new Map(result.patches.map(p => [p.id, p.changes]));
+    if (result.updated) await json.saveUsers(users.map(user => patches.has(user.id) ? { ...user, ...patches.get(user.id), updatedAt: new Date().toISOString() } : user));
+    return result;
+  }
+  const connection = await getMysqlPool().getConnection();
+  try {
+    await connection.beginTransaction();
+    const [stored] = await connection.query("SELECT * FROM users FOR UPDATE");
+    const users = stored.map(u => ({id:u.id,code:u.code,name:u.name,email:u.email,phone:u.phone,typeId:u.department_id,citizenId:u.citizen_id,jiraAccount:u.jira_account,address:u.address,birthday:toDateOnly(u.birthday),citizenIssuedDate:toDateOnly(u.citizen_issued_date)}));
+    const result = prepareStaffImport(rows, users, types);
+    const columns = {name:'name',email:'email',phone:'phone',typeId:'department_id',citizenId:'citizen_id',jiraAccount:'jira_account',address:'address',birthday:'birthday',citizenIssuedDate:'citizen_issued_date'};
+    for (const patch of result.patches) {
+      const entries = Object.entries(patch.changes);
+      await connection.execute(`UPDATE users SET ${entries.map(([key]) => `${columns[key]}=?`).join(',')}, updated_at=? WHERE id=?`, [...entries.map(([,value]) => value), new Date(), patch.id]);
+    }
+    await connection.commit();
+    return result;
+  } catch (error) { await connection.rollback(); throw error; }
+  finally { connection.release(); }
 }

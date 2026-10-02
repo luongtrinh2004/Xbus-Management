@@ -667,6 +667,7 @@ function GalleryContent() {
                 onToggleLike={handleToggleLike}
                 canEdit={isAdminOrAssistant || isItemOwner(item)}
                 canDelete={isAdminOrAssistant || isItemOwner(item)}
+                usersList={usersList}
               />
             </Grid>
           ))}
@@ -688,6 +689,7 @@ function GalleryContent() {
           }}
           currentUser={session?.user}
           isAdminOrAssistant={isAdminOrAssistant}
+          usersList={usersList}
         />
       )}
 

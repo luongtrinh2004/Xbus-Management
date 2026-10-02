@@ -14,7 +14,7 @@ import Avatar from "@mui/material/Avatar";
 import Chip from "@mui/material/Chip";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
-import { renderWithMentions } from "./mentionUtils";
+import { renderWithMentions, resolveAuthorAvatar } from "./mentionUtils";
 
 function formatDateTime(dateString) {
   try {
@@ -40,6 +40,7 @@ export default function MediaListView({
   onEdit,
   currentUser = null,
   isAdminOrAssistant = false,
+  usersList = [],
 }) {
   const allSelected = items.length > 0 && selectedIds.length === items.length;
   const someSelected = selectedIds.length > 0 && selectedIds.length < items.length;
@@ -221,7 +222,7 @@ export default function MediaListView({
                   <TableCell>
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                       <Avatar
-                        src={item.uploader?.avatar}
+                        src={resolveAuthorAvatar(item.uploader, usersList)}
                         alt={item.uploader?.name}
                         sx={{ width: 28, height: 28, fontSize: 12, bgcolor: "primary.light" }}
                       >

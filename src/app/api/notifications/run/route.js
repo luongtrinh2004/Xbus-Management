@@ -1,7 +1,9 @@
+import { toVietnamDateKey } from "@/libs/dateTime";
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import {
   getFunds,
+  getAfternoonTea,
   getSettings,
   getTrashScheduleState,
   getUsers,
@@ -60,7 +62,8 @@ export async function POST(req) {
   } catch {}
   const immediateFund = body.action === "sendFundNow";
   const immediateSchedule = body.action === "sendScheduleNow";
-  const immediate = immediateFund || immediateSchedule;
+  const immediateTea = body.action === "sendTeaNow";
+  const immediate = immediateFund || immediateSchedule || immediateTea;
   if (
     immediate
       ? !["admin", "assistant"].includes(token?.role)
@@ -80,6 +83,15 @@ export async function POST(req) {
         getWaterSchedules(),
         getWaterExemptions(),
       ]);
+    let teaRecipientIds;
+    if (immediateTea) {
+      if (!Array.isArray(body.recipientIds) || !body.recipientIds.length || body.recipientIds.some(id => typeof id !== "string")) {
+        return NextResponse.json({error:"Hãy chọn ít nhất một người nhận"},{status:400});
+      }
+      teaRecipientIds = new Set(body.recipientIds);
+      const eligible = new Set(users.filter(user => user.status === "able" && user.email).map(user => user.id));
+      if ([...teaRecipientIds].some(id => !eligible.has(id))) return NextResponse.json({error:"Có người nhận không còn hoạt động hoặc chưa có email. Vui lòng tải lại danh sách."},{status:400});
+    }
     const clock = vietnamClock();
     const today = clock.date;
     const logs = { ...(settings.notificationEmailLogs || {}) };
@@ -111,7 +123,7 @@ export async function POST(req) {
     const fundConfig = settings.fundReminderSettings || {};
     const shouldRunFund =
       immediateFund ||
-      (fundConfig.enabled && clock.time === (fundConfig.sendTime || "14:00"));
+      (!immediate && fundConfig.enabled && clock.time === (fundConfig.sendTime || "14:00"));
     if (shouldRunFund) {
       for (const fund of funds) {
         if (
@@ -162,7 +174,7 @@ export async function POST(req) {
     const scheduleConfig = settings.scheduleReminderSettings || {};
     if (
       immediateSchedule ||
-      (scheduleConfig.enabled &&
+      (!immediate && scheduleConfig.enabled &&
         clock.time === (scheduleConfig.sendTime || "14:00"))
     ) {
       const automaticTargetDate = addDays(
@@ -260,6 +272,34 @@ export async function POST(req) {
             },
             immediateSchedule ? 60_000 : null,
           );
+      }
+    }
+
+    const teaConfig = settings.teaReminderSettings || {};
+    if (immediateTea || (!immediate && teaConfig.enabled && clock.time >= (teaConfig.sendTime || "10:00"))) {
+      const tea = await getAfternoonTea();
+      const invitations = (tea.invitations || []).filter(item => {
+        try { return item.scheduledAt && toVietnamDateKey(item.scheduledAt) === today; } catch { return false; }
+      });
+      if (immediateTea && !invitations.length) return NextResponse.json({error:"Hôm nay chưa có lời mời Happy Hour hoặc trà chiều"},{status:400});
+      for (const invitation of invitations) {
+        const title = invitation.type === "happy-hour" ? "Hôm nay có Happy Hour!" : "Hôm nay có trà chiều!";
+        const excludedTeaRecipients = new Set(teaConfig.excludedUserIds || []);
+        const recipients = users.filter(user => user.status === "able" && user.email && !excludedTeaRecipients.has(user.id) && (!immediateTea || teaRecipientIds.has(user.id)));
+        const sentEmails = new Set();
+        for (const user of recipients) {
+          const email = user.email.trim().toLowerCase();
+          if (sentEmails.has(email)) continue;
+          sentEmails.add(email);
+          await deliver(`tea:${today}:${invitation.id}:${user.id}`, {
+            to: user.email, subject: title,
+            ...createNotificationContent({name:user.name,title,
+              message:[invitation.title,invitation.note,"Mời mọi người vào đặt món nhé!"].filter(Boolean).join("\n"),
+              actionUrl:"https://xbus-office.xmobility.vn/afternoon-tea", actionLabel:"Đặt ngay",
+              images:(invitation.menus || []).map(menu => ({url:menu.imageUrl,label:menu.shop})),
+            }),
+          }, immediateTea ? 60_000 : null);
+        }
       }
     }
 

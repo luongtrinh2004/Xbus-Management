@@ -19,7 +19,7 @@ import MenuItem from "@mui/material/MenuItem";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Tooltip from "@mui/material/Tooltip";
-import { renderWithMentions } from "./mentionUtils";
+import { renderWithMentions, resolveAuthorAvatar } from "./mentionUtils";
 
 const uploadSize = value => {
   const bytes = Number(value) || 0;
@@ -53,6 +53,7 @@ export default function MediaCard({
   onToggleLike,
   canEdit = true,
   canDelete = true,
+  usersList = [],
 }) {
   const [menuAnchor, setMenuAnchor] = useState(null);
   const [isHovered, setIsHovered] = useState(false);
@@ -142,7 +143,7 @@ export default function MediaCard({
       <CardHeader
         avatar={
           <Avatar
-            src={item.uploader?.avatar}
+            src={resolveAuthorAvatar(item.uploader, usersList)}
             alt={item.uploader?.name}
             sx={{ width: 34, height: 34, fontSize: 13, bgcolor: "primary.light" }}
           >
