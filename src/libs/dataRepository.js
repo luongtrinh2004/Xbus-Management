@@ -12,6 +12,8 @@ import {
 } from "@/libs/assetIds";
 import { applyFundBalances } from "./fundRules.js";
 import { getMysqlPool, isMysqlEnabled } from "./mysql.js";
+import { mutateWorkManagementJson } from "./workManagementJsonStorage.js";
+import { appendAuditLogJson } from "./auditJsonStorage.js";
 
 const mysqlEnabled = () => isMysqlEnabled();
 const toIso = (value) => (value ? new Date(value).toISOString() : null);
@@ -61,6 +63,7 @@ const asJson = (value, fallback) => {
   }
 };
 const query = (sql, values = []) => getMysqlPool().query(sql, values);
+
 
 async function getDocument(key, fallback) {
   const [rows] = await query(
@@ -1421,8 +1424,18 @@ export async function getWorkManagement() {
   return mysqlEnabled()
     ? getDocument("work-management", {
         version: 1,
-        projects: [], projectMembers: [], sections: [], tasks: [], comments: [],
-        activities: [], labels: [], taskLabels: [], counters: {},
+        projects: [],
+        projectMembers: [],
+        sections: [],
+        tasks: [],
+        comments: [],
+        activities: [],
+        labels: [],
+        taskLabels: [],
+        pendingGlobalAudits: [],
+        projectStatusUpdates: [],
+        workTemplates: [],
+        counters: {},
       })
     : json.getWorkManagement();
 }
@@ -1431,6 +1444,53 @@ export async function saveWorkManagement(data) {
   return mysqlEnabled()
     ? saveDocument("work-management", data)
     : json.saveWorkManagement(data);
+}
+
+export async function mutateWorkManagement(mutator) {
+  const fallback = {
+    version: 1,
+    projects: [],
+    projectMembers: [],
+    sections: [],
+    tasks: [],
+    comments: [],
+    activities: [],
+    labels: [],
+    taskLabels: [],
+    pendingGlobalAudits: [],
+    projectStatusUpdates: [],
+    workTemplates: [],
+    counters: {},
+  };
+  if (!mysqlEnabled()) return mutateWorkManagementJson(mutator);
+
+  const connection = await getMysqlPool().getConnection();
+  try {
+    await connection.beginTransaction();
+    await connection.execute(
+      "INSERT IGNORE INTO app_documents (document_key,document_value,updated_at) VALUES ('work-management',?,?)",
+      [JSON.stringify(fallback), new Date()],
+    );
+    const [rows] = await connection.execute(
+      "SELECT document_value FROM app_documents WHERE document_key='work-management' FOR UPDATE",
+    );
+    const current = rows.length
+      ? asJson(rows[0].document_value, fallback)
+      : fallback;
+    const mutation = await mutator(current);
+    if (!mutation?.state) throw new Error("Work mutation must return state");
+    await connection.execute(
+      "UPDATE app_documents SET document_value=?,updated_at=? WHERE document_key='work-management'",
+      [JSON.stringify(mutation.state), new Date()],
+    );
+    await connection.commit();
+    return mutation.result;
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
 }
 
 export async function getAuditLogs() {
@@ -1450,6 +1510,7 @@ export async function getAuditLogs() {
   }));
 }
 export async function appendAuditLog({
+  id,
   adminId,
   adminName,
   adminEmail,
@@ -1458,20 +1519,10 @@ export async function appendAuditLog({
   targetId,
   details,
   ip = "127.0.0.1",
+  timestamp,
 }) {
-  if (!mysqlEnabled())
-    return json.appendAuditLog({
-      adminId,
-      adminName,
-      adminEmail,
-      action,
-      targetType,
-      targetId,
-      details,
-      ip,
-    });
   const log = {
-    id: `log_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+    id: id || `log_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
     adminId,
     adminName,
     adminEmail,
@@ -1480,10 +1531,11 @@ export async function appendAuditLog({
     targetId,
     details,
     ip,
-    timestamp: new Date().toISOString(),
+    timestamp: timestamp || new Date().toISOString(),
   };
+  if (!mysqlEnabled()) return appendAuditLogJson(log);
   await query(
-    "INSERT INTO audit_logs (id,admin_id,action,target_type,target_id,details,ip,timestamp) VALUES (?,?,?,?,?,?,?,?)",
+    "INSERT IGNORE INTO audit_logs (id,admin_id,action,target_type,target_id,details,ip,timestamp) VALUES (?,?,?,?,?,?,?,?)",
     [
       log.id,
       adminId || null,

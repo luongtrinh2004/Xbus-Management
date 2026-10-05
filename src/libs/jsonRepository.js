@@ -189,6 +189,7 @@ export function getAuditLogs() {
  * Ghi nhật ký hoạt động của Admin (chỉ ghi thêm, không sửa/xóa)
  */
 export function appendAuditLog({
+  id,
   adminId,
   adminName,
   adminEmail,
@@ -197,10 +198,13 @@ export function appendAuditLog({
   targetId,
   details,
   ip = "127.0.0.1",
+  timestamp,
 }) {
   const logs = getAuditLogs();
+  const existing = id && logs.find((item) => item.id === id);
+  if (existing) return existing;
   const newLog = {
-    id: `log_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+    id: id || `log_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
     adminId,
     adminName,
     adminEmail,
@@ -209,7 +213,7 @@ export function appendAuditLog({
     targetId,
     details,
     ip,
-    timestamp: new Date().toISOString(),
+    timestamp: timestamp || new Date().toISOString(),
   };
   logs.unshift(newLog); // đưa log mới nhất lên đầu
   writeJsonFile("audit-logs.json", { auditLogs: logs });

@@ -8,6 +8,7 @@ import Typography from '@mui/material/Typography'
 
 const links = [
   { href: '/work/projects', label: 'Dự án', icon: 'tabler-layout-grid' },
+  { href: '/work/templates', label: 'Mẫu dự án', icon: 'tabler-layout-grid' },
   { href: '/work/my-tasks', label: 'Công việc của tôi', icon: 'tabler-checkbox' }
 ]
 
