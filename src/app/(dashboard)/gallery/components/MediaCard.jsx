@@ -54,10 +54,12 @@ export default function MediaCard({
   canEdit = true,
   canDelete = true,
   usersList = [],
+  showChannelBadge = false,
 }) {
   const [menuAnchor, setMenuAnchor] = useState(null);
   const [isHovered, setIsHovered] = useState(false);
   const [isLikeAnimating, setIsLikeAnimating] = useState(false);
+  const [isDislikeAnimating, setIsDislikeAnimating] = useState(false);
 
   const handleOpenMenu = (e) => {
     e.stopPropagation();
@@ -73,7 +75,14 @@ export default function MediaCard({
     e.stopPropagation();
     setIsLikeAnimating(true);
     setTimeout(() => setIsLikeAnimating(false), 400);
-    if (onToggleLike) onToggleLike(item.id);
+    if (onToggleLike) onToggleLike(item.id, "like");
+  };
+
+  const handleDislikeClick = (e) => {
+    e.stopPropagation();
+    setIsDislikeAnimating(true);
+    setTimeout(() => setIsDislikeAnimating(false), 400);
+    if (onToggleLike) onToggleLike(item.id, "dislike");
   };
 
   const handleCommentClick = (e) => {
@@ -257,6 +266,52 @@ export default function MediaCard({
           />
         )}
 
+        {/* Channel badge on top left (Only on All tab) */}
+        {showChannelBadge && (
+          <Box
+            sx={{
+              position: "absolute",
+              top: 10,
+              left: 10,
+              zIndex: 2,
+              bgcolor:
+                item.channel === "relax"
+                  ? "rgba(40, 199, 111, 0.92)"
+                  : item.channel === "report"
+                  ? "rgba(234, 84, 85, 0.92)"
+                  : "rgba(115, 103, 240, 0.92)",
+              backdropFilter: "blur(4px)",
+              color: "#fff",
+              borderRadius: "6px",
+              px: "7px",
+              py: "2px",
+              display: "flex",
+              alignItems: "center",
+              gap: 0.5,
+              fontSize: "0.7rem",
+              fontWeight: 600,
+              boxShadow: "0 2px 6px rgba(0,0,0,0.25)",
+              pointerEvents: "none",
+            }}
+          >
+            <i
+              className={
+                item.channel === "relax"
+                  ? "tabler-coffee"
+                  : item.channel === "report"
+                  ? "tabler-clipboard-check"
+                  : "tabler-photo-heart"
+              }
+              style={{ fontSize: 13 }}
+            />
+            {item.channel === "relax"
+              ? "Relax"
+              : item.channel === "report"
+              ? "Report"
+              : "Kỷ niệm"}
+          </Box>
+        )}
+
         {/* Multi-file subtle icon indicator (No text, no hashtag) */}
         {hasMultipleFiles && (
           <Box
@@ -330,7 +385,7 @@ export default function MediaCard({
               sx={{
                 border: 0,
                 py: 0.5,
-                px: 1,
+                px: 0.75,
                 bgcolor: "transparent",
                 color: item.isLiked ? "#ea5455" : "text.secondary",
                 display: "inline-flex",
@@ -348,7 +403,7 @@ export default function MediaCard({
               <i
                 className={item.isLiked ? "tabler-heart-filled" : "tabler-heart"}
                 style={{
-                  fontSize: 20,
+                  fontSize: 19,
                   transition: "transform 0.15s ease",
                   transform: isLikeAnimating ? "scale(1.35)" : "scale(1)",
                 }}
@@ -363,6 +418,52 @@ export default function MediaCard({
                 }}
               >
                 {item.likes || 0}
+              </Typography>
+            </Box>
+          </Tooltip>
+
+          {/* Nút Không thích (Dislike) kèm số lượng bên phải */}
+          <Tooltip title={item.isDisliked ? "Bỏ không thích" : "Không thích bài viết"}>
+            <Box
+              component="button"
+              type="button"
+              onClick={handleDislikeClick}
+              sx={{
+                border: 0,
+                py: 0.5,
+                px: 0.75,
+                bgcolor: "transparent",
+                color: item.isDisliked ? "#ff9f43" : "text.secondary",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 0.5,
+                cursor: "pointer",
+                borderRadius: 1.5,
+                transition: "all 0.15s ease",
+                "&:hover": {
+                  color: "#ff9f43",
+                  bgcolor: "rgba(255, 159, 67, 0.08)",
+                },
+              }}
+            >
+              <i
+                className={item.isDisliked ? "tabler-thumb-down-filled" : "tabler-thumb-down"}
+                style={{
+                  fontSize: 18,
+                  transition: "transform 0.15s ease",
+                  transform: isDislikeAnimating ? "scale(1.35)" : "scale(1)",
+                }}
+              />
+              <Typography
+                variant="body2"
+                sx={{
+                  fontWeight: 600,
+                  fontSize: "0.8125rem",
+                  color: item.isDisliked ? "#ff9f43" : "text.secondary",
+                  userSelect: "none",
+                }}
+              >
+                {item.dislikes || 0}
               </Typography>
             </Box>
           </Tooltip>

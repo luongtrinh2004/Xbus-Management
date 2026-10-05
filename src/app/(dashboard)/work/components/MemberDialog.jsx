@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import Alert from "@mui/material/Alert";
-import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
@@ -16,6 +15,7 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { toast } from "react-toastify";
 import { serializeEditableMembers } from "@/libs/workUi";
+import WorkAvatar from "./WorkAvatar";
 
 const EMPTY = { userId: "", role: "member" };
 
@@ -112,9 +112,7 @@ export default function MemberDialog({
             key={member.userId}
             sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1.5 }}
           >
-            <Avatar src={member.user?.avatarUrl}>
-              {member.user?.name?.[0]}
-            </Avatar>
+            <WorkAvatar user={member.user} />
             <Box sx={{ flex: 1, minWidth: 0 }}>
               <Typography variant="body2" fontWeight={600} noWrap>
                 {member.user?.name || member.userId}
@@ -195,7 +193,11 @@ export default function MemberDialog({
             </Button>
           </Box>
         )}
-        <Typography variant="caption" color="text.secondary" sx={{ mt: 2, display: "block" }}>
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          sx={{ mt: 2, display: "block" }}
+        >
           Không thể bỏ thành viên đang phụ trách công việc chưa lưu trữ — hãy
           chuyển người phụ trách trước.
         </Typography>

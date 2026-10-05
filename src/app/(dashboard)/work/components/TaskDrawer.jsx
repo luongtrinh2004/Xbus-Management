@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
@@ -13,6 +12,7 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 
 import { PRIORITY_LABELS, formatDate } from "./workConstants";
+import WorkAvatar from "./WorkAvatar";
 
 const draftSectionFor = (sections, completed) => {
   if (completed)
@@ -21,8 +21,7 @@ const draftSectionFor = (sections, completed) => {
       sections.at(-1)?.id
     );
   return (
-    sections.find((section) => section.status !== "done")?.id ||
-    sections[0]?.id
+    sections.find((section) => section.status !== "done")?.id || sections[0]?.id
   );
 };
 
@@ -218,7 +217,8 @@ export default function TaskDrawer({
         <Meta
           label="Người phụ trách"
           value={
-            users.find((user) => user.id === task.assigneeId)?.name || "Chưa giao"
+            users.find((user) => user.id === task.assigneeId)?.name ||
+            "Chưa giao"
           }
         />
         <Meta label="Tạo lúc" value={formatDate(task.createdAt)} />
@@ -276,7 +276,12 @@ export default function TaskDrawer({
         </Typography>
       )}
       {taskActivities.map((item) => (
-        <Typography key={item.id} variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+        <Typography
+          key={item.id}
+          variant="body2"
+          color="text.secondary"
+          sx={{ mt: 1 }}
+        >
           {item.details} · {new Date(item.createdAt).toLocaleString("vi-VN")}
         </Typography>
       ))}
@@ -285,10 +290,10 @@ export default function TaskDrawer({
       <Typography fontWeight={700}>Bình luận ({comments.length})</Typography>
       {comments.map((item) => (
         <Box key={item.id} sx={{ display: "flex", gap: 1.5, mt: 2 }}>
-          <Avatar sx={{ width: 32, height: 32 }}>
-            {item.author?.name?.[0] || "?"}
-          </Avatar>
-          <Box sx={{ bgcolor: "action.hover", borderRadius: 2, p: 1.5, flex: 1 }}>
+          <WorkAvatar user={item.author} sx={{ width: 32, height: 32 }} />
+          <Box
+            sx={{ bgcolor: "action.hover", borderRadius: 2, p: 1.5, flex: 1 }}
+          >
             <Typography variant="caption" fontWeight={700}>
               {item.author?.name || "Thành viên"}
             </Typography>
@@ -332,13 +337,14 @@ function Meta({ label, value }) {
 }
 
 function Chipish({ status, completed }) {
-  const meta = completed || status === "done"
-    ? { label: "Hoàn thành", className: "tabler-circle-check" }
-    : status === "blocked"
-      ? { label: "Bị chặn", className: "tabler-circle-x" }
-      : status === "in_progress"
-        ? { label: "Đang thực hiện", className: "tabler-clock" }
-        : { label: "Cần làm", className: "tabler-circle-dotted" };
+  const meta =
+    completed || status === "done"
+      ? { label: "Hoàn thành", className: "tabler-circle-check" }
+      : status === "blocked"
+        ? { label: "Bị chặn", className: "tabler-circle-x" }
+        : status === "in_progress"
+          ? { label: "Đang thực hiện", className: "tabler-clock" }
+          : { label: "Cần làm", className: "tabler-circle-dotted" };
   return (
     <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
       <i className={meta.className} />

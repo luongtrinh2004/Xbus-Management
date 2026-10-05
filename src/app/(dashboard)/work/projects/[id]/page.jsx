@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Alert from "@mui/material/Alert";
-import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
@@ -30,6 +29,7 @@ import MemberDialog from "../../components/MemberDialog";
 import ProjectHeader from "../../components/ProjectHeader";
 import StatusUpdateDialog from "../../components/StatusUpdateDialog";
 import TaskDrawer from "../../components/TaskDrawer";
+import WorkAvatar from "../../components/WorkAvatar";
 import {
   CalendarView,
   DashboardView,
@@ -58,9 +58,10 @@ export default function ProjectPage() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [view, setView] = useState("overview");
+  const [view, setView] = useState("list");
   const [query, setQuery] = useState("");
   const [assignee, setAssignee] = useState("all");
+  const [sortBy, setSortBy] = useState("section");
   const [dialog, setDialog] = useState(false);
   const [form, setForm] = useState(blank);
   const [selected, setSelected] = useState(null);
@@ -78,7 +79,9 @@ export default function ProjectPage() {
   const load = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/work/projects/${id}`, { cache: "no-store" });
+      const res = await fetch(`/api/work/projects/${id}`, {
+        cache: "no-store",
+      });
       const body = await res.json();
       if (!res.ok) throw new Error(body.error);
       setData(body);
@@ -96,10 +99,6 @@ export default function ProjectPage() {
     if (id) load();
   }, [id]);
 
-  useEffect(() => {
-    if (data?.project?.defaultView) setView(data.project.defaultView);
-  }, [data?.project?.id]);
-
   const memberUsers = useMemo(
     () => data?.members.map((item) => item.user).filter(Boolean) || [],
     [data],
@@ -113,20 +112,27 @@ export default function ProjectPage() {
     !canManageTasks && role === "member" && task.assigneeId === viewerId;
   const canWorkflow = (task) => canManageTasks || isAssignedToMe(task);
 
-  const tasks = useMemo(
-    () =>
-      (data?.tasks || []).filter((task) => {
-        const q = query.toLocaleLowerCase("vi");
-        return (
-          (!q ||
-            `${task.code} ${task.title}`
-              .toLocaleLowerCase("vi")
-              .includes(q)) &&
-          (assignee === "all" || task.assigneeId === assignee)
-        );
-      }),
-    [data, query, assignee],
-  );
+  const tasks = useMemo(() => {
+    const filtered = (data?.tasks || []).filter((task) => {
+      const q = query.toLocaleLowerCase("vi");
+      return (
+        (!q ||
+          `${task.code} ${task.title}`.toLocaleLowerCase("vi").includes(q)) &&
+        (assignee === "all" || task.assigneeId === assignee)
+      );
+    });
+    if (sortBy === "dueDate")
+      return filtered.sort((a, b) =>
+        String(a.dueDate || "9999-12-31").localeCompare(
+          String(b.dueDate || "9999-12-31"),
+        ),
+      );
+    if (sortBy === "priority") {
+      const weight = { urgent: 0, high: 1, medium: 2, low: 3 };
+      return filtered.sort((a, b) => weight[a.priority] - weight[b.priority]);
+    }
+    return filtered;
+  }, [data, query, assignee, sortBy]);
 
   const openCreate = (sectionId) => {
     setForm({ ...blank, sectionId: sectionId || data.sections[0]?.id || "" });
@@ -263,10 +269,7 @@ export default function ProjectPage() {
 
   const completed = data.tasks.filter((task) => task.completed).length;
   const overdue = data.tasks.filter(
-    (task) =>
-      task.dueDate &&
-      task.dueDate < todayIso() &&
-      !task.completed,
+    (task) => task.dueDate && task.dueDate < todayIso() && !task.completed,
   ).length;
   const latestStatus =
     data.statusUpdates?.[0] ||
@@ -276,8 +279,6 @@ export default function ProjectPage() {
     <>
       <ProjectHeader
         data={data}
-        view={view}
-        onViewChange={setView}
         canManage={canManage}
         onOpenMembers={() => setMembersOpen(true)}
         onOpenStatusUpdate={() => setStatusOpen(true)}
@@ -286,13 +287,18 @@ export default function ProjectPage() {
         onSaveTemplate={() => setTemplateOpen(true)}
       />
 
-      <Card>
-        <CardContent sx={{ py: "12px !important" }}>
+      <Card sx={{ mt: -1 }}>
+        <CardContent sx={{ py: "0 !important", px: "12px !important" }}>
           <Tabs
             value={view}
             onChange={(_, value) => setView(value)}
             variant="scrollable"
             allowScrollButtonsMobile
+            sx={{
+              minHeight: 44,
+              "& .MuiTab-root": { minHeight: 44, py: 1, px: 1.5, fontSize: 13 },
+              "& .MuiTabs-indicator": { bgcolor: "#5c5bd6" },
+            }}
           >
             {VIEW_OPTIONS.map((item) => (
               <Tab
@@ -330,9 +336,7 @@ export default function ProjectPage() {
                 <Chip
                   size="small"
                   variant="tonal"
-                  color={
-                    HEALTH_META[data.project.health]?.color || "default"
-                  }
+                  color={HEALTH_META[data.project.health]?.color || "default"}
                   icon={
                     <i
                       className={
@@ -358,8 +362,18 @@ export default function ProjectPage() {
                 }}
               >
                 {[
-                  [data.tasks.length, "Tổng công việc", "tabler-list-check", "primary"],
-                  [completed, "Đã hoàn thành", "tabler-circle-check", "success"],
+                  [
+                    data.tasks.length,
+                    "Tổng công việc",
+                    "tabler-list-check",
+                    "primary",
+                  ],
+                  [
+                    completed,
+                    "Đã hoàn thành",
+                    "tabler-circle-check",
+                    "success",
+                  ],
                   [overdue, "Quá hạn", "tabler-alert-triangle", "error"],
                   [
                     data.tasks.filter((task) => !task.assigneeId).length,
@@ -457,15 +471,15 @@ export default function ProjectPage() {
               <Typography variant="h6" fontWeight={700}>
                 Thành viên ({data.members.length})
               </Typography>
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 2 }}>
+              <Box
+                sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 2 }}
+              >
                 {data.members.map((member) => (
                   <Box
                     key={member.id}
                     sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
                   >
-                    <Avatar src={member.user?.avatarUrl}>
-                      {member.user?.name?.[0]}
-                    </Avatar>
+                    <WorkAvatar user={member.user} />
                     <Box sx={{ flex: 1 }}>
                       <Typography variant="body2" fontWeight={600}>
                         {member.user?.name}
@@ -512,8 +526,39 @@ export default function ProjectPage() {
 
       {(view === "list" || view === "board") && (
         <Card>
-          <CardContent>
-            <Box sx={{ display: "flex", gap: 2, mb: 3, flexWrap: "wrap" }}>
+          <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
+            <Box
+              sx={{
+                display: "flex",
+                gap: 1,
+                mb: 1,
+                flexWrap: "wrap",
+                alignItems: "center",
+              }}
+            >
+              <Typography variant="h6" fontWeight={700} sx={{ mr: "auto" }}>
+                {view === "list" ? "Danh sách công việc" : "Bảng công việc"}
+              </Typography>
+              {canManageTasks && (
+                <Button
+                  variant="contained"
+                  startIcon={<i className="tabler-plus" />}
+                  onClick={() => openCreate()}
+                  sx={{
+                    bgcolor: "#5c5bd6",
+                    boxShadow: "none",
+                    "&:hover": { bgcolor: "#4f4ec4", boxShadow: "none" },
+                  }}
+                >
+                  Thêm công việc
+                </Button>
+              )}
+            </Box>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              {tasks.length} công việc đang hiển thị. Chọn một công việc để xem
+              và cập nhật chi tiết.
+            </Typography>
+            <Box sx={{ display: "flex", gap: 1, mb: 3, flexWrap: "wrap" }}>
               <TextField
                 size="small"
                 placeholder="Tìm công việc..."
@@ -535,15 +580,17 @@ export default function ProjectPage() {
                   </MenuItem>
                 ))}
               </TextField>
-              {canManageTasks && (
-                <Button
-                  variant="contained"
-                  startIcon={<i className="tabler-plus" />}
-                  onClick={() => openCreate()}
-                >
-                  Thêm công việc
-                </Button>
-              )}
+              <TextField
+                select
+                size="small"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                sx={{ minWidth: 150 }}
+              >
+                <MenuItem value="section">Sắp xếp: Nhóm</MenuItem>
+                <MenuItem value="dueDate">Sắp xếp: Hạn gần</MenuItem>
+                <MenuItem value="priority">Sắp xếp: Ưu tiên</MenuItem>
+              </TextField>
             </Box>
 
             {view === "list" ? (
@@ -560,7 +607,10 @@ export default function ProjectPage() {
                     <Typography fontWeight={700}>{section.name}</Typography>
                     <Chip
                       size="small"
-                      label={tasks.filter((task) => task.sectionId === section.id).length}
+                      label={
+                        tasks.filter((task) => task.sectionId === section.id)
+                          .length
+                      }
                     />
                     {canManageTasks && (
                       <IconButton
@@ -609,9 +659,14 @@ export default function ProjectPage() {
                     sx={{
                       minWidth: 280,
                       width: 300,
-                      bgcolor: "action.hover",
-                      borderRadius: 2,
+                      bgcolor: (theme) =>
+                        theme.palette.mode === "dark"
+                          ? "rgba(255,255,255,.025)"
+                          : "#f3f3f5",
+                      borderRadius: 1.5,
                       p: 1.5,
+                      border: "1px solid",
+                      borderColor: "divider",
                     }}
                   >
                     <Box
@@ -643,13 +698,19 @@ export default function ProjectPage() {
                           draggable={canWorkflow(task)}
                           onDragStart={(event) => {
                             if (canWorkflow(task))
-                              event.dataTransfer.setData("text/task-id", task.id);
+                              event.dataTransfer.setData(
+                                "text/task-id",
+                                task.id,
+                              );
                           }}
                           onClick={() => setSelected(task)}
                           sx={{
                             mb: 1.5,
                             cursor: canWorkflow(task) ? "grab" : "pointer",
-                            "&:hover": { boxShadow: 4 },
+                            "&:hover": {
+                              borderColor: "#5c5bd6",
+                              bgcolor: "action.hover",
+                            },
                           }}
                         >
                           <CardContent sx={{ p: "14px !important" }}>
@@ -683,19 +744,16 @@ export default function ProjectPage() {
                                 color={PRIORITY_LABELS[task.priority]?.[1]}
                                 variant="tonal"
                               />
-                              <Avatar
-                                src={task.assignee?.avatarUrl}
+                              <WorkAvatar
+                                user={task.assignee}
                                 sx={{ width: 28, height: 28, fontSize: 12 }}
-                              >
-                                {task.assignee?.name?.[0] || "?"}
-                              </Avatar>
+                              />
                             </Box>
                             {task.dueDate && (
                               <Typography
                                 variant="caption"
                                 color={
-                                  task.dueDate < todayIso() &&
-                                  !task.completed
+                                  task.dueDate < todayIso() && !task.completed
                                     ? "error.main"
                                     : "text.secondary"
                                 }
@@ -834,7 +892,12 @@ export default function ProjectPage() {
       >
         <DialogTitle>Lưu dự án thành mẫu</DialogTitle>
         <DialogContent
-          sx={{ display: "flex", flexDirection: "column", gap: 2, pt: "12px !important" }}
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+            pt: "12px !important",
+          }}
         >
           <TextField
             label="Tên mẫu"
@@ -940,7 +1003,8 @@ function TaskRow({
   onToggle,
   onSectionChange,
 }) {
-  const user = task.assignee || users.find((item) => item.id === task.assigneeId);
+  const user =
+    task.assignee || users.find((item) => item.id === task.assigneeId);
   return (
     <Box
       sx={{
@@ -995,9 +1059,7 @@ function TaskRow({
         color={PRIORITY_LABELS[task.priority]?.[1]}
         variant="tonal"
       />
-      <Avatar src={user?.avatarUrl} sx={{ width: 28, height: 28, fontSize: 12 }}>
-        {user?.name?.[0] || "?"}
-      </Avatar>
+      <WorkAvatar user={user} sx={{ width: 28, height: 28, fontSize: 12 }} />
       <Typography variant="caption" color="text.secondary" sx={{ width: 85 }}>
         {task.dueDate
           ? new Date(`${task.dueDate}T00:00:00`).toLocaleDateString("vi-VN")

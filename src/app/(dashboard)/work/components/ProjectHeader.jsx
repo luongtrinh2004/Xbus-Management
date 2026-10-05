@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Avatar from "@mui/material/Avatar";
 import AvatarGroup from "@mui/material/AvatarGroup";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -24,14 +23,12 @@ import {
   HEALTH_META,
   PROJECT_COLORS,
   PROJECT_ICONS,
-  VIEW_OPTIONS,
   formatDate,
 } from "./workConstants";
+import WorkAvatar from "./WorkAvatar";
 
 export default function ProjectHeader({
   data,
-  view,
-  onViewChange,
   canManage,
   onOpenMembers,
   onOpenStatusUpdate,
@@ -75,12 +72,6 @@ export default function ProjectHeader({
     );
   };
 
-  const changeView = (nextView) => {
-    onViewChange?.(nextView);
-    if (canManage && nextView !== project.defaultView)
-      patch({ defaultView: nextView });
-  };
-
   const copyLink = async () => {
     try {
       await navigator.clipboard.writeText(window.location.href);
@@ -103,11 +94,13 @@ export default function ProjectHeader({
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
           <Tooltip title={canManage ? "Đổi màu và biểu tượng" : project.icon}>
             <Box
-              onClick={canManage ? (e) => setAppearance(e.currentTarget) : undefined}
+              onClick={
+                canManage ? (e) => setAppearance(e.currentTarget) : undefined
+              }
               sx={{
-                width: 52,
-                height: 52,
-                borderRadius: 2,
+                width: 40,
+                height: 40,
+                borderRadius: 1.25,
                 bgcolor: project.color,
                 color: "#fff",
                 display: "grid",
@@ -115,12 +108,12 @@ export default function ProjectHeader({
                 cursor: canManage ? "pointer" : "default",
               }}
             >
-              <i className={project.icon} style={{ fontSize: 26 }} />
+              <i className={project.icon} style={{ fontSize: 20 }} />
             </Box>
           </Tooltip>
           <Box>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <Typography variant="h5" fontWeight={700}>
+              <Typography variant="h5" fontWeight={750} letterSpacing="-.025em">
                 {project.title}
               </Typography>
               <Chip size="small" label={project.key} />
@@ -155,7 +148,14 @@ export default function ProjectHeader({
 
         <Box sx={{ flex: 1 }} />
 
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            flexWrap: "wrap",
+          }}
+        >
           <Chip
             size="small"
             variant="tonal"
@@ -165,12 +165,15 @@ export default function ProjectHeader({
             onClick={canManage ? onOpenStatusUpdate : undefined}
             sx={{ cursor: canManage ? "pointer" : "default" }}
           />
-          <AvatarGroup max={5} sx={{ "& .MuiAvatar-root": { width: 32, height: 32, fontSize: 13 } }}>
+          <AvatarGroup
+            max={5}
+            sx={{
+              "& .MuiAvatar-root": { width: 32, height: 32, fontSize: 13 },
+            }}
+          >
             {members.map((member) => (
               <Tooltip key={member.userId} title={member.user?.name || ""}>
-                <Avatar src={member.user?.avatarUrl}>
-                  {member.user?.name?.[0]}
-                </Avatar>
+                <WorkAvatar user={member.user} />
               </Tooltip>
             ))}
           </AvatarGroup>
@@ -182,30 +185,6 @@ export default function ProjectHeader({
           >
             {canManage ? "Thành viên" : "Chia sẻ"}
           </Button>
-          <TextField
-            select
-            size="small"
-            value={view}
-            onChange={(e) => changeView(e.target.value)}
-            sx={{ minWidth: 170 }}
-            SelectProps={{ renderValue: (v) => {
-              const found = VIEW_OPTIONS.find((item) => item.value === v);
-              return (
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <i className={found?.icon} /> {found?.label}
-                </Box>
-              );
-            } }}
-          >
-            {VIEW_OPTIONS.map((item) => (
-              <MenuItem key={item.value} value={item.value}>
-                <ListItemIcon>
-                  <i className={item.icon} />
-                </ListItemIcon>
-                <ListItemText>{item.label}</ListItemText>
-              </MenuItem>
-            ))}
-          </TextField>
         </Box>
       </Box>
 
@@ -316,7 +295,8 @@ export default function ProjectHeader({
                 display: "grid",
                 placeItems: "center",
                 cursor: "pointer",
-                bgcolor: project.icon === icon ? "action.selected" : "action.hover",
+                bgcolor:
+                  project.icon === icon ? "action.selected" : "action.hover",
               }}
             >
               <i className={icon} />
@@ -349,7 +329,10 @@ export default function ProjectHeader({
             variant="contained"
             disabled={saving || !draftTitle.trim()}
             onClick={async () => {
-              const ok = await patch({ title: draftTitle.trim() }, "Đã đổi tên dự án");
+              const ok = await patch(
+                { title: draftTitle.trim() },
+                "Đã đổi tên dự án",
+              );
               if (ok) setRenameOpen(false);
             }}
           >
@@ -365,9 +348,10 @@ function Cardish({ children }) {
   return (
     <Box
       sx={{
-        p: 3,
+        px: { xs: 2, sm: 2.5 },
+        py: 2,
         bgcolor: "background.paper",
-        borderRadius: 2,
+        borderRadius: 1.5,
         border: "1px solid",
         borderColor: "divider",
       }}

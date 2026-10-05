@@ -20,6 +20,7 @@ export function normalizeSearch(str = "") {
 let cachedUserNames = new Set([
   "Nhân viên hệ thống",
   "Quản trị viên Hệ thống",
+  "Nguyễn Quốc Bảo",
   "Vũ Hoàng Dũng",
   "Hà Quốc Việt",
   "Hoàng Duy Lộc",
@@ -46,6 +47,16 @@ let cachedUserNames = new Set([
   "Nguyễn Thị Thuyết",
   "Lê Ngọc Sơn",
 ]);
+
+export function registerUserName(name) {
+  if (name && typeof name === "string") {
+    cachedUserNames.add(name.trim());
+  }
+}
+
+export function getCachedUserNames() {
+  return cachedUserNames;
+}
 
 // Auto-fetch and register new users if client-side
 if (typeof window !== "undefined") {

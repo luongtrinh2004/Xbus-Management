@@ -53,7 +53,7 @@ const blankInfo = () => ({
   visibility: "private",
   color: PROJECT_COLORS[0],
   icon: "tabler-folder",
-  defaultView: "board",
+  defaultView: "list",
 });
 
 const stripDiacritics = (value) =>
@@ -175,12 +175,16 @@ export default function ProjectWizard({
 
   useEffect(() => {
     if (!open || source !== "template" || !initialTemplateId) return;
-    const template = templateCatalog.find((item) => item.id === initialTemplateId);
+    const template = templateCatalog.find(
+      (item) => item.id === initialTemplateId,
+    );
     if (template) applyTemplate(template);
   }, [open, source, initialTemplateId, templateCatalog]);
 
   const downloadSample = () => {
-    const blob = new Blob([SAMPLE_IMPORT_CSV], { type: "text/csv;charset=utf-8" });
+    const blob = new Blob([SAMPLE_IMPORT_CSV], {
+      type: "text/csv;charset=utf-8",
+    });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
@@ -217,7 +221,9 @@ export default function ProjectWizard({
           description: task.description,
           section: Math.max(
             0,
-            result.sections.findIndex((section) => section.name === task.section),
+            result.sections.findIndex(
+              (section) => section.name === task.section,
+            ),
           ),
           priority: task.priority,
           status:
@@ -296,8 +302,7 @@ export default function ProjectWizard({
             assigneeId: task.assigneeId || undefined,
             startDate: task.startDate || undefined,
             dueDate: task.dueDate || undefined,
-            status:
-              task.status || sections[Number(task.section) || 0]?.status,
+            status: task.status || sections[Number(task.section) || 0]?.status,
           })),
         members: members.map((member) => ({
           userId: member.userId,
@@ -326,7 +331,14 @@ export default function ProjectWizard({
   return (
     <Dialog open={open} onClose={close} fullWidth maxWidth="lg" scroll="body">
       <DialogTitle sx={{ pb: 1 }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            flexWrap: "wrap",
+          }}
+        >
           <Typography variant="h5" fontWeight={700}>
             Bắt đầu dự án mới
           </Typography>
@@ -366,7 +378,7 @@ export default function ProjectWizard({
                 Dùng mẫu dự án
               </Typography>
               <Radio value="import" />
-              <Typography variant="body2">Import CSV</Typography>
+              <Typography variant="body2">Nhập tệp CSV</Typography>
             </RadioGroup>
 
             {source === "template" && (
@@ -410,22 +422,41 @@ export default function ProjectWizard({
                         borderRadius: 2,
                         border: "1px solid",
                         borderColor:
-                          templateId === template.id ? "primary.main" : "divider",
+                          templateId === template.id
+                            ? "primary.main"
+                            : "divider",
                         cursor: "pointer",
                         bgcolor:
-                          templateId === template.id ? "action.selected" : "background.paper",
+                          templateId === template.id
+                            ? "action.selected"
+                            : "background.paper",
                       }}
                     >
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                      >
                         <i className={template.icon} />
-                        <Typography fontWeight={700}>{template.name}</Typography>
+                        <Typography fontWeight={700}>
+                          {template.name}
+                        </Typography>
                       </Box>
                       <Typography variant="caption" color="text.secondary">
                         {template.description}
                       </Typography>
-                      <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap", mt: 1 }}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          gap: 0.5,
+                          flexWrap: "wrap",
+                          mt: 1,
+                        }}
+                      >
                         {template.sections.slice(0, 5).map((section) => (
-                          <Chip key={section.name} size="small" label={section.name} />
+                          <Chip
+                            key={section.name}
+                            size="small"
+                            label={section.name}
+                          />
                         ))}
                       </Box>
                     </Box>
@@ -444,7 +475,10 @@ export default function ProjectWizard({
                   textAlign: "center",
                 }}
               >
-                <i className="tabler-file-spreadsheet" style={{ fontSize: 42, opacity: 0.5 }} />
+                <i
+                  className="tabler-file-spreadsheet"
+                  style={{ fontSize: 42, opacity: 0.5 }}
+                />
                 <Typography fontWeight={700} mt={1}>
                   Chọn tệp .csv (tối đa 2 MB)
                 </Typography>
@@ -452,8 +486,19 @@ export default function ProjectWizard({
                   Cột gợi ý: Nhóm công việc, Tiêu đề, Mô tả, Độ ưu tiên, Trạng
                   thái, Hạn hoàn thành, Người phụ trách.
                 </Typography>
-                <Box sx={{ display: "flex", gap: 1, justifyContent: "center", mt: 2 }}>
-                  <Button variant="contained" component="label" disabled={parsing}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    gap: 1,
+                    justifyContent: "center",
+                    mt: 2,
+                  }}
+                >
+                  <Button
+                    variant="contained"
+                    component="label"
+                    disabled={parsing}
+                  >
                     Chọn tệp
                     <input
                       hidden
@@ -490,7 +535,13 @@ export default function ProjectWizard({
         )}
 
         {step === 1 && (
-          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: 2 }}>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+              gap: 2,
+            }}
+          >
             <TextField
               label="Tên dự án"
               autoFocus
@@ -520,7 +571,9 @@ export default function ProjectWizard({
               multiline
               minRows={2}
               value={info.description}
-              onChange={(e) => setInfo({ ...info, description: e.target.value })}
+              onChange={(e) =>
+                setInfo({ ...info, description: e.target.value })
+              }
               sx={{ gridColumn: "1 / -1" }}
             />
             <TextField
@@ -545,7 +598,9 @@ export default function ProjectWizard({
               select
               label="Giao diện mặc định"
               value={info.defaultView}
-              onChange={(e) => setInfo({ ...info, defaultView: e.target.value })}
+              onChange={(e) =>
+                setInfo({ ...info, defaultView: e.target.value })
+              }
             >
               {VIEW_OPTIONS.map((view) => (
                 <MenuItem key={view.value} value={view.value}>
@@ -574,7 +629,9 @@ export default function ProjectWizard({
               onChange={(e) => setInfo({ ...info, visibility: e.target.value })}
             >
               <MenuItem value="private">Riêng tư — chỉ thành viên</MenuItem>
-              <MenuItem value="public">Công khai — mọi tài khoản hoạt động</MenuItem>
+              <MenuItem value="public">
+                Công khai — mọi tài khoản hoạt động
+              </MenuItem>
             </TextField>
             <Box>
               <Typography variant="body2" mb={1}>
@@ -613,7 +670,8 @@ export default function ProjectWizard({
                       display: "grid",
                       placeItems: "center",
                       cursor: "pointer",
-                      bgcolor: info.icon === icon ? "action.selected" : "action.hover",
+                      bgcolor:
+                        info.icon === icon ? "action.selected" : "action.hover",
                     }}
                   >
                     <i className={icon} />
@@ -626,7 +684,9 @@ export default function ProjectWizard({
 
         {step === 2 && (
           <Box>
-            <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
+            <Box
+              sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}
+            >
               <Typography fontWeight={700}>
                 Nhóm công việc ({sections.length})
               </Typography>
@@ -636,7 +696,10 @@ export default function ProjectWizard({
                 onClick={() =>
                   setSections((current) => [
                     ...current,
-                    { name: `Nhóm ${current.length + 1}`, status: "in_progress" },
+                    {
+                      name: `Nhóm ${current.length + 1}`,
+                      status: "in_progress",
+                    },
                   ])
                 }
               >
@@ -649,14 +712,18 @@ export default function ProjectWizard({
                   <TextField
                     size="small"
                     value={section.name}
-                    onChange={(e) => setSectionField(index, { name: e.target.value })}
+                    onChange={(e) =>
+                      setSectionField(index, { name: e.target.value })
+                    }
                     sx={{ flex: 1 }}
                   />
                   <TextField
                     select
                     size="small"
                     value={section.status}
-                    onChange={(e) => setSectionField(index, { status: e.target.value })}
+                    onChange={(e) =>
+                      setSectionField(index, { status: e.target.value })
+                    }
                     sx={{ width: 170 }}
                   >
                     <MenuItem value="todo">Cần làm</MenuItem>
@@ -668,7 +735,9 @@ export default function ProjectWizard({
                     color="error"
                     disabled={sections.length <= 1}
                     onClick={() =>
-                      setSections((current) => current.filter((_, i) => i !== index))
+                      setSections((current) =>
+                        current.filter((_, i) => i !== index),
+                      )
                     }
                   >
                     <i className="tabler-trash" />
@@ -678,9 +747,12 @@ export default function ProjectWizard({
             </Box>
 
             <Divider sx={{ my: 3 }} />
-            <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
+            <Box
+              sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}
+            >
               <Typography fontWeight={700}>
-                Công việc khởi tạo ({tasks.filter((t) => t.include !== false).length})
+                Công việc khởi tạo (
+                {tasks.filter((t) => t.include !== false).length})
               </Typography>
               <Button
                 size="small"
@@ -721,19 +793,25 @@ export default function ProjectWizard({
                   <Checkbox
                     size="small"
                     checked={task.include !== false}
-                    onChange={(e) => setTaskField(index, { include: e.target.checked })}
+                    onChange={(e) =>
+                      setTaskField(index, { include: e.target.checked })
+                    }
                   />
                   <TextField
                     size="small"
                     placeholder="Tiêu đề công việc"
                     value={task.title}
-                    onChange={(e) => setTaskField(index, { title: e.target.value })}
+                    onChange={(e) =>
+                      setTaskField(index, { title: e.target.value })
+                    }
                   />
                   <TextField
                     select
                     size="small"
                     value={Number(task.section) || 0}
-                    onChange={(e) => setTaskField(index, { section: Number(e.target.value) })}
+                    onChange={(e) =>
+                      setTaskField(index, { section: Number(e.target.value) })
+                    }
                   >
                     {sections.map((section, i) => (
                       <MenuItem key={i} value={i}>
@@ -745,7 +823,9 @@ export default function ProjectWizard({
                     select
                     size="small"
                     value={task.priority}
-                    onChange={(e) => setTaskField(index, { priority: e.target.value })}
+                    onChange={(e) =>
+                      setTaskField(index, { priority: e.target.value })
+                    }
                   >
                     {Object.entries(PRIORITY_LABELS).map(([key, value]) => (
                       <MenuItem key={key} value={key}>
@@ -758,11 +838,17 @@ export default function ProjectWizard({
                     type="date"
                     value={task.dueDate || ""}
                     InputLabelProps={{ shrink: true }}
-                    onChange={(e) => setTaskField(index, { dueDate: e.target.value })}
+                    onChange={(e) =>
+                      setTaskField(index, { dueDate: e.target.value })
+                    }
                   />
                   <IconButton
                     color="error"
-                    onClick={() => setTasks((current) => current.filter((_, i) => i !== index))}
+                    onClick={() =>
+                      setTasks((current) =>
+                        current.filter((_, i) => i !== index),
+                      )
+                    }
                   >
                     <i className="tabler-trash" />
                   </IconButton>
@@ -770,7 +856,8 @@ export default function ProjectWizard({
               ))}
               {tasks.length === 0 && (
                 <Typography variant="body2" color="text.secondary">
-                  Chưa có công việc khởi tạo — dự án sẽ bắt đầu với các nhóm trống.
+                  Chưa có công việc khởi tạo — dự án sẽ bắt đầu với các nhóm
+                  trống.
                 </Typography>
               )}
             </Box>
@@ -788,7 +875,9 @@ export default function ProjectWizard({
             </Typography>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
               {users.map((user) => {
-                const selected = members.find((item) => item.userId === user.id);
+                const selected = members.find(
+                  (item) => item.userId === user.id,
+                );
                 return (
                   <Box
                     key={user.id}
@@ -848,7 +937,13 @@ export default function ProjectWizard({
         )}
 
         {step === 4 && (
-          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: 3 }}>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+              gap: 3,
+            }}
+          >
             <Box>
               <Typography fontWeight={700} mb={1}>
                 Thông tin dự án
@@ -866,7 +961,9 @@ export default function ProjectWizard({
               />
               <Summary
                 label="Giao diện mặc định"
-                value={VIEW_OPTIONS.find((v) => v.value === info.defaultView)?.label}
+                value={
+                  VIEW_OPTIONS.find((v) => v.value === info.defaultView)?.label
+                }
               />
               <Summary
                 label="Nguồn"
@@ -895,12 +992,20 @@ export default function ProjectWizard({
               {sections.map((section, index) => (
                 <Box key={index} sx={{ mb: 1.5 }}>
                   <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-                    <Chip size="small" label={section.name} color="primary" variant="tonal" />
+                    <Chip
+                      size="small"
+                      label={section.name}
+                      color="primary"
+                      variant="tonal"
+                    />
                     <Typography variant="caption" color="text.secondary">
-                      {tasks.filter(
-                        (task) =>
-                          task.include !== false && Number(task.section) === index,
-                      ).length}{" "}
+                      {
+                        tasks.filter(
+                          (task) =>
+                            task.include !== false &&
+                            Number(task.section) === index,
+                        ).length
+                      }{" "}
                       việc
                     </Typography>
                   </Box>
@@ -908,10 +1013,15 @@ export default function ProjectWizard({
                     {tasks
                       .filter(
                         (task) =>
-                          task.include !== false && Number(task.section) === index,
+                          task.include !== false &&
+                          Number(task.section) === index,
                       )
                       .map((task, i) => (
-                        <Typography key={i} variant="body2" color="text.secondary">
+                        <Typography
+                          key={i}
+                          variant="body2"
+                          color="text.secondary"
+                        >
                           • {task.title}
                         </Typography>
                       ))}
@@ -937,7 +1047,10 @@ export default function ProjectWizard({
       </DialogContent>
 
       <DialogActions sx={{ px: 3, pb: 3 }}>
-        <Button variant="tonal" onClick={step === 0 ? close : () => setStep(step - 1)}>
+        <Button
+          variant="tonal"
+          onClick={step === 0 ? close : () => setStep(step - 1)}
+        >
           {step === 0 ? "Hủy" : "Quay lại"}
         </Button>
         {step < STEPS.length - 1 ? (

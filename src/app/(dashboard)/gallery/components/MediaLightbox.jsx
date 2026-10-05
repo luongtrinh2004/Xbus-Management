@@ -7,15 +7,22 @@ import { trackGalleryActivity } from "@/libs/galleryActivity";
 import { useState, useEffect, useRef } from "react";
 import Box from "@mui/material/Box";
 import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
+import ButtonGroup from "@mui/material/ButtonGroup";
+import Tabs from "@mui/material/Tabs";
+import Tab from "@mui/material/Tab";
 import Chip from "@mui/material/Chip";
 import Slider from "@mui/material/Slider";
 import Tooltip from "@mui/material/Tooltip";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
+import Popover from "@mui/material/Popover";
+import InputAdornment from "@mui/material/InputAdornment";
 import Divider from "@mui/material/Divider";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useTheme } from "@mui/material/styles";
@@ -23,6 +30,56 @@ import CustomTextField from "@core/components/mui/TextField";
 import { toast } from "react-toastify";
 import MentionInput from "./MentionInput";
 import { renderWithMentions, resolveAuthorAvatar } from "./mentionUtils";
+
+const EMOJI_CATEGORIES = [
+  {
+    name: "Phổ biến",
+    icon: "tabler-flame",
+    emojis: ["👍", "❤️", "😂", "👏", "🔥", "🎉", "😮", "😢", "🚀", "💯", "🙏", "😍", "🥳", "✨"],
+  },
+  {
+    name: "Mặt cười & Cảm xúc",
+    icon: "tabler-mood-smile",
+    emojis: [
+      "😀", "😃", "😄", "😁", "😆", "😅", "🤣", "😂", "🥹", "😊",
+      "😇", "🙂", "😉", "😌", "😍", "🥰", "😘", "😗", "😋", "😛",
+      "😜", "🤪", "🤩", "😎", "🥳", "😏", "😒", "😞", "😔", "😟",
+      "😕", "🙁", "😣", "😖", "😫", "😩", "🥺", "😢", "😭", "😤",
+      "😠", "😡", "🤬", "🤯", "😳", "🥵", "🥶", "😱", "😨", "😰",
+      "🤔", "🤫", "🤭", "🥱", "😴", "🤤", "😷", "🤒", "🤕", "🤢",
+    ],
+  },
+  {
+    name: "Cử chỉ & Tương tác",
+    icon: "tabler-hand-stop",
+    emojis: [
+      "👍", "👎", "👏", "🙌", "👐", "🤲", "🤝", "🙏", "✍️", "💪",
+      "👊", "✊", "🤛", "🤜", "🤞", "✌️", "🤟", "🤘", "🤙", "👈",
+      "👉", "👆", "👇", "☝️", "✋", "🤚", "🖐️", "🖖", "👋", "🫶",
+      "💅", "🤳", "👀", "👁️", "🧠", "👄", "👅", "👃",
+    ],
+  },
+  {
+    name: "Trái tim & Biểu tượng",
+    icon: "tabler-heart",
+    emojis: [
+      "❤️", "🧡", "💛", "💚", "💙", "💜", "🖤", "🤍", "🤎", "💔",
+      "❤️‍🔥", "❤️‍🩹", "❣️", "💕", "💞", "💓", "💗", "💖", "💘", "💝",
+      "✨", "🌟", "⭐️", "💫", "⚡️", "💥", "🔥", "💯", "💢", "💤",
+      "🎉", "🎊", "🎈", "🎁", "🏆", "🥇", "🥈", "🥉", "🏅", "🎖️",
+    ],
+  },
+  {
+    name: "Công việc & Xe cộ",
+    icon: "tabler-bus",
+    emojis: [
+      "🚌", "🚐", "🚗", "🚙", "🏎️", "🛞", "⚙️", "🔧", "🔨", "🛠️",
+      "💻", "📱", "🖥️", "📷", "📸", "🎥", "📹", "📊", "📈", "📉",
+      "📌", "📍", "📎", "📝", "📅", "🕒", "⏰", "💡", "🎯", "🚀",
+      "🏢", "🏗️", "⛽️", "🚦", "🛑", "🚧", "🔑", "🛡️", "📦", "📫",
+    ],
+  },
+];
 
 function formatFullDateTime(dateString) {
   try {
@@ -36,6 +93,19 @@ function formatFullDateTime(dateString) {
       month: "2-digit",
       year: "numeric",
     })}`;
+  } catch {
+    return dateString;
+  }
+}
+
+function formatDateOnly(dateString) {
+  try {
+    const d = new Date(dateString);
+    return d.toLocaleDateString("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
   } catch {
     return dateString;
   }
@@ -56,11 +126,13 @@ export default function MediaLightbox({
   onClose,
   onNavigate,
   onToggleLike,
+  onToggleCommentReaction,
   onAddComment,
   onEditComment,
   onDeleteComment,
   onDownload,
   onShare,
+  onTagClick,
   currentUser,
   usersList = [],
 }) {
@@ -106,6 +178,19 @@ export default function MediaLightbox({
   // Comment input
   const [commentText, setCommentText] = useState("");
   const [commentMentions, setCommentMentions] = useState({ isTagAll: false, taggedUserIds: [] });
+  const commentInputRef = useRef(null);
+
+  // Emoji picker state
+  const [emojiAnchorEl, setEmojiAnchorEl] = useState(null);
+  const [emojiCategoryIdx, setEmojiCategoryIdx] = useState(0);
+  const [emojiSearch, setEmojiSearch] = useState("");
+
+  // Reaction modal state (who liked/disliked)
+  const [reactionModalOpen, setReactionModalOpen] = useState(false);
+  const [reactionTab, setReactionTab] = useState("like"); // "like" | "dislike"
+
+  // Replying to state
+  const [replyingTo, setReplyingTo] = useState(null); // { commentId, authorName }
 
   // Comment editing state
   const [editingCommentId, setEditingCommentId] = useState(null);
@@ -339,6 +424,10 @@ export default function MediaLightbox({
         (currentUser?.id && u.id === currentUser.id) ||
         (currentUser?.name && u.name === currentUser.name)
     );
+    const finalContent = replyingTo
+      ? `@${replyingTo.authorName} ${commentText.trim()}`
+      : commentText.trim();
+
     onAddComment(item.id, {
       id: `cmt_${Date.now()}`,
       author: {
@@ -346,14 +435,63 @@ export default function MediaLightbox({
         avatar: matched?.avatar || currentUser?.image || "/images/avatars/male-admin.png",
         department: matched?.department || "AP",
       },
-      content: commentText.trim(),
+      content: finalContent,
       taggedUserIds: commentMentions.taggedUserIds,
       isTagAll: /@all\b/i.test(commentText) || commentMentions.isTagAll,
       createdAt: new Date().toISOString(),
+      parentId: replyingTo?.commentId || null,
+      replyTo: null,
     });
     setCommentText("");
     setCommentMentions({ isTagAll: false, taggedUserIds: [] });
+    setReplyingTo(null);
     toast.success("Đã đăng bình luận!");
+  };
+
+  // Insert emoji into comment at cursor or append
+  const handleInsertEmoji = (emoji) => {
+    const input = commentInputRef.current?.querySelector?.("input, textarea") || commentInputRef.current;
+    if (input && typeof input.selectionStart === "number") {
+      const start = input.selectionStart;
+      const end = input.selectionEnd;
+      const before = commentText.substring(0, start);
+      const after = commentText.substring(end);
+      const nextText = before + emoji + after;
+      setCommentText(nextText);
+      setTimeout(() => {
+        input.focus();
+        input.setSelectionRange(start + emoji.length, start + emoji.length);
+      }, 10);
+    } else {
+      setCommentText((prev) => (prev ? `${prev} ${emoji}` : emoji));
+    }
+  };
+
+  // Handle reply button click: sets replyingTo chip at start of input
+  const handleReplyToComment = (cmt, isReply) => {
+    const parentCommentId = isReply ? cmt.parentId : cmt.id;
+    const authorName = cmt.author?.name || "thành viên";
+    const authorId = cmt.author?.id || cmt.author?._id;
+
+    setReplyingTo({
+      commentId: parentCommentId,
+      authorName: authorName,
+      authorId: authorId,
+    });
+
+    if (authorId) {
+      setCommentMentions((prev) => ({
+        ...prev,
+        taggedUserIds: Array.from(new Set([...(prev.taggedUserIds || []), authorId])),
+      }));
+    }
+
+    setTimeout(() => {
+      const input = commentInputRef.current?.querySelector?.("input, textarea") || commentInputRef.current;
+      if (input) {
+        input.focus();
+      }
+    }, 50);
   };
 
   const canManageComment = (cmt) => {
@@ -1057,25 +1195,59 @@ export default function MediaLightbox({
           }}
         >
           {/* Uploader Profile */}
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <Avatar
-              src={resolveAuthorAvatar(item.uploader, usersList)}
-              sx={{ width: 48, height: 48, border: "2px solid #7367F0", bgcolor: "primary.light" }}
-            >
-              {item.uploader?.name?.[0]}
-            </Avatar>
-            <Box>
-              <Typography variant="body1" sx={{ fontWeight: 600, color: "text.primary" }}>
-                {item.uploader?.name}
-              </Typography>
-              <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>
-                {item.uploader?.role || item.uploader?.department}
-                {item.uploader?.code ? ` (${item.uploader.code})` : ""}
-              </Typography>
-              <Typography variant="caption" color="text.disabled">
-                {formatFullDateTime(item.uploadedAt)}
-              </Typography>
+          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1, flexWrap: "wrap" }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+              <Avatar
+                src={resolveAuthorAvatar(item.uploader, usersList)}
+                sx={{ width: 48, height: 48, border: "2px solid #7367F0", bgcolor: "primary.light" }}
+              >
+                {item.uploader?.name?.[0]}
+              </Avatar>
+              <Box>
+                <Typography variant="body1" sx={{ fontWeight: 600, color: "text.primary" }}>
+                  {item.uploader?.name}
+                </Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>
+                  {item.uploader?.role || item.uploader?.department}
+                  {item.uploader?.code ? ` (${item.uploader.code})` : ""}
+                </Typography>
+                <Typography variant="caption" color="text.disabled">
+                  {formatFullDateTime(item.uploadedAt)}
+                </Typography>
+              </Box>
             </Box>
+
+            <Chip
+              size="small"
+              icon={
+                <i
+                  className={
+                    item.channel === "relax"
+                      ? "tabler-coffee"
+                      : item.channel === "report"
+                      ? "tabler-clipboard-check"
+                      : "tabler-photo-heart"
+                  }
+                  style={{ fontSize: 14 }}
+                />
+              }
+              label={
+                item.channel === "relax"
+                  ? "Relax"
+                  : item.channel === "report"
+                  ? "Report"
+                  : "Kỷ Niệm"
+              }
+              color={
+                item.channel === "relax"
+                  ? "success"
+                  : item.channel === "report"
+                  ? "error"
+                  : "primary"
+              }
+              variant="outlined"
+              sx={{ fontWeight: 600, fontSize: "0.75rem", height: 26 }}
+            />
           </Box>
 
           {/* Social Interactions: Like, Download, Share */}
@@ -1083,45 +1255,107 @@ export default function MediaLightbox({
             sx={{
               display: "flex",
               alignItems: "center",
-              gap: 1.5,
+              gap: 1,
               py: 1.5,
               borderTop: "1px solid",
               borderBottom: "1px solid",
               borderColor: "divider",
             }}
           >
-            <Button
-              variant={item.isLiked ? "contained" : "outlined"}
-              color="error"
-              size="small"
-              onClick={() => onToggleLike(item.id)}
-              startIcon={<i className={item.isLiked ? "tabler-heart-filled" : "tabler-heart"} />}
-              sx={{ textTransform: "none", fontWeight: 600 }}
-            >
-              {item.likes} Yêu thích
-            </Button>
+            {/* Nút Yêu thích */}
+            <ButtonGroup size="small" variant={item.isLiked ? "contained" : "outlined"} color="error">
+              <Tooltip title={item.isLiked ? "Bỏ thích" : "Yêu thích"}>
+                <Button
+                  onClick={() => onToggleLike && onToggleLike(item.id, "like")}
+                  sx={{ px: 1, minWidth: 36 }}
+                >
+                  <i className={item.isLiked ? "tabler-heart-filled" : "tabler-heart"} style={{ fontSize: 18 }} />
+                </Button>
+              </Tooltip>
+              <Tooltip title="Xem danh sách người yêu thích">
+                <Button
+                  onClick={() => {
+                    setReactionTab("like");
+                    setReactionModalOpen(true);
+                  }}
+                  sx={{ px: 1, fontWeight: 700, minWidth: 28 }}
+                >
+                  {item.likes || 0}
+                </Button>
+              </Tooltip>
+            </ButtonGroup>
 
-            <Button
-              variant="outlined"
-              color="secondary"
-              size="small"
-              onClick={() => onDownload(item)}
-              startIcon={<i className="tabler-download" />}
-              sx={{ textTransform: "none" }}
-            >
-              Tải xuống
-            </Button>
+            {/* Nút Không thích (Dislike) */}
+            <ButtonGroup size="small" variant={item.isDisliked ? "contained" : "outlined"} color="secondary">
+              <Tooltip title={item.isDisliked ? "Bỏ không thích" : "Không thích"}>
+                <Button
+                  onClick={() => onToggleLike && onToggleLike(item.id, "dislike")}
+                  sx={{
+                    px: 1,
+                    minWidth: 36,
+                    color: item.isDisliked ? "#fff" : "text.secondary",
+                    borderColor: item.isDisliked ? "secondary.main" : "divider",
+                  }}
+                >
+                  <i className={item.isDisliked ? "tabler-thumb-down-filled" : "tabler-thumb-down"} style={{ fontSize: 18 }} />
+                </Button>
+              </Tooltip>
+              <Tooltip title="Xem danh sách người không thích">
+                <Button
+                  onClick={() => {
+                    setReactionTab("dislike");
+                    setReactionModalOpen(true);
+                  }}
+                  sx={{
+                    px: 1,
+                    fontWeight: 700,
+                    minWidth: 28,
+                    color: item.isDisliked ? "#fff" : "text.secondary",
+                    borderColor: item.isDisliked ? "secondary.main" : "divider",
+                  }}
+                >
+                  {item.dislikes || 0}
+                </Button>
+              </Tooltip>
+            </ButtonGroup>
 
-            <Button
-              variant="outlined"
-              color="secondary"
-              size="small"
-              onClick={() => onShare(item)}
-              startIcon={<i className="tabler-share" />}
-              sx={{ textTransform: "none" }}
-            >
-              Chia sẻ
-            </Button>
+            {/* Nút Tải xuống */}
+            <Tooltip title="Tải xuống tệp gốc">
+              <IconButton
+                size="small"
+                onClick={() => onDownload(item)}
+                sx={{
+                  border: "1px solid",
+                  borderColor: "divider",
+                  borderRadius: 1.5,
+                  width: 32,
+                  height: 30,
+                  color: "text.secondary",
+                  "&:hover": { color: "primary.main", borderColor: "primary.main" },
+                }}
+              >
+                <i className="tabler-download" style={{ fontSize: 18 }} />
+              </IconButton>
+            </Tooltip>
+
+            {/* Nút Chia sẻ */}
+            <Tooltip title="Lấy liên kết chia sẻ">
+              <IconButton
+                size="small"
+                onClick={() => onShare(item)}
+                sx={{
+                  border: "1px solid",
+                  borderColor: "divider",
+                  borderRadius: 1.5,
+                  width: 32,
+                  height: 30,
+                  color: "text.secondary",
+                  "&:hover": { color: "primary.main", borderColor: "primary.main" },
+                }}
+              >
+                <i className="tabler-share" style={{ fontSize: 18 }} />
+              </IconButton>
+            </Tooltip>
           </Box>
 
           {/* Description & Tags */}
@@ -1166,11 +1400,14 @@ export default function MediaLightbox({
                     key={tag}
                     label={tag}
                     size="small"
+                    onClick={onTagClick ? () => onTagClick(tag) : undefined}
                     sx={{
                       bgcolor: "rgba(115, 103, 240, 0.12)",
                       color: "primary.main",
                       fontSize: "0.75rem",
                       fontWeight: 500,
+                      cursor: onTagClick ? "pointer" : "default",
+                      "&:hover": onTagClick ? { bgcolor: "primary.main", color: "#fff" } : undefined,
                     }}
                   />
                 ))}
@@ -1185,139 +1422,302 @@ export default function MediaLightbox({
             </Typography>
 
             {/* Comments List */}
-            <Box sx={{ flexGrow: 1, minHeight: 120, display: "flex", flexDirection: "column", gap: 1.5, mb: 2, overflowY: "auto", pr: 0.5 }}>
+            <Box sx={{ flexGrow: 1, minHeight: 140, display: "flex", flexDirection: "column", gap: 1.5, mb: 2, overflowY: "auto", pr: 0.5 }}>
               {(!item.comments || item.comments.length === 0) ? (
                 <Typography variant="caption" color="text.disabled" sx={{ py: 2, textAlign: "center" }}>
                   Chưa có bình luận nào. Hãy là người đầu tiên để lại ý kiến!
                 </Typography>
               ) : (
-                item.comments.map((cmt) => {
-                  const isEditing = editingCommentId === cmt.id;
-                  const canManage = canManageComment(cmt);
+                (() => {
+                  const comments = item.comments || [];
+                  const topLevelComments = comments.filter((c) => !c.parentId);
+                  const repliesMap = new Map();
+                  comments.forEach((c) => {
+                    if (c.parentId) {
+                      if (!repliesMap.has(c.parentId)) repliesMap.set(c.parentId, []);
+                      repliesMap.get(c.parentId).push(c);
+                    }
+                  });
 
-                  return (
-                    <Box
-                      key={cmt.id}
-                      sx={{
-                        p: 1.5,
-                        borderRadius: 1.5,
-                        bgcolor: isDark ? "rgba(255, 255, 255, 0.04)" : "action.hover",
-                        border: "1px solid",
-                        borderColor: isEditing ? "primary.main" : "divider",
-                        display: "flex",
-                        gap: 1.5,
-                      }}
-                    >
-                      <Avatar src={resolveAuthorAvatar(cmt.author, usersList)} sx={{ width: 32, height: 32, fontSize: 13, bgcolor: "primary.light" }}>
-                        {cmt.author?.name?.[0] || "U"}
-                      </Avatar>
-                      <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-                        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 0.5 }}>
-                          <Typography variant="caption" sx={{ fontWeight: 600, color: "text.primary" }}>
-                            {cmt.author?.name}
-                          </Typography>
-                          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                            <Typography variant="caption" color="text.disabled" sx={{ fontSize: "0.68rem" }}>
-                              {formatFullDateTime(cmt.createdAt)}
-                            </Typography>
-                            {canManage && !isEditing && (
-                              <>
-                                <Tooltip title="Chỉnh sửa bình luận">
-                                  <IconButton
-                                    size="small"
-                                    onClick={() => handleStartEditComment(cmt)}
-                                    sx={{ p: 0.25, ml: 0.5, color: "text.secondary", "&:hover": { color: "primary.main" } }}
-                                  >
-                                    <i className="tabler-pencil" style={{ fontSize: 14 }} />
-                                  </IconButton>
-                                </Tooltip>
-                                <Tooltip title="Xóa bình luận">
-                                  <IconButton
-                                    size="small"
-                                    onClick={() => handleDeleteComment(cmt.id)}
-                                    sx={{ p: 0.25, color: "text.secondary", "&:hover": { color: "error.main" } }}
-                                  >
-                                    <i className="tabler-trash" style={{ fontSize: 14 }} />
-                                  </IconButton>
-                                </Tooltip>
-                              </>
-                            )}
-                          </Box>
-                        </Box>
+                  const renderCommentItem = (cmt, isReply = false) => {
+                    const isEditing = editingCommentId === cmt.id;
+                    const canManage = canManageComment(cmt);
 
-                        {isEditing ? (
-                          <Box sx={{ mt: 1 }}>
-                            <MentionInput
-                              fullWidth
-                              size="small"
-                              placement="top-start"
-                              value={editingCommentText}
-                              onChange={(val) => setEditingCommentText(val)}
-                              usersList={usersList}
-                              onMentionsChange={setEditingMentions}
-                              autoFocus
-                            />
-                            <Box sx={{ display: "flex", gap: 1, justifyContent: "flex-end", mt: 1 }}>
-                              <Button
-                                size="small"
-                                variant="outlined"
-                                color="secondary"
-                                onClick={handleCancelEditComment}
-                                sx={{ textTransform: "none", py: 0.25, px: 1.25, fontSize: "0.75rem" }}
-                              >
-                                Hủy
-                              </Button>
-                              <Button
-                                size="small"
-                                variant="contained"
-                                color="primary"
-                                disabled={!editingCommentText.trim() || isSubmittingEdit}
-                                onClick={() => handleSaveEditComment(cmt.id)}
-                                sx={{ textTransform: "none", py: 0.25, px: 1.25, fontSize: "0.75rem" }}
-                              >
-                                {isSubmittingEdit ? "Đang lưu..." : "Lưu"}
-                              </Button>
+                    return (
+                      <Box
+                        key={cmt.id}
+                        sx={{
+                          p: isReply ? 1 : 1.5,
+                          borderRadius: 1.5,
+                          bgcolor: isDark ? "rgba(255, 255, 255, 0.04)" : isReply ? "transparent" : "action.hover",
+                          border: isReply ? "none" : "1px solid",
+                          borderColor: isEditing ? "primary.main" : "divider",
+                          display: "flex",
+                          gap: 1.25,
+                        }}
+                      >
+                        <Avatar
+                          src={resolveAuthorAvatar(cmt.author, usersList)}
+                          sx={{
+                            width: isReply ? 26 : 32,
+                            height: isReply ? 26 : 32,
+                            fontSize: isReply ? 11 : 13,
+                            bgcolor: "primary.light",
+                            flexShrink: 0,
+                            mt: 0.25,
+                          }}
+                        >
+                          {cmt.author?.name?.[0] || "U"}
+                        </Avatar>
+                        <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 0.25 }}>
+                            <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, flexWrap: "wrap" }}>
+                              <Typography variant="caption" sx={{ fontWeight: 600, color: "text.primary" }}>
+                                {cmt.author?.name}
+                              </Typography>
+                            </Box>
+                            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                              <Tooltip title={formatFullDateTime(cmt.createdAt)}>
+                                <Typography
+                                  variant="caption"
+                                  color="text.disabled"
+                                  sx={{ fontSize: "0.68rem", whiteSpace: "nowrap" }}
+                                >
+                                  {isReply ? formatDateOnly(cmt.createdAt) : formatFullDateTime(cmt.createdAt)}
+                                </Typography>
+                              </Tooltip>
+                              {canManage && !isEditing && (
+                                <>
+                                  <Tooltip title="Chỉnh sửa bình luận">
+                                    <IconButton
+                                      size="small"
+                                      onClick={() => handleStartEditComment(cmt)}
+                                      sx={{ p: 0.25, ml: 0.5, color: "text.secondary", "&:hover": { color: "primary.main" } }}
+                                    >
+                                      <i className="tabler-pencil" style={{ fontSize: 13 }} />
+                                    </IconButton>
+                                  </Tooltip>
+                                  <Tooltip title="Xóa bình luận">
+                                    <IconButton
+                                      size="small"
+                                      onClick={() => handleDeleteComment(cmt.id)}
+                                      sx={{ p: 0.25, color: "text.secondary", "&:hover": { color: "error.main" } }}
+                                    >
+                                      <i className="tabler-trash" style={{ fontSize: 13 }} />
+                                    </IconButton>
+                                  </Tooltip>
+                                </>
+                              )}
                             </Box>
                           </Box>
-                        ) : (
-                          <>
-                            <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.825rem", lineHeight: 1.4, wordBreak: "break-word" }}>
-                              {renderWithMentions(cmt.content, usersList)}
-                            </Typography>
-                            {cmt.updatedAt && (
-                              <Typography variant="caption" color="text.disabled" sx={{ fontSize: "0.68rem", fontStyle: "italic", display: "block", mt: 0.25 }}>
-                                (Đã chỉnh sửa)
+
+                          {isEditing ? (
+                            <Box sx={{ mt: 1 }}>
+                              <MentionInput
+                                fullWidth
+                                size="small"
+                                placement="top-start"
+                                value={editingCommentText}
+                                onChange={(val) => setEditingCommentText(val)}
+                                usersList={usersList}
+                                onMentionsChange={setEditingMentions}
+                                autoFocus
+                              />
+                              <Box sx={{ display: "flex", gap: 1, justifyContent: "flex-end", mt: 1 }}>
+                                <Button
+                                  size="small"
+                                  variant="outlined"
+                                  color="secondary"
+                                  onClick={handleCancelEditComment}
+                                  sx={{ textTransform: "none", py: 0.25, px: 1.25, fontSize: "0.75rem" }}
+                                >
+                                  Hủy
+                                </Button>
+                                <Button
+                                  size="small"
+                                  variant="contained"
+                                  color="primary"
+                                  disabled={!editingCommentText.trim() || isSubmittingEdit}
+                                  onClick={() => handleSaveEditComment(cmt.id)}
+                                  sx={{ textTransform: "none", py: 0.25, px: 1.25, fontSize: "0.75rem" }}
+                                >
+                                  {isSubmittingEdit ? "Đang lưu..." : "Lưu"}
+                                </Button>
+                              </Box>
+                            </Box>
+                          ) : (
+                            <>
+                              <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.825rem", lineHeight: 1.4, wordBreak: "break-word" }}>
+                                {renderWithMentions(cmt.content, usersList)}
                               </Typography>
-                            )}
-                          </>
-                        )}
+                              {cmt.updatedAt && (
+                                <Typography variant="caption" color="text.disabled" sx={{ fontSize: "0.68rem", fontStyle: "italic", display: "block", mt: 0.25 }}>
+                                  (Đã chỉnh sửa)
+                                </Typography>
+                              )}
+
+                              {/* Comment Action Buttons: Like, Dislike, Reply */}
+                              <Box sx={{ display: "flex", alignItems: "center", gap: 2, mt: 0.5 }}>
+                                <Box
+                                  component="button"
+                                  type="button"
+                                  onClick={() => onToggleCommentReaction && onToggleCommentReaction(item.id, cmt.id, "like")}
+                                  sx={{
+                                    border: 0,
+                                    bgcolor: "transparent",
+                                    p: 0,
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    gap: 0.5,
+                                    cursor: "pointer",
+                                    color: cmt.isLiked ? "error.main" : "text.secondary",
+                                    fontWeight: cmt.isLiked ? 600 : 500,
+                                    fontSize: "0.72rem",
+                                    "&:hover": { color: "error.main" },
+                                  }}
+                                >
+                                  <i className={cmt.isLiked ? "tabler-heart-filled" : "tabler-heart"} style={{ fontSize: 13 }} />
+                                  <span>{(cmt.likes || 0) > 0 ? cmt.likes : "Thích"}</span>
+                                </Box>
+
+                                <Box
+                                  component="button"
+                                  type="button"
+                                  onClick={() => onToggleCommentReaction && onToggleCommentReaction(item.id, cmt.id, "dislike")}
+                                  sx={{
+                                    border: 0,
+                                    bgcolor: "transparent",
+                                    p: 0,
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    gap: 0.5,
+                                    cursor: "pointer",
+                                    color: cmt.isDisliked ? "text.primary" : "text.secondary",
+                                    fontWeight: cmt.isDisliked ? 600 : 500,
+                                    fontSize: "0.72rem",
+                                    "&:hover": { color: "text.primary" },
+                                  }}
+                                >
+                                  <i className={cmt.isDisliked ? "tabler-thumb-down-filled" : "tabler-thumb-down"} style={{ fontSize: 13 }} />
+                                  <span>{(cmt.dislikes || 0) > 0 ? cmt.dislikes : "Không thích"}</span>
+                                </Box>
+
+                                <Box
+                                  component="button"
+                                  type="button"
+                                  onClick={() => handleReplyToComment(cmt, isReply)}
+                                  sx={{
+                                    border: 0,
+                                    bgcolor: "transparent",
+                                    p: 0,
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    gap: 0.5,
+                                    cursor: "pointer",
+                                    color: "text.secondary",
+                                    fontWeight: 500,
+                                    fontSize: "0.72rem",
+                                    "&:hover": { color: "primary.main" },
+                                  }}
+                                >
+                                  <i className="tabler-arrow-back-up" style={{ fontSize: 13 }} />
+                                  <span>Trả lời</span>
+                                </Box>
+                              </Box>
+                            </>
+                          )}
+
+                          {/* Nested replies */}
+                          {!isReply && repliesMap.has(cmt.id) && (
+                            <Box sx={{ mt: 1, pl: 2, borderLeft: "2px solid", borderColor: "divider", display: "flex", flexDirection: "column", gap: 1 }}>
+                              {repliesMap.get(cmt.id).map((r) => renderCommentItem(r, true))}
+                            </Box>
+                          )}
+                        </Box>
                       </Box>
-                    </Box>
-                  );
-                })
+                    );
+                  };
+
+                  return topLevelComments.map((cmt) => renderCommentItem(cmt, false));
+                })()
               )}
             </Box>
 
             {/* Comment Input Box */}
-            <Box sx={{ mt: "auto", display: "flex", gap: 1, alignItems: "flex-start" }}>
+            <Box sx={{ mt: "auto", display: "flex", gap: 0.75, alignItems: "center" }}>
               <Box sx={{ flexGrow: 1 }}>
                 <MentionInput
+                  inputRef={commentInputRef}
                   fullWidth
                   size="small"
                   placement="top-start"
-                  placeholder="Viết bình luận, gắn thẻ @tên hoặc @All..."
+                  placeholder={replyingTo ? "Nhập câu trả lời..." : "Viết bình luận, gắn thẻ @tên hoặc @All..."}
                   value={commentText}
                   onChange={(val) => setCommentText(val)}
                   usersList={usersList}
                   onMentionsChange={setCommentMentions}
+                  InputProps={{
+                    startAdornment: replyingTo ? (
+                      <InputAdornment position="start">
+                        <Chip
+                          size="small"
+                          label={`@${replyingTo.authorName}`}
+                          color="primary"
+                          variant="tonal"
+                          onDelete={() => setReplyingTo(null)}
+                          sx={{
+                            fontWeight: 600,
+                            fontSize: "0.78rem",
+                            height: 24,
+                            bgcolor: "rgba(115, 103, 240, 0.12)",
+                            color: "primary.main",
+                            "& .MuiChip-deleteIcon": {
+                              fontSize: 14,
+                              color: "primary.main",
+                              "&:hover": { color: "error.main" },
+                            },
+                          }}
+                        />
+                      </InputAdornment>
+                    ) : null,
+                    endAdornment: null,
+                  }}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
+                    if (e.key === "Backspace" && !commentText && replyingTo) {
+                      setReplyingTo(null);
+                    } else if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault();
                       handleSendComment();
                     }
                   }}
                 />
               </Box>
+
+              {/* Nút Chọn Emoji */}
+              <Tooltip title="Chọn biểu tượng cảm xúc">
+                <IconButton
+                  size="small"
+                  onClick={(e) => setEmojiAnchorEl(e.currentTarget)}
+                  sx={{
+                    width: 38,
+                    height: 38,
+                    borderRadius: 1.5,
+                    border: "1px solid",
+                    borderColor: Boolean(emojiAnchorEl) ? "primary.main" : "divider",
+                    color: Boolean(emojiAnchorEl) ? "primary.main" : "text.secondary",
+                    bgcolor: Boolean(emojiAnchorEl) ? "rgba(115, 103, 240, 0.08)" : "transparent",
+                    "&:hover": {
+                      color: "primary.main",
+                      bgcolor: "rgba(115, 103, 240, 0.08)",
+                      borderColor: "primary.main",
+                    },
+                  }}
+                >
+                  <i className="tabler-mood-smile" style={{ fontSize: 20 }} />
+                </IconButton>
+              </Tooltip>
+
+              {/* Nút Gửi bình luận */}
               <Button
                 variant="contained"
                 color="primary"
@@ -1331,6 +1731,215 @@ export default function MediaLightbox({
           </Box>
         </Box>
       </Box>
+
+      {/* Reaction List Modal (Like / Dislike) */}
+      <Dialog
+        open={reactionModalOpen}
+        onClose={() => setReactionModalOpen(false)}
+        maxWidth="xs"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: 2 } }}
+      >
+        <DialogTitle sx={{ pb: 1, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <Tabs
+            value={reactionTab}
+            onChange={(_, val) => setReactionTab(val)}
+            textColor="primary"
+            indicatorColor="primary"
+            sx={{ minHeight: 40 }}
+          >
+            <Tab
+              value="like"
+              icon={<i className="tabler-heart-filled text-error" style={{ fontSize: 16 }} />}
+              iconPosition="start"
+              label={`Yêu thích (${(item?.likedBy || []).length})`}
+              sx={{ textTransform: "none", fontWeight: 600, minHeight: 40, py: 0.5, fontSize: "0.85rem" }}
+            />
+            <Tab
+              value="dislike"
+              icon={<i className="tabler-thumb-down-filled" style={{ fontSize: 16 }} />}
+              iconPosition="start"
+              label={`Không thích (${(item?.dislikedBy || []).length})`}
+              sx={{ textTransform: "none", fontWeight: 600, minHeight: 40, py: 0.5, fontSize: "0.85rem" }}
+            />
+          </Tabs>
+          <IconButton size="small" onClick={() => setReactionModalOpen(false)}>
+            <i className="tabler-x" style={{ fontSize: 16 }} />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent dividers sx={{ p: 2 }}>
+          {(() => {
+            const list = reactionTab === "like" ? (item?.likedBy || []) : (item?.dislikedBy || []);
+            if (list.length === 0) {
+              return (
+                <Box sx={{ py: 4, textAlign: "center" }}>
+                  <Typography variant="body2" color="text.secondary">
+                    {reactionTab === "like"
+                      ? "Chưa có ai yêu thích bài đăng này."
+                      : "Chưa có ai bày tỏ không thích bài đăng này."}
+                  </Typography>
+                </Box>
+              );
+            }
+            return (
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+                {list.map((u, idx) => {
+                  const resolvedUser = typeof u === "string"
+                    ? usersList.find((x) => x.id === u || x.name === u) || { name: u }
+                    : u;
+                  return (
+                    <Box key={u.id || u.name || idx} sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                      <Avatar src={resolvedUser.avatar} sx={{ width: 36, height: 36, fontSize: 14 }}>
+                        {resolvedUser.name?.[0]}
+                      </Avatar>
+                      <Box sx={{ minWidth: 0, flex: 1 }}>
+                        <Typography variant="subtitle2" noWrap sx={{ fontWeight: 600, lineHeight: 1.2 }}>
+                          {resolvedUser.name}
+                        </Typography>
+                        {(resolvedUser.department || resolvedUser.role) && (
+                          <Typography variant="caption" color="text.secondary" noWrap sx={{ display: "block" }}>
+                            {resolvedUser.department || resolvedUser.role}
+                          </Typography>
+                        )}
+                      </Box>
+                    </Box>
+                  );
+                })}
+              </Box>
+            );
+          })()}
+        </DialogContent>
+      </Dialog>
+
+      {/* Emoji Picker Popover */}
+      <Popover
+        open={Boolean(emojiAnchorEl)}
+        anchorEl={emojiAnchorEl}
+        onClose={() => {
+          setEmojiAnchorEl(null);
+          setEmojiSearch("");
+        }}
+        anchorOrigin={{
+          vertical: "top",
+          horizontal: "right",
+        }}
+        transformOrigin={{
+          vertical: "bottom",
+          horizontal: "right",
+        }}
+        slotProps={{
+          paper: {
+            sx: {
+              width: 320,
+              maxHeight: 380,
+              display: "flex",
+              flexDirection: "column",
+              borderRadius: 2,
+              p: 1.5,
+              boxShadow: "0 8px 32px rgba(0,0,0,0.22)",
+            },
+          },
+        }}
+      >
+        {/* Search */}
+        <CustomTextField
+          size="small"
+          fullWidth
+          placeholder="Tìm biểu tượng cảm xúc..."
+          value={emojiSearch}
+          onChange={(e) => setEmojiSearch(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <i className="tabler-search" style={{ fontSize: 16 }} />
+              </InputAdornment>
+            ),
+            endAdornment: emojiSearch ? (
+              <InputAdornment position="end">
+                <IconButton size="small" onClick={() => setEmojiSearch("")}>
+                  <i className="tabler-x" style={{ fontSize: 14 }} />
+                </IconButton>
+              </InputAdornment>
+            ) : null,
+          }}
+          sx={{ mb: 1 }}
+        />
+
+        {/* Categories Tab (if not searching) */}
+        {!emojiSearch && (
+          <Tabs
+            value={emojiCategoryIdx}
+            onChange={(_, val) => setEmojiCategoryIdx(val)}
+            variant="scrollable"
+            scrollButtons={false}
+            sx={{
+              minHeight: 32,
+              mb: 1,
+              borderBottom: "1px solid",
+              borderColor: "divider",
+              "& .MuiTab-root": {
+                minHeight: 32,
+                py: 0.5,
+                px: 1,
+                fontSize: "0.75rem",
+                textTransform: "none",
+              },
+            }}
+          >
+            {EMOJI_CATEGORIES.map((cat) => (
+              <Tab
+                key={cat.name}
+                icon={<i className={cat.icon} style={{ fontSize: 15 }} />}
+                iconPosition="start"
+                label={cat.name}
+              />
+            ))}
+          </Tabs>
+        )}
+
+        {/* Emoji Grid */}
+        <Box
+          sx={{
+            flexGrow: 1,
+            overflowY: "auto",
+            display: "grid",
+            gridTemplateColumns: "repeat(7, 1fr)",
+            gap: 0.5,
+            py: 0.5,
+          }}
+        >
+          {(emojiSearch
+            ? EMOJI_CATEGORIES.flatMap((c) => c.emojis).filter((e, idx, arr) => arr.indexOf(e) === idx)
+            : EMOJI_CATEGORIES[emojiCategoryIdx]?.emojis || []
+          ).map((em, i) => (
+            <Box
+              key={`${em}_${i}`}
+              component="button"
+              type="button"
+              onClick={() => handleInsertEmoji(em)}
+              sx={{
+                border: 0,
+                bgcolor: "transparent",
+                borderRadius: 1,
+                p: 0.5,
+                fontSize: "1.35rem",
+                lineHeight: 1,
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                transition: "transform 0.12s, background-color 0.12s",
+                "&:hover": {
+                  transform: "scale(1.3)",
+                  bgcolor: "action.hover",
+                },
+              }}
+            >
+              {em}
+            </Box>
+          ))}
+        </Box>
+      </Popover>
     </Dialog>
   );
 }

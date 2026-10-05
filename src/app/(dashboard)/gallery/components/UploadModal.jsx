@@ -8,7 +8,7 @@ import {
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import AlbumLinkUpload from "./AlbumLinkUpload";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
@@ -105,11 +105,13 @@ export default function UploadModal({
   onUploadSuccess,
   currentUser,
   usersList = [],
+  defaultChannel = "memory",
 }) {
   const fileInputRef = useRef(null);
   const [mode, setMode] = useState("media");
   const [isDragOver, setIsDragOver] = useState(false);
   const [filesQueue, setFilesQueue] = useState([]);
+  const [channel, setChannel] = useState(defaultChannel || "memory");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [selectedTags, setSelectedTags] = useState(["#xe_tuhanh"]);
@@ -121,6 +123,12 @@ export default function UploadModal({
     taggedUserIds: [],
   });
   const draftPostIdRef = useRef(null);
+
+  useEffect(() => {
+    if (open) {
+      setChannel(defaultChannel || "memory");
+    }
+  }, [open, defaultChannel]);
 
   const canBrowserPreviewImage = (file) => {
     const ext = file.name.split(".").pop()?.toLowerCase();
@@ -234,6 +242,7 @@ export default function UploadModal({
       const response = await fetch("/api/gallery/upload", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ background: true, postId, title: title.trim(), description: description.trim(),
+          channel: channel || "memory",
           privacy, tags: selectedTags, uploadedFiles: [],
           uploads: uploads.map(item => ({ sessionId: item.sessionId, name: item.file.name, size: item.file.size })),
           isTagAll: /@all\b/i.test(`${title} ${description}`) || mentionsInfo.isTagAll,
@@ -258,6 +267,7 @@ export default function UploadModal({
     setSelectedTags(["#xe_tuhanh"]);
     setCustomTagInput("");
     setPrivacy("public");
+    setChannel(defaultChannel || "memory");
     setIsUploading(false);
     onClose();
   };
@@ -320,7 +330,7 @@ export default function UploadModal({
           <Tab value="media" label="Tải ảnh / video" disabled={isUploading} />
           <Tab value="album" label="Upload URL Album" disabled={isUploading} />
         </Tabs>
-        {mode === "album" ? <AlbumLinkUpload onUploadSuccess={onUploadSuccess} onClose={handleResetAndClose} onBusyChange={setIsUploading} /> : <>
+        {mode === "album" ? <AlbumLinkUpload onUploadSuccess={onUploadSuccess} onClose={handleResetAndClose} onBusyChange={setIsUploading} defaultChannel={channel} /> : <>
         {/* Hidden File Input */}
         <input
           ref={fileInputRef}
@@ -617,6 +627,62 @@ export default function UploadModal({
               }}
             />
           </Box>
+
+          {/* Kênh truyền thông đăng tải */}
+          <FormControl fullWidth>
+            <FormLabel sx={{ fontSize: "0.8125rem", fontWeight: 600, mb: 1 }}>
+              Kênh truyền thông đăng tải:
+            </FormLabel>
+            <RadioGroup
+              row
+              value={channel}
+              onChange={(e) => setChannel(e.target.value)}
+              sx={{ gap: { xs: 1, sm: 2 } }}
+            >
+              <FormControlLabel
+                value="memory"
+                control={<Radio size="small" />}
+                label={
+                  <Box>
+                    <Typography variant="body2" sx={{ fontWeight: 600, display: "flex", alignItems: "center", gap: 0.5 }}>
+                      <i className="tabler-photo-heart text-primary" /> Kênh Kỷ Niệm
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Kho tư liệu sự kiện & dự án
+                    </Typography>
+                  </Box>
+                }
+              />
+              <FormControlLabel
+                value="relax"
+                control={<Radio size="small" color="success" />}
+                label={
+                  <Box>
+                    <Typography variant="body2" sx={{ fontWeight: 600, display: "flex", alignItems: "center", gap: 0.5 }}>
+                      <i className="tabler-coffee text-success" /> Kênh Relax
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Thư giãn, hài hước & đời sống
+                    </Typography>
+                  </Box>
+                }
+              />
+              <FormControlLabel
+                value="report"
+                control={<Radio size="small" color="error" />}
+                label={
+                  <Box>
+                    <Typography variant="body2" sx={{ fontWeight: 600, display: "flex", alignItems: "center", gap: 0.5 }}>
+                      <i className="tabler-clipboard-check text-error" /> Kênh Report
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Tiến độ, biên bản bàn giao, kiểm tra xe
+                    </Typography>
+                  </Box>
+                }
+              />
+            </RadioGroup>
+          </FormControl>
 
           {/* Privacy */}
           <FormControl>

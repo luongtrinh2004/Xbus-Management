@@ -30,6 +30,7 @@ export default function EditPostModal({
 }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [channel, setChannel] = useState("memory");
   const [privacy, setPrivacy] = useState("public");
   const [selectedTags, setSelectedTags] = useState([]);
   const [customTagInput, setCustomTagInput] = useState("");
@@ -40,6 +41,7 @@ export default function EditPostModal({
     if (post) {
       setTitle(post.title || "");
       setDescription(post.description || "");
+      setChannel(post.channel || "memory");
       setPrivacy(post.privacy || "public");
       setSelectedTags(Array.isArray(post.tags) ? post.tags : []);
     }
@@ -74,6 +76,7 @@ export default function EditPostModal({
         body: JSON.stringify({
           title: title.trim(),
           description: description.trim(),
+          channel,
           privacy,
           tags: selectedTags,
           isTagAll: /@all\b/i.test(`${title} ${description}`) || mentionsInfo.isTagAll,
@@ -219,6 +222,50 @@ export default function EditPostModal({
               }}
             />
           </Box>
+
+          {/* Kênh truyền thông */}
+          <FormControl>
+            <FormLabel sx={{ fontSize: "0.875rem", fontWeight: 600, mb: 0.5 }}>
+              Kênh truyền thông:
+            </FormLabel>
+            <RadioGroup
+              row
+              value={channel}
+              onChange={(e) => setChannel(e.target.value)}
+              sx={{ gap: 1 }}
+            >
+              <FormControlLabel
+                value="memory"
+                control={<Radio size="small" />}
+                label={
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                    <i className="tabler-photo-heart text-primary" style={{ fontSize: 16 }} />
+                    <Typography variant="body2">Kỷ niệm</Typography>
+                  </Box>
+                }
+              />
+              <FormControlLabel
+                value="relax"
+                control={<Radio size="small" color="success" />}
+                label={
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                    <i className="tabler-coffee text-success" style={{ fontSize: 16 }} />
+                    <Typography variant="body2">Relax</Typography>
+                  </Box>
+                }
+              />
+              <FormControlLabel
+                value="report"
+                control={<Radio size="small" color="error" />}
+                label={
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                    <i className="tabler-clipboard-check text-error" style={{ fontSize: 16 }} />
+                    <Typography variant="body2">Report</Typography>
+                  </Box>
+                }
+              />
+            </RadioGroup>
+          </FormControl>
 
           {/* Quyền riêng tư */}
           <FormControl>

@@ -75,7 +75,7 @@ export async function POST(req) {
     // --- CASE A: JSON payload (Pre-uploaded files finalization - INSTANT SUBMIT) ---
     if (contentType.includes("application/json")) {
       const body = await req.json();
-      const { title = "", description = "", tags = [], privacy = "public", uploadedFiles = [] } = body;
+      const { title = "", description = "", tags = [], privacy = "public", channel = "memory", uploadedFiles = [] } = body;
 
       if (!Array.isArray(uploadedFiles) || (!body.background && uploadedFiles.length === 0)) {
         return NextResponse.json({ error: "Chưa có tệp tin nào được tải lên" }, { status: 400 });
@@ -105,6 +105,7 @@ export async function POST(req) {
         id: postId,
         postId,
         mediaSource: "minio",
+        channel: ["memory", "relax", "report"].includes(channel) ? channel : "memory",
         ...(uploadSessions ? { uploadSessions } : {}),
         title: postTitle,
         description: postDescription,
@@ -197,6 +198,7 @@ export async function POST(req) {
     const titleInput = String(formData.get("title") || "").trim();
     const descriptionInput = String(formData.get("description") || "").trim();
     const privacyInput = String(formData.get("privacy") || "public").trim();
+    const channelInput = String(formData.get("channel") || "memory").trim();
     let tagsInput = [];
     try {
       const parsed = JSON.parse(formData.get("tags") || "[]");
@@ -300,6 +302,7 @@ export async function POST(req) {
       id: postId,
       postId,
       mediaSource: "minio",
+      channel: ["memory", "relax", "report"].includes(channelInput) ? channelInput : "memory",
       title: postTitle,
       ...(isAlbumLink ? { postType: "album_link" } : {}),
       description: descriptionInput || "Tệp media được tải lên hệ thống lưu trữ nội bộ Xbus.",

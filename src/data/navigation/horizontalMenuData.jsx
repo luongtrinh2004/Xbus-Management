@@ -42,9 +42,9 @@ const horizontalMenuData = [
     roles: ["user", "assistant", "admin"],
   },
   {
-    label: "Ảnh và video",
+    label: "Kênh truyền thông",
     href: "/gallery",
-    icon: "tabler-photo-video",
+    icon: "tabler-broadcast",
     roles: ["user", "assistant", "admin"],
   },
   {

@@ -54,15 +54,22 @@ function GalleryContent() {
   const [isLoading, setIsLoading] = useState(true);
 
   // Filter & Search states
+  const [selectedChannel, setSelectedChannel] = useState("memory");
+  const [channelCounts, setChannelCounts] = useState({
+    all: 0,
+    memory: 0,
+    relax: 0,
+    report: 0,
+  });
   const [searchQuery, setSearchQuery] = useState("");
-  const [typeFilter, setTypeFilter] = useState("all"); // 'all' | 'image' | 'video'
-  const [timeFilter, setTimeFilter] = useState("all"); // 'all' | 'today' | 'this_week' | 'this_month' | 'custom'
+  const [tagFilter, setTagFilter] = useState("all");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [uploaderFilter, setUploaderFilter] = useState("all");
   const [sortOption, setSortOption] = useState("newest");
   const [viewMode, setViewMode] = useState("grid"); // 'grid' | 'list'
   const [isFilterLargest, setIsFilterLargest] = useState(false);
+  const [availableTags, setAvailableTags] = useState([]);
 
   // Batch selection states
   const [isBatchMode, setIsBatchMode] = useState(false);
@@ -149,9 +156,11 @@ function GalleryContent() {
     try {
       if (!silent) setIsLoading(true);
       const params = new URLSearchParams();
+      if (selectedChannel && selectedChannel !== "all") params.set("channel", selectedChannel);
       if (searchQuery.trim()) params.set("search", searchQuery.trim());
-      if (typeFilter !== "all") params.set("type", typeFilter);
-      if (timeFilter !== "all") params.set("time", timeFilter);
+      if (startDate) params.set("startDate", startDate);
+      if (endDate) params.set("endDate", endDate);
+      if (tagFilter && tagFilter !== "all") params.set("tag", tagFilter);
       if (uploaderFilter !== "all") params.set("uploader", uploaderFilter);
       if (sortOption) params.set("sort", isFilterLargest ? "size_desc" : sortOption);
       if (isFilterLargest) params.set("largestOnly", "true");
@@ -174,8 +183,14 @@ function GalleryContent() {
           return { ...post, uploadState: { ...post.uploadState, sessions,
             progress: size ? Math.round(sessions.reduce((sum, session) => sum + session.size * session.progress, 0) / size) : 0 } };
         }));
+        if (data.channelCounts) {
+          setChannelCounts(data.channelCounts);
+        }
         if (data.storage) {
           setStorageStats(data.storage);
+        }
+        if (Array.isArray(data.tags)) {
+          setAvailableTags(data.tags);
         }
       }
     } catch (err) {
@@ -184,7 +199,7 @@ function GalleryContent() {
     } finally {
       if (!silent) setIsLoading(false);
     }
-  }, [searchQuery, typeFilter, timeFilter, uploaderFilter, sortOption, isFilterLargest]);
+  }, [selectedChannel, searchQuery, startDate, endDate, tagFilter, uploaderFilter, sortOption, isFilterLargest]);
 
   useEffect(() => {
     fetchGalleryData();
@@ -247,28 +262,83 @@ function GalleryContent() {
     return idx >= 0 ? idx : 0;
   }, [activeMediaId, mediaList]);
 
-  // Dynamic counts for Toolbar chips
-  const counts = useMemo(() => {
-    const total = mediaList.length;
-    const images = mediaList.filter((m) => m.type === "image" || m.hasImage).length;
-    const videos = mediaList.filter((m) => m.type === "video" || m.hasVideo).length;
-    return { all: total, image: images, video: videos };
-  }, [mediaList]);
-
-  // Dynamic Uploader options
-  const uploaderOptions = useMemo(() => {
-    const map = new Map();
-    mediaList.forEach((item) => {
-      if (item.uploader?.id && !map.has(item.uploader.id)) {
-        map.set(item.uploader.id, {
-          id: item.uploader.id,
-          name: item.uploader.name,
-          avatar: item.uploader.avatar,
+  // Dynamic tags list fallback
+  const computedTags = useMemo(() => {
+    if (availableTags && availableTags.length > 0) return availableTags;
+    const tagMap = new Map();
+    POPULAR_TAGS.forEach((t) => tagMap.set(t, 0));
+    mediaList.forEach((m) => {
+      if (Array.isArray(m.tags)) {
+        m.tags.forEach((t) => {
+          const norm = t.startsWith("#") ? t : `#${t}`;
+          tagMap.set(norm, (tagMap.get(norm) || 0) + 1);
         });
       }
     });
-    return Array.from(map.values());
-  }, [mediaList]);
+    return Array.from(tagMap.entries())
+      .map(([tag, count]) => ({ tag, count }))
+      .sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag));
+  }, [availableTags, mediaList]);
+
+  const handleResetFilters = () => {
+    setSearchQuery("");
+    setStartDate("");
+    setEndDate("");
+    setTagFilter("all");
+    setUploaderFilter("all");
+  };
+
+  const handleStartDateChange = (val) => {
+    setStartDate(val);
+    if (val) {
+      const today = new Date();
+      const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+      if (!endDate) {
+        setEndDate(val > todayStr ? val : todayStr);
+      } else if (val > endDate) {
+        setEndDate(val);
+      }
+    }
+  };
+
+  const handleEndDateChange = (val) => {
+    setEndDate(val);
+    if (val && startDate && startDate > val) {
+      setStartDate("");
+    }
+  };
+
+  // Dynamic Uploader options from company personnel (usersList) + any media uploaders
+  const uploaderOptions = useMemo(() => {
+    const map = new Map();
+    (usersList || []).forEach((u) => {
+      if (u.name) {
+        map.set(u.name.toLowerCase().trim(), {
+          id: u.id,
+          name: u.name,
+          email: u.email,
+          code: u.code,
+          role: u.role,
+          department: u.department,
+          avatar: u.avatar,
+        });
+      }
+    });
+    mediaList.forEach((item) => {
+      if (item.uploader?.name) {
+        const key = item.uploader.name.toLowerCase().trim();
+        if (!map.has(key)) {
+          map.set(key, {
+            id: item.uploader.id,
+            name: item.uploader.name,
+            avatar: item.uploader.avatar,
+            department: item.uploader.department || "Xbus",
+          });
+        }
+      }
+    });
+    return Array.from(map.values()).sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+  }, [usersList, mediaList]);
 
   // Batch actions
   const handleToggleSelect = (id) => {
@@ -391,32 +461,164 @@ function GalleryContent() {
   };
 
   // Social interactions (Real API with optimistic state)
-  const handleToggleLike = async (id) => {
+  const handleToggleLike = async (id, action = "like") => {
     // Optimistic update
     setMediaList((prev) =>
       prev.map((item) => {
         if (item.id === id) {
-          const nextLiked = !item.isLiked;
-          const nextCount = Math.max(0, (item.likes || 0) + (nextLiked ? 1 : -1));
-          return { ...item, isLiked: nextLiked, likes: nextCount };
+          let isLiked = item.isLiked;
+          let likes = item.likes || 0;
+          let isDisliked = item.isDisliked;
+          let dislikes = item.dislikes || 0;
+
+          if (action === "like") {
+            if (isLiked) {
+              isLiked = false;
+              likes = Math.max(0, likes - 1);
+            } else {
+              isLiked = true;
+              likes += 1;
+              if (isDisliked) {
+                isDisliked = false;
+                dislikes = Math.max(0, dislikes - 1);
+              }
+            }
+          } else if (action === "dislike") {
+            if (isDisliked) {
+              isDisliked = false;
+              dislikes = Math.max(0, dislikes - 1);
+            } else {
+              isDisliked = true;
+              dislikes += 1;
+              if (isLiked) {
+                isLiked = false;
+                likes = Math.max(0, likes - 1);
+              }
+            }
+          }
+
+          return { ...item, isLiked, likes, isDisliked, dislikes };
         }
         return item;
       })
     );
 
     try {
-      const res = await fetch(`/api/gallery/${id}/like`, { method: "POST" });
+      const res = await fetch(`/api/gallery/${id}/like`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action }),
+      });
       if (res.ok) {
         const data = await res.json();
         setMediaList((prev) =>
           prev.map((item) =>
-            item.id === id ? { ...item, isLiked: data.isLiked, likes: data.likes } : item
+            item.id === id
+              ? {
+                  ...item,
+                  isLiked: data.isLiked,
+                  likes: data.likes,
+                  likedBy: data.likedBy,
+                  isDisliked: data.isDisliked,
+                  dislikes: data.dislikes,
+                  dislikedBy: data.dislikedBy,
+                }
+              : item
           )
         );
       }
     } catch (err) {
       console.error("[handleToggleLike] Lỗi:", err);
       fetchGalleryData(); // rollback if error
+    }
+  };
+
+  // Toggle reaction (like / dislike) on individual comment
+  const handleToggleCommentReaction = async (postId, commentId, action = "like") => {
+    // Optimistic update
+    setMediaList((prev) =>
+      prev.map((post) => {
+        const isMatch =
+          post.id === postId ||
+          (post.postId && activeMediaItem?.postId && post.postId === activeMediaItem.postId);
+        if (!isMatch) return post;
+
+        return {
+          ...post,
+          comments: (post.comments || []).map((c) => {
+            if (c.id !== commentId) return c;
+            let isLiked = c.isLiked;
+            let likes = c.likes || 0;
+            let isDisliked = c.isDisliked;
+            let dislikes = c.dislikes || 0;
+
+            if (action === "like") {
+              if (isLiked) {
+                isLiked = false;
+                likes = Math.max(0, likes - 1);
+              } else {
+                isLiked = true;
+                likes += 1;
+                if (isDisliked) {
+                  isDisliked = false;
+                  dislikes = Math.max(0, dislikes - 1);
+                }
+              }
+            } else if (action === "dislike") {
+              if (isDisliked) {
+                isDisliked = false;
+                dislikes = Math.max(0, dislikes - 1);
+              } else {
+                isDisliked = true;
+                dislikes += 1;
+                if (isLiked) {
+                  isLiked = false;
+                  likes = Math.max(0, likes - 1);
+                }
+              }
+            }
+
+            return { ...c, isLiked, likes, isDisliked, dislikes };
+          }),
+        };
+      })
+    );
+
+    try {
+      const res = await fetch(`/api/gallery/${postId}/comment`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ commentId, action }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setMediaList((prev) =>
+          prev.map((post) => {
+            const isMatch =
+              post.id === postId ||
+              (post.postId && activeMediaItem?.postId && post.postId === activeMediaItem.postId);
+            if (!isMatch) return post;
+            return {
+              ...post,
+              comments: (post.comments || []).map((c) =>
+                c.id === commentId
+                  ? {
+                      ...c,
+                      isLiked: data.comment?.isLiked,
+                      likes: data.comment?.likes,
+                      isDisliked: data.comment?.isDisliked,
+                      dislikes: data.comment?.dislikes,
+                      likedBy: data.comment?.likedBy,
+                      dislikedBy: data.comment?.dislikedBy,
+                    }
+                  : c
+              ),
+            };
+          })
+        );
+      }
+    } catch (err) {
+      console.error("[handleToggleCommentReaction] Lỗi:", err);
     }
   };
 
@@ -429,6 +631,8 @@ function GalleryContent() {
           content: newComment.content,
           taggedUserIds: newComment.taggedUserIds,
           isTagAll: newComment.isTagAll,
+          parentId: newComment.parentId || null,
+          replyTo: newComment.replyTo || null,
         }),
       });
       if (res.ok) {
@@ -466,19 +670,30 @@ function GalleryContent() {
     );
   };
 
-  const handleDeleteComment = (id, commentId) => {
-    setMediaList((prev) =>
-      prev.map((item) => {
-        const isMatch =
-          item.id === id ||
-          (item.postId && activeMediaItem?.postId && item.postId === activeMediaItem.postId);
-        if (!isMatch) return item;
-        return {
-          ...item,
-          comments: (item.comments || []).filter((c) => c.id !== commentId),
-        };
-      })
-    );
+  const handleDeleteComment = async (id, commentId) => {
+    try {
+      const res = await fetch(`/api/gallery/${id}/comment?commentId=${commentId}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        setMediaList((prev) =>
+          prev.map((item) => {
+            const isMatch =
+              item.id === id ||
+              (item.postId && activeMediaItem?.postId && item.postId === activeMediaItem.postId);
+            if (!isMatch) return item;
+            return {
+              ...item,
+              comments: (item.comments || []).filter(
+                (c) => c.id !== commentId && c.parentId !== commentId
+              ),
+            };
+          })
+        );
+      }
+    } catch (err) {
+      console.error("[handleDeleteComment] Lỗi:", err);
+    }
   };
 
   // Batch tag assignment (Real API)
@@ -573,16 +788,17 @@ function GalleryContent() {
 
       {/* 2. Toolbar & Filters */}
       <MediaToolbar
+        selectedChannel={selectedChannel}
+        onChannelChange={setSelectedChannel}
+        channelCounts={channelCounts}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
-        typeFilter={typeFilter}
-        onTypeFilterChange={setTypeFilter}
-        timeFilter={timeFilter}
-        onTimeFilterChange={setTimeFilter}
         startDate={startDate}
-        onStartDateChange={setStartDate}
+        onStartDateChange={handleStartDateChange}
         endDate={endDate}
-        onEndDateChange={setEndDate}
+        onEndDateChange={handleEndDateChange}
+        tagFilter={tagFilter}
+        onTagFilterChange={setTagFilter}
         uploaderFilter={uploaderFilter}
         onUploaderFilterChange={setUploaderFilter}
         sortOption={sortOption}
@@ -593,7 +809,8 @@ function GalleryContent() {
         onToggleBatchMode={handleToggleBatchMode}
         onOpenUpload={() => setIsUploadOpen(true)}
         uploaderOptions={uploaderOptions}
-        counts={counts}
+        availableTags={computedTags}
+        onResetFilters={handleResetFilters}
       />
 
       {/* 3. Main Content: Grid View or List View */}
@@ -633,7 +850,7 @@ function GalleryContent() {
             Không tìm thấy bài đăng nào
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 400, mx: "auto", mb: 3 }}>
-            {searchQuery || typeFilter !== "all" || timeFilter !== "all" || uploaderFilter !== "all"
+            {searchQuery || startDate || endDate || tagFilter !== "all" || uploaderFilter !== "all"
               ? "Hãy thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm để xem kết quả khác."
               : "Hãy bắt đầu đăng tải ảnh và video kỷ niệm của bạn lên hệ thống."}
           </Typography>
@@ -668,6 +885,7 @@ function GalleryContent() {
                 canEdit={isAdminOrAssistant || isItemOwner(item)}
                 canDelete={isAdminOrAssistant || isItemOwner(item)}
                 usersList={usersList}
+                showChannelBadge={selectedChannel === "all"}
               />
             </Grid>
           ))}
@@ -708,6 +926,7 @@ function GalleryContent() {
         onUploadSuccess={handleUploadSuccess}
         currentUser={session?.user}
         usersList={usersList}
+        defaultChannel={selectedChannel === "all" ? "memory" : selectedChannel}
       />
 
       {/* 6. Lightbox Viewer Modal */}
@@ -723,11 +942,16 @@ function GalleryContent() {
           }
         }}
         onToggleLike={handleToggleLike}
+        onToggleCommentReaction={handleToggleCommentReaction}
         onAddComment={handleAddComment}
         onEditComment={handleEditComment}
         onDeleteComment={handleDeleteComment}
         onDownload={handleDownload}
         onShare={handleShare}
+        onTagClick={(tag) => {
+          setTagFilter(tag);
+          setLightboxOpen(false);
+        }}
         currentUser={session?.user}
         usersList={usersList}
       />

@@ -18,6 +18,7 @@ import Typography from "@mui/material/Typography";
 import { listTemplates } from "@/libs/workTemplates";
 import { splitFavoriteProjects } from "@/libs/workUi";
 import ProjectWizard from "../components/ProjectWizard";
+import WorkAvatar from "../components/WorkAvatar";
 import { HEALTH_META } from "../components/workConstants";
 
 const START_ACTIONS = [
@@ -35,7 +36,7 @@ const START_ACTIONS = [
   },
   {
     source: "import",
-    title: "Import CSV",
+    title: "Nhập tệp CSV",
     description: "Nạp danh sách công việc từ tệp .csv tối đa 2 MB.",
     icon: "tabler-file-spreadsheet",
   },
@@ -83,8 +84,11 @@ export default function ProjectsPage() {
 
   useEffect(() => {
     load();
-    const template = new URLSearchParams(window.location.search).get("template");
+    const params = new URLSearchParams(window.location.search);
+    const template = params.get("template");
     if (template) setWizard({ source: "template", templateId: template });
+    else if (["blank", "template", "import"].includes(params.get("create")))
+      setWizard({ source: params.get("create"), templateId: "" });
   }, []);
 
   useEffect(() => {
@@ -140,8 +144,38 @@ export default function ProjectsPage() {
 
   return (
     <>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: { xs: "flex-start", sm: "center" },
+          justifyContent: "space-between",
+          gap: 2,
+          flexWrap: "wrap",
+        }}
+      >
+        <Box>
+          <Typography variant="h4" fontWeight={750} letterSpacing="-.03em">
+            Dự án
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+            Theo dõi tất cả sáng kiến và tiến độ của đội ngũ.
+          </Typography>
+        </Box>
+        <Button
+          variant="contained"
+          startIcon={<i className="tabler-plus" />}
+          onClick={() => openWizard("blank")}
+          sx={{
+            bgcolor: "#5c5bd6",
+            boxShadow: "none",
+            "&:hover": { bgcolor: "#4f4ec4", boxShadow: "none" },
+          }}
+        >
+          Tạo dự án
+        </Button>
+      </Box>
       <Card sx={{ overflow: "hidden" }}>
-        <CardContent sx={{ p: { xs: 3, md: 4 } }}>
+        <CardContent sx={{ p: { xs: 2, md: 2.5 } }}>
           <Box
             sx={{
               display: "flex",
@@ -151,10 +185,14 @@ export default function ProjectsPage() {
             }}
           >
             <Box sx={{ flex: 1 }}>
-              <Typography variant="h5" fontWeight={700}>
-                Bắt đầu dự án mới
+              <Typography variant="h6" fontWeight={700}>
+                Bắt đầu nhanh
               </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ mt: 0.5 }}
+              >
                 Tạo dự án trống, dùng mẫu có sẵn hoặc nhập công việc từ CSV.
               </Typography>
             </Box>
@@ -174,13 +212,16 @@ export default function ProjectsPage() {
                   key={action.source}
                   onClick={() => openWizard(action.source)}
                   sx={{
-                    p: 2,
-                    borderRadius: 2,
+                    p: 1.5,
+                    borderRadius: 1.25,
                     border: "1px solid",
                     borderColor: "divider",
                     cursor: "pointer",
-                    transition: "transform .15s, box-shadow .15s",
-                    "&:hover": { transform: "translateY(-2px)", boxShadow: 4 },
+                    transition: "border-color .15s, background-color .15s",
+                    "&:hover": {
+                      borderColor: "#5c5bd6",
+                      bgcolor: "action.hover",
+                    },
                   }}
                 >
                   <Box
@@ -190,8 +231,8 @@ export default function ProjectsPage() {
                       borderRadius: 1.5,
                       display: "grid",
                       placeItems: "center",
-                      bgcolor: "primary.main",
-                      color: "#fff",
+                      bgcolor: "rgba(92,91,214,.12)",
+                      color: "#5c5bd6",
                       mb: 1,
                     }}
                   >
@@ -212,7 +253,12 @@ export default function ProjectsPage() {
 
       <Card>
         <CardContent
-          sx={{ display: "flex", gap: 2, flexWrap: "wrap", alignItems: "center" }}
+          sx={{
+            display: "flex",
+            gap: 2,
+            flexWrap: "wrap",
+            alignItems: "center",
+          }}
         >
           <TextField
             size="small"
@@ -239,13 +285,6 @@ export default function ProjectsPage() {
             <MenuItem value="public">Công khai</MenuItem>
             <MenuItem value="private">Riêng tư</MenuItem>
           </TextField>
-          <Button
-            variant="contained"
-            startIcon={<i className="tabler-plus" />}
-            onClick={() => openWizard("blank")}
-          >
-            Tạo dự án
-          </Button>
         </CardContent>
       </Card>
 
@@ -275,7 +314,10 @@ export default function ProjectsPage() {
       ) : (
         <Card>
           <CardContent sx={{ textAlign: "center", py: 8 }}>
-            <i className="tabler-folders" style={{ fontSize: 56, opacity: 0.4 }} />
+            <i
+              className="tabler-folders"
+              style={{ fontSize: 56, opacity: 0.4 }}
+            />
             <Typography variant="h6" mt={2}>
               Chưa có dự án phù hợp
             </Typography>
@@ -339,9 +381,15 @@ export default function ProjectsPage() {
                 <Typography variant="caption" color="text.secondary">
                   {template.description}
                 </Typography>
-                <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap", mt: 1 }}>
+                <Box
+                  sx={{ display: "flex", gap: 0.5, flexWrap: "wrap", mt: 1 }}
+                >
                   {template.sections.slice(0, 4).map((section) => (
-                    <Chip key={section.name} size="small" label={section.name} />
+                    <Chip
+                      key={section.name}
+                      size="small"
+                      label={section.name}
+                    />
                   ))}
                 </Box>
               </Box>
@@ -391,7 +439,7 @@ function ProjectGrid({ projects }) {
           md: "repeat(2, 1fr)",
           xl: "repeat(3, 1fr)",
         },
-        gap: 3,
+        gap: 1.5,
       }}
     >
       {projects.map((project) => {
@@ -404,26 +452,43 @@ function ProjectGrid({ projects }) {
             sx={{
               textDecoration: "none",
               color: "inherit",
-              transition: "transform .2s, box-shadow .2s",
-              "&:hover": { transform: "translateY(-3px)", boxShadow: 8 },
+              transition: "border-color .15s, background-color .15s",
+              "&:hover": { borderColor: "#5c5bd6", bgcolor: "action.hover" },
             }}
           >
-            <CardContent>
-              <Box sx={{ display: "flex", justifyContent: "space-between", gap: 2 }}>
+            <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  gap: 2,
+                }}
+              >
                 <Avatar
                   variant="rounded"
                   sx={{
                     bgcolor: project.color,
-                    width: 48,
-                    height: 48,
+                    width: 38,
+                    height: 38,
                     fontWeight: 700,
                   }}
                 >
                   <i className={project.icon || "tabler-folder"} />
                 </Avatar>
-                <Box sx={{ display: "flex", gap: 0.5, alignItems: "flex-start", flexWrap: "wrap", justifyContent: "flex-end" }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    gap: 0.5,
+                    alignItems: "flex-start",
+                    flexWrap: "wrap",
+                    justifyContent: "flex-end",
+                  }}
+                >
                   {project.favorite && (
-                    <i className="tabler-star-filled" style={{ color: "#FF9F43" }} />
+                    <i
+                      className="tabler-star-filled"
+                      style={{ color: "#FF9F43" }}
+                    />
                   )}
                   <Chip
                     size="small"
@@ -443,7 +508,9 @@ function ProjectGrid({ projects }) {
                         }
                       />
                     }
-                    label={project.visibility === "public" ? "Công khai" : "Riêng tư"}
+                    label={
+                      project.visibility === "public" ? "Công khai" : "Riêng tư"
+                    }
                     variant="tonal"
                   />
                 </Box>
@@ -458,8 +525,12 @@ function ProjectGrid({ projects }) {
               >
                 {project.description || "Chưa có mô tả dự án"}
               </Typography>
-              <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
-                <Typography variant="caption">{project.taskCount} công việc</Typography>
+              <Box
+                sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}
+              >
+                <Typography variant="caption">
+                  {project.taskCount} công việc
+                </Typography>
                 <Typography variant="caption" fontWeight={700}>
                   {project.progress}%
                 </Typography>
@@ -479,9 +550,9 @@ function ProjectGrid({ projects }) {
               >
                 <Box sx={{ display: "flex" }}>
                   {project.members.slice(0, 4).map((member, index) => (
-                    <Avatar
+                    <WorkAvatar
                       key={member.id}
-                      src={member.user?.avatarUrl}
+                      user={member.user}
                       sx={{
                         width: 28,
                         height: 28,
@@ -490,9 +561,7 @@ function ProjectGrid({ projects }) {
                         borderColor: "background.paper",
                         fontSize: 11,
                       }}
-                    >
-                      {member.user?.name?.[0]}
-                    </Avatar>
+                    />
                   ))}
                 </Box>
                 <Chip

@@ -197,6 +197,17 @@ test("public work users exclude private account fields", () => {
   });
 });
 
+test("public work users always expose a safe avatar source", () => {
+  assert.equal(
+    publicWorkUser({ id: "u1", role: "admin", gender: "female" }).avatarUrl,
+    "/images/avatars/female-admin.png",
+  );
+  assert.equal(
+    publicWorkUser({ id: "u2", role: "user", gender: "female" }).avatarUrl,
+    "/images/avatars/female-user.png",
+  );
+});
+
 test("current actor resolution uses the stored active account and current role", () => {
   const users = [
     {
@@ -489,7 +500,7 @@ test("project settings normalize with safe defaults", () => {
   });
   const [project] = state.projects;
   assert.equal(project.icon, "tabler-folder");
-  assert.equal(project.defaultView, "board");
+  assert.equal(project.defaultView, "list");
   assert.deepEqual(project.favoriteBy, []);
   assert.equal(project.health, "no_update");
   assert.deepEqual(state.projectStatusUpdates, []);

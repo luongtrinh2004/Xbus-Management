@@ -1,12 +1,291 @@
 {
   "version": 1,
-  "projects": [],
-  "projectMembers": [],
-  "sections": [],
-  "tasks": [],
+  "projects": [
+    {
+      "id": "prj_1791180934650_mg617z",
+      "title": "Bug Tracker",
+      "key": "BUG-TRACKER",
+      "description": "dsdsd",
+      "color": "#EA5455",
+      "icon": "tabler-bus",
+      "visibility": "private",
+      "ownerId": "usr_007",
+      "template": "bug-tracker",
+      "templateId": "bug-tracker",
+      "defaultView": "list",
+      "startDate": "2026-10-09",
+      "dueDate": "2026-10-29",
+      "favoriteBy": [],
+      "health": "on_track",
+      "createdAt": "2026-10-05T06:15:34.650Z",
+      "updatedAt": "2026-10-05T06:36:54.137Z",
+      "archivedAt": null,
+      "statusUpdatedAt": "2026-10-05T06:36:43.267Z"
+    }
+  ],
+  "projectMembers": [
+    {
+      "id": "pm_1791180934651_ed4rzj",
+      "projectId": "prj_1791180934650_mg617z",
+      "userId": "usr_007",
+      "role": "owner",
+      "createdAt": "2026-10-05T06:15:34.650Z"
+    },
+    {
+      "id": "pm_1791182214137_sw31ne",
+      "projectId": "prj_1791180934650_mg617z",
+      "userId": "usr_003",
+      "role": "member",
+      "createdAt": "2026-10-05T06:36:54.137Z"
+    },
+    {
+      "id": "pm_1791182214137_zccrlb",
+      "projectId": "prj_1791180934650_mg617z",
+      "userId": "usr_011",
+      "role": "member",
+      "createdAt": "2026-10-05T06:36:54.137Z"
+    }
+  ],
+  "sections": [
+    {
+      "id": "sec_1791180934651_6abk6p",
+      "projectId": "prj_1791180934650_mg617z",
+      "name": "Lỗi mới",
+      "status": "todo",
+      "order": 0,
+      "createdAt": "2026-10-05T06:15:34.650Z"
+    },
+    {
+      "id": "sec_1791180934651_9sfmko",
+      "projectId": "prj_1791180934650_mg617z",
+      "name": "Đã xác nhận",
+      "status": "todo",
+      "order": 0,
+      "createdAt": "2026-10-05T06:15:34.650Z"
+    },
+    {
+      "id": "sec_1791180934651_5latia",
+      "projectId": "prj_1791180934650_mg617z",
+      "name": "Đang sửa",
+      "status": "in_progress",
+      "order": 0,
+      "createdAt": "2026-10-05T06:15:34.650Z"
+    },
+    {
+      "id": "sec_1791180934651_d8r44p",
+      "projectId": "prj_1791180934650_mg617z",
+      "name": "Chờ kiểm thử",
+      "status": "in_progress",
+      "order": 0,
+      "createdAt": "2026-10-05T06:15:34.650Z"
+    },
+    {
+      "id": "sec_1791180934651_e07nfx",
+      "projectId": "prj_1791180934650_mg617z",
+      "name": "Đã đóng",
+      "status": "done",
+      "order": 0,
+      "createdAt": "2026-10-05T06:15:34.650Z"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "tsk_1791180934651_fdx1ud",
+      "projectId": "prj_1791180934650_mg617z",
+      "sectionId": "sec_1791180934651_6abk6p",
+      "number": 1,
+      "code": "BUG-TRACKER-1",
+      "title": "Ghi log tái hiện lỗi",
+      "description": "Môi trường, bước thực hiện, kết quả mong đợi",
+      "status": "todo",
+      "priority": "high",
+      "assigneeId": null,
+      "startDate": null,
+      "dueDate": null,
+      "completed": false,
+      "subtasks": [],
+      "createdBy": "usr_admin_001",
+      "createdAt": "2026-10-05T06:15:34.650Z",
+      "updatedAt": "2026-10-05T06:30:18.238Z",
+      "archivedAt": null
+    },
+    {
+      "id": "tsk_1791180934651_7vvdus",
+      "projectId": "prj_1791180934650_mg617z",
+      "sectionId": "sec_1791180934651_9sfmko",
+      "number": 2,
+      "code": "BUG-TRACKER-2",
+      "title": "Xác nhận mức độ nghiêm trọng",
+      "description": "",
+      "status": "todo",
+      "priority": "urgent",
+      "assigneeId": null,
+      "startDate": null,
+      "dueDate": null,
+      "completed": false,
+      "subtasks": [],
+      "createdBy": "usr_admin_001",
+      "createdAt": "2026-10-05T06:15:34.650Z",
+      "updatedAt": "2026-10-05T06:30:34.535Z",
+      "archivedAt": null
+    },
+    {
+      "id": "tsk_1791180934651_2l1iuw",
+      "projectId": "prj_1791180934650_mg617z",
+      "sectionId": "sec_1791180934651_d8r44p",
+      "number": 3,
+      "code": "BUG-TRACKER-3",
+      "title": "Kiểm thử hồi quy",
+      "description": "",
+      "status": "in_progress",
+      "priority": "medium",
+      "assigneeId": null,
+      "startDate": null,
+      "dueDate": null,
+      "completed": false,
+      "subtasks": [],
+      "createdBy": "usr_admin_001",
+      "createdAt": "2026-10-05T06:15:34.650Z",
+      "updatedAt": "2026-10-05T06:15:34.650Z",
+      "archivedAt": null
+    }
+  ],
   "comments": [],
-  "activities": [],
+  "activities": [
+    {
+      "id": "act_1791182214137_ho297j",
+      "projectId": "prj_1791180934650_mg617z",
+      "taskId": null,
+      "actorId": "usr_admin_001",
+      "action": "update_project",
+      "details": "Bug Tracker",
+      "createdAt": "2026-10-05T06:36:54.137Z"
+    },
+    {
+      "id": "act_1791182203268_lm2fg3",
+      "projectId": "prj_1791180934650_mg617z",
+      "taskId": null,
+      "actorId": "usr_admin_001",
+      "action": "update_project",
+      "details": "Bug Tracker",
+      "createdAt": "2026-10-05T06:36:43.268Z"
+    },
+    {
+      "id": "act_1791182150314_0wdv40",
+      "projectId": "prj_1791180934650_mg617z",
+      "taskId": null,
+      "actorId": "usr_admin_001",
+      "action": "update_project",
+      "details": "Bug Tracker",
+      "createdAt": "2026-10-05T06:35:50.314Z"
+    },
+    {
+      "id": "act_1791181834535_3ipdou",
+      "projectId": "prj_1791180934650_mg617z",
+      "taskId": "tsk_1791180934651_7vvdus",
+      "actorId": "usr_admin_001",
+      "action": "update_task",
+      "details": "BUG-TRACKER-2 - Xác nhận mức độ nghiêm trọng",
+      "createdAt": "2026-10-05T06:30:34.535Z"
+    },
+    {
+      "id": "act_1791181833337_finehx",
+      "projectId": "prj_1791180934650_mg617z",
+      "taskId": "tsk_1791180934651_7vvdus",
+      "actorId": "usr_admin_001",
+      "action": "update_task",
+      "details": "BUG-TRACKER-2 - Xác nhận mức độ nghiêm trọng",
+      "createdAt": "2026-10-05T06:30:33.337Z"
+    },
+    {
+      "id": "act_1791181832744_2kx0od",
+      "projectId": "prj_1791180934650_mg617z",
+      "taskId": "tsk_1791180934651_7vvdus",
+      "actorId": "usr_admin_001",
+      "action": "update_task",
+      "details": "BUG-TRACKER-2 - Xác nhận mức độ nghiêm trọng",
+      "createdAt": "2026-10-05T06:30:32.744Z"
+    },
+    {
+      "id": "act_1791181832054_k7s4z5",
+      "projectId": "prj_1791180934650_mg617z",
+      "taskId": "tsk_1791180934651_7vvdus",
+      "actorId": "usr_admin_001",
+      "action": "update_task",
+      "details": "BUG-TRACKER-2 - Xác nhận mức độ nghiêm trọng",
+      "createdAt": "2026-10-05T06:30:32.054Z"
+    },
+    {
+      "id": "act_1791181830849_b1akoc",
+      "projectId": "prj_1791180934650_mg617z",
+      "taskId": "tsk_1791180934651_7vvdus",
+      "actorId": "usr_admin_001",
+      "action": "update_task",
+      "details": "BUG-TRACKER-2 - Xác nhận mức độ nghiêm trọng",
+      "createdAt": "2026-10-05T06:30:30.849Z"
+    },
+    {
+      "id": "act_1791181818238_q48b5x",
+      "projectId": "prj_1791180934650_mg617z",
+      "taskId": "tsk_1791180934651_fdx1ud",
+      "actorId": "usr_admin_001",
+      "action": "update_task",
+      "details": "BUG-TRACKER-1 - Ghi log tái hiện lỗi",
+      "createdAt": "2026-10-05T06:30:18.238Z"
+    },
+    {
+      "id": "act_1791181815679_k9m8nj",
+      "projectId": "prj_1791180934650_mg617z",
+      "taskId": "tsk_1791180934651_fdx1ud",
+      "actorId": "usr_admin_001",
+      "action": "update_task",
+      "details": "BUG-TRACKER-1 - Ghi log tái hiện lỗi",
+      "createdAt": "2026-10-05T06:30:15.679Z"
+    },
+    {
+      "id": "act_1791181815538_0jtfz6",
+      "projectId": "prj_1791180934650_mg617z",
+      "taskId": "tsk_1791180934651_7vvdus",
+      "actorId": "usr_admin_001",
+      "action": "update_task",
+      "details": "BUG-TRACKER-2 - Xác nhận mức độ nghiêm trọng",
+      "createdAt": "2026-10-05T06:30:15.538Z"
+    },
+    {
+      "id": "act_1791181815508_f3lp4d",
+      "projectId": "prj_1791180934650_mg617z",
+      "taskId": "tsk_1791180934651_7vvdus",
+      "actorId": "usr_admin_001",
+      "action": "update_task",
+      "details": "BUG-TRACKER-2 - Xác nhận mức độ nghiêm trọng",
+      "createdAt": "2026-10-05T06:30:15.508Z"
+    },
+    {
+      "id": "act_1791180934651_p8ixqk",
+      "projectId": "prj_1791180934650_mg617z",
+      "taskId": null,
+      "actorId": "usr_admin_001",
+      "action": "create_project",
+      "details": "Bug Tracker",
+      "createdAt": "2026-10-05T06:15:34.651Z"
+    }
+  ],
   "labels": [],
   "taskLabels": [],
-  "counters": {}
+  "counters": {
+    "prj_1791180934650_mg617z": 3
+  },
+  "pendingGlobalAudits": [],
+  "projectStatusUpdates": [
+    {
+      "id": "su_1791182203267_bjfugm",
+      "projectId": "prj_1791180934650_mg617z",
+      "authorId": "usr_admin_001",
+      "authorName": "Quản trị viên Hệ thống",
+      "health": "on_track",
+      "note": "",
+      "createdAt": "2026-10-05T06:36:43.267Z"
+    }
+  ],
+  "workTemplates": []
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo, forwardRef } from "react";
 import Box from "@mui/material/Box";
 import Popper from "@mui/material/Popper";
 import Paper from "@mui/material/Paper";
@@ -15,9 +15,207 @@ import Tooltip from "@mui/material/Tooltip";
 import InputAdornment from "@mui/material/InputAdornment";
 import ClickAwayListener from "@mui/material/ClickAwayListener";
 import CustomTextField from "@core/components/mui/TextField";
-import { normalizeSearch } from "./mentionUtils";
+import { normalizeSearch, registerUserName, getCachedUserNames } from "./mentionUtils";
+
+const MentionInputBase = forwardRef(function MentionInputBase(props, ref) {
+  const {
+    className,
+    style,
+    value,
+    onScroll,
+    tokens = [],
+    hasMention = false,
+    multiline = false,
+    rows,
+    ...rest
+  } = props;
+
+  const backdropRef = useRef(null);
+
+  const syncScroll = (el) => {
+    if (el && backdropRef.current) {
+      backdropRef.current.scrollLeft = el.scrollLeft;
+      backdropRef.current.scrollTop = el.scrollTop;
+    }
+  };
+
+  const handleScroll = (e) => {
+    syncScroll(e.target);
+    if (onScroll) onScroll(e);
+  };
+
+  const Component = multiline ? "textarea" : "input";
+
+  return (
+    <span
+      style={{
+        position: "relative",
+        display: "inline-flex",
+        flexGrow: 1,
+        width: "100%",
+        minWidth: 0,
+        height: multiline ? "auto" : "100%",
+        alignItems: multiline ? "stretch" : "center",
+      }}
+    >
+      {/* Visual Highlight Backdrop for Mentions */}
+      {hasMention && (
+        <span
+          ref={backdropRef}
+          className={className}
+          aria-hidden="true"
+          style={{
+            ...style,
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            pointerEvents: "none",
+            backgroundColor: "transparent",
+            borderColor: "transparent",
+            color: "var(--mui-palette-text-primary, #2F2B3D)",
+            overflow: "hidden",
+            whiteSpace: multiline ? "pre-wrap" : "pre",
+            wordBreak: multiline ? "break-word" : "normal",
+            zIndex: 0,
+          }}
+        >
+          {tokens.map((token, idx) =>
+            token.isMention ? (
+              <span
+                key={idx}
+                style={{
+                  color: "var(--mui-palette-primary-main, #7367F0)",
+                  fontWeight: 600,
+                  backgroundColor: "rgba(115, 103, 240, 0.12)",
+                  borderRadius: "3px",
+                }}
+              >
+                {token.text}
+              </span>
+            ) : (
+              <span key={idx} style={{ color: "var(--mui-palette-text-primary, inherit)" }}>
+                {token.text}
+              </span>
+            )
+          )}
+        </span>
+      )}
+
+      {/* Native Input / Textarea Element */}
+      <Component
+        ref={ref}
+        className={className}
+        value={value}
+        rows={rows}
+        onScroll={handleScroll}
+        onKeyUp={(e) => {
+          syncScroll(e.target);
+          if (rest.onKeyUp) rest.onKeyUp(e);
+        }}
+        onSelect={(e) => {
+          syncScroll(e.target);
+          if (rest.onSelect) rest.onSelect(e);
+        }}
+        style={{
+          ...style,
+          position: "relative",
+          zIndex: 1,
+          width: "100%",
+          backgroundColor: "transparent",
+          color: hasMention ? "transparent" : "inherit",
+          caretColor: "var(--mui-palette-text-primary, #2F2B3D)",
+        }}
+        {...rest}
+      />
+    </span>
+  );
+});
+
+function formatInputTokens(text, usersList = []) {
+  if (!text) return [];
+
+  const names = new Set(getCachedUserNames ? Array.from(getCachedUserNames()) : []);
+
+  const defaultNames = [
+    "Quản trị viên Hệ thống",
+    "Nhân viên hệ thống",
+    "Nguyễn Quốc Bảo",
+    "Vũ Hoàng Dũng",
+    "Hà Quốc Việt",
+    "Hoàng Duy Lộc",
+    "Nguyễn Trung Kiên",
+    "Trần Cao Khâm",
+    "Trần Hoàng Hà",
+    "Nguyễn Thị Hồng Quyên",
+    "Bùi Đình Quý",
+    "Bùi Văn Quốc Anh",
+    "Lê Tuấn Long",
+    "Trần Việt Dũng",
+    "Phan Thành Nam",
+    "Đặng Đình Khánh",
+    "Nghiêm Thành Long",
+    "Nguyễn Văn Bằng",
+    "Nguyễn Minh Sang",
+    "Nguyễn Mạnh Cường",
+    "Phạm Hoàng Sơn",
+    "Trần Bảo Khánh",
+    "Bùi Tùng Lâm",
+    "Nguyễn Bách Tùng",
+    "Trịnh Phúc Lương",
+    "Nguyễn Minh Hoàng",
+    "Nguyễn Thị Thuyết",
+    "Lê Ngọc Sơn",
+  ];
+  defaultNames.forEach((n) => names.add(n));
+
+  if (Array.isArray(usersList)) {
+    usersList.forEach((u) => {
+      const name = typeof u === "string" ? u : u?.name;
+      if (name) names.add(name.trim());
+    });
+  }
+
+  const sortedNames = Array.from(names).sort((a, b) => b.length - a.length);
+  const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const namesPattern = sortedNames.length > 0 ? sortedNames.map(escapeRegex).join("|") : "a^";
+
+  const regex = new RegExp(
+    `(@all|@\\[[^\\]]+\\]|#(?:[A-Za-z0-9À-ỹ_-]+)|@(?:${namesPattern})|@[A-Za-z0-9À-ỹ_.-]+)(?=[\\s.,!?:;"'()\\[\\]{}]|$)`,
+    "gi"
+  );
+
+  const parts = [];
+  let lastIndex = 0;
+  let match;
+
+  while ((match = regex.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push({
+        text: text.substring(lastIndex, match.index),
+        isMention: false,
+      });
+    }
+    parts.push({
+      text: match[0],
+      isMention: true,
+    });
+    lastIndex = regex.lastIndex;
+  }
+
+  if (lastIndex < text.length) {
+    parts.push({
+      text: text.substring(lastIndex),
+      isMention: false,
+    });
+  }
+
+  return parts;
+}
 
 export default function MentionInput({
+  inputRef: externalInputRef,
   value = "",
   onChange,
   usersList = [],
@@ -35,7 +233,9 @@ export default function MentionInput({
   ...props
 }) {
   const containerRef = useRef(null);
-  const inputRef = useRef(null);
+  const backdropRef = useRef(null);
+  const internalInputRef = useRef(null);
+  const inputRef = externalInputRef || internalInputRef;
 
   const [open, setOpen] = useState(false);
   const [mentionQuery, setMentionQuery] = useState("");
@@ -173,10 +373,18 @@ export default function MentionInput({
 
     if (onChange) onChange(val);
     detectMentionTrigger(val, cursorPos);
+
+    if (backdropRef.current) {
+      backdropRef.current.scrollLeft = e.target.scrollLeft;
+    }
   };
 
   const handleSelectSuggestion = (item) => {
     if (!item) return;
+
+    if (item.name) {
+      registerUserName(item.name);
+    }
 
     const before = value.substring(0, mentionStartIndex);
     const after = value.substring(mentionStartIndex + 1 + mentionQuery.length);
@@ -255,7 +463,15 @@ export default function MentionInput({
     if (onKeyDown) onKeyDown(e);
   };
 
-  const hasMention = Boolean(value && value.includes("@"));
+  const hasMention = Boolean(value && (value.includes("@") || value.includes("#")));
+  const tokens = useMemo(() => {
+    if (!hasMention) return [];
+    return formatInputTokens(value, effectiveUsers);
+  }, [value, hasMention, effectiveUsers]);
+
+  const hasActualMention = useMemo(() => {
+    return tokens.some((t) => t.isMention);
+  }, [tokens]);
 
   return (
     <ClickAwayListener onClickAway={() => setOpen(false)}>
@@ -274,36 +490,46 @@ export default function MentionInput({
           sx={{
             ...sx,
             "& .MuiInputBase-input": {
-              color: hasMention ? "var(--mui-palette-primary-main, #7367f0) !important" : "inherit",
-              fontWeight: hasMention ? "600 !important" : 400,
-              transition: "color 0.2s ease",
+              fontSize: "0.875rem",
+              lineHeight: 1.4375,
+              fontFamily: "inherit",
             },
           }}
           InputProps={{
             ...InputProps,
-            endAdornment: (
-              <InputAdornment position="end">
-                <Tooltip title="Gắn thẻ thành viên (@ hoặc @All)">
-                  <IconButton
-                    size="small"
-                    edge="end"
-                    onClick={handleTriggerClick}
-                    tabIndex={-1}
-                    sx={{
-                      color: open ? "primary.main" : "text.secondary",
-                      bgcolor: open ? "rgba(115, 103, 240, 0.12)" : "transparent",
-                      "&:hover": {
-                        color: "primary.main",
-                        bgcolor: "rgba(115, 103, 240, 0.08)",
-                      },
-                    }}
-                  >
-                    <i className="tabler-at" style={{ fontSize: 18 }} />
-                  </IconButton>
-                </Tooltip>
-                {InputProps?.endAdornment}
-              </InputAdornment>
-            ),
+            inputComponent: MentionInputBase,
+            inputProps: {
+              ...(InputProps?.inputProps || {}),
+              tokens,
+              hasMention: hasActualMention,
+              multiline,
+              rows,
+            },
+            endAdornment:
+              InputProps?.endAdornment !== undefined ? (
+                InputProps.endAdornment
+              ) : (
+                <InputAdornment position="end">
+                  <Tooltip title="Gắn thẻ thành viên (@ hoặc @All)">
+                    <IconButton
+                      size="small"
+                      edge="end"
+                      onClick={handleTriggerClick}
+                      tabIndex={-1}
+                      sx={{
+                        color: open ? "primary.main" : "text.secondary",
+                        bgcolor: open ? "rgba(115, 103, 240, 0.12)" : "transparent",
+                        "&:hover": {
+                          color: "primary.main",
+                          bgcolor: "rgba(115, 103, 240, 0.08)",
+                        },
+                      }}
+                    >
+                      <i className="tabler-at" style={{ fontSize: 18 }} />
+                    </IconButton>
+                  </Tooltip>
+                </InputAdornment>
+              ),
           }}
           {...props}
         />

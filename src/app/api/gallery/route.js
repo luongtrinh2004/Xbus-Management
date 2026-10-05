@@ -3,9 +3,25 @@ import { resolveGalleryMinioFiles } from "@/libs/galleryMinioFiles";
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import { getGallery } from "@/libs/dataRepository";
+import { ensureGalleryWorker } from "@/libs/galleryWorker";
 
 const secret = process.env.NEXTAUTH_SECRET;
 const MAX_STORAGE_BYTES = 20 * 1024 * 1024 * 1024; // 20 GB
+
+const POPULAR_TAGS = [
+  "#xe_tuhanh",
+  "#road_test",
+  "#sensor",
+  "#lidar",
+  "#teambuilding",
+  "#sukien",
+  "#trachieu",
+  "#vanphong",
+  "#workshop",
+  "#ap",
+  "#planning",
+  "#xbus",
+];
 
 function formatBytes(bytes, decimals = 1) {
   if (!+bytes) return "0 Bytes";
@@ -42,6 +58,9 @@ function normalizeToPosts(rawItems = []) {
         likes: item.likes || 0,
         isLiked: item.isLiked || false,
         likedBy: item.likedBy || [],
+        dislikes: item.dislikes || 0,
+        isDisliked: item.isDisliked || false,
+        dislikedBy: item.dislikedBy || [],
         comments: item.comments || [],
         totalFiles: 0,
         fileSize: 0,
@@ -98,9 +117,13 @@ export async function GET(req) {
     }
 
     const { searchParams } = new URL(req.url);
+    const channel = searchParams.get("channel") || "all";
     const search = (searchParams.get("search") || "").toLowerCase().trim();
     const type = searchParams.get("type") || "all";
     const time = searchParams.get("time") || "all";
+    const startDate = searchParams.get("startDate") || "";
+    const endDate = searchParams.get("endDate") || "";
+    const tag = searchParams.get("tag") || "all";
     const uploader = searchParams.get("uploader") || "all";
     const sort = searchParams.get("sort") || "newest";
     const largestOnly = searchParams.get("largestOnly") === "true";
@@ -110,6 +133,27 @@ export async function GET(req) {
 
     // Normalize to Post-based representation (1 Post = 1 Card on UI)
     const allPosts = await withGalleryUploadProgress(await resolveGalleryMinioFiles(normalizeToPosts(rawItems)));
+
+    // Ensure worker is running if there are pending uploads
+    if (allPosts.some((p) => p.uploadState && p.uploadState.state !== "completed")) {
+      ensureGalleryWorker();
+    }
+
+    // Count posts per channel
+    const channelCounts = {
+      all: allPosts.length,
+      memory: 0,
+      relax: 0,
+      report: 0,
+    };
+    for (const post of allPosts) {
+      const ch = post.channel || "memory";
+      if (channelCounts[ch] !== undefined) {
+        channelCounts[ch]++;
+      } else {
+        channelCounts.memory++;
+      }
+    }
 
     // Calculate real storage statistics across every sub-file
     let usedBytes = 0;
@@ -150,8 +194,35 @@ export async function GET(req) {
     const remainingBytes = Math.max(0, MAX_STORAGE_BYTES - usedBytes);
     const percentUsed = Number(((usedBytes / MAX_STORAGE_BYTES) * 100).toFixed(1));
 
+    // Attach reaction states (likes, dislikes) for the current user
+    for (const post of allPosts) {
+      if (!Array.isArray(post.likedBy)) post.likedBy = [];
+      if (!Array.isArray(post.dislikedBy)) post.dislikedBy = [];
+      post.isLiked = post.likedBy.some((u) => (typeof u === "string" ? u === token.id : u?.id === token.id));
+      post.isDisliked = post.dislikedBy.some((u) => (typeof u === "string" ? u === token.id : u?.id === token.id));
+      post.likes = post.likedBy.length;
+      post.dislikes = post.dislikedBy.length;
+
+      if (Array.isArray(post.comments)) {
+        post.comments.forEach((cmt) => {
+          if (!Array.isArray(cmt.likedBy)) cmt.likedBy = [];
+          if (!Array.isArray(cmt.dislikedBy)) cmt.dislikedBy = [];
+          cmt.isLiked = cmt.likedBy.some((u) => (typeof u === "string" ? u === token.id : u?.id === token.id));
+          cmt.isDisliked = cmt.dislikedBy.some((u) => (typeof u === "string" ? u === token.id : u?.id === token.id));
+          cmt.likes = cmt.likedBy.length;
+          cmt.dislikes = cmt.dislikedBy.length;
+        });
+      }
+    }
+
     // Filter Posts
     let filtered = allPosts.filter((post) => {
+      // 0. Channel Filter (memory, relax, report)
+      if (channel && channel !== "all") {
+        const postChannel = post.channel || "memory";
+        if (postChannel !== channel) return false;
+      }
+
       // 1. Search Query
       if (search) {
         const matchTitle = post.title?.toLowerCase().includes(search);
@@ -167,8 +238,32 @@ export async function GET(req) {
         if (type === "image" && !post.hasImage && post.type !== "image") return false;
       }
 
-      // 3. Time Filter
-      if (time !== "all") {
+      // 3. Date Range Filter (Vietnam GMT+7)
+      let rangeStart = startDate;
+      let rangeEnd = endDate;
+      if (rangeStart && rangeEnd && rangeStart > rangeEnd) {
+        const tmp = rangeStart;
+        rangeStart = rangeEnd;
+        rangeEnd = tmp;
+      }
+
+      if (rangeStart) {
+        const start = new Date(`${rangeStart}T00:00:00+07:00`);
+        if (!isNaN(start.getTime())) {
+          const itemDate = new Date(post.uploadedAt);
+          if (itemDate < start) return false;
+        }
+      }
+      if (rangeEnd) {
+        const end = new Date(`${rangeEnd}T23:59:59.999+07:00`);
+        if (!isNaN(end.getTime())) {
+          const itemDate = new Date(post.uploadedAt);
+          if (itemDate > end) return false;
+        }
+      }
+
+      // Legacy time preset filter (only if custom date range is not specified)
+      if (!startDate && !endDate && time !== "all") {
         const itemDate = new Date(post.uploadedAt);
         const now = new Date();
         if (time === "today") {
@@ -189,16 +284,60 @@ export async function GET(req) {
         }
       }
 
-      // 4. Uploader
-      if (uploader !== "all" && post.uploader?.name !== uploader) return false;
+      // 4. Tag (Hashtag) Filter
+      if (tag && tag !== "all") {
+        const cleanTag = tag.trim().toLowerCase().replace(/^#/, "");
+        const hasTagInTags = post.tags?.some((t) => {
+          const cleanT = String(t).trim().toLowerCase().replace(/^#/, "");
+          return cleanT === cleanTag;
+        });
+        const hasTagInTitle = post.title?.toLowerCase().includes(`#${cleanTag}`);
+        const hasTagInDesc = post.description?.toLowerCase().includes(`#${cleanTag}`);
+        if (!hasTagInTags && !hasTagInTitle && !hasTagInDesc) return false;
+      }
 
-      // 5. Largest Only
+      // 5. Uploader
+      if (uploader !== "all") {
+        const uploaderMatch =
+          post.uploader?.name?.toLowerCase() === uploader.toLowerCase() ||
+          post.uploader?.id?.toLowerCase() === uploader.toLowerCase() ||
+          post.uploader?.email?.toLowerCase() === uploader.toLowerCase();
+        if (!uploaderMatch) return false;
+      }
+
+      // 6. Largest Only
       if (largestOnly) {
         if ((post.fileSize || 0) < 10 * 1024 * 1024) return false;
       }
 
       return true;
     });
+
+    // Aggregate unique tags with post count for filter dropdown
+    const tagCountMap = new Map();
+    allPosts.forEach((post) => {
+      if (Array.isArray(post.tags)) {
+        post.tags.forEach((t) => {
+          if (!t) return;
+          const clean = String(t).trim().toLowerCase().replace(/^#/, "");
+          if (!clean) return;
+          const formatted = `#${clean}`;
+          tagCountMap.set(formatted, (tagCountMap.get(formatted) || 0) + 1);
+        });
+      }
+    });
+
+    POPULAR_TAGS.forEach((t) => {
+      const clean = String(t).trim().toLowerCase().replace(/^#/, "");
+      const formatted = `#${clean}`;
+      if (!tagCountMap.has(formatted)) {
+        tagCountMap.set(formatted, 0);
+      }
+    });
+
+    const tagsList = Array.from(tagCountMap.entries())
+      .map(([t, count]) => ({ tag: t, count }))
+      .sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag));
 
     // Sort Posts
     filtered.sort((a, b) => {
@@ -222,6 +361,8 @@ export async function GET(req) {
     return NextResponse.json({
       items: filtered,
       total: filtered.length,
+      tags: tagsList,
+      channelCounts,
       storage: {
         maxBytes: MAX_STORAGE_BYTES,
         usedBytes,

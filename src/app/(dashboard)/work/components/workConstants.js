@@ -10,7 +10,6 @@ export const VIEW_OPTIONS = [
   { value: "list", label: "Danh sách", icon: "tabler-list" },
   { value: "board", label: "Bảng", icon: "tabler-layout-kanban" },
   { value: "timeline", label: "Dòng thời gian", icon: "tabler-chart-gantt" },
-  { value: "dashboard", label: "Phân tích", icon: "tabler-chart-bar" },
   { value: "calendar", label: "Lịch", icon: "tabler-calendar" },
 ];
 

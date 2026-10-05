@@ -143,6 +143,7 @@ export async function PATCH(req, { params }) {
       if (body.title !== undefined) it.title = String(body.title).trim();
       if (body.description !== undefined) it.description = String(body.description).trim();
       if (body.privacy !== undefined) it.privacy = body.privacy;
+      if (body.channel !== undefined) it.channel = ["memory", "relax", "report"].includes(body.channel) ? body.channel : "memory";
       if (Array.isArray(body.tags)) it.tags = body.tags;
     };
 

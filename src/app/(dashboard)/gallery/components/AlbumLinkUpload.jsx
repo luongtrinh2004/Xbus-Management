@@ -4,7 +4,7 @@ import { Box, Button, TextField, Typography, CircularProgress } from '@mui/mater
 import { toast } from 'react-toastify';
 import { getAlbumLink } from '@/libs/galleryAlbumLink';
 
-export default function AlbumLinkUpload({ onUploadSuccess, onClose, onBusyChange }) {
+export default function AlbumLinkUpload({ onUploadSuccess, onClose, onBusyChange, defaultChannel = "memory" }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [file, setFile] = useState(null);
@@ -22,6 +22,7 @@ export default function AlbumLinkUpload({ onUploadSuccess, onClose, onBusyChange
       const data = new FormData();
       data.set('title', title.trim());
       data.set('postType', 'album_link'); data.set('description', description.trim());
+      data.set('channel', defaultChannel || 'memory');
       data.set('file', file);
       const response = await fetch('/api/gallery/upload', { method: 'POST', body: data });
       const result = await response.json();

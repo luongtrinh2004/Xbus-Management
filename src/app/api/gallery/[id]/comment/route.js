@@ -60,6 +60,12 @@ export async function POST(req, { params }) {
       },
       content: String(content).trim(),
       createdAt: new Date().toISOString(),
+      parentId: body?.parentId || null,
+      replyTo: body?.replyTo || null,
+      likes: 0,
+      likedBy: [],
+      dislikes: 0,
+      dislikedBy: [],
     };
 
     const item = items[index];
@@ -79,31 +85,48 @@ export async function POST(req, { params }) {
     await saveGallery({ items });
     await auditGallery(token, "CREATE_GALLERY_COMMENT", item, `Bình luận ${newComment.id}: ${newComment.content}`);
 
-    // Send notification to post author if someone else commented
-    const authorId = item.uploader?.id;
-    if (authorId && authorId !== token.id) {
-      try {
-        const postTitle = item.title || "ảnh/video";
-        const shortContent =
-          newComment.content.length > 50
-            ? newComment.content.substring(0, 50) + "..."
-            : newComment.content;
+    // Thông báo nếu là phản hồi bình luận
+    if (newComment.parentId) {
+      const parentCmt = item.comments?.find((c) => c.id === newComment.parentId);
+      if (parentCmt && parentCmt.author?.id && parentCmt.author.id !== token.id) {
+        try {
+          createNotification({
+            userId: parentCmt.author.id,
+            type: "gallery_comment_reply",
+            title: "Phản hồi mới",
+            message: `${newComment.author.name} đã trả lời bình luận của bạn: "${newComment.content.substring(0, 50)}"`,
+            link: `/gallery?open=${item.id}`,
+            metadata: { postId: item.id, commentId: newComment.id, parentId: newComment.parentId },
+          });
+        } catch {}
+      }
+    } else {
+      // Send notification to post author if someone else commented top-level
+      const authorId = item.uploader?.id;
+      if (authorId && authorId !== token.id) {
+        try {
+          const postTitle = item.title || "ảnh/video";
+          const shortContent =
+            newComment.content.length > 50
+              ? newComment.content.substring(0, 50) + "..."
+              : newComment.content;
 
-        createNotification({
-          userId: authorId,
-          type: "gallery_comment",
-          title: "Bình luận mới",
-          message: `${newComment.author.name} đã bình luận bài đăng "${postTitle}": "${shortContent}"`,
-          link: `/gallery?open=${item.id}`,
-          metadata: {
-            postId: item.id,
-            commentId: newComment.id,
-            actorId: token.id,
-            actorName: newComment.author.name,
-          },
-        });
-      } catch (notiErr) {
-        console.warn("[POST comment] Không thể gửi thông báo:", notiErr);
+          createNotification({
+            userId: authorId,
+            type: "gallery_comment",
+            title: "Bình luận mới",
+            message: `${newComment.author.name} đã bình luận bài đăng "${postTitle}": "${shortContent}"`,
+            link: `/gallery?open=${item.id}`,
+            metadata: {
+              postId: item.id,
+              commentId: newComment.id,
+              actorId: token.id,
+              actorName: newComment.author.name,
+            },
+          });
+        } catch (notiErr) {
+          console.warn("[POST comment] Không thể gửi thông báo:", notiErr);
+        }
       }
     }
 
@@ -135,8 +158,95 @@ export async function PATCH(req, { params }) {
 
     const { id } = await params;
     const body = await req.json();
-    const { commentId, content } = body;
 
+    // 1. Thả tym / Dislike cho bình luận
+    if (body?.action === "like" || body?.action === "dislike") {
+      const { commentId, action } = body;
+      const data = await getGallery();
+      const items = Array.isArray(data.items) ? data.items : [];
+      const index = items.findIndex((i) => i.id === id || (i.postId && i.postId === id));
+      if (index === -1) return NextResponse.json({ error: "Không tìm thấy tệp" }, { status: 404 });
+
+      const item = items[index];
+      const comments = Array.isArray(item.comments) ? item.comments : [];
+      const cmt = comments.find((c) => c.id === commentId);
+      if (!cmt) return NextResponse.json({ error: "Không tìm thấy bình luận" }, { status: 404 });
+
+      if (!Array.isArray(cmt.likedBy)) cmt.likedBy = [];
+      if (!Array.isArray(cmt.dislikedBy)) cmt.dislikedBy = [];
+
+      let matchedUser = null;
+      try {
+        const allUsers = await getUsers();
+        matchedUser = allUsers.find((u) => u.id === token.id || u.email?.toLowerCase() === token.email?.toLowerCase());
+      } catch {}
+
+      const userObj = {
+        id: token.id,
+        name: matchedUser?.name || token.name || "Thành viên Xbus",
+        avatar: matchedUser?.avatarUrl || token.avatar || token.picture || "/images/avatars/male-user.png",
+        department: matchedUser?.department || token.department || "Xbus",
+        role: matchedUser?.role || token.role || "user",
+      };
+
+      const findIdx = (arr) => arr.findIndex((u) => (typeof u === "string" ? u === token.id : u?.id === token.id));
+
+      let isLiked = false;
+      let isDisliked = false;
+
+      if (action === "like") {
+        const likeIdx = findIdx(cmt.likedBy);
+        if (likeIdx > -1) {
+          cmt.likedBy.splice(likeIdx, 1);
+          isLiked = false;
+        } else {
+          cmt.likedBy.push(userObj);
+          isLiked = true;
+          const disIdx = findIdx(cmt.dislikedBy);
+          if (disIdx > -1) cmt.dislikedBy.splice(disIdx, 1);
+        }
+        isDisliked = findIdx(cmt.dislikedBy) > -1;
+      } else {
+        const disIdx = findIdx(cmt.dislikedBy);
+        if (disIdx > -1) {
+          cmt.dislikedBy.splice(disIdx, 1);
+          isDisliked = false;
+        } else {
+          cmt.dislikedBy.push(userObj);
+          isDisliked = true;
+          const likeIdx = findIdx(cmt.likedBy);
+          if (likeIdx > -1) cmt.likedBy.splice(likeIdx, 1);
+        }
+        isLiked = findIdx(cmt.likedBy) > -1;
+      }
+
+      cmt.likes = cmt.likedBy.length;
+      cmt.dislikes = cmt.dislikedBy.length;
+      cmt.isLiked = isLiked;
+      cmt.isDisliked = isDisliked;
+
+      if (item.postId) {
+        for (const it of items) {
+          if (it.postId === item.postId && it.id !== item.id && Array.isArray(it.comments)) {
+            const oc = it.comments.find((c) => c.id === commentId);
+            if (oc) {
+              oc.likedBy = cmt.likedBy;
+              oc.likes = cmt.likes;
+              oc.dislikedBy = cmt.dislikedBy;
+              oc.dislikes = cmt.dislikes;
+              oc.isLiked = isLiked;
+              oc.isDisliked = isDisliked;
+            }
+          }
+        }
+      }
+
+      await saveGallery({ items });
+      return NextResponse.json({ success: true, comment: cmt });
+    }
+
+    // 2. Chỉnh sửa nội dung bình luận
+    const { commentId, content } = body;
     if (!commentId || !content || !String(content).trim()) {
       return NextResponse.json({ error: "Thiếu thông tin bình luận" }, { status: 400 });
     }
@@ -252,13 +362,14 @@ export async function DELETE(req, { params }) {
       return NextResponse.json({ error: "Bạn không có quyền xóa bình luận này" }, { status: 403 });
     }
 
-    item.comments = comments.filter((c) => c.id !== commentId);
+    // Xóa bình luận đó và các phản hồi con của nó (nếu có)
+    item.comments = comments.filter((c) => c.id !== commentId && c.parentId !== commentId);
 
     // Sync across items with same postId
     if (item.postId) {
       for (const it of items) {
         if (it.postId === item.postId && it.id !== item.id && Array.isArray(it.comments)) {
-          it.comments = it.comments.filter((c) => c.id !== commentId);
+          it.comments = it.comments.filter((c) => c.id !== commentId && c.parentId !== commentId);
         }
       }
     }

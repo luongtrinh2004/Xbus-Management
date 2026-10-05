@@ -11,9 +11,15 @@ import { createExtractorFromData } from 'node-unrar-js';
 import sharp from 'sharp';
 import convertHeic from 'heic-convert';
 
-const connection = new IORedis(process.env.REDIS_URL || 'redis://redis:6379', { maxRetriesPerRequest: null });
+const connection = new IORedis(process.env.REDIS_URL || 'redis://127.0.0.1:6379', { maxRetriesPerRequest: null });
 const bucket = process.env.MINIO_BUCKET || 'xbus-gallery';
-const client = new Minio.Client({ endPoint: process.env.MINIO_ENDPOINT || 'minio', port: Number(process.env.MINIO_PORT || 9000), useSSL: process.env.MINIO_USE_SSL === 'true', accessKey: process.env.MINIO_ACCESS_KEY || process.env.MINIO_ROOT_USER, secretKey: process.env.MINIO_SECRET_KEY || process.env.MINIO_ROOT_PASSWORD });
+const client = new Minio.Client({
+  endPoint: process.env.MINIO_ENDPOINT || '127.0.0.1',
+  port: Number(process.env.MINIO_PORT || 9000),
+  useSSL: process.env.MINIO_USE_SSL === 'true',
+  accessKey: process.env.MINIO_ACCESS_KEY || process.env.MINIO_ROOT_USER || 'admin',
+  secretKey: process.env.MINIO_SECRET_KEY || process.env.MINIO_ROOT_PASSWORD || 'Admin123456',
+});
 const images = new Set(['jpg','jpeg','jfif','png','gif','webp','avif','heic','heif','hif','tif','tiff','bmp','ico','svg','jxl','psd','dng','raw','cr2','cr3','nef','arw','orf','raf','rw2']);
 const videos = new Set(['mp4','mov','webm','m4v','avi','mkv','mpeg','mpg','3gp','mts']);
 const media = name => {

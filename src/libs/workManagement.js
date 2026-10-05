@@ -134,12 +134,7 @@ export const PROJECT_VIEWS = [
   "dashboard",
   "calendar",
 ];
-export const PROJECT_HEALTH = [
-  "no_update",
-  "on_track",
-  "at_risk",
-  "off_track",
-];
+export const PROJECT_HEALTH = ["no_update", "on_track", "at_risk", "off_track"];
 export const DEFAULT_PROJECT_ICON = "tabler-folder";
 
 // Applies defaults for settings introduced by the new project workspace so
@@ -152,16 +147,14 @@ export function normalizeProjectSettings(project) {
       : DEFAULT_PROJECT_ICON;
   project.defaultView = PROJECT_VIEWS.includes(project.defaultView)
     ? project.defaultView
-    : "board";
+    : "list";
   project.favoriteBy = Array.isArray(project.favoriteBy)
     ? project.favoriteBy.filter((userId) => typeof userId === "string")
     : [];
   project.health = PROJECT_HEALTH.includes(project.health)
     ? project.health
     : "no_update";
-  project.startDate = isValidDate(project.startDate)
-    ? project.startDate
-    : null;
+  project.startDate = isValidDate(project.startDate) ? project.startDate : null;
   project.dueDate = isValidDate(project.dueDate) ? project.dueDate : null;
   project.templateId =
     typeof project.templateId === "string" && project.templateId
@@ -172,7 +165,8 @@ export function normalizeProjectSettings(project) {
 
 export function validateProjectDates({ startDate, dueDate } = {}) {
   if (startDate !== undefined && startDate !== null && startDate !== "") {
-    if (!isValidDate(startDate)) return { valid: false, reason: "invalid_start" };
+    if (!isValidDate(startDate))
+      return { valid: false, reason: "invalid_start" };
   }
   if (dueDate !== undefined && dueDate !== null && dueDate !== "") {
     if (!isValidDate(dueDate)) return { valid: false, reason: "invalid_due" };
@@ -184,7 +178,8 @@ export function validateProjectDates({ startDate, dueDate } = {}) {
 
 export function validateTaskDates({ startDate, dueDate } = {}) {
   if (startDate !== undefined && startDate !== null && startDate !== "") {
-    if (!isValidDate(startDate)) return { valid: false, reason: "invalid_start" };
+    if (!isValidDate(startDate))
+      return { valid: false, reason: "invalid_start" };
   }
   if (dueDate !== undefined && dueDate !== null && dueDate !== "") {
     if (!isValidDate(dueDate)) return { valid: false, reason: "invalid_due" };
@@ -196,13 +191,17 @@ export function validateTaskDates({ startDate, dueDate } = {}) {
 
 export function isProjectFavorite(project, userId) {
   return Boolean(
-    userId && Array.isArray(project?.favoriteBy) && project.favoriteBy.includes(userId),
+    userId &&
+      Array.isArray(project?.favoriteBy) &&
+      project.favoriteBy.includes(userId),
   );
 }
 
 export function toggleProjectFavorite(project, userId) {
   if (!userId) return false;
-  const favoriteBy = Array.isArray(project.favoriteBy) ? project.favoriteBy : [];
+  const favoriteBy = Array.isArray(project.favoriteBy)
+    ? project.favoriteBy
+    : [];
   if (favoriteBy.includes(userId)) {
     project.favoriteBy = favoriteBy.filter((id) => id !== userId);
     return false;
@@ -218,7 +217,9 @@ export function createProjectStatusUpdate(
 ) {
   if (!PROJECT_HEALTH.includes(health))
     return { valid: false, reason: "invalid_health" };
-  const cleanNote = String(note || "").trim().slice(0, 1001);
+  const cleanNote = String(note || "")
+    .trim()
+    .slice(0, 1001);
   if (cleanNote.length > 1000) return { valid: false, reason: "invalid_note" };
   const update = {
     id: id || `su_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
@@ -298,7 +299,19 @@ export function publicWorkUser(user) {
     name: user.name || "",
     email: user.email || "",
     code: user.code || "",
-    avatarUrl: user.avatarUrl || "",
+    // Work screens only receive this safe public object, so always provide a
+    // usable image without exposing the rest of the account record.
+    avatarUrl:
+      user.avatarUrl ||
+      (user.role === "assistant"
+        ? "/images/avatars/assistant.png"
+        : user.role === "admin" && user.gender === "female"
+          ? "/images/avatars/female-admin.png"
+          : user.role === "admin"
+            ? "/images/avatars/male-admin.png"
+            : user.gender === "female"
+              ? "/images/avatars/female-user.png"
+              : "/images/avatars/male-user.png"),
   };
 }
 
@@ -406,9 +419,7 @@ export function resolveTaskSection(sections = [], projectId, sectionId) {
     .sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
   if (sectionId === undefined || sectionId === null)
     return projectSections[0] || null;
-  return (
-    projectSections.find((section) => section.id === sectionId) || null
-  );
+  return projectSections.find((section) => section.id === sectionId) || null;
 }
 
 export function synchronizeTaskState(task, patch = {}, sections = []) {
@@ -461,8 +472,7 @@ export function synchronizeTaskState(task, patch = {}, sections = []) {
   // Derive the section deterministically: an explicit sectionId wins, and a
   // status/completed change moves the task to the section carrying that
   // status (falling back to the current section, then the first active one).
-  const preferred =
-    section && section.status === status ? section : null;
+  const preferred = section && section.status === status ? section : null;
   const desiredSection =
     status === "done"
       ? preferred || projectSections.find((item) => item.status === "done")
