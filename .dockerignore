@@ -12,3 +12,4 @@ yarn-error.log
 *.xlsx
 *.docx
 Xbus-Management
+services/plane

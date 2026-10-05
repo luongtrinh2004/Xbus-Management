@@ -1,0 +1,19 @@
+# Patch the deployed Plane 1.4.2 bundle until the upstream hydration fix ships.
+# Pin the base image: the replacement below is specific to this release.
+FROM makeplane/plane-frontend@sha256:22fd2434fb8d6658439f669ab72f999ce0773abe587663da21a77d70bd63ff61
+
+RUN set -eu; \
+    bundle=/usr/share/nginx/html/assets/root-IFknDPgy.js; \
+    original='Q=n(function(){let{resolvedTheme:e}=p();return typeof window>`u`||e===void 0?'; \
+    fixed='Q=n(function(){let[t,r]=A.useState(!1);A.useEffect(()=>r(!0),[]);let{resolvedTheme:e}=p();return !t||typeof window>`u`||e===void 0?'; \
+    grep -Fq "$original" "$bundle"; \
+    sed -i "s/$original/$fixed/" "$bundle"; \
+    grep -Fq "$fixed" "$bundle"; \
+    # Permanently disable Plane top navigation bar in embedded XBus workspace \
+    layout_bundle=/usr/share/nginx/html/assets/layout-C1wtx7eA.js; \
+    sed -i 's/var Ie=H(function(){/var Ie=H(function(){return null;/' "$layout_bundle"; \
+    embedded_css='[class*="z-[27]"], [class*="min-h-10"][class*="bg-canvas"] { display: none !important; height: 0 !important; min-height: 0 !important; padding: 0 !important; margin: 0 !important; overflow: hidden !important; } [class*="flex-grow"][class*="pr-2"][class*="pb-2"][class*="pl-2"] { padding: 0 !important; } [class*="h-12"][class*="border-t"][class*="bg-surface-1"][class*="p-3"] { display: none !important; }'; \
+    echo "$embedded_css" >> /usr/share/nginx/html/assets/globals-Cm7C7RhK.css; \
+    echo "$embedded_css" >> /usr/share/nginx/html/assets/root-CzK3JmXp.css; \
+    sed -i 's|Plane \| Simple, extensible, open-source project management tool.|XBus Work|g; s|content="Plane"|content="XBus Work"|g' /usr/share/nginx/html/index.html; \
+    sed -i "s|</head>|<style>$embedded_css</style></head>|" /usr/share/nginx/html/index.html

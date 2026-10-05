@@ -1,0 +1,3 @@
+[submodule "services/plane"]
+	path = services/plane
+	url = https://github.com/makeplane/plane.git
