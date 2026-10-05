@@ -4,8 +4,9 @@
 một ứng dụng độc lập vì frontend, API, realtime service và authentication của
 Plane không thể được import trực tiếp thành component Next.js.
 
-Source chính thức được clone tại `services/plane` và giữ nguyên giấy phép
-AGPL-3.0. Không xóa các tệp `LICENSE` và `COPYRIGHT.txt` của Plane.
+Source chính thức được lưu trực tiếp tại `services/plane` như mã nguồn vendor,
+không còn là Git submodule, và vẫn giữ nguyên giấy phép AGPL-3.0. Không xóa các
+tệp `LICENSE` và `COPYRIGHT.txt` của Plane.
 
 ## Chạy local
 
