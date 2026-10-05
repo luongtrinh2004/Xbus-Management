@@ -5,10 +5,13 @@ npm-debug.log
 yarn-error.log
 .env
 .env.*
+plane.env
+.deploy.env
 !.env.example
 .git
 .github
 .DS_Store
+._*
 *.xlsx
 *.docx
 Xbus-Management

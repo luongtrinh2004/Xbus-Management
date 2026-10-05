@@ -12,8 +12,11 @@ RUN npm ci --legacy-peer-deps
 COPY . .
 
 ARG NEXT_PUBLIC_APP_URL=http://localhost:3000
+ARG NEXT_PUBLIC_PLANE_URL=http://localhost:3100
 
 ENV NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
+ENV NEXT_PUBLIC_PLANE_URL=${NEXT_PUBLIC_PLANE_URL}
+ENV NEXT_BUILD_CPUS=1
 
 RUN npm run build:icons
 RUN npm run build

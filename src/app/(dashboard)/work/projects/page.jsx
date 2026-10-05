@@ -9,7 +9,7 @@ import GlobalStyles from "@mui/material/GlobalStyles";
 import Typography from "@mui/material/Typography";
 
 const planeUrl = (
-  process.env.NEXT_PUBLIC_PLANE_URL || "http://localhost:3100"
+  process.env.NEXT_PUBLIC_PLANE_URL || ""
 ).replace(/\/$/, "");
 
 export default function PlaneProjectsPage() {
@@ -157,7 +157,7 @@ export default function PlaneProjectsPage() {
             >
               Kết nối lại
             </Button>
-            <Button href={planeUrl} target="_blank" rel="noreferrer">
+            <Button href={`${planeUrl}/xbus-office/projects/`} target="_blank" rel="noreferrer">
               Mở Plane trong tab mới
             </Button>
           </Box>

@@ -12,7 +12,7 @@ RUN set -eu; \
     # Permanently disable Plane top navigation bar in embedded XBus workspace \
     layout_bundle=/usr/share/nginx/html/assets/layout-C1wtx7eA.js; \
     sed -i 's/var Ie=H(function(){/var Ie=H(function(){return null;/' "$layout_bundle"; \
-    embedded_css='[class*="z-[27]"], [class*="min-h-10"][class*="bg-canvas"] { display: none !important; height: 0 !important; min-height: 0 !important; padding: 0 !important; margin: 0 !important; overflow: hidden !important; } [class*="flex-grow"][class*="pr-2"][class*="pb-2"][class*="pl-2"] { padding: 0 !important; } [class*="h-12"][class*="border-t"][class*="bg-surface-1"][class*="p-3"] { display: none !important; }'; \
+    embedded_css='[class*="z-[27]"], [class*="min-h-10"][class*="bg-canvas"] { display: none !important; height: 0 !important; min-height: 0 !important; padding: 0 !important; margin: 0 !important; overflow: hidden !important; } [class*="flex-grow"][class*="pr-2"][class*="pb-2"][class*="pl-2"] { padding: 0 !important; } .desktop-app-container, .desktop-app-container [class*="size-full"][class*="bg-canvas"] { background-color: var(--background-color-surface-1) !important; } [class*="h-12"][class*="border-t"][class*="bg-surface-1"][class*="p-3"] { display: none !important; }'; \
     echo "$embedded_css" >> /usr/share/nginx/html/assets/globals-Cm7C7RhK.css; \
     echo "$embedded_css" >> /usr/share/nginx/html/assets/root-CzK3JmXp.css; \
     sed -i 's|Plane \| Simple, extensible, open-source project management tool.|XBus Work|g; s|content="Plane"|content="XBus Work"|g' /usr/share/nginx/html/index.html; \

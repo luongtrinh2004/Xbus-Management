@@ -116,7 +116,7 @@ try {
   const completed = new Set(applied.map((row) => row.filename));
   const files = fs
     .readdirSync(migrationsDir)
-    .filter((file) => file.endsWith(".sql"))
+    .filter((file) => !file.startsWith(".") && file.endsWith(".sql"))
     .sort();
   for (const file of files) {
     if (completed.has(file)) continue;

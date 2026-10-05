@@ -43,17 +43,22 @@ npm run plane:stop
 
 ## Production
 
-Plane sử dụng các route cấp gốc `/api`, `/auth`, `/live`, `/spaces` và
-`/god-mode`, trùng với route của XBus. Vì vậy không proxy Plane bằng cách strip
-prefix `/work/projects`. Hãy cấp một origin riêng, ví dụ:
+Plane được tích hợp như module trên cùng origin HTTPS của XBus. Người dùng
+vào `/work/projects`; iframe dùng `/xbus-office/projects/`. Nginx chuyển các
+route Plane được liệt kê trong `services/plane-xbus/nginx.module.conf` tới
+cổng nội bộ 3100, giữ `/api/auth`, `/api/work`, `/api/users` và `/api/assets`
+của XBus. Không cần domain thứ hai hay cổng công khai 8443.
 
 ```text
-XBus:  https://office.example.com
-Plane: https://plane.office.example.com
+XBus:             https://xbus-office.xmobility.vn/work/projects
+Plane bên trong:  https://xbus-office.xmobility.vn/xbus-office/projects/
 ```
 
-Đặt `WEB_URL`, `CORS_ALLOWED_ORIGINS` trong `plane.env` và
-`NEXT_PUBLIC_PLANE_URL` trong môi trường build XBus thành URL HTTPS của Plane.
+`deploy.sh` cài snippet vào Nginx hiện có, sao lưu cấu hình trước khi sửa và
+kiểm tra `nginx -t` trước khi reload. Đặt `PUBLIC_PLANE_URL` bằng
+`PUBLIC_APP_URL` trong `.deploy.env`; script cập nhật `WEB_URL`,
+`CORS_ALLOWED_ORIGINS`, `PLANE_PUBLIC_URL` và `NEXT_PUBLIC_PLANE_URL` tương ứng.
+XBus trong Docker gọi backend qua `PLANE_INTERNAL_URL=http://host.docker.internal:3100`.
 Reverse proxy production phải cho phép Plane được hiển thị trong iframe từ
 origin XBus; không thêm `X-Frame-Options: DENY` và cấu hình CSP `frame-ancestors`
 phù hợp nếu proxy đang áp CSP chung.
@@ -84,5 +89,5 @@ liệu tài chính. Tài khoản Plane tạo từ XBus không có mật khẩu r
 Nếu email đã thuộc tài khoản Plane khác, đồng bộ dừng để tránh gán nhầm người.
 Không tự tạo dự án hoặc công việc mẫu.
 
-Local dùng cùng hostname `localhost` cho cả XBus và Plane. Production nên dùng
-hai subdomain cùng một site HTTPS để cookie Plane hoạt động trong iframe.
+Local dùng cùng hostname `localhost` cho cả XBus và Plane. Production dùng
+cùng origin HTTPS qua Nginx; cookie Plane và NextAuth vẫn là các phiên riêng.

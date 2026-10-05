@@ -25,7 +25,7 @@ Hệ thống gồm hai ứng dụng phối hợp với nhau:
 | XBus Management         | Xác thực nhân sự, cung cấp menu tổng, đồng bộ danh tính và mở trang `/work/projects`                          |
 | Plane Community Edition | Quản lý workspace, dự án, work item, trạng thái, thành viên, chu kỳ, mô-đun, bộ lọc và các màn hình nghiệp vụ |
 
-Plane chạy ở một origin riêng và được hiển thị trong iframe của XBus. Ở môi trường local:
+Plane được hiển thị trong iframe của XBus. Production dùng chung origin HTTPS và cổng 443: người dùng mở `/work/projects`, iframe mở `/xbus-office/projects/`. Nginx chuyển các route Plane tới dịch vụ nội bộ, không cần domain riêng hoặc cổng công khai 8443. Ở môi trường local:
 
 ```text
 XBus:  http://localhost:3000
@@ -653,7 +653,8 @@ Các biến quan trọng:
 | Biến                    | Mục đích                                  |
 | ----------------------- | ----------------------------------------- |
 | `NEXT_PUBLIC_PLANE_URL` | URL Plane mà trình duyệt truy cập         |
-| `PLANE_INTERNAL_URL`    | URL Plane mà server XBus truy cập         |
+| `PLANE_INTERNAL_URL`    | URL Plane mà server XBus truy cập; Docker VPS dùng `http://host.docker.internal:3100` |
+| `PLANE_PUBLIC_URL`      | URL Plane công khai cho server tạo login URL; production bằng origin XBus |
 | `PLANE_BRIDGE_SECRET`   | Secret phía XBus để gọi identity bridge   |
 | `XBUS_BRIDGE_SECRET`    | Secret tương ứng phía Plane               |
 | `XBUS_FRAME_ANCESTORS`  | Origin XBus được phép nhúng Plane         |
@@ -681,13 +682,13 @@ Proxy Plane:
 - bỏ `X-Frame-Options` mặc định chặn iframe;
 - đặt CSP `frame-ancestors` chỉ cho phép chính Plane và origin XBus được cấu hình;
 - không nhúng Plane từ origin không tin cậy;
-- production nên dùng HTTPS và hai subdomain cùng site.
+- production dùng chung origin HTTPS với XBus qua Nginx.
 
 Ví dụ:
 
 ```text
-XBus:  https://office.example.com
-Plane: https://plane.office.example.com
+XBus:  https://xbus-office.xmobility.vn/work/projects
+Plane: https://xbus-office.xmobility.vn/xbus-office/projects/
 ```
 
 ### 18.6. Kiểm tra nhanh khi gặp HTTP 502

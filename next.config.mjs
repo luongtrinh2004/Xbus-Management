@@ -2,6 +2,11 @@
 
 const nextConfig = {
   basePath: process.env.BASEPATH,
+  // The production VPS has 4 GB RAM. Keep static generation serial so a
+  // deploy does not starve the running XBus and Plane containers.
+  experimental: {
+    cpus: Number(process.env.NEXT_BUILD_CPUS || 1),
+  },
   serverExternalPackages: [
     "bullmq",
     "ioredis",

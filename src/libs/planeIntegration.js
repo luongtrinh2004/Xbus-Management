@@ -76,7 +76,7 @@ export async function syncPlanePersonnel(actorId = null) {
         `Không thể đồng bộ nhân sự vào Plane (HTTP ${response.status}).`,
     );
   const publicUrl = (
-    process.env.NEXT_PUBLIC_PLANE_URL || "http://localhost:3100"
+    process.env.PLANE_PUBLIC_URL ?? process.env.NEXT_PUBLIC_PLANE_URL ?? ""
   ).replace(/\/$/, "");
   return {
     ...data,
