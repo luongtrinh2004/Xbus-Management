@@ -168,6 +168,18 @@ export function saveAfternoonTea(data) {
   return writeJsonFile("afternoon-tea.json", data);
 }
 
+export function getWorkManagement() {
+  return readJsonFile("work-management.json", {
+    version: 1,
+    projects: [], projectMembers: [], sections: [], tasks: [], comments: [],
+    activities: [], labels: [], taskLabels: [], counters: {},
+  });
+}
+
+export function saveWorkManagement(data) {
+  return writeJsonFile("work-management.json", data);
+}
+
 export function getAuditLogs() {
   const data = readJsonFile("audit-logs.json", { auditLogs: [] });
   return data.auditLogs || [];

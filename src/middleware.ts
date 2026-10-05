@@ -11,6 +11,7 @@ const accessControl: Record<Role, string[]> = {
     "/water-schedule",
     "/fund",
     "/assets",
+    "/work",
     "/afternoon-tea",
     "/gallery",
   ],
@@ -20,6 +21,7 @@ const accessControl: Record<Role, string[]> = {
     "/water-schedule",
     "/fund",
     "/assets",
+    "/work",
     "/afternoon-tea",
     "/gallery",
     "/audit-logs",
@@ -78,7 +80,12 @@ export async function middleware(req: NextRequest) {
   const allowedRoutes = accessControl[role] || accessControl.user;
 
   // Nếu role không có quyền truy cập trang này (ví dụ user thường vào /audit-logs) -> 401
-  if (!allowedRoutes.includes("*") && !allowedRoutes.includes(pathname)) {
+  if (
+    !allowedRoutes.includes("*") &&
+    !allowedRoutes.some(
+      (route) => pathname === route || pathname.startsWith(`${route}/`),
+    )
+  ) {
     url.pathname = "/401";
     return NextResponse.redirect(url);
   }
@@ -94,6 +101,7 @@ export const config = {
     "/water-schedule",
     "/fund",
     "/assets",
+    "/work/:path*",
     "/afternoon-tea",
     "/gallery",
     "/audit-logs",

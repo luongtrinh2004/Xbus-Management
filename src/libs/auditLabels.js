@@ -63,6 +63,17 @@ export const actionLabels = {
   UPDATE_ASSET_PRODUCT: "Cập nhật sản phẩm",
   DELETE_ASSET_PRODUCT: "Xóa sản phẩm",
 
+  // Quản lý công việc
+  CREATE_WORK_PROJECT: "Tạo dự án công việc",
+  UPDATE_WORK_PROJECT: "Cập nhật dự án công việc",
+  ARCHIVE_WORK_PROJECT: "Lưu trữ dự án công việc",
+  CREATE_WORK_TASK: "Tạo công việc",
+  UPDATE_WORK_TASK: "Cập nhật công việc",
+  ARCHIVE_WORK_TASK: "Lưu trữ công việc",
+  COMMENT_WORK_TASK: "Bình luận công việc",
+  UPDATE_WORK_COMMENT: "Cập nhật bình luận công việc",
+  DELETE_WORK_COMMENT: "Xóa bình luận công việc",
+
   // Bộ phận
   CREATE_TYPE: "Thêm bộ phận",
 
@@ -114,6 +125,9 @@ export const targetLabels = {
   fund_periods: "Kỳ quỹ",
   fund_member_payments: "Đóng quỹ thành viên",
   fund_transactions: "Giao dịch quỹ",
+  WORK_PROJECT: "Dự án công việc",
+  WORK_TASK: "Công việc",
+  WORK_COMMENT: "Bình luận công việc",
   AFTERNOON_TEA: "Trà chiều",
   audit_logs: "Nhật ký hệ thống",
   app_settings: "Cài đặt hệ thống",

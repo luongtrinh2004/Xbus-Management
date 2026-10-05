@@ -1417,6 +1417,22 @@ export async function saveGallery(data) {
     : json.saveGalleryData(data);
 }
 
+export async function getWorkManagement() {
+  return mysqlEnabled()
+    ? getDocument("work-management", {
+        version: 1,
+        projects: [], projectMembers: [], sections: [], tasks: [], comments: [],
+        activities: [], labels: [], taskLabels: [], counters: {},
+      })
+    : json.getWorkManagement();
+}
+
+export async function saveWorkManagement(data) {
+  return mysqlEnabled()
+    ? saveDocument("work-management", data)
+    : json.saveWorkManagement(data);
+}
+
 export async function getAuditLogs() {
   if (!mysqlEnabled()) return json.getAuditLogs();
   const [rows] = await query(

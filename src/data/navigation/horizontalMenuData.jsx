@@ -30,6 +30,12 @@ const horizontalMenuData = [
     roles: ["user", "assistant", "admin"],
   },
   {
+    label: "Quản lý công việc",
+    href: "/work",
+    icon: "tabler-checklist",
+    roles: ["user", "assistant", "admin"],
+  },
+  {
     label: "Trà chiều",
     href: "/afternoon-tea",
     icon: "tabler-bubble-tea",
