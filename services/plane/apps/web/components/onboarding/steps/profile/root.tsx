@@ -147,7 +147,10 @@ export const ProfileSetupStep = observer(function ProfileSetupStep({ handleStepC
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-10">
       {/* Header */}
-      <CommonOnboardingHeader title={"Tạo hồ sơ của bạn."} description={"Đây là tên hiển thị của bạn trong Plane."} />
+      <CommonOnboardingHeader
+        title={"Tạo hồ sơ của bạn."}
+        description={"Đây là tên hiển thị của bạn trong XBus Office."}
+      />
 
       {/* Profile Picture Section */}
       <Controller

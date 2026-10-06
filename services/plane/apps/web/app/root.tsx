@@ -12,12 +12,6 @@ import { ThemeProvider, useTheme } from "next-themes";
 import { SITE_DESCRIPTION, SITE_NAME } from "@plane/constants";
 // types
 // assets
-import favicon16 from "@/app/assets/favicon/favicon-16x16.png?url";
-import favicon32 from "@/app/assets/favicon/favicon-32x32.png?url";
-import faviconIco from "@/app/assets/favicon/favicon.ico?url";
-import icon180 from "@/app/assets/icons/icon-180x180.png?url";
-import icon512 from "@/app/assets/icons/icon-512x512.png?url";
-import ogImage from "@/app/assets/og-image.png?url";
 import globalStyles from "@/styles/globals.css?url";
 import type { Route } from "./+types/root";
 // components
@@ -32,16 +26,15 @@ import interVariableWoff2 from "@fontsource-variable/inter/files/inter-latin-wgh
 import "@fontsource/material-symbols-rounded";
 import "@fontsource/ibm-plex-mono";
 
-const APP_TITLE = process.env.VITE_XBUS_EMBEDDED === "true" ? "XBus Work" : "Plane | Quản lý dự án và công việc";
+const APP_TITLE = "XBus Office";
+const ogImage = "/xbus/logo.png";
 
 export const links: LinksFunction = () => [
-  { rel: "icon", type: "image/png", sizes: "32x32", href: favicon32 },
-  { rel: "icon", type: "image/png", sizes: "16x16", href: favicon16 },
-  { rel: "shortcut icon", href: faviconIco },
+  { rel: "icon", type: "image/svg+xml", sizes: "any", href: "/xbus/logo-icon.svg" },
   { rel: "manifest", href: "/site.webmanifest.json" },
-  { rel: "apple-touch-icon", href: icon512 },
-  { rel: "apple-touch-icon", sizes: "180x180", href: icon180 },
-  { rel: "apple-touch-icon", sizes: "512x512", href: icon512 },
+  { rel: "apple-touch-icon", href: "/xbus/logo-icon.svg" },
+  { rel: "apple-touch-icon", sizes: "180x180", href: "/xbus/logo-icon.svg" },
+  { rel: "apple-touch-icon", sizes: "512x512", href: "/xbus/logo-icon.svg" },
   { rel: "manifest", href: "/manifest.json" },
   { rel: "stylesheet", href: globalStyles },
   {
@@ -61,7 +54,7 @@ export function Layout({ children }: { children: ReactNode }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#fff" />
         {/* Meta info for PWA */}
-        <meta name="application-name" content="Plane" />
+        <meta name="application-name" content="XBus Office" />
         <meta name="apple-mobile-web-app-capable" content={"Có"} />
         <meta name="apple-mobile-web-app-status-bar-style" content={"Mặc định"} />
         <meta name="apple-mobile-web-app-title" content={SITE_NAME} />
@@ -90,22 +83,16 @@ export const meta: Route.MetaFunction = () => [
     property: "og:description",
     content: "Công cụ quản lý dự án mã nguồn mở giúp tổ chức công việc, chu kỳ và lộ trình sản phẩm.",
   },
-  { property: "og:url", content: "https://app.plane.so/" },
   { property: "og:image", content: ogImage },
-  { property: "og:image:width", content: "1200" },
-  { property: "og:image:height", content: "630" },
-  { property: "og:image:alt", content: "Plane - Quản lý dự án hiện đại" },
+  { property: "og:image:alt", content: "XBus Office - Quản lý dự án hiện đại" },
   {
     name: "keywords",
     content:
       "software development, plan, ship, software, accelerate, code management, release management, project management, work item tracking, agile, scrum, kanban, collaboration",
   },
-  { name: "twitter:site", content: "@planepowers" },
   { name: "twitter:card", content: "summary_large_image" },
   { name: "twitter:image", content: ogImage },
-  { name: "twitter:image:width", content: "1200" },
-  { name: "twitter:image:height", content: "630" },
-  { name: "twitter:image:alt", content: "Plane - Quản lý dự án hiện đại" },
+  { name: "twitter:image:alt", content: "XBus Office - Quản lý dự án hiện đại" },
 ];
 
 // Root stays shell-thin: in SPA mode React Router server-builds only the root route, so

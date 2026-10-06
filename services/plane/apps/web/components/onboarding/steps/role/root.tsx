@@ -98,7 +98,7 @@ export const RoleSetupStep = observer(function RoleSetupStep({ handleStepChange 
       {/* Header */}
       <CommonOnboardingHeader
         title={"Vai trò của bạn là gì?"}
-        description={"Thiết lập Plane phù hợp với cách làm việc của bạn."}
+        description={"Thiết lập XBus Office phù hợp với cách làm việc của bạn."}
       />
       {/* Role Selection */}
       <div className="flex flex-col gap-3">

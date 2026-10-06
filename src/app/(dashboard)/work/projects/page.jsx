@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import CircularProgress from "@mui/material/CircularProgress";
 import GlobalStyles from "@mui/material/GlobalStyles";
 
 const planeUrl = (process.env.NEXT_PUBLIC_PLANE_URL || "").replace(/\/$/, "");
@@ -37,7 +36,7 @@ export default function PlaneProjectsPage() {
         });
         const data = await response.json();
         if (!response.ok || !data.loginUrl || !data.ticket)
-          throw new Error(data.error || "Không thể mở phiên Plane.");
+          throw new Error(data.error || "Không thể mở phiên XBus Office.");
         if (!controller.signal.aborted) {
           setLoginUrl(data.loginUrl);
           setTicket(data.ticket);
@@ -125,7 +124,13 @@ export default function PlaneProjectsPage() {
               pointerEvents: "none",
             }}
           >
-            <CircularProgress size={24} />
+            <Box
+              component="img"
+              src="/images/icons/loading.svg"
+              alt=""
+              aria-hidden="true"
+              sx={{ width: 64, height: 64 }}
+            />
           </Box>
         )}
 
@@ -133,7 +138,7 @@ export default function PlaneProjectsPage() {
           <Box sx={{ maxWidth: 720, mx: "auto", pt: 8, px: 3 }}>
             <Alert severity="warning" sx={{ mb: 2 }}>
               {error ||
-                "Plane tải lâu hơn dự kiến. Bạn có thể kết nối lại hoặc mở Plane trong tab mới."}
+                "XBus Office tải lâu hơn dự kiến. Bạn có thể kết nối lại hoặc mở XBus Office trong tab mới."}
             </Alert>
             <Button
               onClick={() => setAttempt((value) => value + 1)}
@@ -147,7 +152,7 @@ export default function PlaneProjectsPage() {
               target="_blank"
               rel="noreferrer"
             >
-              Mở Plane trong tab mới
+              Mở XBus Office trong tab mới
             </Button>
           </Box>
         )}
@@ -167,7 +172,7 @@ export default function PlaneProjectsPage() {
           <Box
             component="iframe"
             name="plane-workspace"
-            title="Plane — XBus Projects"
+            title="XBus Office — XBus Projects"
             onLoad={() => {
               setLoading(false);
               setSlow(false);
@@ -175,7 +180,7 @@ export default function PlaneProjectsPage() {
             onError={() => {
               setLoading(false);
               setError(
-                "Không thể tải giao diện Plane. Hãy kiểm tra địa chỉ Plane hoặc thử kết nối lại.",
+                "Không thể tải giao diện XBus Office. Hãy kiểm tra địa chỉ XBus Office hoặc thử kết nối lại.",
               );
             }}
             allow="clipboard-read; clipboard-write; fullscreen"

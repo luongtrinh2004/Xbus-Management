@@ -8,7 +8,7 @@ import { useState } from "react";
 import { observer } from "mobx-react";
 // plane imports
 import { Button } from "@makeplane/propel/components/button";
-import { PlaneLockup } from "@plane/blocks/icons";
+import { XBusOfficeLogo as PlaneLockup } from "@/components/common/xbus-office-logo";
 import { CloseOutline } from "@makeplane/propel/icons";
 // assets
 import CyclesTour from "@/app/assets/onboarding/cycles.webp?url";
@@ -40,7 +40,7 @@ const TOUR_STEPS: {
     key: "work-items",
     title: "Lập kế hoạch công việc",
     description:
-      "Công việc là đơn vị cơ bản trong Plane. Các chức năng được tổ chức quanh công việc và thuộc tính của công việc.",
+      "Công việc là đơn vị cơ bản trong XBus Office. Các chức năng được tổ chức quanh công việc và thuộc tính của công việc.",
     image: IssuesTour,
     nextStep: "cycles",
   },
@@ -98,10 +98,10 @@ export const TourRoot = observer(function TourRoot(props: TOnboardingTourProps) 
             </div>
             <div className="flex flex-col overflow-y-auto p-6">
               <h3 className="font-semibold sm:text-18">
-                Chào mừng đến với Plane, {currentUser?.first_name} {currentUser?.last_name}
+                Chào mừng đến với XBus Office, {currentUser?.first_name} {currentUser?.last_name}
               </h3>
               <p className="mt-3 text-13 text-secondary">
-                Chào mừng bạn đến với Plane. Hãy tạo dự án đầu tiên để bắt đầu quản lý công việc.
+                Chào mừng bạn đến với XBus Office. Hãy tạo dự án đầu tiên để bắt đầu quản lý công việc.
               </p>
               <div className="flex h-full items-end">
                 <div className="mt-12 flex items-center gap-6">

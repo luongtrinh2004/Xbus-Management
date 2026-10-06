@@ -9,7 +9,7 @@ import { GOD_MODE_URL } from "@plane/constants";
 import GradientLogo from "@/app/assets/auth/gradient-logo.webp?url";
 import GradientBgLogo from "@/app/assets/auth/gradient-bg-logo.webp?url";
 import DefaultLayout from "@/layouts/default-layout";
-import { PlaneLockup } from "@plane/blocks/icons";
+import { XBusOfficeLogo as PlaneLockup } from "@/components/common/xbus-office-logo";
 import { Button } from "@makeplane/propel/components/button";
 
 export function InstanceNotReady() {
@@ -36,9 +36,9 @@ export function InstanceNotReady() {
           </div>
           <div className="flex h-full w-full flex-col items-center justify-center gap-7">
             <div className="flex flex-col items-center gap-11">
-              <img src={GradientLogo} className="h-24 w-40 object-contain" alt={"Logo Plane"} />
+              <img src={GradientLogo} className="h-24 w-40 object-contain" alt={"Logo XBus Office"} />
               <div className="flex max-w-124 flex-col items-center gap-3">
-                <h1 className="text-h2-semibold text-primary">Chào mừng đến với Plane</h1>
+                <h1 className="text-h2-semibold text-primary">Chào mừng đến với XBus Office</h1>
                 <p className="text-center text-body-md-regular text-secondary">
                   Thiết lập hệ thống và tạo không gian làm việc đầu tiên để bắt đầu quản lý dự án và công việc.
                 </p>

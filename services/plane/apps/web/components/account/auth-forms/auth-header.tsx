@@ -28,29 +28,29 @@ const Titles = {
   [EAuthModes.SIGN_IN]: {
     [EAuthSteps.EMAIL]: {
       header: "Quản lý mọi khía cạnh công việc.",
-      subHeader: "Chào mừng bạn trở lại Plane.",
+      subHeader: "Chào mừng bạn trở lại XBus Office.",
     },
     [EAuthSteps.PASSWORD]: {
       header: "Quản lý mọi khía cạnh công việc.",
-      subHeader: "Chào mừng bạn trở lại Plane.",
+      subHeader: "Chào mừng bạn trở lại XBus Office.",
     },
     [EAuthSteps.UNIQUE_CODE]: {
       header: "Quản lý mọi khía cạnh công việc.",
-      subHeader: "Chào mừng bạn trở lại Plane.",
+      subHeader: "Chào mừng bạn trở lại XBus Office.",
     },
   },
   [EAuthModes.SIGN_UP]: {
     [EAuthSteps.EMAIL]: {
       header: "Quản lý mọi khía cạnh công việc.",
-      subHeader: "Tạo tài khoản Plane.",
+      subHeader: "Tạo tài khoản XBus Office.",
     },
     [EAuthSteps.PASSWORD]: {
       header: "Quản lý mọi khía cạnh công việc.",
-      subHeader: "Tạo tài khoản Plane.",
+      subHeader: "Tạo tài khoản XBus Office.",
     },
     [EAuthSteps.UNIQUE_CODE]: {
       header: "Quản lý mọi khía cạnh công việc.",
-      subHeader: "Tạo tài khoản Plane.",
+      subHeader: "Tạo tài khoản XBus Office.",
     },
   },
 };

@@ -36,7 +36,7 @@ export const IssueArchivedAtActivity = observer(function IssueArchivedAtActivity
       }
       activityId={activityId}
       ends={ends}
-      customUserName={activity.new_value === "archive" ? "Plane" : undefined}
+      customUserName={activity.new_value === "archive" ? "XBus Office" : undefined}
     >
       {activity.new_value === "restore" ? "đã khôi phục công việc" : "đã lưu trữ công việc"}.
     </IssueActivityBlockComponent>

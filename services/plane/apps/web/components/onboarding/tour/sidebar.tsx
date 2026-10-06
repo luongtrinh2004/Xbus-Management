@@ -53,7 +53,7 @@ export function TourSidebar({ step, setStep }: Props) {
       <h3 className="text-16 font-medium">
         Bắt đầu thôi!
         <br />
-        Khám phá thêm tính năng của Plane.
+        Khám phá thêm tính năng của XBus Office.
       </h3>
       <div className="mt-8 space-y-5">
         {sidebarOptions.map((option) => (

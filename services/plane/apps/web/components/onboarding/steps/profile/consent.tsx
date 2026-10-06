@@ -23,7 +23,7 @@ export function MarketingConsent({ isChecked, handleChange }: Props) {
       >
         {isChecked && <TickOutline className="h-3 w-3 text-on-color" />}
       </button>
-      <span className="text-13 text-tertiary">Tôi đồng ý nhận thông tin tiếp thị từ Plane</span>
+      <span className="text-13 text-tertiary">Tôi đồng ý nhận thông tin tiếp thị từ XBus Office</span>
     </div>
   );
 }

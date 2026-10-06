@@ -34,7 +34,10 @@ export async function POST(req) {
   } catch (error) {
     console.error("[Plane] Bootstrap failed:", error.message);
     return NextResponse.json(
-      { error: "Không thể kết nối Plane hoặc đồng bộ nhân sự. Hãy thử lại." },
+      {
+        error:
+          "Không thể kết nối XBus Office hoặc đồng bộ nhân sự. Hãy thử lại.",
+      },
       { status: 502 },
     );
   }

@@ -84,7 +84,7 @@ export const UseCaseSetupStep = observer(function UseCaseSetupStep({ handleStepC
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-10">
       {/* Header */}
       <CommonOnboardingHeader
-        title={"Bạn sử dụng Plane cho mục đích gì?"}
+        title={"Bạn sử dụng XBus Office cho mục đích gì?"}
         description={"Cho biết mục tiêu và quy mô đội ngũ của bạn."}
       />
 

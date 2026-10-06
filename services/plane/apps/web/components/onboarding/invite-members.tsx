@@ -303,7 +303,9 @@ export function InviteMembers(props: Props) {
         <div className="mx-auto mt-6 flex w-full flex-col items-center justify-center p-8 md:w-4/5">
           <div className="mx-auto w-4/5 space-y-1 py-4 text-center">
             <h3 className="text-24 font-bold text-primary">Mời đồng nghiệp</h3>
-            <p className="font-medium text-placeholder">Mời đội ngũ tham gia để cùng quản lý công việc trong Plane.</p>
+            <p className="font-medium text-placeholder">
+              Mời đội ngũ tham gia để cùng quản lý công việc trong XBus Office.
+            </p>
           </div>
           <form
             className="mx-auto mt-2 w-full space-y-4"

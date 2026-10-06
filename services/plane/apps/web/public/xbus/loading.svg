@@ -1,0 +1,102 @@
+<svg width="300" height="300" viewBox="-24 -21 300 300" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Logo loading animation</title>
+  <desc id="desc">Four logo segments assemble softly while a subtle highlight passes across the mark.</desc>
+
+  <style>
+    .mark {
+      transform-box: view-box;
+      transform-origin: 125.5px 128.5px;
+      animation: breathe 1.5s cubic-bezier(.4, 0, .2, 1) infinite;
+    }
+
+    .piece {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: assemble 1.5s cubic-bezier(.22, 1, .36, 1) infinite;
+    }
+
+    .piece-1 { --x: 12px;  --y: -14px; animation-delay: 0s; }
+    .piece-2 { --x: -13px; --y: -10px; animation-delay: .04s; }
+    .piece-3 { --x: 13px;  --y: 10px;  animation-delay: .08s; }
+    .piece-4 { --x: -12px; --y: 14px;  animation-delay: .12s; }
+
+    .sheen {
+      opacity: 0;
+      transform: translateX(-210px) skewX(-12deg);
+      animation: sheen 1.5s cubic-bezier(.4, 0, .2, 1) infinite;
+      pointer-events: none;
+    }
+
+    @keyframes assemble {
+      0%, 7% {
+        opacity: 0;
+        transform: translate(var(--x), var(--y)) scale(.92);
+      }
+      24%, 72% {
+        opacity: 1;
+        transform: translate(0, 0) scale(1);
+      }
+      88%, 100% {
+        opacity: 0;
+        transform: translate(calc(var(--x) * -.35), calc(var(--y) * -.35)) scale(.97);
+      }
+    }
+
+    @keyframes breathe {
+      0%, 18%   { transform: scale(.985); }
+      35%, 68%  { transform: scale(1); }
+      82%, 100% { transform: scale(.985); }
+    }
+
+    @keyframes sheen {
+      0%, 34%  { opacity: 0; transform: translateX(-210px) skewX(-12deg); }
+      40%      { opacity: 0; }
+      48%      { opacity: .62; }
+      61%      { opacity: 0; transform: translateX(235px) skewX(-12deg); }
+      100%     { opacity: 0; transform: translateX(235px) skewX(-12deg); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .mark, .piece, .sheen { animation: none; }
+      .piece { opacity: 1; }
+    }
+  </style>
+
+  <defs>
+    <linearGradient id="navy" x1="219.392" y1="0" x2="35.723" y2="257.136" gradientUnits="userSpaceOnUse">
+      <stop offset=".25" stop-color="#233871"/>
+      <stop offset=".5" stop-color="#00103C"/>
+      <stop offset=".8" stop-color="#233871"/>
+    </linearGradient>
+    <linearGradient id="blue" x1="62.205" y1="50.403" x2="177.105" y2="214.423" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#216BD4"/>
+      <stop offset=".452" stop-color="#26418C"/>
+      <stop offset="1" stop-color="#233871"/>
+    </linearGradient>
+    <linearGradient id="orange" x1="78.866" y1="151.56" x2="59.659" y2="257.971" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#B42400"/>
+      <stop offset=".788" stop-color="#FF7E36"/>
+    </linearGradient>
+    <linearGradient id="glint" x1="0" y1="0" x2="70" y2="0" gradientUnits="userSpaceOnUse">
+      <stop stop-color="white" stop-opacity="0"/>
+      <stop offset=".5" stop-color="white" stop-opacity=".88"/>
+      <stop offset="1" stop-color="white" stop-opacity="0"/>
+    </linearGradient>
+    <clipPath id="logo-clip">
+      <path d="M148.487 134.975L119.015 93.543L191.201 0H251L148.487 134.975Z"/>
+      <path d="M88.2607 49.9753H30.5972L117.733 175.126L148.487 134.976L88.2607 49.9753Z"/>
+      <path d="M157.029 147.79L127.13 187.086L146.351 214.423H204.015L157.029 147.79Z"/>
+      <path d="M106.784 188.367L77.3118 146.935L0 257.136H59.7992L106.784 188.367Z"/>
+    </clipPath>
+  </defs>
+
+  <g class="mark">
+    <path class="piece piece-1" d="M148.487 134.975L119.015 93.543L191.201 0H251L148.487 134.975Z" fill="url(#navy)"/>
+    <path class="piece piece-2" d="M88.2607 49.9753H30.5972L117.733 175.126L148.487 134.976L88.2607 49.9753Z" fill="url(#blue)"/>
+    <path class="piece piece-3" d="M157.029 147.79L127.13 187.086L146.351 214.423H204.015L157.029 147.79Z" fill="url(#blue)"/>
+    <path class="piece piece-4" d="M106.784 188.367L77.3118 146.935L0 257.136H59.7992L106.784 188.367Z" fill="url(#orange)"/>
+    <g clip-path="url(#logo-clip)">
+      <rect class="sheen" x="-40" y="-30" width="72" height="330" fill="url(#glint)"/>
+    </g>
+  </g>
+</svg>

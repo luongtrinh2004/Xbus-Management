@@ -98,7 +98,7 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
       },
       {
         title: "Bình luận",
-        description: "Bình luận công việc, @nhắc thành viên và cùng trao đổi ý tưởng ngay trong Plane.",
+        description: "Bình luận công việc, @nhắc thành viên và cùng trao đổi ý tưởng ngay trong XBus Office.",
         cloud: {
           free: true,
           one: true,
@@ -608,7 +608,7 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
     features: [
       {
         title: "Power K",
-        description: "Truy cập nhanh các chức năng trong Plane bằng bàn phím.",
+        description: "Truy cập nhanh các chức năng trong XBus Office bằng bàn phím.",
         cloud: {
           free: true,
           one: true,
@@ -652,7 +652,7 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
       {
         title: "PQL",
         description:
-          "Tìm kiếm bằng Plane Query Language với toán tử Boolean. Truy vấn ngôn ngữ tự nhiên sẽ được hỗ trợ sau.",
+          "Tìm kiếm bằng XBus Office Query Language với toán tử Boolean. Truy vấn ngôn ngữ tự nhiên sẽ được hỗ trợ sau.",
         cloud: {
           free: false,
           one: false,
@@ -962,7 +962,7 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
       {
         title: "GitHub",
         description:
-          "Đồng bộ công việc và trạng thái giữa Plane với GitHub. Hoạt động ở một bên sẽ tự động cập nhật bên còn lại.",
+          "Đồng bộ công việc và trạng thái giữa XBus Office với GitHub. Hoạt động ở một bên sẽ tự động cập nhật bên còn lại.",
         cloud: {
           free: false,
           one: false,
@@ -973,7 +973,7 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
       },
       {
         title: "Slack",
-        description: "Nhận hoạt động Plane trong Slack và dùng lệnh / trong Slack để cập nhật Plane.",
+        description: "Nhận hoạt động XBus Office trong Slack và dùng lệnh / trong Slack để cập nhật XBus Office.",
         cloud: {
           free: false,
           one: false,
@@ -995,7 +995,7 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
       },
       {
         title: "Zendesk",
-        description: "Tạo công việc trong Plane từ ticket Zendesk.",
+        description: "Tạo công việc trong XBus Office từ ticket Zendesk.",
         cloud: {
           free: false,
           one: false,
@@ -1006,7 +1006,7 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
       },
       {
         title: "Freshdesk",
-        description: "Tạo công việc trong Plane từ ticket Freshdesk.",
+        description: "Tạo công việc trong XBus Office từ ticket Freshdesk.",
         cloud: {
           free: false,
           one: false,
@@ -1052,7 +1052,7 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
     features: [
       {
         title: "SAML",
-        description: "Tích hợp SAML chính thức để xác thực Plane với nhà cung cấp danh tính IdP.",
+        description: "Tích hợp SAML chính thức để xác thực XBus Office với nhà cung cấp danh tính IdP.",
         cloud: {
           free: false,
           one: true,
@@ -1063,7 +1063,7 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
       },
       {
         title: "OIDC",
-        description: "Tích hợp OIDC chính thức để xác thực Plane với nhà cung cấp danh tính IdP.",
+        description: "Tích hợp OIDC chính thức để xác thực XBus Office với nhà cung cấp danh tính IdP.",
         selfHostedOnly: true,
         cloud: {
           free: false,
@@ -1127,7 +1127,7 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
     features: [
       {
         title: "Quản trị hệ thống",
-        description: "Quản lý Plane tự triển khai bằng giao diện quản trị hệ thống.",
+        description: "Quản lý XBus Office tự triển khai bằng giao diện quản trị hệ thống.",
         cloud: {
           free: true,
           one: true,
@@ -1138,7 +1138,7 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
       },
       {
         title: "Triển khai bằng một lần nhấn",
-        description: "Cài đặt và tự triển khai Plane lên hạ tầng Cloud riêng bằng một lệnh.",
+        description: "Cài đặt và tự triển khai XBus Office lên hạ tầng Cloud riêng bằng một lệnh.",
         cloud: {
           free: false,
           one: true,

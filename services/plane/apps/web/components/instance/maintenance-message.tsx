@@ -16,7 +16,7 @@ export function MaintenanceMessage() {
   return (
     <>
       <div className="flex flex-col gap-2.5">
-        <h1 className="text-left text-18 font-semibold text-primary">🚧 Plane chưa khởi động thành công!</h1>
+        <h1 className="text-left text-18 font-semibold text-primary">🚧 XBus Office chưa khởi động thành công!</h1>
         <span className="text-left text-14 font-medium text-secondary">
           Một số dịch vụ chưa khởi động được. Hãy kiểm tra log container để xác định nguyên nhân hoặc liên hệ hỗ trợ.
         </span>

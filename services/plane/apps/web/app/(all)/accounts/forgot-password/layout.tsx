@@ -11,4 +11,4 @@ export default function ForgotPasswordLayout() {
   return <Outlet />;
 }
 
-export const meta: Route.MetaFunction = () => [{ title: "Quên mật khẩu - Plane" }];
+export const meta: Route.MetaFunction = () => [{ title: "Quên mật khẩu - XBus Office" }];

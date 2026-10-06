@@ -15,7 +15,7 @@ import { ROLE } from "@plane/constants";
 import { useTranslation } from "@plane/i18n";
 // types
 import { Button } from "@makeplane/propel/components/button";
-import { PlaneLogo } from "@plane/blocks/icons";
+import { XBusOfficeIcon as PlaneLogo } from "@/components/common/xbus-office-logo";
 import { setToast } from "@plane/blocks/toast";
 import type { IWorkspaceMemberInvitation } from "@plane/types";
 import { truncateText } from "@plane/utils";

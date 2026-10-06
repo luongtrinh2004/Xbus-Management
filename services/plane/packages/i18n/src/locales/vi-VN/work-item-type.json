@@ -367,7 +367,7 @@
         },
         "confirmation": {
           "title": "Khi đã kích hoạt, Loại công việc không thể bị vô hiệu hóa.",
-          "description": "Công việc của Plane sẽ trở thành loại công việc mặc định cho dự án này và sẽ hiển thị với biểu tượng và nền của nó trong dự án này.",
+          "description": "Công việc của XBus Office sẽ trở thành loại công việc mặc định cho dự án này và sẽ hiển thị với biểu tượng và nền của nó trong dự án này.",
           "button": {
             "default": "Kích hoạt",
             "loading": "Đang thiết lập"

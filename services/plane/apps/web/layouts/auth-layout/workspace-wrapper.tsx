@@ -13,7 +13,7 @@ import useSWR from "swr";
 import { LogOutOutline } from "@makeplane/propel/icons";
 import { EUserPermissions, EUserPermissionsLevel } from "@plane/constants";
 import { Button as ButtonElement } from "@makeplane/propel/elements/button";
-import { PlaneLogo } from "@plane/blocks/icons";
+import { XBusOfficeIcon as PlaneLogo } from "@/components/common/xbus-office-logo";
 import { setToast } from "@plane/blocks/toast";
 import { Tooltip } from "@makeplane/propel/components/tooltip";
 // assets
@@ -172,7 +172,11 @@ export const WorkspaceAuthWrapper = observer(function WorkspaceAuthWrapper(props
           </div>
           <div className="relative flex h-full w-full flex-grow flex-col items-center justify-center space-y-3">
             <div className="relative flex-shrink-0">
-              <img src={WorkSpaceNotAvailable} className="h-[220px] object-contain object-center" alt={"Logo Plane"} />
+              <img
+                src={WorkSpaceNotAvailable}
+                className="h-[220px] object-contain object-center"
+                alt={"Logo XBus Office"}
+              />
             </div>
             <h3 className="text-center text-16 font-semibold">Không tìm thấy không gian làm việc</h3>
             <p className="text-center text-13 text-secondary">

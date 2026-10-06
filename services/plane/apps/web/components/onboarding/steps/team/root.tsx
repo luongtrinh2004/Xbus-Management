@@ -307,7 +307,7 @@ export const InviteTeamStep = observer(function InviteTeamStep(props: Props) {
     >
       <CommonOnboardingHeader
         title={"Mời đồng nghiệp"}
-        description={"Mời đội ngũ tham gia để cùng quản lý công việc trong Plane."}
+        description={"Mời đội ngũ tham gia để cùng quản lý công việc trong XBus Office."}
       />
       <div className="w-full py-4 text-13">
         <div className="group relative mx-8 grid grid-cols-10 gap-4 py-2">

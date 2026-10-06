@@ -11,4 +11,4 @@ export default function SetPasswordLayout() {
   return <Outlet />;
 }
 
-export const meta: Route.MetaFunction = () => [{ title: "Thiết lập mật khẩu - Plane" }];
+export const meta: Route.MetaFunction = () => [{ title: "Thiết lập mật khẩu - XBus Office" }];

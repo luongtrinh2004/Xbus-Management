@@ -8,7 +8,7 @@ import { useTranslation } from "@plane/i18n";
 // ui
 import { Button } from "@makeplane/propel/components/button";
 import { DialogActions, DialogInfo } from "@makeplane/propel/components/dialog";
-import { PlaneLogo } from "@plane/blocks/icons";
+import { XBusOfficeIcon as PlaneLogo } from "@/components/common/xbus-office-logo";
 
 export function ProductUpdatesFooter() {
   const { t } = useTranslation();
