@@ -36,7 +36,7 @@ export function TermsAndConditions({ authType = EAuthModes.SIGN_IN }: TermsAndCo
   return (
     <div className="flex items-center justify-center">
       <p className="text-center text-13 whitespace-pre-line text-tertiary">
-        {`${MESSAGES[authType]}, you understand and agree to \n our `}
+        {`${MESSAGES[authType]}, bạn đồng ý với `}
         <LegalLink href={LEGAL_LINKS.termsOfService}>Điều khoản sử dụng</LegalLink> và{" "}
         <LegalLink href={LEGAL_LINKS.privacyPolicy}>Chính sách bảo mật</LegalLink>.
       </p>

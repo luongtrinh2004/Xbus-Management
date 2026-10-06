@@ -16,7 +16,7 @@ type Props = {
 const BADGE_CONTENT = {
   syncing: {
     label: "Đang đồng bộ…",
-    tooltipLabel: "Syncing... Your changes are being synced with the server. You can continue making changes.",
+    tooltipLabel: "Thay đổi đang được đồng bộ với máy chủ. Bạn có thể tiếp tục chỉnh sửa.",
   },
   error: {
     label: "Mất kết nối",

@@ -154,7 +154,7 @@ export const LiteTextEditor = React.forwardRef(function LiteTextEditor(
             mentionHandler={{
               searchCallback: async (query) => {
                 const res = await fetchMentions(query);
-                if (!res) throw new Error("Failed in fetching mentions");
+                if (!res) throw new Error("Không thể tải danh sách để nhắc tên");
                 return res;
               },
               renderComponent: EditorMentionsRoot,

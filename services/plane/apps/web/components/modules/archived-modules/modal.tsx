@@ -69,7 +69,7 @@ export function ArchiveModuleModal(props: Props) {
       title={`Lưu trữ nhóm công việc ${moduleName}`}
       content={"Bạn có muốn lưu trữ nhóm công việc? Bạn có thể khôi phục sau."}
       primaryButtonText={{ loading: "Archiving", default: "Archive" }}
-      secondaryButtonText="Cancel"
+      secondaryButtonText="Hủy"
     />
   );
 }

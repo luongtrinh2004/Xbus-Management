@@ -6,11 +6,8 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
 import GlobalStyles from "@mui/material/GlobalStyles";
-import Typography from "@mui/material/Typography";
 
-const planeUrl = (
-  process.env.NEXT_PUBLIC_PLANE_URL || ""
-).replace(/\/$/, "");
+const planeUrl = (process.env.NEXT_PUBLIC_PLANE_URL || "").replace(/\/$/, "");
 
 export default function PlaneProjectsPage() {
   const [loading, setLoading] = useState(true);
@@ -117,30 +114,18 @@ export default function PlaneProjectsPage() {
       >
         {loading && !error && (
           <Box
+            role="status"
+            aria-label="Đang tải quản lý công việc"
             sx={{
               position: "absolute",
-              top: 16,
-              left: "50%",
-              transform: "translateX(-50%)",
+              inset: 0,
               zIndex: 1,
-              px: 2,
-              py: 1,
-              borderRadius: 2,
-              boxShadow: 2,
+              display: "grid",
+              placeItems: "center",
               pointerEvents: "none",
-              bgcolor: "background.paper",
-              border: "1px solid",
-              borderColor: "divider",
             }}
           >
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-              <CircularProgress size={20} />
-              <Typography variant="body2" color="text.secondary">
-                {loginUrl
-                  ? "Đang mở Plane…"
-                  : "Đang đồng bộ nhân sự và kết nối Plane…"}
-              </Typography>
-            </Box>
+            <CircularProgress size={24} />
           </Box>
         )}
 
@@ -157,7 +142,11 @@ export default function PlaneProjectsPage() {
             >
               Kết nối lại
             </Button>
-            <Button href={`${planeUrl}/xbus-office/projects/`} target="_blank" rel="noreferrer">
+            <Button
+              href={`${planeUrl}/xbus-office/projects/`}
+              target="_blank"
+              rel="noreferrer"
+            >
               Mở Plane trong tab mới
             </Button>
           </Box>

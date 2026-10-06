@@ -107,7 +107,7 @@ export const ProjectCard = observer(function ProjectCard(props: Props) {
       },
       error: {
         title: "Lỗi!",
-        message: () => "Couldn't add the project to favorites. Please try again.",
+        message: () => "Không thể thêm dự án vào mục yêu thích. Vui lòng thử lại.",
       },
     });
   };
@@ -124,7 +124,7 @@ export const ProjectCard = observer(function ProjectCard(props: Props) {
       },
       error: {
         title: "Lỗi!",
-        message: () => "Couldn't remove the project from favorites. Please try again.",
+        message: () => "Không thể bỏ dự án khỏi mục yêu thích. Vui lòng thử lại.",
       },
     });
   };

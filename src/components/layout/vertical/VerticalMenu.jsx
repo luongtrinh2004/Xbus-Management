@@ -104,6 +104,8 @@ const VerticalMenu = ({ scrollMenu }) => {
                 <MenuItem
                   key={item.label}
                   href={item.href}
+                  exactMatch={item.exactMatch}
+                  activeUrl={item.activeUrl}
                   icon={<i className={item.icon} />}
                 >
                   {item.label}

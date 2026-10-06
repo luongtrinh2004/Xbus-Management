@@ -31,7 +31,9 @@ const horizontalMenuData = [
   },
   {
     label: "Quản lý công việc",
-    href: "/work",
+    href: "/work/projects",
+    exactMatch: false,
+    activeUrl: "/work",
     icon: "tabler-checklist",
     roles: ["user", "assistant", "admin"],
   },

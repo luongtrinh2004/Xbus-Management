@@ -70,7 +70,7 @@ export function ArchiveCycleModal(props: Props) {
       title={`Lưu trữ chu kỳ ${cycleName ?? ""}`}
       content={"Bạn có muốn lưu trữ chu kỳ? Bạn có thể khôi phục sau."}
       primaryButtonText={{ loading: "Archiving", default: "Archive" }}
-      secondaryButtonText="Cancel"
+      secondaryButtonText="Hủy"
     />
   );
 }

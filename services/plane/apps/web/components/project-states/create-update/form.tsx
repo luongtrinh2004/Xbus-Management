@@ -56,7 +56,7 @@ export function StateForm(props: TStateForm) {
     const name = formData?.name || undefined;
     if (!formData || !name) {
       let currentErrors: Partial<Record<keyof IState, string>> = {};
-      if (!name) currentErrors = { ...currentErrors, name: "Name is required" };
+      if (!name) currentErrors = { ...currentErrors, name: "Vui lòng nhập tên" };
       setErrors(currentErrors);
       return;
     }

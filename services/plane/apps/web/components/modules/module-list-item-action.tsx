@@ -78,7 +78,7 @@ export const ModuleListItemAction = observer(function ModuleListItemAction(props
       },
       error: {
         title: "Lỗi!",
-        message: () => "Couldn't add the module to favorites. Please try again.",
+        message: () => "Không thể thêm nhóm công việc vào mục yêu thích. Vui lòng thử lại.",
       },
     });
   };
@@ -102,7 +102,7 @@ export const ModuleListItemAction = observer(function ModuleListItemAction(props
       },
       error: {
         title: "Lỗi!",
-        message: () => "Couldn't remove the module from favorites. Please try again.",
+        message: () => "Không thể bỏ nhóm công việc khỏi mục yêu thích. Vui lòng thử lại.",
       },
     });
   };

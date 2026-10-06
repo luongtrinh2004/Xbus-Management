@@ -60,7 +60,7 @@ export default function WorkShell({ children }) {
   // Plane already provides its own project navigation and workspace chrome.
   // Do not wrap it in the legacy XBus Work shell, otherwise both sidebars are
   // rendered and the iframe can no longer fill the dashboard content area.
-  if (pathname.startsWith("/work/projects")) {
+  if (pathname === "/work" || pathname.startsWith("/work/projects")) {
     return children;
   }
 

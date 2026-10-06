@@ -114,15 +114,14 @@ export const DeleteIssueModal = observer(function DeleteIssueModal(props: Props)
       handleSubmit={handleIssueDelete}
       isSubmitting={isDeleting}
       isOpen={isOpen}
-      title={t("entity.delete.label", { entity: isEpic ? t("common.epic") : t("common.work_item") })}
+      title={isEpic ? t("entity.delete.label", { entity: t("common.epic") }) : t("issue.delete.label")}
       content={
         <>
-          {/* TODO: Translate here */}
-          {`Bạn có chắc muốn xóa ${isEpic ? "Epic" : "Công việc"} `}
+          {`Bạn có chắc muốn xóa ${isEpic ? "Epic" : "công việc"} `}
           <span className="font-medium break-words text-primary">
             {projectDetails?.identifier}-{issue?.sequence_id}
           </span>
-          {` ? All of the data related to the ${isEpic ? "Epic" : "Công việc"} sẽ bị xóa vĩnh viễn. Thao tác này không thể hoàn tác.`}
+          {`? Toàn bộ dữ liệu liên quan đến ${isEpic ? "Epic" : "công việc"} này sẽ bị xóa vĩnh viễn. Thao tác này không thể hoàn tác.`}
         </>
       }
     />
