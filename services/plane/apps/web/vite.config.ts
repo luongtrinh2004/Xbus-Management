@@ -24,6 +24,8 @@ export default defineConfig(() => ({
   plugins: [reactRouter(), tsconfigPaths({ projects: [path.resolve(__dirname, "tsconfig.json")] })],
   resolve: {
     alias: {
+      // Resolve Tailwind CSS consistently during client and SPA prerender builds.
+      tailwindcss: path.resolve(__dirname, "node_modules/tailwindcss/index.css"),
       // Next.js compatibility shims used within web
       "next/link": path.resolve(__dirname, "app/compat/next/link.tsx"),
       "next/navigation": path.resolve(__dirname, "app/compat/next/navigation.ts"),

@@ -62,7 +62,7 @@ export function ComingSoonBadge({ className }: { className?: string }) {
         className
       )}
     >
-      COMING SOON
+      SẮP RA MẮT
     </span>
   );
 }
@@ -72,11 +72,11 @@ export const PLANS_LIST: TPlanePlans[] = ["free", "one", "pro", "business", "ent
 export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
   {
     id: "project-work-tracking",
-    title: "Project + work tracking",
+    title: "Theo dõi dự án và công việc",
     features: [
       {
-        title: "Projects",
-        description: "Add projects to house work items, cycles, and modules.",
+        title: "Dự án",
+        description: "Tạo dự án để tổ chức công việc, chu kỳ và nhóm công việc.",
         cloud: {
           free: true,
           one: true,
@@ -86,8 +86,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Work items",
-        description: "Add work via work items, set properties for tracking, and add to\ncycles or modules.",
+        title: "Công việc",
+        description: "Tạo công việc, thiết lập thuộc tính để theo dõi và đưa vào chu kỳ hoặc nhóm công việc.",
         cloud: {
           free: true,
           one: true,
@@ -97,8 +97,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Comments",
-        description: "Respond to work items, @mention members, and brainstorm\ntogether without leaving Plane.",
+        title: "Bình luận",
+        description: "Bình luận công việc, @nhắc thành viên và cùng trao đổi ý tưởng ngay trong Plane.",
         cloud: {
           free: true,
           one: true,
@@ -108,8 +108,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Cycles",
-        description: "Track work in timeboxes with differing frequency.",
+        title: "Chu kỳ",
+        description: "Theo dõi công việc theo chu kỳ có thời lượng linh hoạt.",
         cloud: {
           free: true,
           one: true,
@@ -119,8 +119,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Modules",
-        description: "Group replicable work in modules with their own\nleads.",
+        title: "Nhóm công việc",
+        description: "Tổ chức công việc lặp lại thành nhóm có người phụ trách riêng.",
         cloud: {
           free: true,
           one: true,
@@ -130,9 +130,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Intake",
-        description:
-          "See suggestions and feedback from viewers and\nguests before you decide to add them to your\nproject.",
+        title: "Tiếp nhận",
+        description: "Xem đề xuất và phản hồi của người xem hoặc khách trước khi đưa vào dự án.",
         cloud: {
           free: true,
           one: true,
@@ -142,8 +141,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Estimates",
-        description: "Measure effort in points in a system that works for\nyou.",
+        title: "Ước tính",
+        description: "Ước lượng khối lượng công việc theo hệ thống điểm phù hợp với đội ngũ.",
         cloud: {
           free: "Basic",
           one: "Basic",
@@ -156,43 +155,44 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
   },
   {
     id: "project-work-management",
-    title: "Project + work management",
+    title: "Quản lý dự án và công việc",
     features: [
       {
-        title: "Bulk Ops",
-        description: "Add several work items to cycles or modules, transfer\nthem, or edit their properties.",
+        title: "Thao tác hàng loạt",
+        description:
+          "Thêm nhiều công việc vào chu kỳ hoặc nhóm công việc, di chuyển hoặc chỉnh sửa thuộc tính cùng lúc.",
         cloud: {
           free: false,
-          one: "Limited props",
-          pro: "All props",
+          one: "Thuộc tính giới hạn",
+          pro: "Tất cả thuộc tính",
           business: (
             <span className="flex flex-col items-end gap-1 lg:items-center">
               <ComingSoonBadge />
-              Work item transfers and conversions
+              Chuyển và đổi loại công việc
             </span>
           ),
           enterprise: (
             <span className="flex flex-col items-end gap-1 lg:items-center">
               <ComingSoonBadge />
-              Work item transfers and conversions
+              Chuyển và đổi loại công việc
             </span>
           ),
         },
       },
       {
-        title: "Time Tracking + Worklogs",
-        description: "Track time per work item, see aggregated reports, and\nfilter by need.",
+        title: "Theo dõi thời gian và nhật ký công việc",
+        description: "Ghi nhận thời gian cho từng công việc, xem báo cáo tổng hợp và lọc theo nhu cầu.",
         cloud: {
           free: false,
           one: "Basic",
-          pro: "Historical timesheets",
-          business: "Historical timesheets\nand approvals",
-          enterprise: "Historical timesheets\nand approvals",
+          pro: "Lịch sử bảng chấm công",
+          business: "Lịch sử bảng chấm công và phê duyệt",
+          enterprise: "Lịch sử bảng chấm công và phê duyệt",
         },
       },
       {
-        title: "Active Cycles",
-        description: "See all running cycles across all projects, or soon, in\na single project.",
+        title: "Chu kỳ đang diễn ra",
+        description: "Xem các chu kỳ đang diễn ra trên toàn bộ dự án hoặc trong từng dự án.",
         cloud: {
           free: false,
           one: true,
@@ -202,8 +202,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Work item Types",
-        description: "Create your own work item types with your own\nproperties.",
+        title: "Loại công việc",
+        description: "Tạo loại công việc với các thuộc tính riêng.",
         cloud: {
           free: false,
           one: false,
@@ -213,8 +213,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Custom Properties",
-        description: "Create your own properties and apply them to your\nworkspace or project.",
+        title: "Thuộc tính tùy chỉnh",
+        description: "Tạo thuộc tính tùy chỉnh cho không gian làm việc hoặc dự án.",
         cloud: {
           free: false,
           one: false,
@@ -224,8 +224,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Dependencies in Gantt",
-        description: "Adjust timelines for dependent work items visually on\nour Gantt layout.",
+        title: "Quan hệ phụ thuộc trên biểu đồ Gantt",
+        description: "Điều chỉnh lịch của các công việc phụ thuộc trên biểu đồ Gantt.",
         cloud: {
           free: false,
           one: false,
@@ -235,8 +235,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Work item Transfers",
-        description: "Move a work item from a project or a cycle to\nanother.",
+        title: "Chuyển công việc",
+        description: "Chuyển công việc sang dự án hoặc chu kỳ khác.",
         cloud: {
           free: false,
           one: false,
@@ -246,9 +246,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Auto-transfer Cycle Work items",
-        description:
-          "Transfer incomplete work items from a completed cycle\nto the next cycle or to the default project state. ",
+        title: "Tự động chuyển công việc giữa các chu kỳ",
+        description: "Chuyển công việc chưa hoàn thành sang chu kỳ tiếp theo hoặc trạng thái mặc định của dự án.",
         cloud: {
           free: false,
           one: false,
@@ -259,7 +258,7 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
       },
       {
         title: "Epics",
-        description: "Organize long-term work in epics that house work items,\ncycles, and modules.",
+        description: "Tổ chức công việc dài hạn theo Epic, bao gồm công việc, chu kỳ và nhóm công việc.",
         cloud: {
           free: false,
           one: false,
@@ -269,8 +268,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Initiatives",
-        description: "Create initiatives to roll up several epics.",
+        title: "Sáng kiến",
+        description: "Tạo sáng kiến để tập hợp nhiều Epic.",
         comingSoon: true,
         cloud: {
           free: false,
@@ -281,9 +280,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Checkpoints",
-        description:
-          "Add markers to Projects, Epics and Initiatives to keep your\nteam on track and report on progress.",
+        title: "Mốc kiểm tra",
+        description: "Thêm mốc vào dự án, Epic và sáng kiến để theo dõi tiến độ và lập báo cáo.",
         comingSoon: true,
         cloud: {
           free: false,
@@ -294,8 +292,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Module Overview",
-        description: "Like Cycle Overviews, see relevant details and\nprogress charts for each module.",
+        title: "Tổng quan nhóm công việc",
+        description: "Xem thông tin và biểu đồ tiến độ của từng nhóm công việc, tương tự tổng quan chu kỳ.",
         cloud: {
           free: false,
           one: false,
@@ -305,8 +303,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Auto-assignment In Modules",
-        description: "Choose assignment rules for work items in a\nmodule including Linear, Round Robin, or Capacity.",
+        title: "Tự động phân công trong nhóm công việc",
+        description: "Chọn quy tắc phân công trong nhóm công việc: tuần tự, luân phiên hoặc theo năng lực.",
         cloud: {
           free: false,
           one: false,
@@ -328,9 +326,9 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
       //   },
       // },
       {
-        title: "Public, Private, and Secret projects",
+        title: "Dự án công khai, riêng tư và bí mật",
         description:
-          "Public projects are visible and accessible to\neveryone. Private ones are visible but need approval\nto join. Secret projects aren't visible or accessible.",
+          "Mọi người có thể xem và truy cập dự án công khai. Dự án riêng tư cần được duyệt để tham gia. Dự án bí mật chỉ hiển thị với thành viên được cấp quyền.",
         cloud: {
           free: false,
           one: false,
@@ -340,9 +338,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "State Of Projects",
-        description:
-          "See all projects laid across states that highlight\nthose that need attention and those on track.",
+        title: "Trạng thái dự án",
+        description: "Xem dự án theo trạng thái để nhận biết dự án đúng tiến độ và dự án cần chú ý.",
         cloud: {
           free: false,
           one: false,
@@ -365,9 +362,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
       //   },
       // },
       {
-        title: "Pre-defined work item Templates",
-        description:
-          "Choose from our available work item templates that\ncustomize work item types and properties for several\nuse cases.",
+        title: "Mẫu công việc có sẵn",
+        description: "Chọn mẫu công việc có sẵn với loại và thuộc tính phù hợp cho từng nhu cầu.",
         comingSoon: true,
         cloud: {
           free: false,
@@ -378,8 +374,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Teamspace Cycles",
-        description: "See multiple cycles in multiple projects at once.",
+        title: "Chu kỳ của nhóm",
+        description: "Xem đồng thời nhiều chu kỳ ở nhiều dự án.",
         cloud: {
           free: false,
           one: false,
@@ -389,8 +385,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Project Templates",
-        description: "Save states, workflows, automation, and other project\nsettings into templates.",
+        title: "Mẫu dự án",
+        description: "Lưu trạng thái, quy trình, tự động hóa và các cài đặt dự án thành mẫu.",
         cloud: {
           free: false,
           one: false,
@@ -400,8 +396,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Baselines And Deviations",
-        description: "Declare baselines for how your projects progress\nand zoom in on deviations.",
+        title: "Đường cơ sở và sai lệch",
+        description: "Thiết lập tiến độ cơ sở của dự án để theo dõi các sai lệch.",
         cloud: {
           free: false,
           one: false,
@@ -411,8 +407,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Scheduled Comms",
-        description: "Schedule reports, notifications, and messages to\nthird-party tools.",
+        title: "Gửi thông tin theo lịch",
+        description: "Lên lịch gửi báo cáo, thông báo và tin nhắn đến công cụ bên thứ ba.",
         cloud: {
           free: false,
           one: false,
@@ -422,8 +418,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Intake Assignees",
-        description: "Assign approved Intake work items to a member by\ndefault.",
+        title: "Người phụ trách tiếp nhận",
+        description: "Tự động giao công việc đã được duyệt trong mục Tiếp nhận cho một thành viên.",
         cloud: {
           free: false,
           one: false,
@@ -433,8 +429,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Custom SLAs",
-        description: "Set SLA matrices for time-sensitive work items.",
+        title: "SLA tùy chỉnh",
+        description: "Thiết lập ma trận SLA cho công việc cần xử lý đúng hạn.",
         cloud: {
           free: false,
           one: false,
@@ -444,8 +440,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Intake Forms",
-        description: "Take Intake work items from externally accessible web\nforms.",
+        title: "Biểu mẫu tiếp nhận",
+        description: "Tiếp nhận công việc từ biểu mẫu web dành cho người dùng bên ngoài.",
         cloud: {
           free: false,
           one: false,
@@ -455,8 +451,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Emails For Intake",
-        description: "Get an email address for reporting work items\ndirectly into a project's Intake.",
+        title: "Tiếp nhận qua email",
+        description: "Dùng địa chỉ email để gửi công việc trực tiếp vào mục Tiếp nhận của dự án.",
         comingSoon: true,
         cloud: {
           free: false,
@@ -470,12 +466,11 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
   },
   {
     id: "visualization",
-    title: "Visualization",
+    title: "Trực quan hóa",
     features: [
       {
-        title: "Layouts",
-        description:
-          "Choose from the List, the Board, the Calendar, the\nGantt, or the Spreadsheet layout for your work items.",
+        title: "Bố cục",
+        description: "Hiển thị công việc theo danh sách, bảng Kanban, lịch, biểu đồ Gantt hoặc bảng tính.",
         cloud: {
           free: true,
           one: true,
@@ -485,8 +480,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Views",
-        description: "Save sort, filter, and display options on a layout to a\nview.",
+        title: "Chế độ xem",
+        description: "Lưu cách sắp xếp, bộ lọc và tùy chọn hiển thị thành một chế độ xem.",
         cloud: {
           free: true,
           one: true,
@@ -496,8 +491,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Shared Views",
-        description: "Choose a few members to share a view with.",
+        title: "Chế độ xem được chia sẻ",
+        description: "Chọn thành viên để chia sẻ chế độ xem.",
         cloud: {
           free: false,
           one: false,
@@ -507,8 +502,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Publish Views",
-        description: "Put a view on the Internet and let your customers\ninteract with them.",
+        title: "Công bố chế độ xem",
+        description: "Công bố chế độ xem trên web để khách hàng tương tác.",
         cloud: {
           free: false,
           one: false,
@@ -518,8 +513,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Dashboards and Widgets",
-        description: "Create your own dashboards with custom widgets\nand data types.",
+        title: "Bảng tổng quan và tiện ích",
+        description: "Tạo bảng tổng quan với tiện ích và loại dữ liệu tùy chỉnh.",
         cloud: {
           free: false,
           one: false,
@@ -532,12 +527,12 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
   },
   {
     id: "analytics-reports",
-    title: "Analytics + reports",
+    title: "Phân tích và báo cáo",
     features: [
       {
-        title: "Progress Charts",
+        title: "Biểu đồ tiến độ",
         description:
-          "Track progress in cycles, modules, and overviews\nthroughout Plane without switching to dashboards\nor Analytics.",
+          "Theo dõi tiến độ ngay trong chu kỳ, nhóm công việc và trang tổng quan mà không cần chuyển sang bảng phân tích.",
         cloud: {
           free: false,
           one: false,
@@ -547,8 +542,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Cycle Reports",
-        description: "Get on-demand cycle reports during and after a\ncycle. Revisit reports anytime from permalinks.",
+        title: "Báo cáo chu kỳ",
+        description: "Tạo báo cáo trong và sau chu kỳ. Mở lại báo cáo bất cứ lúc nào bằng liên kết cố định.",
         cloud: {
           free: false,
           one: false,
@@ -558,8 +553,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Insights",
-        description: "Hindsight, On-demand insights, Foresights.",
+        title: "Thông tin phân tích",
+        description: "Đánh giá kết quả, phân tích theo nhu cầu và dự báo.",
         comingSoon: true,
         cloud: {
           free: false,
@@ -582,8 +577,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
       //   },
       // },
       {
-        title: "Advanced Pages Analytics",
-        description: "See who's viewing, sharing, and commenting on\nyour pages along with other useful info.",
+        title: "Phân tích trang nâng cao",
+        description: "Xem ai đang đọc, chia sẻ và bình luận trên trang cùng các thông tin hữu ích khác.",
         comingSoon: true,
         cloud: {
           free: false,
@@ -594,8 +589,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Custom Reports",
-        description: "Generate reports by any dimension and metric\nacross your project or workspace.",
+        title: "Báo cáo tùy chỉnh",
+        description: "Tạo báo cáo theo các tiêu chí và chỉ số của dự án hoặc không gian làm việc.",
         comingSoon: true,
         cloud: {
           free: false,
@@ -609,11 +604,11 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
   },
   {
     id: "navigation",
-    title: "Navigation",
+    title: "Điều hướng",
     features: [
       {
         title: "Power K",
-        description: "Access a keyboard-first gateway to almost anything\nin Plane.",
+        description: "Truy cập nhanh các chức năng trong Plane bằng bàn phím.",
         cloud: {
           free: true,
           one: true,
@@ -657,7 +652,7 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
       {
         title: "PQL",
         description:
-          "Write Plane Query Language in search with support\nfor Boolean operators. Soon, you can write natural\nlanguage queries.",
+          "Tìm kiếm bằng Plane Query Language với toán tử Boolean. Truy vấn ngôn ngữ tự nhiên sẽ được hỗ trợ sau.",
         cloud: {
           free: false,
           one: false,
@@ -670,12 +665,12 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
   },
   {
     id: "workspace-user-management",
-    title: "Workspace and user management",
+    title: "Quản lý không gian làm việc và người dùng",
     features: [
       {
-        title: "Member limit",
-        description: "Number of seats that can use project and work management features",
-        selfHostedDescription: "Number of users that our standard infra supports\nIncrease infra to get more users",
+        title: "Giới hạn thành viên",
+        description: "Số người dùng có thể sử dụng tính năng quản lý dự án và công việc",
+        selfHostedDescription: "Số người dùng hạ tầng tiêu chuẩn hỗ trợ. Nâng cấp hạ tầng để tăng số người dùng.",
         cloud: {
           free: "12",
           one: "",
@@ -692,8 +687,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Roles",
-        description: "Choose from one of four pre-defined roles or create\ncustom ones with RBAC.",
+        title: "Vai trò",
+        description: "Chọn một trong bốn vai trò có sẵn hoặc tạo vai trò tùy chỉnh bằng RBAC.",
         cloud: {
           free: "Basic",
           one: "Basic",
@@ -703,8 +698,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Guests",
-        description: "Let some users see everything or just their work items in\na project.",
+        title: "Khách",
+        description: "Cho phép người dùng xem toàn bộ công việc hoặc chỉ công việc của mình trong dự án.",
         cloud: {
           free: false,
           one: "5 per paid member",
@@ -714,8 +709,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Approvals",
-        description: "Set workspace, project, and work item type approvals to\ndesignated admins.",
+        title: "Phê duyệt",
+        description: "Chỉ định quản trị viên phê duyệt không gian làm việc, dự án và loại công việc.",
         comingSoon: true,
         cloud: {
           free: false,
@@ -726,8 +721,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Admin Interface",
-        description: "Get an admin overview to manage workspace and\nproject settings.",
+        title: "Giao diện quản trị",
+        description: "Quản lý cài đặt không gian làm việc và dự án từ giao diện quản trị.",
         cloud: {
           free: false,
           one: false,
@@ -737,8 +732,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Workspace Activity Logs",
-        description: "See filterable activity logs for your entire\nworkspace.",
+        title: "Nhật ký hoạt động của không gian làm việc",
+        description: "Xem và lọc nhật ký hoạt động của toàn bộ không gian làm việc.",
         cloud: {
           free: false,
           one: false,
@@ -748,8 +743,9 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "API-enabled Audit Logs",
-        description: "See a full-workspace audit log and use APIs to flag\nPlane activity in compliance systems.",
+        title: "Nhật ký kiểm tra hỗ trợ API",
+        description:
+          "Xem nhật ký kiểm tra toàn bộ không gian làm việc và dùng API để ghi nhận hoạt động trong hệ thống tuân thủ.",
         comingSoon: true,
         cloud: {
           free: false,
@@ -763,11 +759,11 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
   },
   {
     id: "automations-workflows",
-    title: "Automations and workflows",
+    title: "Tự động hóa và quy trình",
     features: [
       {
-        title: "Trigger And Action",
-        description: "Choose a trigger and a corresponding action per\nautomation flow.",
+        title: "Điều kiện kích hoạt và hành động",
+        description: "Chọn điều kiện kích hoạt và hành động tương ứng cho mỗi quy trình tự động hóa.",
         cloud: {
           free: false,
           one: false,
@@ -777,8 +773,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Decisions And Loops Automation",
-        description: "Use actions as triggers indefinitely in an\nautomation flow.",
+        title: "Tự động hóa điều kiện và vòng lặp",
+        description: "Dùng hành động làm điều kiện kích hoạt tiếp theo trong quy trình tự động hóa.",
         comingSoon: true,
         cloud: {
           free: false,
@@ -789,8 +785,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Number of automations",
-        description: "Total number of automation flows in your\nworkspace",
+        title: "Số quy trình tự động hóa",
+        description: "Tổng số quy trình tự động hóa trong không gian làm việc",
         cloud: {
           free: false,
           one: false,
@@ -803,11 +799,11 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
   },
   {
     id: "knowledge-management",
-    title: "Knowledge management",
+    title: "Quản lý tri thức",
     features: [
       {
-        title: "Pages",
-        description: "Build knowledge bases for your teams which are\naccessible & shareable.",
+        title: "Trang",
+        description: "Xây dựng kho tri thức để đội ngũ dễ truy cập và chia sẻ.",
         cloud: {
           free: true,
           one: true,
@@ -817,8 +813,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Real-time Collab",
-        description: "Edit a page together with members in your project,\nteam, or workspace.",
+        title: "Cộng tác theo thời gian thực",
+        description: "Cùng thành viên trong dự án, nhóm hoặc không gian làm việc chỉnh sửa trang.",
         cloud: {
           free: false,
           one: true,
@@ -828,8 +824,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Work item Embeds",
-        description: "Embed work items from any project you are a member\nof.",
+        title: "Nhúng công việc",
+        description: "Nhúng công việc từ bất kỳ dự án nào bạn tham gia.",
         cloud: {
           free: false,
           one: true,
@@ -839,8 +835,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Link-to-work items",
-        description: "Link pages in work items in a separate section in work item\ndetails.",
+        title: "Liên kết đến công việc",
+        description: "Liên kết trang trong mục riêng trên màn hình chi tiết công việc.",
         cloud: {
           free: false,
           one: true,
@@ -850,9 +846,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Publish",
-        description:
-          "Put your pages on the web for external users and let\nthem comment without signing into your workspace.",
+        title: "Xuất bản",
+        description: "Công bố trang trên web để người dùng bên ngoài bình luận mà không cần đăng nhập.",
         cloud: {
           free: false,
           one: true,
@@ -863,7 +858,7 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
       },
       {
         title: "Wiki",
-        description: "Create company-wide wikis or knowledge bases\nwithout creating a project.",
+        description: "Tạo wiki hoặc kho tri thức cho toàn công ty mà không cần tạo dự án.",
         cloud: {
           free: false,
           one: true,
@@ -873,19 +868,19 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Exports",
-        description: "Export page content into PDFs or Word-compatible\ndocs.",
+        title: "Xuất",
+        description: "Xuất nội dung trang thành PDF hoặc tài liệu tương thích với Word.",
         cloud: {
           free: false,
           one: false,
-          pro: "One download\nat a time",
-          business: "Queued downloads",
-          enterprise: "Queued downloads",
+          pro: "Mỗi lần tải một tệp",
+          business: "Tệp đang chờ tải",
+          enterprise: "Tệp đang chờ tải",
         },
       },
       {
-        title: "Templates",
-        description: "Use pages as templates for your project, team, or\nworkspace.",
+        title: "Mẫu",
+        description: "Dùng trang làm mẫu cho dự án, nhóm hoặc không gian làm việc.",
         cloud: {
           free: false,
           one: false,
@@ -895,8 +890,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Versions",
-        description: "See restorable version of edits to your pages.",
+        title: "Phiên bản",
+        description: "Xem và khôi phục các phiên bản chỉnh sửa của trang.",
         cloud: {
           free: false,
           one: false,
@@ -906,9 +901,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Databases + Formulas",
-        description:
-          "Put databases and formulas into a page without\nworrying about losing text, images, or other content\ntypes.",
+        title: "Cơ sở dữ liệu và công thức",
+        description: "Thêm cơ sở dữ liệu và công thức vào trang mà vẫn giữ nguyên văn bản, ảnh và các nội dung khác.",
         comingSoon: true,
         cloud: {
           free: false,
@@ -919,8 +913,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Nested Pages",
-        description: "Pages inside a page, organize your pages\nas you see fit for the progressive\ndisclosure.",
+        title: "Trang lồng nhau",
+        description: "Tạo trang con để tổ chức nội dung theo từng cấp.",
         comingSoon: true,
         cloud: {
           free: false,
@@ -934,41 +928,41 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
   },
   {
     id: "importers",
-    title: "Importers",
+    title: "Công cụ nhập dữ liệu",
     features: [
       {
         title: "Jira",
-        description: "Import your work items and members from Jira.",
+        description: "Nhập công việc và thành viên từ Jira.",
         cloud: {
-          free: "Without custom props",
-          one: "Without custom props",
-          pro: "With custom props",
-          business: "With custom props",
-          enterprise: "With custom props",
+          free: "Không có thuộc tính tùy chỉnh",
+          one: "Không có thuộc tính tùy chỉnh",
+          pro: "Có thuộc tính tùy chỉnh",
+          business: "Có thuộc tính tùy chỉnh",
+          enterprise: "Có thuộc tính tùy chỉnh",
         },
       },
       {
         title: "GitHub",
-        description: "Import your work items and members from GitHub.",
+        description: "Nhập công việc và thành viên từ GitHub.",
         cloud: {
-          free: "Without custom props",
-          one: "Without custom props",
-          pro: "With custom props",
-          business: "With custom props",
-          enterprise: "With custom props",
+          free: "Không có thuộc tính tùy chỉnh",
+          one: "Không có thuộc tính tùy chỉnh",
+          pro: "Có thuộc tính tùy chỉnh",
+          business: "Có thuộc tính tùy chỉnh",
+          enterprise: "Có thuộc tính tùy chỉnh",
         },
       },
     ],
   },
   {
     id: "integrations",
-    title: "Integrations",
+    title: "Tích hợp",
     comingSoon: true,
     features: [
       {
         title: "GitHub",
         description:
-          "Sync Plane work items and states to GitHub work items and\nstates. Update GitHub automatically with activity\nfrom Plane and vice-versa.",
+          "Đồng bộ công việc và trạng thái giữa Plane với GitHub. Hoạt động ở một bên sẽ tự động cập nhật bên còn lại.",
         cloud: {
           free: false,
           one: false,
@@ -979,7 +973,7 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
       },
       {
         title: "Slack",
-        description: "Get Plane activity in Slack and use / commands in\nSlack to make changes in Plane.",
+        description: "Nhận hoạt động Plane trong Slack và dùng lệnh / trong Slack để cập nhật Plane.",
         cloud: {
           free: false,
           one: false,
@@ -990,7 +984,7 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
       },
       {
         title: "Zapier",
-        description: "Run if-then-else automations using Zapier.",
+        description: "Tạo quy trình tự động hóa theo điều kiện if-then-else bằng Zapier.",
         cloud: {
           free: false,
           one: false,
@@ -1001,7 +995,7 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
       },
       {
         title: "Zendesk",
-        description: "Create Plane work items from Zendesk tickets.",
+        description: "Tạo công việc trong Plane từ ticket Zendesk.",
         cloud: {
           free: false,
           one: false,
@@ -1012,7 +1006,7 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
       },
       {
         title: "Freshdesk",
-        description: "Create Plane work items from Freshdesk tickets.",
+        description: "Tạo công việc trong Plane từ ticket Freshdesk.",
         cloud: {
           free: false,
           one: false,
@@ -1025,12 +1019,12 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
   },
   {
     id: "storage",
-    title: "Storage",
+    title: "Dung lượng lưu trữ",
     cloudOnly: true,
     features: [
       {
-        title: "Space",
-        description: "Total storage allowed per workspace",
+        title: "Không gian",
+        description: "Tổng dung lượng lưu trữ cho mỗi không gian làm việc",
         cloud: {
           free: "5GB",
           one: false,
@@ -1040,8 +1034,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Max file size",
-        description: "Limit for uploads to your workspace",
+        title: "Dung lượng tệp tối đa",
+        description: "Giới hạn tải lên trong không gian làm việc",
         cloud: {
           free: "5 MB",
           one: false,
@@ -1054,11 +1048,11 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
   },
   {
     id: "security",
-    title: "Security",
+    title: "Bảo mật",
     features: [
       {
         title: "SAML",
-        description: "Get the officially supported SAML implementation\nand make Plane secure with any IdP.",
+        description: "Tích hợp SAML chính thức để xác thực Plane với nhà cung cấp danh tính IdP.",
         cloud: {
           free: false,
           one: true,
@@ -1069,7 +1063,7 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
       },
       {
         title: "OIDC",
-        description: "Get the officially supported OIDC implementation\nand make Plane secure with any IdP.",
+        description: "Tích hợp OIDC chính thức để xác thực Plane với nhà cung cấp danh tính IdP.",
         selfHostedOnly: true,
         cloud: {
           free: false,
@@ -1080,9 +1074,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Domain Security",
-        description:
-          "Choose other domains that can authenticate into\nyour Plane workspace or restrict all but one domain.",
+        title: "Bảo mật tên miền",
+        description: "Chọn các tên miền được phép đăng nhập vào không gian làm việc hoặc giới hạn ở một tên miền.",
         cloud: {
           free: false,
           one: false,
@@ -1092,8 +1085,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Two-factor authentication and passkeys",
-        description: "Secure your Plane workspace with device-\ndependent two-factor authentication and passkeys. ",
+        title: "Xác thực hai yếu tố và passkey",
+        description: "Bảo vệ không gian làm việc bằng xác thực hai yếu tố và passkey theo thiết bị.",
         cloud: {
           free: false,
           one: false,
@@ -1103,8 +1096,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Password Policy",
-        description: "Set custom password policies in line with your\ncompliance requirements.",
+        title: "Chính sách mật khẩu",
+        description: "Thiết lập chính sách mật khẩu theo yêu cầu tuân thủ của bạn.",
         cloud: {
           free: false,
           one: false,
@@ -1115,7 +1108,7 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
       },
       {
         title: "LDAP",
-        description: "Get our official LDAP implementation and secure\nyour Plane workspace with your LDAP server.",
+        description: "Tích hợp LDAP chính thức để bảo vệ không gian làm việc bằng máy chủ LDAP của bạn.",
         comingSoon: true,
         cloud: {
           free: false,
@@ -1129,12 +1122,12 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
   },
   {
     id: "self-hosted",
-    title: "Self-hosted",
+    title: "Tự triển khai",
     selfHostedOnly: true,
     features: [
       {
-        title: "God Mode",
-        description: "Manage your self-hosted Plane instance better with\nan instance admin interface.",
+        title: "Quản trị hệ thống",
+        description: "Quản lý Plane tự triển khai bằng giao diện quản trị hệ thống.",
         cloud: {
           free: true,
           one: true,
@@ -1144,8 +1137,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "One-click Deployment",
-        description: "Install and deploy your self-hosted Plane to any\nprivate cloud with a single-line command.",
+        title: "Triển khai bằng một lần nhấn",
+        description: "Cài đặt và tự triển khai Plane lên hạ tầng Cloud riêng bằng một lệnh.",
         cloud: {
           free: false,
           one: true,
@@ -1155,8 +1148,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Digital Ocean Marketplace app",
-        description: "Get our Digital Ocean-compatible app on their\nmarketplace.",
+        title: "Ứng dụng trên DigitalOcean Marketplace",
+        description: "Tải ứng dụng tương thích DigitalOcean từ Marketplace.",
         cloud: {
           free: false,
           one: true,
@@ -1166,8 +1159,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Heroku Platform app",
-        description: "Get our Heroku Platform-compatible app and deploy\nto Heroku easily.",
+        title: "Ứng dụng Heroku Platform",
+        description: "Dùng ứng dụng tương thích Heroku Platform để triển khai lên Heroku.",
         cloud: {
           free: false,
           one: true,
@@ -1178,7 +1171,7 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
       },
       {
         title: "AWS AMI",
-        description: "Get our AMI-compatible app from the AWS\nmarketplace.",
+        description: "Tải ứng dụng tương thích AMI từ AWS Marketplace.",
         cloud: {
           free: false,
           one: true,
@@ -1188,8 +1181,8 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         },
       },
       {
-        title: "Private deployments",
-        description: "Get our hosted Cloud app on a private Cloud\nmanaged by us.",
+        title: "Triển khai riêng",
+        description: "Sử dụng ứng dụng trên hạ tầng Cloud riêng do chúng tôi quản lý.",
         comingSoon: true,
         cloud: {
           free: false,
@@ -1203,11 +1196,11 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
   },
   {
     id: "support",
-    title: "Support",
+    title: "Hỗ trợ",
     features: [
       {
-        title: "Channels",
-        description: "Get access to one or more Support channels\nby your plan.",
+        title: "Kênh",
+        description: "Sử dụng các kênh hỗ trợ tùy theo gói dịch vụ.",
         cloud: {
           free: (
             <>
@@ -1235,9 +1228,9 @@ export const PLANS_COMPARISON_LIST: TPlansComparisonDetails[] = [
         title: "SLA",
         description: (
           <>
-            Get business-friendly SLAs with higher plans. SLAs are by priority of work item and tiers{" "}
+            Sử dụng SLA phù hợp với doanh nghiệp ở các gói cao hơn, theo mức ưu tiên và cấp độ công việc.{" "}
             <a href="https://plane.so/talk-to-sales" target="_blank" rel="noopener noreferrer" className="underline">
-              can be requested
+              có thể yêu cầu
             </a>
             .
           </>
@@ -1288,7 +1281,7 @@ export const PLANE_PLANS: PlanePlans = {
       name: "Business",
       monthlyPriceSecondaryDescription: "billed monthly",
       yearlyPriceSecondaryDescription: "billed yearly",
-      buttonCTA: "Talk to Sales",
+      buttonCTA: "Liên hệ bộ phận bán hàng",
       isActive: false,
     },
     enterprise: {
@@ -1296,16 +1289,21 @@ export const PLANE_PLANS: PlanePlans = {
       name: "Enterprise",
       monthlyPriceSecondaryDescription: "billed monthly",
       yearlyPriceSecondaryDescription: "billed yearly",
-      buttonCTA: "Talk to Sales",
+      buttonCTA: "Liên hệ bộ phận bán hàng",
       isActive: false,
     },
   },
   planHighlights: {
-    free: ["Upto 12 users", "Pages", "Unlimited projects", "Unlimited cycles and modules"],
-    one: ["Upto 50 users", "OIDC and SAML", "Active cycles", "Limited time tracking"],
-    pro: ["Unlimited users", "Custom work items + Properties", "Work item templates", "Full Time Tracking"],
-    business: ["RBAC", "Project Templates", "Baselines And Deviations", "Custom Reports"],
-    enterprise: ["Private + managed deployments", "GAC", "LDAP support", "Databases + Formulas"],
+    free: ["Tối đa 12 người dùng", "Pages", "Không giới hạn dự án", "Không giới hạn chu kỳ và nhóm công việc"],
+    one: ["Tối đa 50 người dùng", "OIDC and SAML", "Chu kỳ hoạt động", "Theo dõi thời gian giới hạn"],
+    pro: [
+      "Không giới hạn người dùng",
+      "Công việc và thuộc tính tùy chỉnh",
+      "Mẫu công việc",
+      "Theo dõi thời gian đầy đủ",
+    ],
+    business: ["RBAC", "Mẫu dự án", "Đường cơ sở và sai lệch", "Báo cáo tùy chỉnh"],
+    enterprise: ["Triển khai riêng có quản lý", "GAC", "Hỗ trợ LDAP", "Cơ sở dữ liệu và công thức"],
   },
   planComparison: PLANS_COMPARISON_LIST,
 };

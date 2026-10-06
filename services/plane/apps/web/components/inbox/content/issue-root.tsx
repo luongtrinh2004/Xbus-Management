@@ -82,16 +82,16 @@ export const InboxIssueMainContent = observer(function InboxIssueMainContent(pro
         try {
           await removeIssue(workspaceSlug, projectId, _issueId);
           setToast({
-            title: "Success!",
+            title: "Thành công!",
             type: "success",
-            message: "Work item deleted successfully",
+            message: "Đã xóa công việc thành công",
           });
         } catch (error) {
           console.log("Error in deleting work item:", error);
           setToast({
-            title: "Error!",
+            title: "Lỗi!",
             type: "error",
-            message: "Work item delete failed",
+            message: "Không thể xóa công việc",
           });
         }
       },
@@ -100,9 +100,9 @@ export const InboxIssueMainContent = observer(function InboxIssueMainContent(pro
           await inboxIssue.updateIssue(data);
         } catch (_error) {
           setToast({
-            title: "Work item update failed",
+            title: "Không thể cập nhật công việc",
             type: "error",
-            message: "Work item update failed",
+            message: "Không thể cập nhật công việc",
           });
         }
       },
@@ -178,7 +178,7 @@ export const InboxIssueMainContent = observer(function InboxIssueMainContent(pro
                 createdAt: issue.created_at ? new Date(issue.created_at) : new Date(),
                 createdByDisplayName:
                   inboxIssue.source === EInboxIssueSource.FORMS
-                    ? "Intake Form user"
+                    ? "Người gửi biểu mẫu tiếp nhận"
                     : (getUserDetails(issue.created_by ?? "")?.display_name ?? ""),
                 id: issue.id,
                 isRestoreDisabled: !isEditable,

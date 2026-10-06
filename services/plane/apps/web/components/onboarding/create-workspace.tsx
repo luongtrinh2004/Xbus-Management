@@ -114,14 +114,14 @@ export const CreateWorkspace = observer(function CreateWorkspace(props: Props) {
             onClick={handleCurrentViewChange}
             render={<button type="button" className="flex items-center gap-2 bg-surface-2 text-14" />}
           >
-            I want to join invited workspaces{" "}
+            Tôi muốn tham gia không gian làm việc được mời{" "}
             <span className="flex h-4 w-4 items-center justify-center rounded-xs bg-accent-primary/80 text-11 font-medium text-on-color">
               {invitedWorkspaces}
             </span>
           </Button>
           <div className="mx-auto mt-4 flex items-center sm:w-96">
             <hr className="w-full border-strong" />
-            <p className="mx-3 flex-shrink-0 text-center text-13 text-placeholder">or</p>
+            <p className="mx-3 flex-shrink-0 text-center text-13 text-placeholder">Hoặc</p>
             <hr className="w-full border-strong" />
           </div>
         </>

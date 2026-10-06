@@ -38,8 +38,8 @@ export const useCoreOAuthConfig = (oauthActionText: string): TOAuthConfigs => {
   const oAuthOptions: TOAuthOption[] = [
     {
       id: "google",
-      text: `${oauthActionText} with Google`,
-      icon: <img src={googleLogo} height={18} width={18} alt="Google Logo" />,
+      text: `${oauthActionText} bằng Google`,
+      icon: <img src={googleLogo} height={18} width={18} alt={"Logo Google"} />,
       onClick: () => {
         window.location.assign(`${API_BASE_URL}/auth/google/${next_path ? `?next_path=${next_path}` : ``}`);
       },
@@ -47,13 +47,13 @@ export const useCoreOAuthConfig = (oauthActionText: string): TOAuthConfigs => {
     },
     {
       id: "github",
-      text: `${oauthActionText} with GitHub`,
+      text: `${oauthActionText} bằng GitHub`,
       icon: (
         <img
           src={resolvedTheme === "dark" ? githubLightLogo : githubDarkLogo}
           height={18}
           width={18}
-          alt="GitHub Logo"
+          alt={"Logo GitHub"}
         />
       ),
       onClick: () => {
@@ -63,8 +63,8 @@ export const useCoreOAuthConfig = (oauthActionText: string): TOAuthConfigs => {
     },
     {
       id: "gitlab",
-      text: `${oauthActionText} with GitLab`,
-      icon: <img src={gitlabLogo} height={18} width={18} alt="GitLab Logo" />,
+      text: `${oauthActionText} bằng GitLab`,
+      icon: <img src={gitlabLogo} height={18} width={18} alt={"Logo GitLab"} />,
       onClick: () => {
         window.location.assign(`${API_BASE_URL}/auth/gitlab/${next_path ? `?next_path=${next_path}` : ``}`);
       },
@@ -72,8 +72,8 @@ export const useCoreOAuthConfig = (oauthActionText: string): TOAuthConfigs => {
     },
     {
       id: "gitea",
-      text: `${oauthActionText} with Gitea`,
-      icon: <img src={giteaLogo} height={18} width={18} alt="Gitea Logo" />,
+      text: `${oauthActionText} bằng Gitea`,
+      icon: <img src={giteaLogo} height={18} width={18} alt={"Logo Gitea"} />,
       onClick: () => {
         window.location.assign(`${API_BASE_URL}/auth/gitea/${next_path ? `?next_path=${next_path}` : ``}`);
       },

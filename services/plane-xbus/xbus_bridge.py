@@ -110,6 +110,7 @@ def sync_roster(rows, actor_id=None):
                 },
             )
             profile, _ = Profile.objects.get_or_create(user=user)
+            profile.language = "vi-VN"
             profile.is_onboarded = True
             profile.last_workspace_id = workspace.pk
             profile.company_name = "XBus Office"

@@ -43,16 +43,16 @@ export function ArchiveModuleModal(props: Props) {
       await archiveModule(workspaceSlug, projectId, moduleId);
       setToast({
         type: "success",
-        title: "Archive success",
-        message: "Your archives can be found in project archives.",
+        title: "Lưu trữ thành công",
+        message: "Mục đã lưu trữ của bạn có thể được tìm thấy trong phần lưu trữ của dự án.",
       });
       onClose();
       router.push(`/${workspaceSlug}/projects/${projectId}/modules`);
     } catch {
       setToast({
         type: "error",
-        title: "Error!",
-        message: "Module could not be archived. Please try again.",
+        title: "Lỗi!",
+        message: "Không thể lưu trữ nhóm công việc. Vui lòng thử lại.",
       });
     } finally {
       setIsArchiving(false);
@@ -66,8 +66,8 @@ export function ArchiveModuleModal(props: Props) {
       handleSubmit={handleArchiveModule}
       isSubmitting={isArchiving}
       variant="primary"
-      title={`Archive module ${moduleName}`}
-      content="Are you sure you want to archive the module? All your archives can be restored later."
+      title={`Lưu trữ nhóm công việc ${moduleName}`}
+      content={"Bạn có muốn lưu trữ nhóm công việc? Bạn có thể khôi phục sau."}
       primaryButtonText={{ loading: "Archiving", default: "Archive" }}
       secondaryButtonText="Cancel"
     />

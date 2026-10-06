@@ -184,7 +184,7 @@ export function CustomImageUploader(props: CustomImageUploaderProps) {
   const getDisplayMessage = useCallback(() => {
     const isUploading = isImageBeingUploaded;
     if (isErrorState) {
-      return "Error loading image";
+      return "Không thể tải ảnh";
     }
 
     if (isUploading) {
@@ -192,10 +192,10 @@ export function CustomImageUploader(props: CustomImageUploaderProps) {
     }
 
     if (draggedInside && editor.isEditable) {
-      return "Drop image here";
+      return "Thả ảnh vào đây";
     }
 
-    return "Add an image";
+    return "Thêm ảnh";
   }, [draggedInside, editor.isEditable, isErrorState, isImageBeingUploaded]);
 
   const handleRetryClick = useCallback(
@@ -247,10 +247,10 @@ export function CustomImageUploader(props: CustomImageUploaderProps) {
               "hover:bg-danger-subtle-hover": selected,
             }
           )}
-          title="Retry duplication"
+          title={"Thử tạo bản sao lại"}
         >
           <RefreshOutline className="size-3" />
-          <span className="text-11">Retry</span>
+          <span className="text-11">Thử lại</span>
         </button>
       )}
       <input

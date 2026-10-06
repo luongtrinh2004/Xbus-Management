@@ -41,10 +41,10 @@ export const CustomThemeImportConfigButton = observer(function CustomThemeImport
       // Validate hex color format
       const hexPattern = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
       if (!hexPattern.test(config.primary)) {
-        throw new Error("Invalid brand color hex format");
+        throw new Error("Mã màu thương hiệu không hợp lệ");
       }
       if (!hexPattern.test(config.background)) {
-        throw new Error("Invalid neutral color hex format");
+        throw new Error("Mã màu trung tính không hợp lệ");
       }
 
       // Validate theme mode
@@ -73,14 +73,14 @@ export const CustomThemeImportConfigButton = observer(function CustomThemeImport
       setToast({
         type: "success",
         title: t("success"),
-        message: "Theme configuration imported successfully",
+        message: "Đã nhập cấu hình giao diện",
       });
     } catch (error) {
       console.error("Failed to upload config:", error);
       setToast({
         type: "error",
         title: t("error"),
-        message: error instanceof Error ? error.message : "Failed to import theme configuration",
+        message: error instanceof Error ? error.message : "Không thể nhập cấu hình giao diện",
       });
     } finally {
       // Reset file input
@@ -98,7 +98,7 @@ export const CustomThemeImportConfigButton = observer(function CustomThemeImport
         size="md"
         stretch="auto"
         type="button"
-        label="Import config"
+        label={"Nhập cấu hình"}
         onClick={() => fileInputRef.current?.click()}
       />
     </>

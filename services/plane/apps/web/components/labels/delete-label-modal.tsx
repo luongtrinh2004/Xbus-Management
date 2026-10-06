@@ -48,10 +48,10 @@ export const DeleteLabelModal = observer(function DeleteLabelModal(props: Props)
       const error =
         err && typeof err === "object" && "error" in err && typeof err.error === "string" && err.error
           ? err.error
-          : "Label could not be deleted. Please try again.";
+          : "Không thể xóa nhãn. Vui lòng thử lại.";
       setToast({
         type: "error",
-        title: "Error!",
+        title: "Lỗi!",
         message: error,
       });
     }
@@ -63,11 +63,11 @@ export const DeleteLabelModal = observer(function DeleteLabelModal(props: Props)
       handleSubmit={handleDeletion}
       isSubmitting={isDeleteLoading}
       isOpen={isOpen}
-      title="Delete Label"
+      title={"Xóa nhãn"}
       content={
         <>
-          Are you sure you want to delete <span className="font-medium text-primary">{data?.name}</span>? This will
-          remove the label from all the work item and from any views where the label is being filtered upon.
+          Bạn có chắc chắn muốn xóa <span className="font-medium text-primary">{data?.name}</span>? Nhãn sẽ bị xóa khỏi
+          tất cả công việc và các chế độ xem đang lọc theo nhãn này.
         </>
       }
     />

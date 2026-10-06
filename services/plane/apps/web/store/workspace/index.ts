@@ -231,7 +231,7 @@ export class BaseWorkspaceRootStore implements IWorkspaceRootStore {
   updateWorkspaceLogo = (workspaceSlug: string, logoURL: string) => {
     const workspaceId = this.getWorkspaceBySlug(workspaceSlug)?.id;
     if (!workspaceId) {
-      throw new Error("Workspace not found");
+      throw new Error("Không tìm thấy không gian làm việc");
     }
     runInAction(() => {
       set(this.workspaces[workspaceId], ["logo_url"], logoURL);

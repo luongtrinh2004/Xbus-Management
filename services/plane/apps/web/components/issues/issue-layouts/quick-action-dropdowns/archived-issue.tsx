@@ -59,7 +59,7 @@ export const ArchivedIssueQuickActions = observer(function ArchivedIssueQuickAct
 
   const { issuesFilter } = useIssues(EIssuesStoreType.ARCHIVED);
   // derived values
-  const activeLayout = `${issuesFilter.issueFilters?.displayFilters?.layout} layout`;
+  const activeLayout = `${issuesFilter.issueFilters?.displayFilters?.layout} bố cục`;
   // auth
   const isEditingAllowed =
     allowPermissions([EUserPermissions.ADMIN, EUserPermissions.MEMBER], EUserPermissionsLevel.PROJECT) && !readOnly;

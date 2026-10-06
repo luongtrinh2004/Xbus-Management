@@ -246,7 +246,7 @@ export class IssueDetailStore implements IIssueDetailStore {
       return res;
     } catch (error) {
       console.log("Error in uploading comment asset:", error);
-      throw new Error("Asset upload failed. Please try again later.", { cause: error });
+      throw new Error("Không thể tải lên tài nguyên. Vui lòng thử lại sau.", { cause: error });
     }
   };
 
@@ -263,7 +263,7 @@ export class IssueDetailStore implements IIssueDetailStore {
       return res;
     } catch (error) {
       console.log("Error in uploading comment asset:", error);
-      throw new Error("Asset upload failed. Please try again later.", { cause: error });
+      throw new Error("Không thể tải lên tài nguyên. Vui lòng thử lại sau.", { cause: error });
     }
   };
 
@@ -395,7 +395,7 @@ export class IssueDetailStore implements IIssueDetailStore {
     const publishSettings = this.rootStore.publishList?.publishMap?.[anchor];
     const projectID = publishSettings?.project;
     const workspaceSlug = publishSettings?.workspace_detail?.slug;
-    if (!projectID || !workspaceSlug) throw new Error("Publish settings not found");
+    if (!projectID || !workspaceSlug) throw new Error("Không tìm thấy cài đặt công bố");
 
     const newVote: IVote = {
       actor_details: this.rootStore.user.currentActor,

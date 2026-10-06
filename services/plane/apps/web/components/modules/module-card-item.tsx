@@ -75,13 +75,13 @@ export const ModuleCardItem = observer(function ModuleCardItem(props: Props) {
     );
 
     setPromiseToast(addToFavoritePromise, {
-      loading: "Adding module to favorites...",
+      loading: "Đang thêm nhóm công việc vào mục yêu thích…",
       success: {
-        title: "Success!",
-        message: () => "Module added to favorites.",
+        title: "Thành công!",
+        message: () => "Đã thêm nhóm công việc vào mục yêu thích.",
       },
       error: {
-        title: "Error!",
+        title: "Lỗi!",
         message: () => "Couldn't add the module to favorites. Please try again.",
       },
     });
@@ -99,13 +99,13 @@ export const ModuleCardItem = observer(function ModuleCardItem(props: Props) {
     );
 
     setPromiseToast(removeFromFavoritePromise, {
-      loading: "Removing module from favorites...",
+      loading: "Đang bỏ nhóm công việc khỏi mục yêu thích…",
       success: {
-        title: "Success!",
-        message: () => "Module removed from favorites.",
+        title: "Thành công!",
+        message: () => "Đã bỏ nhóm công việc khỏi mục yêu thích.",
       },
       error: {
-        title: "Error!",
+        title: "Lỗi!",
         message: () => "Couldn't remove the module from favorites. Please try again.",
       },
     });
@@ -123,15 +123,15 @@ export const ModuleCardItem = observer(function ModuleCardItem(props: Props) {
       .then(() => {
         setToast({
           type: "success",
-          title: "Success!",
-          message: "Module updated successfully.",
+          title: "Thành công!",
+          message: "Đã cập nhật nhóm công việc.",
         });
       })
       .catch((err) => {
         setToast({
           type: "error",
-          title: "Error!",
-          message: err?.detail ?? "Module could not be updated. Please try again.",
+          title: "Lỗi!",
+          message: err?.detail ?? "Không thể cập nhật nhóm công việc. Vui lòng thử lại.",
         });
       });
   };
@@ -167,8 +167,8 @@ export const ModuleCardItem = observer(function ModuleCardItem(props: Props) {
     ? !moduleTotalIssues || moduleTotalIssues === 0
       ? `0 work items`
       : moduleTotalIssues === moduleCompletedIssues
-        ? `${moduleTotalIssues} Work item${moduleTotalIssues > 1 ? `s` : ``}`
-        : `${moduleCompletedIssues}/${moduleTotalIssues} Work items`
+        ? `${moduleTotalIssues} công việc${moduleTotalIssues > 1 ? `s` : ``}`
+        : `${moduleCompletedIssues}/${moduleTotalIssues} công việc`
     : `0 work items`;
 
   const moduleLeadDetails = moduleDetails.lead_id ? getUserDetails(moduleDetails.lead_id) : undefined;
@@ -207,14 +207,14 @@ export const ModuleCardItem = observer(function ModuleCardItem(props: Props) {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5 text-secondary">
                 <WorkItemsOutline className="h-4 w-4 text-tertiary" />
-                <span className="text-11 text-tertiary">{issueCount ?? "0 Work item"}</span>
+                <span className="text-11 text-tertiary">{issueCount ?? "0 công việc"}</span>
               </div>
               {moduleLeadDetails ? (
                 <span className="cursor-default">
                   <ButtonAvatars showTooltip={false} userIds={moduleLeadDetails?.id} />
                 </span>
               ) : (
-                <Tooltip label="No lead">
+                <Tooltip label={"Chưa có trưởng nhóm"}>
                   <UserAltOutline className="mx-1 h-4 w-4 text-tertiary" />
                 </Tooltip>
               )}
@@ -224,7 +224,7 @@ export const ModuleCardItem = observer(function ModuleCardItem(props: Props) {
               size="md"
               variant="brand"
               showValue={false}
-              aria-label="Module progress"
+              aria-label={"Tiến độ nhóm công việc"}
             />
             {/* Ruling 38: the whole card is a `Link`, so the trigger's click and keyboard
                 activation must not reach it. */}
@@ -249,7 +249,7 @@ export const ModuleCardItem = observer(function ModuleCardItem(props: Props) {
                     target_date: range.to ? renderFormattedPayloadDate(range.to) : null,
                   });
                 }}
-                placeholder="Start date - End date"
+                placeholder={"Ngày bắt đầu - Ngày kết thúc"}
                 weekStartsOn={userProfile?.start_of_the_week}
                 disabled={isDisabled}
                 icon={renderIcon ? undefined : <CalendarOutline aria-hidden="true" />}

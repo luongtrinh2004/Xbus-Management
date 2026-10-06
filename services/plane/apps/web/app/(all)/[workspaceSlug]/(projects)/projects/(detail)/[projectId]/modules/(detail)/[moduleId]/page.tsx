@@ -53,10 +53,10 @@ function ModuleIssuesPage({ params }: Route.ComponentProps) {
       {error ? (
         <EmptyState
           image={emptyModule}
-          title="Module does not exist"
-          description="The module you are looking for does not exist or has been deleted."
+          title={"Nhóm công việc không tồn tại"}
+          description={"Nhóm công việc không tồn tại hoặc đã bị xóa."}
           primaryButton={{
-            text: "View other modules",
+            text: "Xem nhóm công việc khác",
             onClick: () => router.push(`/${workspaceSlug}/projects/${projectId}/modules`),
           }}
         />

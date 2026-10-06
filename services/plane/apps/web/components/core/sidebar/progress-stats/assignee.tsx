@@ -67,7 +67,7 @@ export const AssigneeStatComponent = observer(function AssigneeStatComponent(pro
                 title={
                   <div className="flex items-center gap-2">
                     <div className="h-4 w-4 rounded-full border-2 border-subtle bg-layer-1">
-                      <img src={userImage} className="h-full w-full rounded-full object-cover" alt="User" />
+                      <img src={userImage} className="h-full w-full rounded-full object-cover" alt={"Người dùng"} />
                     </div>
                     <span>{t("no_assignee")}</span>
                   </div>
@@ -80,7 +80,7 @@ export const AssigneeStatComponent = observer(function AssigneeStatComponent(pro
       ) : (
         <div className="flex h-full flex-col items-center justify-center gap-2">
           <div className="flex h-20 w-20 items-center justify-center rounded-full bg-layer-1">
-            <img src={emptyMembers} className="h-12 w-12 object-contain" alt="empty members" />
+            <img src={emptyMembers} className="h-12 w-12 object-contain" alt={"chưa có thành viên"} />
           </div>
           <h6 className="text-14 text-tertiary">{t("no_assignee")}</h6>
         </div>

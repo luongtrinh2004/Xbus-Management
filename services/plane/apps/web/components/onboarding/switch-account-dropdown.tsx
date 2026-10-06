@@ -52,7 +52,7 @@ export const SwitchAccountDropdown = observer(function SwitchAccountDropdown(pro
           <span className="text-13 font-medium text-secondary">{displayName}</span>
         </MenuTrigger>
         <MenuContent side="bottom" align="end">
-          <MenuItem variant="danger" label="Wrong e-mail address?" onClick={() => setShowSwitchAccountModal(true)} />
+          <MenuItem variant="danger" label={"Email chưa đúng?"} onClick={() => setShowSwitchAccountModal(true)} />
         </MenuContent>
       </Menu>
     </>

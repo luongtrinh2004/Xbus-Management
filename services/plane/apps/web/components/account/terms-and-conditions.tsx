@@ -19,8 +19,8 @@ const LEGAL_LINKS = {
 } as const;
 
 const MESSAGES = {
-  [EAuthModes.SIGN_UP]: "By creating an account",
-  [EAuthModes.SIGN_IN]: "By signing in",
+  [EAuthModes.SIGN_UP]: "Khi tạo tài khoản",
+  [EAuthModes.SIGN_IN]: "Khi đăng nhập",
 } as const;
 
 // Reusable link component to reduce duplication
@@ -37,8 +37,8 @@ export function TermsAndConditions({ authType = EAuthModes.SIGN_IN }: TermsAndCo
     <div className="flex items-center justify-center">
       <p className="text-center text-13 whitespace-pre-line text-tertiary">
         {`${MESSAGES[authType]}, you understand and agree to \n our `}
-        <LegalLink href={LEGAL_LINKS.termsOfService}>Terms of Service</LegalLink> and{" "}
-        <LegalLink href={LEGAL_LINKS.privacyPolicy}>Privacy Policy</LegalLink>.
+        <LegalLink href={LEGAL_LINKS.termsOfService}>Điều khoản sử dụng</LegalLink> và{" "}
+        <LegalLink href={LEGAL_LINKS.privacyPolicy}>Chính sách bảo mật</LegalLink>.
       </p>
     </div>
   );

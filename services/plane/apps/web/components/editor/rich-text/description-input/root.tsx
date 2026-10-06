@@ -190,7 +190,7 @@ export const DescriptionInput = observer(function DescriptionInput(props: Props)
   const debouncedFormSave = useCallback(
     debounce(async () => {
       handleSubmit(handleDescriptionFormSubmit)()
-        .catch((error) => console.error(`Failed to save description for ${entityId}:`, error))
+        .catch((error) => console.error(`Không thể lưu mô tả của ${entityId}:`, error))
         .finally(() => {
           setIsSubmitting("submitted");
           hasUnsavedChanges.current = false;
@@ -274,7 +274,7 @@ export const DescriptionInput = observer(function DescriptionInput(props: Props)
               return asset_id;
             } catch (error) {
               console.log("Error in uploading asset:", error);
-              throw new Error("Asset upload failed. Please try again later.", { cause: error });
+              throw new Error("Không thể tải lên tài nguyên. Vui lòng thử lại sau.", { cause: error });
             }
           }}
           duplicateFile={async (assetId: string) => {
@@ -287,7 +287,7 @@ export const DescriptionInput = observer(function DescriptionInput(props: Props)
               });
               return asset_id;
             } catch {
-              throw new Error("Asset duplication failed. Please try again later.");
+              throw new Error("Không thể sao chép tệp đính kèm. Vui lòng thử lại sau.");
             }
           }}
         />

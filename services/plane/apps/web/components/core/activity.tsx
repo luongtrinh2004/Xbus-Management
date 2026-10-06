@@ -51,7 +51,7 @@ export function IssueLink({ activity }: { activity: IIssueActivity }) {
 
   return (
     <Tooltip
-      label={activity?.issue_detail ? activity.issue_detail.name : "This work item has been deleted"}
+      label={activity?.issue_detail ? activity.issue_detail.name : "Công việc này đã bị xóa"}
       layout="stacked"
       disabled={isMobile}
     >
@@ -68,7 +68,7 @@ export function IssueLink({ activity }: { activity: IIssueActivity }) {
         </a>
       ) : (
         <span className="inline-flex items-center gap-1 font-medium whitespace-nowrap text-primary">
-          {" a work item"}{" "}
+          {"một công việc"}{" "}
         </span>
       )}
     </Tooltip>
@@ -157,11 +157,11 @@ const activityDetails: {
       if (activity.old_value === "")
         return (
           <>
-            added a new assignee <UserLink activity={activity} />
+            đã thêm người phụ trách <UserLink activity={activity} />
             {showIssue && (
               <>
                 {" "}
-                to <IssueLink activity={activity} />
+                đến <IssueLink activity={activity} />
               </>
             )}
           </>
@@ -169,11 +169,11 @@ const activityDetails: {
       else
         return (
           <>
-            removed the assignee <UserLink activity={activity} />
+            đã bỏ người phụ trách <UserLink activity={activity} />
             {showIssue && (
               <>
                 {" "}
-                from <IssueLink activity={activity} />
+                từ <IssueLink activity={activity} />
               </>
             )}
           </>
@@ -186,13 +186,13 @@ const activityDetails: {
       if (activity.new_value === "restore")
         return (
           <>
-            restored <IssueLink activity={activity} />
+            đã khôi phục <IssueLink activity={activity} />
           </>
         );
       else
         return (
           <>
-            archived <IssueLink activity={activity} />
+            Đã lưu trữ <IssueLink activity={activity} />
           </>
         );
     },
@@ -203,11 +203,11 @@ const activityDetails: {
       if (activity.verb === "created")
         return (
           <>
-            uploaded a new attachment
+            đã tải lên tệp đính kèm mới
             {showIssue && (
               <>
                 {" "}
-                to <IssueLink activity={activity} />
+                đến <IssueLink activity={activity} />
               </>
             )}
           </>
@@ -215,11 +215,11 @@ const activityDetails: {
       else
         return (
           <>
-            removed an attachment
+            đã xóa tệp đính kèm
             {showIssue && (
               <>
                 {" "}
-                from <IssueLink activity={activity} />
+                từ <IssueLink activity={activity} />
               </>
             )}
           </>
@@ -230,11 +230,11 @@ const activityDetails: {
   description: {
     message: (activity, showIssue) => (
       <>
-        updated the description
+        đã cập nhật mô tả
         {showIssue && (
           <>
             {" "}
-            of <IssueLink activity={activity} />
+            của <IssueLink activity={activity} />
           </>
         )}
       </>
@@ -246,11 +246,11 @@ const activityDetails: {
       if (!activity.new_value)
         return (
           <>
-            removed the estimate point
+            đã bỏ điểm ước lượng
             {showIssue && (
               <>
                 {" "}
-                from <IssueLink activity={activity} />
+                từ <IssueLink activity={activity} />
               </>
             )}
           </>
@@ -258,11 +258,11 @@ const activityDetails: {
       else
         return (
           <>
-            set the estimate point to {activity.new_value}
+            đã đặt điểm ước lượng là {activity.new_value}
             {showIssue && (
               <>
                 {" "}
-                for <IssueLink activity={activity} />
+                cho <IssueLink activity={activity} />
               </>
             )}
           </>
@@ -275,19 +275,19 @@ const activityDetails: {
       if (activity.verb === "created")
         return (
           <>
-            created <IssueLink activity={activity} />
+            Đã tạo <IssueLink activity={activity} />
           </>
         );
       else if (activity.verb === "converted")
         return (
           <>
-            converted <IssueLink activity={activity} /> to an epic
+            đã chuyển đổi <IssueLink activity={activity} /> thành Epic
           </>
         );
       else
         return (
           <>
-            deleted <IssueLink activity={activity} />
+            đã xóa <IssueLink activity={activity} />
           </>
         );
     },
@@ -298,19 +298,19 @@ const activityDetails: {
       if (activity.verb === "created")
         return (
           <>
-            created <IssueLink activity={activity} />
+            Đã tạo <IssueLink activity={activity} />
           </>
         );
       else if (activity.verb === "converted")
         return (
           <>
-            converted <IssueLink activity={activity} /> to a work item
+            đã chuyển đổi <IssueLink activity={activity} /> thành công việc
           </>
         );
       else
         return (
           <>
-            deleted <IssueLink activity={activity} />
+            đã xóa <IssueLink activity={activity} />
           </>
         );
     },
@@ -321,7 +321,7 @@ const activityDetails: {
       if (activity.old_value === "")
         return (
           <span className="overflow-hidden">
-            added a new label{" "}
+            đã thêm nhãn{" "}
             <span className="inline-flex items-center gap-2 rounded-full border border-strong px-2 py-0.5 text-11">
               <LabelPill labelId={activity.new_identifier ?? ""} workspaceSlug={workspaceSlug} />
               <span className="line-clamp-1 flex-shrink font-medium break-all text-primary">{activity.new_value}</span>
@@ -329,7 +329,7 @@ const activityDetails: {
             {showIssue && (
               <span className="">
                 {" "}
-                to <IssueLink activity={activity} />
+                đến <IssueLink activity={activity} />
               </span>
             )}
           </span>
@@ -337,7 +337,7 @@ const activityDetails: {
       else
         return (
           <>
-            removed the label{" "}
+            đã bỏ nhãn{" "}
             <span className="inline-flex items-center gap-2 rounded-full border border-strong px-2 py-0.5 text-11">
               <LabelPill labelId={activity.old_identifier ?? ""} workspaceSlug={workspaceSlug} />
               <span className="line-clamp-1 flex-shrink font-medium break-all text-primary">{activity.old_value}</span>
@@ -345,7 +345,7 @@ const activityDetails: {
             {showIssue && (
               <span>
                 {" "}
-                from <IssueLink activity={activity} />
+                từ <IssueLink activity={activity} />
               </span>
             )}
           </>
@@ -358,19 +358,19 @@ const activityDetails: {
       if (activity.verb === "created")
         return (
           <>
-            added this{" "}
+            đã thêm mục này{" "}
             <a
               href={`${activity.new_value}`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 font-medium text-primary hover:underline"
             >
-              link
+              Liên kết
             </a>
             {showIssue && (
               <>
                 {" "}
-                to <IssueLink activity={activity} />
+                đến <IssueLink activity={activity} />
               </>
             )}
           </>
@@ -378,19 +378,19 @@ const activityDetails: {
       else if (activity.verb === "updated")
         return (
           <>
-            updated the{" "}
+            đã cập nhật{" "}
             <a
               href={`${activity.old_value}`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 font-medium text-primary hover:underline"
             >
-              link
+              Liên kết
             </a>
             {showIssue && (
               <>
                 {" "}
-                from <IssueLink activity={activity} />
+                từ <IssueLink activity={activity} />
               </>
             )}
           </>
@@ -398,19 +398,19 @@ const activityDetails: {
       else
         return (
           <>
-            removed this{" "}
+            đã xóa mục này{" "}
             <a
               href={`${activity.old_value}`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 font-medium text-primary hover:underline"
             >
-              link
+              Liên kết
             </a>
             {showIssue && (
               <>
                 {" "}
-                from <IssueLink activity={activity} />
+                từ <IssueLink activity={activity} />
               </>
             )}
           </>
@@ -424,8 +424,8 @@ const activityDetails: {
         return (
           <>
             <span className="flex-shrink-0">
-              added {showIssue ? <IssueLink activity={activity} /> : "this work item"}{" "}
-              <span className="whitespace-nowrap">to the cycle</span>{" "}
+              Đã thêm {showIssue ? <IssueLink activity={activity} /> : "công việc này"}{" "}
+              <span className="whitespace-nowrap">vào chu kỳ</span>{" "}
             </span>
             <a
               href={`/${workspaceSlug}/projects/${activity.project}/cycles/${activity.new_identifier}`}
@@ -440,7 +440,7 @@ const activityDetails: {
       else if (activity.verb === "updated")
         return (
           <>
-            <span className="flex-shrink-0 whitespace-nowrap">set the cycle to </span>
+            <span className="flex-shrink-0 whitespace-nowrap">đã đặt chu kỳ thành </span>
             <a
               href={`/${workspaceSlug}/projects/${activity.project}/cycles/${activity.new_identifier}`}
               target="_blank"
@@ -454,7 +454,7 @@ const activityDetails: {
       else
         return (
           <>
-            removed <IssueLink activity={activity} /> from the cycle{" "}
+            đã xóa <IssueLink activity={activity} /> khỏi chu kỳ{" "}
             <a
               href={`/${workspaceSlug}/projects/${activity.project}/cycles/${activity.old_identifier}`}
               target="_blank"
@@ -473,7 +473,7 @@ const activityDetails: {
       if (activity.verb === "created")
         return (
           <>
-            added {showIssue ? <IssueLink activity={activity} /> : "this work item"} to the module{" "}
+            Đã thêm {showIssue ? <IssueLink activity={activity} /> : "this work item"} vào nhóm công việc{" "}
             <a
               href={`/${workspaceSlug}/projects/${activity.project}/modules/${activity.new_identifier}`}
               target="_blank"
@@ -487,7 +487,7 @@ const activityDetails: {
       else if (activity.verb === "updated")
         return (
           <>
-            set the module to{" "}
+            đã đặt nhóm công việc thành{" "}
             <a
               href={`/${workspaceSlug}/projects/${activity.project}/modules/${activity.new_identifier}`}
               target="_blank"
@@ -501,7 +501,7 @@ const activityDetails: {
       else
         return (
           <>
-            removed <IssueLink activity={activity} /> from the module{" "}
+            đã xóa <IssueLink activity={activity} /> khỏi nhóm công việc{" "}
             <a
               href={`/${workspaceSlug}/projects/${activity.project}/modules/${activity.old_identifier}`}
               target="_blank"
@@ -518,11 +518,11 @@ const activityDetails: {
   name: {
     message: (activity, showIssue) => (
       <>
-        set the title to <span className="break-all">{activity.new_value}</span>
+        đã đổi tiêu đề thành <span className="break-all">{activity.new_value}</span>
         {showIssue && (
           <>
             {" "}
-            of <IssueLink activity={activity} />
+            của <IssueLink activity={activity} />
           </>
         )}
       </>
@@ -534,11 +534,11 @@ const activityDetails: {
       if (!activity.new_value)
         return (
           <>
-            removed the parent <span className="font-medium whitespace-nowrap text-primary">{activity.old_value}</span>
+            đã bỏ công việc cha <span className="font-medium whitespace-nowrap text-primary">{activity.old_value}</span>
             {showIssue && (
               <>
                 {" "}
-                from <IssueLink activity={activity} />
+                từ <IssueLink activity={activity} />
               </>
             )}
           </>
@@ -546,11 +546,12 @@ const activityDetails: {
       else
         return (
           <>
-            set the parent to <span className="font-medium whitespace-nowrap text-primary">{activity.new_value}</span>
+            đã đặt công việc cha là{" "}
+            <span className="font-medium whitespace-nowrap text-primary">{activity.new_value}</span>
             {showIssue && (
               <>
                 {" "}
-                for <IssueLink activity={activity} />
+                cho <IssueLink activity={activity} />
               </>
             )}
           </>
@@ -561,14 +562,14 @@ const activityDetails: {
   priority: {
     message: (activity, showIssue) => (
       <>
-        set the priority to{" "}
+        đã đặt độ ưu tiên thành{" "}
         <span className="font-medium text-primary">
-          {activity.new_value ? capitalizeFirstLetter(activity.new_value) : "None"}
+          {activity.new_value ? capitalizeFirstLetter(activity.new_value) : "Không có"}
         </span>
         {showIssue && (
           <>
             {" "}
-            for <IssueLink activity={activity} />
+            cho <IssueLink activity={activity} />
           </>
         )}
       </>
@@ -580,15 +581,14 @@ const activityDetails: {
       if (activity.old_value === "")
         return (
           <>
-            marked that {showIssue ? <IssueLink activity={activity} /> : "this work item"} relates to{" "}
+            đã đánh dấu rằng {showIssue ? <IssueLink activity={activity} /> : "this work item"} liên quan đến{" "}
             <span className="font-medium whitespace-nowrap text-primary">{activity.new_value}</span>.
           </>
         );
       else
         return (
           <>
-            removed the relation from{" "}
-            <span className="font-medium whitespace-nowrap text-primary">{activity.old_value}</span>.
+            đã bỏ liên kết với <span className="font-medium whitespace-nowrap text-primary">{activity.old_value}</span>.
           </>
         );
     },
@@ -599,14 +599,14 @@ const activityDetails: {
       if (activity.old_value === "")
         return (
           <>
-            marked {showIssue ? <IssueLink activity={activity} /> : "this work item"} is blocking work item{" "}
+            đã đánh dấu {showIssue ? <IssueLink activity={activity} /> : "this work item"} đang chặn công việc{" "}
             <span className="font-medium whitespace-nowrap text-primary">{activity.new_value}</span>.
           </>
         );
       else
         return (
           <>
-            removed the blocking work item{" "}
+            đã bỏ công việc chặn{" "}
             <span className="font-medium whitespace-nowrap text-primary">{activity.old_value}</span>.
           </>
         );
@@ -618,14 +618,14 @@ const activityDetails: {
       if (activity.old_value === "")
         return (
           <>
-            marked {showIssue ? <IssueLink activity={activity} /> : "this work item"} is being blocked by{" "}
+            đã đánh dấu {showIssue ? <IssueLink activity={activity} /> : "this work item"} đang bị chặn bởi{" "}
             <span className="font-medium whitespace-nowrap text-primary">{activity.new_value}</span>.
           </>
         );
       else
         return (
           <>
-            removed {showIssue ? <IssueLink activity={activity} /> : "this work item"} being blocked by work item{" "}
+            đã xóa {showIssue ? <IssueLink activity={activity} /> : "this work item"} đang bị chặn bởi công việc{" "}
             <span className="font-medium whitespace-nowrap text-primary">{activity.old_value}</span>.
           </>
         );
@@ -637,14 +637,14 @@ const activityDetails: {
       if (activity.old_value === "")
         return (
           <>
-            marked {showIssue ? <IssueLink activity={activity} /> : "this work item"} as duplicate of{" "}
+            đã đánh dấu {showIssue ? <IssueLink activity={activity} /> : "this work item"} là bản trùng lặp của{" "}
             <span className="font-medium whitespace-nowrap text-primary">{activity.new_value}</span>.
           </>
         );
       else
         return (
           <>
-            removed {showIssue ? <IssueLink activity={activity} /> : "this work item"} as a duplicate of{" "}
+            đã xóa {showIssue ? <IssueLink activity={activity} /> : "this work item"} là bản trùng lặp của{" "}
             <span className="font-medium whitespace-nowrap text-primary">{activity.old_value}</span>.
           </>
         );
@@ -654,11 +654,11 @@ const activityDetails: {
   state: {
     message: (activity, showIssue) => (
       <>
-        set the state to <span className="font-medium break-all text-primary">{activity.new_value}</span>
+        đã đặt trạng thái thành <span className="font-medium break-all text-primary">{activity.new_value}</span>
         {showIssue && (
           <>
             {" "}
-            for <IssueLink activity={activity} />
+            cho <IssueLink activity={activity} />
           </>
         )}
       </>
@@ -670,11 +670,11 @@ const activityDetails: {
       if (!activity.new_value)
         return (
           <>
-            removed the start date
+            đã bỏ ngày bắt đầu
             {showIssue && (
               <>
                 {" "}
-                from <IssueLink activity={activity} />
+                từ <IssueLink activity={activity} />
               </>
             )}
           </>
@@ -682,14 +682,14 @@ const activityDetails: {
       else
         return (
           <>
-            set the start date to{" "}
+            đã đặt ngày bắt đầu là{" "}
             <span className="font-medium whitespace-nowrap text-primary">
               {renderFormattedDate(activity.new_value)}
             </span>
             {showIssue && (
               <>
                 {" "}
-                for <IssueLink activity={activity} />
+                cho <IssueLink activity={activity} />
               </>
             )}
           </>
@@ -702,11 +702,11 @@ const activityDetails: {
       if (!activity.new_value)
         return (
           <>
-            removed the due date
+            đã bỏ hạn hoàn thành
             {showIssue && (
               <>
                 {" "}
-                from <IssueLink activity={activity} />
+                từ <IssueLink activity={activity} />
               </>
             )}
           </>
@@ -714,7 +714,7 @@ const activityDetails: {
       else
         return (
           <>
-            set the due date to{" "}
+            đã đặt hạn hoàn thành là{" "}
             <span className="font-medium whitespace-nowrap text-primary">
               {renderFormattedDate(activity.new_value)}
             </span>

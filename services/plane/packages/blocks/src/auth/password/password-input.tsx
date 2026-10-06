@@ -28,7 +28,7 @@ export function PasswordInput({
   label,
   value,
   onChange,
-  placeholder = "Enter your password",
+  placeholder = "Nhập mật khẩu",
   className,
   showToggle = true,
   error = false,

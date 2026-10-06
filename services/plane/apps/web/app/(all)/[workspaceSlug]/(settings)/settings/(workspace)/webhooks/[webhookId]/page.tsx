@@ -64,15 +64,15 @@ function WebhookDetailsPage({ params }: Route.ComponentProps) {
       await updateWebhook(workspaceSlug, formData.id, payload);
       setToast({
         type: "success",
-        title: "Success!",
-        message: "Webhook updated successfully.",
+        title: "Thành công!",
+        message: "Đã cập nhật webhook.",
       });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       setToast({
         type: "error",
-        title: "Error!",
-        message: error?.error ?? "Something went wrong. Please try again.",
+        title: "Lỗi!",
+        message: error?.error ?? "Đã xảy ra lỗi. Vui lòng thử lại.",
       });
     }
   };
@@ -82,7 +82,7 @@ function WebhookDetailsPage({ params }: Route.ComponentProps) {
       <>
         <PageHead title={pageTitle} />
         <div className="mt-10 flex h-full w-full justify-center p-4">
-          <p className="text-13 text-tertiary">You are not authorized to access this page.</p>
+          <p className="text-13 text-tertiary">Bạn không có quyền truy cập trang này.</p>
         </div>
       </>
     );

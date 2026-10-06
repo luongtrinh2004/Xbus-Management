@@ -190,7 +190,7 @@ export function FavoriteFolder(props: Props) {
                   onClick={() => setIsOpen(!isOpen)}
                 >
                   <Tooltip
-                    label={favorite.sort_order === null ? "Join the project to rearrange" : "Drag to rearrange"}
+                    label={favorite.sort_order === null ? "Tham gia dự án để sắp xếp lại" : "Kéo để sắp xếp lại"}
                     align="end"
                     disabled={isDragging || isMobile}
                   >
@@ -244,7 +244,7 @@ export function FavoriteFolder(props: Props) {
                   />
                   <MenuItem
                     icon={<Icon icon={DraftsOutline} tint="tertiary" />}
-                    label="Rename Folder"
+                    label={"Đổi tên thư mục"}
                     onClick={() => setFolderToRename(favorite.id)}
                   />
                 </MenuContent>

@@ -50,7 +50,7 @@ export const PREFERENCE_OPTIONS: {
 }[] = [
   {
     id: "theme",
-    title: "theme",
+    title: "Chủ đề",
     description: "select_or_customize_your_interface_color_scheme",
   },
 ];
@@ -63,30 +63,30 @@ export const PREFERENCE_OPTIONS: {
 export const START_OF_THE_WEEK_OPTIONS = [
   {
     value: EStartOfTheWeek.SUNDAY,
-    label: "Sunday",
+    label: "Chủ nhật",
   },
   {
     value: EStartOfTheWeek.MONDAY,
-    label: "Monday",
+    label: "Thứ Hai",
   },
   {
     value: EStartOfTheWeek.TUESDAY,
-    label: "Tuesday",
+    label: "Thứ Ba",
   },
   {
     value: EStartOfTheWeek.WEDNESDAY,
-    label: "Wednesday",
+    label: "Thứ Tư",
   },
   {
     value: EStartOfTheWeek.THURSDAY,
-    label: "Thursday",
+    label: "Thứ Năm",
   },
   {
     value: EStartOfTheWeek.FRIDAY,
-    label: "Friday",
+    label: "Thứ Sáu",
   },
   {
     value: EStartOfTheWeek.SATURDAY,
-    label: "Saturday",
+    label: "Thứ Bảy",
   },
 ];

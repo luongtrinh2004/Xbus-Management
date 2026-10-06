@@ -1,12 +1,12 @@
 {
   "power_k": {
     "actions_commands": {
-      "bulk_delete_work_items": "Xóa hàng loạt mục công việc"
+      "bulk_delete_work_items": "Xóa hàng loạt công việc"
     },
     "contextual_actions": {
       "work_item": {
-        "title": "Hành động mục công việc",
-        "indicator": "Mục công việc",
+        "title": "Hành động công việc",
+        "indicator": "Công việc",
         "change_state": "Đổi trạng thái",
         "change_priority": "Đổi mức độ ưu tiên",
         "change_assignees": "Giao cho",
@@ -14,20 +14,20 @@
         "unassign_from_me": "Hủy giao khỏi tôi",
         "change_estimate": "Đổi ước tính",
         "add_to_cycle": "Thêm vào chu kỳ",
-        "add_to_modules": "Thêm vào mô-đun",
+        "add_to_modules": "Thêm vào nhóm công việc",
         "add_labels": "Thêm nhãn",
         "subscribe": "Đăng ký thông báo",
         "unsubscribe": "Hủy đăng ký thông báo",
         "delete": "Xóa",
         "copy_id": "Sao chép ID",
-        "copy_id_toast_success": "Đã sao chép ID mục công việc vào bảng tạm.",
-        "copy_id_toast_error": "Đã xảy ra lỗi khi sao chép ID mục công việc vào bảng tạm.",
+        "copy_id_toast_success": "Đã sao chép ID công việc vào bảng tạm.",
+        "copy_id_toast_error": "Đã xảy ra lỗi khi sao chép ID công việc vào bảng tạm.",
         "copy_title": "Sao chép tiêu đề",
-        "copy_title_toast_success": "Đã sao chép tiêu đề mục công việc vào bảng tạm.",
-        "copy_title_toast_error": "Đã xảy ra lỗi khi sao chép tiêu đề mục công việc vào bảng tạm.",
+        "copy_title_toast_success": "Đã sao chép tiêu đề công việc vào bảng tạm.",
+        "copy_title_toast_error": "Đã xảy ra lỗi khi sao chép tiêu đề công việc vào bảng tạm.",
         "copy_url": "Sao chép URL",
-        "copy_url_toast_success": "Đã sao chép URL mục công việc vào bảng tạm.",
-        "copy_url_toast_error": "Đã xảy ra lỗi khi sao chép URL mục công việc vào bảng tạm."
+        "copy_url_toast_success": "Đã sao chép URL công việc vào bảng tạm.",
+        "copy_url_toast_error": "Đã xảy ra lỗi khi sao chép URL công việc vào bảng tạm."
       },
       "cycle": {
         "title": "Hành động chu kỳ",
@@ -39,15 +39,15 @@
         "copy_url_toast_error": "Đã xảy ra lỗi khi sao chép URL chu kỳ vào bảng tạm."
       },
       "module": {
-        "title": "Hành động mô-đun",
-        "indicator": "Mô-đun",
+        "title": "Hành động nhóm công việc",
+        "indicator": "Nhóm công việc",
         "add_remove_members": "Thêm/xóa thành viên",
         "change_status": "Đổi trạng thái",
         "add_to_favorites": "Thêm vào mục yêu thích",
         "remove_from_favorites": "Xóa khỏi mục yêu thích",
         "copy_url": "Sao chép URL",
-        "copy_url_toast_success": "Đã sao chép URL mô-đun vào bảng tạm.",
-        "copy_url_toast_error": "Đã xảy ra lỗi khi sao chép URL mô-đun vào bảng tạm."
+        "copy_url_toast_success": "Đã sao chép URL nhóm công việc vào bảng tạm.",
+        "copy_url_toast_error": "Đã xảy ra lỗi khi sao chép URL nhóm công việc vào bảng tạm."
       },
       "page": {
         "title": "Hành động trang",
@@ -66,11 +66,11 @@
       }
     },
     "creation_actions": {
-      "create_work_item": "Mục công việc mới",
+      "create_work_item": "Công việc mới",
       "create_page": "Trang mới",
       "create_view": "Chế độ xem mới",
       "create_cycle": "Chu kỳ mới",
-      "create_module": "Mô-đun mới",
+      "create_module": "Nhóm công việc mới",
       "create_project": "Dự án mới",
       "create_workspace": "Không gian làm việc mới",
       "create_project_automation": "Tự động hóa mới"
@@ -83,20 +83,20 @@
       "nav_account_settings": "Đi đến cài đặt tài khoản",
       "open_project": "Mở một dự án",
       "nav_projects_list": "Đi đến danh sách dự án",
-      "nav_all_workspace_work_items": "Đi đến tất cả mục công việc",
-      "nav_assigned_workspace_work_items": "Đi đến mục công việc đã giao",
-      "nav_created_workspace_work_items": "Đi đến mục công việc đã tạo",
-      "nav_subscribed_workspace_work_items": "Đi đến mục công việc đã đăng ký",
+      "nav_all_workspace_work_items": "Đi đến tất cả công việc",
+      "nav_assigned_workspace_work_items": "Đi đến công việc đã giao",
+      "nav_created_workspace_work_items": "Đi đến công việc đã tạo",
+      "nav_subscribed_workspace_work_items": "Đi đến công việc đã đăng ký",
       "nav_workspace_analytics": "Đi đến phân tích không gian làm việc",
       "nav_workspace_drafts": "Đi đến bản nháp không gian làm việc",
       "nav_workspace_archives": "Đi đến lưu trữ không gian làm việc",
       "open_workspace_setting": "Mở một cài đặt không gian làm việc",
       "nav_workspace_settings": "Đi đến cài đặt không gian làm việc",
-      "nav_project_work_items": "Đi đến mục công việc",
+      "nav_project_work_items": "Đi đến công việc",
       "open_project_cycle": "Mở một chu kỳ",
       "nav_project_cycles": "Đi đến chu kỳ",
-      "open_project_module": "Mở một mô-đun",
-      "nav_project_modules": "Đi đến mô-đun",
+      "open_project_module": "Mở một nhóm công việc",
+      "nav_project_modules": "Đi đến nhóm công việc",
       "open_project_view": "Mở một chế độ xem dự án",
       "nav_project_views": "Đi đến chế độ xem dự án",
       "nav_project_pages": "Đi đến trang",
@@ -151,7 +151,7 @@
       "open_project": "Mở một dự án",
       "open_workspace_setting": "Mở một cài đặt không gian làm việc",
       "open_project_cycle": "Mở một chu kỳ",
-      "open_project_module": "Mở một mô-đun",
+      "open_project_module": "Mở một nhóm công việc",
       "open_project_view": "Mở một chế độ xem dự án",
       "open_project_setting": "Mở một cài đặt dự án",
       "update_work_item_state": "Đổi trạng thái",
@@ -159,7 +159,7 @@
       "update_work_item_assignee": "Giao cho",
       "update_work_item_estimate": "Đổi ước tính",
       "update_work_item_cycle": "Thêm vào chu kỳ",
-      "update_work_item_module": "Thêm vào mô-đun",
+      "update_work_item_module": "Thêm vào nhóm công việc",
       "update_work_item_labels": "Thêm nhãn",
       "update_module_member": "Đổi thành viên",
       "update_module_status": "Đổi trạng thái",

@@ -67,7 +67,7 @@ export function LabelSelect(props: LabelSelectProps) {
     onChange,
     disabled = false,
     placeholder = "",
-    searchPlaceholder = "Search labels...",
+    searchPlaceholder = "Tìm nhãn",
     onClose,
     createLabel,
     className,

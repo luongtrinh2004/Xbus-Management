@@ -87,7 +87,7 @@ export const IssueVotes = observer(function IssueVotes(props: TIssueVotes) {
                 .map((r) => r.actor_details?.display_name)
                 .slice(0, VOTES_LIMIT)
                 .join(", ") + (allUpVotes.length > VOTES_LIMIT ? ` and ${allUpVotes.length - VOTES_LIMIT} more` : "")
-            : "No upvotes yet"
+            : "Chưa có phiếu ủng hộ"
         }
       >
         <button
@@ -122,7 +122,7 @@ export const IssueVotes = observer(function IssueVotes(props: TIssueVotes) {
                 .slice(0, VOTES_LIMIT)
                 .join(", ") +
               (allDownVotes.length > VOTES_LIMIT ? ` and ${allDownVotes.length - VOTES_LIMIT} more` : "")
-            : "No downvotes yet"
+            : "Chưa có phiếu phản đối"
         }
       >
         <button

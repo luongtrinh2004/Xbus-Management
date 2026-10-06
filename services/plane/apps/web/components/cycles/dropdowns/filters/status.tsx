@@ -32,7 +32,7 @@ export const FilterStatus = observer(function FilterStatus(props: Props) {
   return (
     <>
       <FilterHeader
-        title={`Status of the cycle${appliedFiltersCount > 0 ? ` (${appliedFiltersCount})` : ""}`}
+        title={`Trạng thái chu kỳ${appliedFiltersCount > 0 ? ` (${appliedFiltersCount})` : ""}`}
         isPreviewEnabled={previewEnabled}
         handleIsPreviewEnabled={() => setPreviewEnabled(!previewEnabled)}
       />
@@ -48,7 +48,7 @@ export const FilterStatus = observer(function FilterStatus(props: Props) {
               />
             ))
           ) : (
-            <p className="text-11 text-placeholder italic">No matches found</p>
+            <p className="text-11 text-placeholder italic">Không tìm thấy kết quả phù hợp</p>
           )}
         </div>
       )}

@@ -19,17 +19,17 @@ const ARCHIVES_TAB_LIST: {
 }[] = [
   {
     key: "issues",
-    label: "Work items",
+    label: "Công việc",
     shouldRender: () => true,
   },
   {
     key: "cycles",
-    label: "Cycles",
+    label: "Chu kỳ",
     shouldRender: (projectDetails) => projectDetails.cycle_view,
   },
   {
     key: "modules",
-    label: "Modules",
+    label: "Nhóm công việc",
     shouldRender: (projectDetails) => projectDetails.module_view,
   },
 ];

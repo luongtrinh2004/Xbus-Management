@@ -27,14 +27,14 @@ export const InstanceFailureView = observer(function InstanceFailureView() {
       <div className="mt-10 flex w-full flex-grow flex-col items-center justify-center py-6">
         <div className="relative flex w-full max-w-[22.5rem] flex-col gap-6">
           <div className="relative flex flex-col items-center justify-center space-y-4">
-            <img src={instanceImage} alt="Instance failure illustration" />
-            <h3 className="text-center text-20 font-medium text-on-color">Unable to fetch instance details.</h3>
+            <img src={instanceImage} alt={"Ảnh minh họa lỗi hệ thống"} />
+            <h3 className="text-center text-20 font-medium text-on-color">Không thể tải thông tin hệ thống.</h3>
             <p className="text-center text-14 font-medium">
-              We were unable to fetch the details of the instance. Fret not, it might just be a connectivity issue.
+              Không thể tải thông tin hệ thống. Có thể kết nối đang gặp sự cố.
             </p>
           </div>
           <div className="flex justify-center">
-            <Button variant="primary" size="md" stretch="auto" onClick={handleRetry} label="Retry" />
+            <Button variant="primary" size="md" stretch="auto" onClick={handleRetry} label={"Thử lại"} />
           </div>
         </div>
       </div>

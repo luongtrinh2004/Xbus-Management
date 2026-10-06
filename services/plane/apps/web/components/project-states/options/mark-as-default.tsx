@@ -43,7 +43,7 @@ export const StateMarksAsDefault = observer(function StateMarksAsDefault(props: 
       disabled={isDefault || isLoading}
       onClick={handleMarkAsDefault}
     >
-      {isLoading ? "Marking as default" : isDefault ? `Default` : `Mark as default`}
+      {isLoading ? "Đang đặt làm mặc định" : isDefault ? "Mặc định" : "Đặt làm mặc định"}
     </button>
   );
 });

@@ -85,7 +85,7 @@ export const FiltersRow = observer(function FiltersRow<K extends TFilterProperty
           variant="secondary"
           size="sm"
           stretch="auto"
-          label={filter.clearFilterOptions?.label ?? "Clear all"}
+          label={filter.clearFilterOptions?.label ?? "Xóa tất cả"}
           onClick={filter.clearFilters}
         />
       </ElementTransition>
@@ -94,7 +94,7 @@ export const FiltersRow = observer(function FiltersRow<K extends TFilterProperty
           variant="secondary"
           size="sm"
           stretch="auto"
-          label={filter.saveViewOptions?.label ?? "Save view"}
+          label={filter.saveViewOptions?.label ?? "Lưu chế độ xem"}
           onClick={filter.saveView}
         />
       </ElementTransition>
@@ -103,7 +103,7 @@ export const FiltersRow = observer(function FiltersRow<K extends TFilterProperty
           variant="secondary"
           size="sm"
           stretch="auto"
-          label={isUpdating ? "Confirming" : (filter.updateViewOptions?.label ?? "Update view")}
+          label={isUpdating ? "Đang xác nhận" : (filter.updateViewOptions?.label ?? "Cập nhật chế độ xem")}
           onClick={handleUpdate}
           loading={isUpdating}
           disabled={isUpdating}

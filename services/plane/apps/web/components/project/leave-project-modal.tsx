@@ -69,7 +69,7 @@ export const LeaveProjectModal = observer(function LeaveProjectModal(props: ILea
 
     if (data) {
       if (data.projectName === project?.name) {
-        if (data.confirmLeave === "Leave Project") {
+        if (data.confirmLeave === "rời dự án") {
           router.push(`/${workspaceSlug}/projects`);
           return leaveProject(workspaceSlug.toString(), project.id)
             .then(() => {
@@ -78,29 +78,29 @@ export const LeaveProjectModal = observer(function LeaveProjectModal(props: ILea
             .catch((_err) => {
               setToast({
                 type: "error",
-                title: "Error!",
-                message: "Something went wrong please try again later.",
+                title: "Lỗi!",
+                message: "Đã xảy ra lỗi. Vui lòng thử lại sau.",
               });
             });
         } else {
           setToast({
             type: "error",
-            title: "Error!",
-            message: "Please confirm leaving the project by typing the 'Leave Project'.",
+            title: "Lỗi!",
+            message: "Nhập “rời dự án” để xác nhận rời khỏi dự án.",
           });
         }
       } else {
         setToast({
           type: "error",
-          title: "Error!",
-          message: "Please enter the project name as shown in the description.",
+          title: "Lỗi!",
+          message: "Vui lòng nhập tên dự án như trong phần mô tả.",
         });
       }
     } else {
       setToast({
         type: "error",
-        title: "Error!",
-        message: "Please fill all fields.",
+        title: "Lỗi!",
+        message: "Vui lòng điền đầy đủ thông tin.",
       });
     }
   };
@@ -121,27 +121,26 @@ export const LeaveProjectModal = observer(function LeaveProjectModal(props: ILea
                   <WarningTriangleOutline className="h-6 w-6 text-danger-primary" aria-hidden="true" />
                 </span>
                 <DialogHeading>
-                  <DialogTitle>Leave Project</DialogTitle>
+                  <DialogTitle>Rời dự án</DialogTitle>
                 </DialogHeading>
               </div>
             </DialogHeader>
             <DialogBody>
               <div className="flex flex-col gap-6">
                 <p className="text-13 leading-7 text-secondary">
-                  Are you sure you want to leave the project -
-                  <span className="font-medium text-primary">{` "${project?.name}" `}</span>? All of the work items
-                  associated with you will become inaccessible.
+                  Bạn có chắc muốn rời dự án
+                  <span className="font-medium text-primary">{` "${project?.name}" `}</span>? Bạn sẽ không còn truy cập
+                  được các công việc liên quan.
                 </p>
                 <div className="text-secondary">
                   <p className="text-13 break-words">
-                    Enter the project name <span className="font-medium text-primary">{project?.name}</span> to
-                    continue:
+                    Nhập tên dự án <span className="font-medium text-primary">{project?.name}</span> để tiếp tục:
                   </p>
                   <Controller
                     control={control}
                     name="projectName"
                     rules={{
-                      required: "Label title is required",
+                      required: "Tiêu đề nhãn là bắt buộc",
                     }}
                     render={({ field: { value, onChange, ref } }) => (
                       <Field name="projectName" invalid={Boolean(errors.projectName)}>
@@ -154,7 +153,7 @@ export const LeaveProjectModal = observer(function LeaveProjectModal(props: ILea
                             value={value}
                             onChange={onChange}
                             ref={ref}
-                            placeholder="Enter project name"
+                            placeholder={"Nhập tên dự án"}
                           />
                         </InputGroup>
                       </Field>
@@ -163,7 +162,7 @@ export const LeaveProjectModal = observer(function LeaveProjectModal(props: ILea
                 </div>
                 <div className="text-secondary">
                   <p className="text-13">
-                    To confirm, type <span className="font-medium text-primary">Leave Project</span> below:
+                    Để xác nhận, hãy nhập <span className="font-medium text-primary">rời dự án</span> bên dưới:
                   </p>
                   <Controller
                     control={control}
@@ -179,7 +178,7 @@ export const LeaveProjectModal = observer(function LeaveProjectModal(props: ILea
                             value={value}
                             onChange={onChange}
                             ref={ref}
-                            placeholder="Enter 'leave project'"
+                            placeholder={"Nhập “rời dự án”"}
                           />
                         </InputGroup>
                       </Field>
@@ -190,13 +189,13 @@ export const LeaveProjectModal = observer(function LeaveProjectModal(props: ILea
             </DialogBody>
           </DialogMain>
           <DialogActions>
-            <Button variant="secondary" size="md" stretch="auto" label="Cancel" onClick={handleClose} />
+            <Button variant="secondary" size="md" stretch="auto" label={"Hủy"} onClick={handleClose} />
             <Button
               variant="danger"
               size="md"
               stretch="auto"
               type="submit"
-              label={isSubmitting ? "Leaving..." : "Leave Project"}
+              label={isSubmitting ? "Đang rời khỏi…" : "Rời dự án"}
               loading={isSubmitting}
             />
           </DialogActions>

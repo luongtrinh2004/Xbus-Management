@@ -119,8 +119,8 @@ export const useRealtimePageEvents = ({
               if (page.id === pageId && data?.user_id !== currentUser?.id) {
                 setToast({
                   type: "error",
-                  title: "Page deleted",
-                  message: `Page deleted${getUserDisplayText(data.user_id)}`,
+                  title: "Đã xóa trang",
+                  message: `Đã xóa trang${getUserDisplayText(data.user_id)}`,
                 });
                 router.push(handlers.getRedirectionLink());
               } else if (page.id === pageId) {
@@ -141,14 +141,14 @@ export const useRealtimePageEvents = ({
 
         error: ({ pageIds, data }: { pageIds: string[]; data: EventToPayloadMap["error"] }) => {
           const errorType = data.error_type;
-          const errorMessage = data.error_message || "An error occurred";
+          const errorMessage = data.error_message || "Đã xảy ra lỗi";
           const errorCode = data.error_code;
 
           if (page.id && pageIds.includes(page.id)) {
             // Show toast notification
             setToast({
               type: "error",
-              title: errorType === "fetch" ? "Failed to load page" : "Failed to save page",
+              title: errorType === "fetch" ? "Không thể tải trang" : "Không thể lưu trang",
               message: errorMessage,
             });
 

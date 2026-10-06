@@ -63,7 +63,7 @@ export function StateSelect(props: StateSelectProps) {
     onChange,
     disabled = false,
     placeholder = "",
-    searchPlaceholder = "Search states...",
+    searchPlaceholder = "Tìm trạng thái",
     onClose,
     className,
     allowedStateIds = null,

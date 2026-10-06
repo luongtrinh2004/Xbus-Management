@@ -20,7 +20,7 @@ function ProjectArchivedIssuesPage({ params }: Route.ComponentProps) {
   const { getProjectById } = useProject();
   // derived values
   const project = getProjectById(projectId);
-  const pageTitle = project?.name && `${project?.name} - Archived work items`;
+  const pageTitle = project?.name && `${project?.name} - Công việc đã lưu trữ`;
 
   return (
     <>

@@ -183,7 +183,7 @@ export function ProjectDetailsForm(props: IProjectDetailsForm) {
       setToast({
         type: "error",
         title: t("toast.error"),
-        message: error instanceof Error ? error.message : "Failed to process cover image",
+        message: error instanceof Error ? error.message : "Không thể xử lý ảnh bìa",
       });
       setIsLoading(false);
       return;
@@ -206,7 +206,7 @@ export function ProjectDetailsForm(props: IProjectDetailsForm) {
     <form onSubmit={handleSubmit(onSubmit)}>
       <div className="relative h-44 w-full">
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-        <CoverImage src={coverImage} alt="Project cover image" className="h-44 w-full rounded-md" />
+        <CoverImage src={coverImage} alt={"Ảnh bìa dự án"} className="h-44 w-full rounded-md" />
         <div className="absolute bottom-4 z-5 flex w-full items-end justify-between gap-3 px-4">
           <div className="flex flex-grow gap-3 truncate">
             <Controller
@@ -284,7 +284,7 @@ export function ProjectDetailsForm(props: IProjectDetailsForm) {
               required: t("name_is_required"),
               maxLength: {
                 value: 255,
-                message: "Project name should be less than 255 characters",
+                message: "Tên dự án phải ít hơn 255 ký tự",
               },
             }}
             render={({ field: { value, onChange, ref } }) => (
@@ -333,7 +333,7 @@ export function ProjectDetailsForm(props: IProjectDetailsForm) {
         </div>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div className="flex flex-col gap-1">
-            <h4 className="text-13">Project ID</h4>
+            <h4 className="text-13">ID dự án</h4>
             <div className="relative">
               <Controller
                 control={control}

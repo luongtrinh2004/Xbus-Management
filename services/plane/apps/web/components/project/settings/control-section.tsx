@@ -59,7 +59,9 @@ export const GeneralProjectSettingsControlSection = observer(function GeneralPro
         <SettingsBoxedControlItem
           className="rounded-b-none border-0 border-b"
           title={t("archive")}
-          description="Archiving a project will unlist your project from your side navigation although you will still be able to access it from your projects page. You can restore the project or delete it whenever you want."
+          description={
+            "Lưu trữ dự án sẽ hủy liệt kê dự án của bạn khỏi thanh điều hướng bên, nhưng bạn vẫn có thể truy cập nó từ trang dự án. Bạn có thể khôi phục hoặc xóa dự án bất cứ lúc nào."
+          }
           control={
             <Button
               variant="secondary"
@@ -74,7 +76,9 @@ export const GeneralProjectSettingsControlSection = observer(function GeneralPro
         <SettingsBoxedControlItem
           className="rounded-t-none border-0"
           title={t("delete")}
-          description="When deleting a project, all of the data and resources within that project will be permanently removed and cannot be recovered."
+          description={
+            "Khi xóa dự án, tất cả dữ liệu và tài nguyên trong dự án đó sẽ bị xóa vĩnh viễn và không thể khôi phục."
+          }
           control={
             <Button
               variant="danger-outline"

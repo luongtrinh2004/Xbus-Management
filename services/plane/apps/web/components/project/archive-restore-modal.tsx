@@ -54,8 +54,8 @@ export function ArchiveRestoreProjectModal(props: Props) {
       .then(() => {
         setToast({
           type: "success",
-          title: "Archive success",
-          message: `${projectDetails.name} has been archived successfully`,
+          title: "Lưu trữ thành công",
+          message: `Đã lưu trữ dự án ${projectDetails.name}`,
         });
         onClose();
         router.push(`/${workspaceSlug}/projects/`);
@@ -64,8 +64,8 @@ export function ArchiveRestoreProjectModal(props: Props) {
       .catch(() =>
         setToast({
           type: "error",
-          title: "Error!",
-          message: "Project could not be archived. Please try again.",
+          title: "Lỗi!",
+          message: "Không thể lưu trữ dự án. Vui lòng thử lại.",
         })
       )
       .finally(() => setIsLoading(false));
@@ -77,8 +77,8 @@ export function ArchiveRestoreProjectModal(props: Props) {
       .then(() => {
         setToast({
           type: "success",
-          title: "Restore success",
-          message: `You can find ${projectDetails.name} in your projects.`,
+          title: "Khôi phục thành công",
+          message: `Bạn có thể tìm ${projectDetails.name} trong danh sách dự án.`,
         });
         onClose();
         router.push(`/${workspaceSlug}/projects/`);
@@ -87,8 +87,8 @@ export function ArchiveRestoreProjectModal(props: Props) {
       .catch(() =>
         setToast({
           type: "error",
-          title: "Error!",
-          message: "Project could not be restored. Please try again.",
+          title: "Lỗi!",
+          message: "Không thể khôi phục dự án. Vui lòng thử lại.",
         })
       )
       .finally(() => setIsLoading(false));
@@ -106,25 +106,25 @@ export function ArchiveRestoreProjectModal(props: Props) {
           <DialogHeader>
             <DialogHeading>
               <DialogTitle>
-                {archive ? "Archive" : "Restore"} {projectDetails.name}
+                {archive ? "Lưu trữ" : "Khôi phục"} {projectDetails.name}
               </DialogTitle>
             </DialogHeading>
           </DialogHeader>
           <DialogBody>
             <p className="text-13 text-secondary">
               {archive
-                ? "This project and its work items, cycles, modules, and pages will be archived. Its work items won't appear in search. Only project admins can restore the project."
-                : "Restoring a project will activate it and make it visible to all members of the project. Are you sure you want to continue?"}
+                ? "Dự án cùng công việc, chu kỳ, nhóm công việc và trang sẽ được lưu trữ. Công việc sẽ không xuất hiện trong kết quả tìm kiếm. Chỉ quản trị viên dự án có thể khôi phục."
+                : "Khôi phục sẽ kích hoạt lại dự án và hiển thị với tất cả thành viên. Bạn có muốn tiếp tục?"}
             </p>
           </DialogBody>
         </DialogMain>
         <DialogActions>
-          <Button variant="secondary" size="md" stretch="auto" label="Cancel" onClick={onClose} />
+          <Button variant="secondary" size="md" stretch="auto" label={"Hủy"} onClick={onClose} />
           <Button
             variant="primary"
             size="md"
             stretch="auto"
-            label={archive ? (isLoading ? "Archiving" : "Archive") : isLoading ? "Restoring" : "Restore"}
+            label={archive ? (isLoading ? "Đang lưu trữ" : "Lưu trữ") : isLoading ? "Đang khôi phục" : "Khôi phục"}
             onClick={archive ? handleArchiveProject : handleRestoreProject}
             loading={isLoading}
           />

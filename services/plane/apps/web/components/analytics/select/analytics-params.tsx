@@ -71,7 +71,7 @@ export const AnalyticsSelectParams = observer(function AnalyticsSelectParams(pro
                 <div className="flex items-center gap-2">
                   <CalendarOutline className="h-3 w-3" />
                   <span className={cn("text-secondary", value && "text-primary")}>
-                    {xAxisOptions.find((v) => v.value === value)?.label || "Add Property"}
+                    {xAxisOptions.find((v) => v.value === value)?.label || "Thêm thuộc tính"}
                   </span>
                 </div>
               }
@@ -92,12 +92,12 @@ export const AnalyticsSelectParams = observer(function AnalyticsSelectParams(pro
                 <div className="flex items-center gap-2">
                   <PreferencesOutline className="h-3 w-3" />
                   <span className={cn("text-secondary", value && "text-primary")}>
-                    {groupByOptions.find((v) => v.value === value)?.label || "Add Property"}
+                    {groupByOptions.find((v) => v.value === value)?.label || "Thêm thuộc tính"}
                   </span>
                 </div>
               }
               options={groupByOptions}
-              placeholder="Group By"
+              placeholder={"Nhóm theo"}
               allowNoValue
             />
           )}

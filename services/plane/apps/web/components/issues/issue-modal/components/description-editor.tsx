@@ -98,8 +98,8 @@ export const IssueDescriptionEditor = observer(function IssueDescriptionEditor(p
     } else {
       setToast({
         type: "error",
-        title: "Error!",
-        message: "Editor is still processing changes. Please wait before proceeding.",
+        title: "Lỗi!",
+        message: "Trình soạn thảo đang xử lý thay đổi. Vui lòng đợi trước khi tiếp tục.",
       });
       event.preventDefault(); // Prevent default action if editor is not ready to discard
     }
@@ -122,15 +122,14 @@ export const IssueDescriptionEditor = observer(function IssueDescriptionEditor(p
     aiService
       .createGptTask(workspaceSlug.toString(), {
         prompt: issueName,
-        task: "Generate a proper description for this work item.",
+        task: "Tạo mô tả phù hợp cho công việc này.",
       })
       .then((res) => {
         if (res.response === "")
           setToast({
             type: "error",
-            title: "Error!",
-            message:
-              "Work item title isn't informative enough to generate the description. Please try with a different title.",
+            title: "Lỗi!",
+            message: "Tiêu đề công việc chưa đủ thông tin để tạo mô tả. Vui lòng dùng tiêu đề cụ thể hơn.",
           });
         else handleAiAssistance(res.response_html);
       })
@@ -140,14 +139,14 @@ export const IssueDescriptionEditor = observer(function IssueDescriptionEditor(p
         if (err.status === 429)
           setToast({
             type: "error",
-            title: "Error!",
-            message: error || "You have reached the maximum number of requests of 50 requests per month per user.",
+            title: "Lỗi!",
+            message: error || "Bạn đã đạt giới hạn 50 yêu cầu mỗi tháng cho mỗi người dùng.",
           });
         else
           setToast({
             type: "error",
-            title: "Error!",
-            message: error || "Some error occurred. Please try again.",
+            title: "Lỗi!",
+            message: error || "Đã xảy ra lỗi. Vui lòng thử lại.",
           });
       })
       .finally(() => setIAmFeelingLucky(false));
@@ -222,7 +221,7 @@ export const IssueDescriptionEditor = observer(function IssueDescriptionEditor(p
                     return asset_id;
                   } catch (error) {
                     console.log("Error in uploading issue asset:", error);
-                    throw new Error("Asset upload failed. Please try again later.", { cause: error });
+                    throw new Error("Không thể tải lên tài nguyên. Vui lòng thử lại sau.", { cause: error });
                   }
                 }}
                 duplicateFile={async (assetId: string) => {
@@ -237,7 +236,7 @@ export const IssueDescriptionEditor = observer(function IssueDescriptionEditor(p
                     onAssetUpload(asset_id);
                     return asset_id;
                   } catch {
-                    throw new Error("Asset duplication failed. Please try again later.");
+                    throw new Error("Không thể sao chép tệp đính kèm. Vui lòng thử lại sau.");
                   }
                 }}
               />
@@ -255,10 +254,10 @@ export const IssueDescriptionEditor = observer(function IssueDescriptionEditor(p
                 tabIndex={getIndex("feeling_lucky")}
               >
                 {iAmFeelingLucky ? (
-                  "Generating response"
+                  "Đang tạo câu trả lời"
                 ) : (
                   <>
-                    <AiStar1Outline className="h-3.5 w-3.5" />I{"'"}m feeling lucky
+                    <AiStar1Outline className="h-3.5 w-3.5" />I{"'"}thử vận may
                   </>
                 )}
               </button>

@@ -69,7 +69,7 @@ export const ProductUpdatesChangelog = observer(function ProductUpdatesChangelog
   if (shouldShowFallback) {
     return (
       <ProductUpdatesFallback
-        description="We're having trouble fetching the updates. Please visit our changelog to view the latest updates."
+        description={"Không thể tải thông tin cập nhật. Hãy xem lịch sử thay đổi để biết phiên bản mới nhất."}
         variant={config?.is_self_managed ? "self-managed" : "cloud"}
       />
     );

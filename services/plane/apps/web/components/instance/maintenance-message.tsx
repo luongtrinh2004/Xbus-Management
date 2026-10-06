@@ -8,7 +8,7 @@ export function MaintenanceMessage() {
   const linkMap = [
     {
       key: "mail_to",
-      label: "Contact Support",
+      label: "Liên hệ hỗ trợ",
       value: "mailto:support@plane.so",
     },
   ];
@@ -16,12 +16,9 @@ export function MaintenanceMessage() {
   return (
     <>
       <div className="flex flex-col gap-2.5">
-        <h1 className="text-left text-18 font-semibold text-primary">
-          &#x1F6A7; Looks like Plane didn&apos;t start up correctly!
-        </h1>
+        <h1 className="text-left text-18 font-semibold text-primary">🚧 Plane chưa khởi động thành công!</h1>
         <span className="text-left text-14 font-medium text-secondary">
-          Some services might have failed to start. Please check your container logs to identify and resolve the issue.
-          If you&apos;re stuck, reach out to our support team for more help.
+          Một số dịch vụ chưa khởi động được. Hãy kiểm tra log container để xác định nguyên nhân hoặc liên hệ hỗ trợ.
         </span>
       </div>
       <div className="mt-1 flex items-center justify-start gap-6">

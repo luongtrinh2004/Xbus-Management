@@ -80,12 +80,12 @@ export const FilterLabels = observer(function FilterLabels(props: Props) {
                     className="ml-8 text-11 font-medium text-accent-primary"
                     onClick={handleViewToggle}
                   >
-                    {itemsToRender === sortedOptions.length ? "View less" : "View all"}
+                    {itemsToRender === sortedOptions.length ? "Thu gọn" : "Xem tất cả"}
                   </button>
                 )}
               </>
             ) : (
-              <p className="text-11 text-placeholder italic">No matches found</p>
+              <p className="text-11 text-placeholder italic">Không tìm thấy kết quả phù hợp</p>
             )
           ) : (
             <Loader className="space-y-2">

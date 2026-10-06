@@ -61,14 +61,14 @@ export const ThemeSwitcher = observer(function ThemeSwitcher(props: {
 
         const updatePromise = updateUserTheme({ theme: themeOption.value });
         setPromiseToast(updatePromise, {
-          loading: "Updating theme...",
+          loading: "Đang cập nhật chủ đề",
           success: {
-            title: "Theme updated",
-            message: () => "Reloading to apply changes...",
+            title: "Đã cập nhật giao diện",
+            message: () => "Đang tải lại để áp dụng thay đổi…",
           },
           error: {
-            title: "Error!",
-            message: () => "Failed to update theme. Please try again.",
+            title: "Lỗi!",
+            message: () => "Không thể cập nhật chủ đề. Vui lòng thử lại.",
           },
         });
         // Wait for the promise to resolve, then reload after showing toast

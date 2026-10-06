@@ -10,7 +10,7 @@ import { observer } from "mobx-react";
 import { useTranslation } from "@plane/i18n";
 import { StateGroupIcon } from "@plane/blocks/icons";
 import { Loader } from "@plane/blocks/skeleton";
-import { cn } from "@plane/utils";
+import { getStateDisplayName, cn } from "@plane/utils";
 // hooks
 import { useProjectState } from "@/hooks/store/use-project-state";
 
@@ -68,7 +68,7 @@ export const ReadonlyState = observer(function ReadonlyState(props: TReadonlySta
           color={state?.color}
         />
       )}
-      <span className="flex-grow truncate">{state?.name ?? placeholder ?? t("common.none")}</span>
+      <span className="flex-grow truncate">{getStateDisplayName(state) ?? placeholder ?? t("common.none")}</span>
     </div>
   );
 });

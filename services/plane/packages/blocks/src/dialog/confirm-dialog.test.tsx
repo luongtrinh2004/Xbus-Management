@@ -27,8 +27,8 @@ function renderDialog(overrides: Partial<ConfirmDialogProps> = {}) {
 }
 
 /** The confirm button, once the async i18n catalog has named it. */
-const confirmButton = (name: string | RegExp = "Delete") => screen.findByRole("button", { name });
-const cancelButton = (name: string | RegExp = "Cancel") => screen.findByRole("button", { name });
+const confirmButton = (name: string | RegExp = "Xóa") => screen.findByRole("button", { name });
+const cancelButton = (name: string | RegExp = "Hủy") => screen.findByRole("button", { name });
 
 /** The intent badge is the header's leading, decorative element; the title column follows it. */
 function getBadge(dialog: HTMLElement): Element | null {
@@ -70,13 +70,13 @@ describe("ConfirmDialog open state", () => {
 describe("ConfirmDialog labels", () => {
   it("defaults the buttons to the translated delete and cancel labels", async () => {
     renderDialog();
-    expect(await confirmButton("Delete")).toBeDefined();
-    expect(await cancelButton("Cancel")).toBeDefined();
+    expect(await confirmButton("Xóa")).toBeDefined();
+    expect(await cancelButton("Hủy")).toBeDefined();
   });
 
   it("defaults the in-flight label to the translated deleting label", async () => {
     renderDialog({ isSubmitting: true });
-    expect(await confirmButton("Deleting")).toBeDefined();
+    expect(await confirmButton("Đang xóa")).toBeDefined();
   });
 
   it("takes caller copy for both buttons and both confirm states", async () => {
@@ -162,7 +162,7 @@ describe("ConfirmDialog while submitting", () => {
     await user.click(cancel);
     expect(handleClose).not.toHaveBeenCalled();
 
-    const confirm = await confirmButton("Deleting");
+    const confirm = await confirmButton("Đang xóa");
     expect(confirm.getAttribute("aria-busy")).toBe("true");
     await user.click(confirm);
     expect(handleSubmit).not.toHaveBeenCalled();

@@ -33,8 +33,8 @@ export const LayoutQuickActions = observer(function LayoutQuickActions(props: Pr
     await copyUrlToClipboard(layoutLink);
     setToast({
       type: "success",
-      title: "Link copied",
-      message: `${storeType === "EPIC" ? "Epics" : "Work items"} link copied to clipboard.`,
+      title: "Đã sao chép liên kết",
+      message: `Đã sao chép liên kết ${storeType === "EPIC" ? "Epic" : "công việc"} vào bộ nhớ tạm.`,
     });
   };
 

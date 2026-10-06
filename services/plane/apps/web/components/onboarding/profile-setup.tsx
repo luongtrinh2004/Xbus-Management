@@ -60,7 +60,7 @@ enum EProfileSetupSteps {
   USER_PERSONALIZATION = "USER_PERSONALIZATION",
 }
 
-const USER_ROLE = ["Individual contributor", "Senior Leader", "Manager", "Executive", "Freelancer", "Student"];
+const USER_ROLE = ["Nhân viên chuyên môn", "Lãnh đạo cấp cao", "Manager", "Executive", "Freelancer", "Student"];
 
 const USER_DOMAIN = [
   "Engineering",
@@ -70,7 +70,7 @@ const USER_DOMAIN = [
   "Operations",
   "Legal",
   "Finance",
-  "Human Resources",
+  "Nhân sự",
   "Project",
   "Other",
 ];
@@ -140,8 +140,8 @@ export const ProfileSetup = observer(function ProfileSetup(props: Props) {
       ]);
       setToast({
         type: "success",
-        title: "Success",
-        message: "Profile setup completed!",
+        title: "Thành công",
+        message: "Đã hoàn tất thiết lập hồ sơ!",
       });
       // For Invited Users, they will skip all other steps and finish onboarding.
       if (totalSteps <= 2) {
@@ -150,8 +150,8 @@ export const ProfileSetup = observer(function ProfileSetup(props: Props) {
     } catch {
       setToast({
         type: "error",
-        title: "Error",
-        message: "Profile setup failed. Please try again!",
+        title: "Lỗi",
+        message: "Không thể thiết lập hồ sơ. Vui lòng thử lại!",
       });
     }
   };
@@ -175,8 +175,8 @@ export const ProfileSetup = observer(function ProfileSetup(props: Props) {
     } catch {
       setToast({
         type: "error",
-        title: "Error",
-        message: "User details update failed. Please try again!",
+        title: "Lỗi",
+        message: "Không thể cập nhật thông tin người dùng. Vui lòng thử lại!",
       });
     }
   };
@@ -193,8 +193,8 @@ export const ProfileSetup = observer(function ProfileSetup(props: Props) {
       ]);
       setToast({
         type: "success",
-        title: "Success",
-        message: "Profile setup completed!",
+        title: "Thành công",
+        message: "Đã hoàn tất thiết lập hồ sơ!",
       });
       // For Invited Users, they will skip all other steps and finish onboarding.
       if (totalSteps <= 2) {
@@ -203,8 +203,8 @@ export const ProfileSetup = observer(function ProfileSetup(props: Props) {
     } catch {
       setToast({
         type: "error",
-        title: "Error",
-        message: "Profile setup failed. Please try again!",
+        title: "Lỗi",
+        message: "Không thể thiết lập hồ sơ. Vui lòng thử lại!",
       });
     }
   };
@@ -277,9 +277,7 @@ export const ProfileSetup = observer(function ProfileSetup(props: Props) {
                           {watch("first_name")[0] ?? "R"}
                         </div>
                       </div>
-                      <div className="pt-1 text-13 font-medium text-accent-secondary hover:text-tertiary">
-                        Choose image
-                      </div>
+                      <div className="pt-1 text-13 font-medium text-accent-secondary hover:text-tertiary">Chọn ảnh</div>
                     </div>
                   ) : (
                     <div className="relative mr-3 h-16 w-16 overflow-hidden">
@@ -299,17 +297,17 @@ export const ProfileSetup = observer(function ProfileSetup(props: Props) {
                     className="text-13 font-medium text-tertiary after:ml-0.5 after:text-danger-primary after:content-['*']"
                     htmlFor="first_name"
                   >
-                    First name
+                    Tên
                   </label>
                   <Controller
                     control={control}
                     name="first_name"
                     rules={{
-                      required: "First name is required",
+                      required: "Vui lòng nhập tên",
                       validate: validatePersonName,
                       maxLength: {
                         value: 50,
-                        message: "First name must be within 50 characters.",
+                        message: "Tên không được quá 50 ký tự.",
                       },
                     }}
                     render={({ field: { value, onChange, ref } }) => (
@@ -340,17 +338,17 @@ export const ProfileSetup = observer(function ProfileSetup(props: Props) {
                     className="text-13 font-medium text-tertiary after:ml-0.5 after:text-danger-primary after:content-['*']"
                     htmlFor="last_name"
                   >
-                    Last name
+                    Họ
                   </label>
                   <Controller
                     control={control}
                     name="last_name"
                     rules={{
-                      required: "Last name is required",
+                      required: "Vui lòng nhập họ",
                       validate: validatePersonName,
                       maxLength: {
                         value: 50,
-                        message: "Last name must be within 50 characters.",
+                        message: "Họ không được quá 50 ký tự.",
                       },
                     }}
                     render={({ field: { value, onChange, ref } }) => (
@@ -380,7 +378,7 @@ export const ProfileSetup = observer(function ProfileSetup(props: Props) {
                 <>
                   <div className="space-y-1">
                     <label className="text-13 font-medium text-tertiary" htmlFor="password">
-                      Set a password ({t("common.optional")})
+                      Thiết lập mật khẩu ({t("common.optional")})
                     </label>
                     <Controller
                       control={control}
@@ -398,11 +396,11 @@ export const ProfileSetup = observer(function ProfileSetup(props: Props) {
                               value={value}
                               onChange={onChange}
                               ref={ref}
-                              placeholder="New password..."
+                              placeholder={"Mật khẩu mới…"}
                               onFocus={() => setIsPasswordInputFocused(true)}
                               onBlur={() => setIsPasswordInputFocused(false)}
                               autoComplete="new-password"
-                              aria-label="New password..."
+                              aria-label={"Mật khẩu mới…"}
                             />
                             <button
                               type="button"
@@ -431,7 +429,7 @@ export const ProfileSetup = observer(function ProfileSetup(props: Props) {
                       rules={{
                         required: watch("password") ? true : false,
                         validate: (value) =>
-                          watch("password") ? (value === watch("password") ? true : "Passwords don't match") : true,
+                          watch("password") ? (value === watch("password") ? true : "Mật khẩu không khớp") : true,
                       }}
                       render={({ field: { value, onChange, ref } }) => (
                         <Field name="confirm_password" invalid={Boolean(errors.confirm_password)}>
@@ -479,13 +477,13 @@ export const ProfileSetup = observer(function ProfileSetup(props: Props) {
                   className="text-13 font-medium text-tertiary after:ml-0.5 after:text-danger-primary after:content-['*']"
                   htmlFor="role"
                 >
-                  What role are you working on? Choose one.
+                  Chọn vai trò công việc của bạn.
                 </label>
                 <Controller
                   control={control}
                   name="role"
                   rules={{
-                    required: "This field is required",
+                    required: "Trường này là bắt buộc",
                   }}
                   render={({ field: { value, onChange } }) => (
                     <div className="flex flex-wrap gap-2 overflow-auto py-2 break-all">
@@ -514,14 +512,14 @@ export const ProfileSetup = observer(function ProfileSetup(props: Props) {
                   className="text-13 font-medium text-tertiary after:ml-0.5 after:text-danger-primary after:content-['*']"
                   htmlFor="use_case"
                 >
-                  What is your domain expertise? Choose one or more.
+                  Chọn một hoặc nhiều lĩnh vực chuyên môn của bạn.
                 </label>
                 <Controller
                   control={control}
                   name="use_case"
                   rules={{
-                    required: "Please select at least one option",
-                    validate: (value) => (value && value.length > 0) || "Please select at least one option",
+                    required: "Vui lòng chọn ít nhất một mục",
+                    validate: (value) => (value && value.length > 0) || "Vui lòng chọn ít nhất một mục",
                   }}
                   render={({ field: { value, onChange } }) => (
                     <div className="flex flex-wrap gap-2 overflow-auto py-2 break-all">
@@ -554,7 +552,7 @@ export const ProfileSetup = observer(function ProfileSetup(props: Props) {
             </>
           )}
           <Button variant="primary" type="submit" size="lg" stretch="full" disabled={isButtonDisabled}>
-            {isSubmitting ? <Spinner height="20px" width="20px" /> : "Continue"}
+            {isSubmitting ? <Spinner height="20px" width="20px" /> : "Tiếp tục"}
           </Button>
         </form>
       </div>

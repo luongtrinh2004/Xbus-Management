@@ -209,7 +209,7 @@ export function NotificationContent({
       <span className="text-tertiary">{renderAction()} </span>
       {verb !== "deleted" && (
         <>
-          {showConnector && <span className="text-tertiary">to </span>}
+          {showConnector && <span className="text-tertiary">đến </span>}
           <span className="font-medium text-primary">{renderValue()}</span>
           {notificationField === "comment" && renderCommentBox && (
             <div className="origin-left scale-75">

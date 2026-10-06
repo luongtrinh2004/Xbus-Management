@@ -4,6 +4,8 @@
  * See the LICENSE file for details.
  */
 
+import { getStateDisplayName } from "@plane/utils";
+
 import { observer } from "mobx-react";
 // icons
 // plane imports
@@ -37,7 +39,7 @@ export const AppliedStateFilters = observer(function AppliedStateFilters(props: 
               size={EIconSize.SM}
               percentage={stateDetails?.order}
             />
-            {stateDetails.name}
+            {getStateDisplayName(stateDetails)}
             {editable && (
               <button
                 type="button"

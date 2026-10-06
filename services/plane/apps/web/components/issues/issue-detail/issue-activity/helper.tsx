@@ -73,7 +73,7 @@ export const useWorkItemCommentOperations = (
       },
       createComment: async (data) => {
         try {
-          if (!workspaceSlug || !projectId || !issueId) throw new Error("Missing fields");
+          if (!workspaceSlug || !projectId || !issueId) throw new Error("Thiếu trường");
           const comment = await createComment(workspaceSlug, projectId, issueId, data);
           setToast({
             title: t("common.success"),
@@ -91,7 +91,7 @@ export const useWorkItemCommentOperations = (
       },
       updateComment: async (commentId, data) => {
         try {
-          if (!workspaceSlug || !projectId || !issueId) throw new Error("Missing fields");
+          if (!workspaceSlug || !projectId || !issueId) throw new Error("Thiếu trường");
           await updateComment(workspaceSlug, projectId, issueId, commentId, data);
           setToast({
             title: t("common.success"),
@@ -108,7 +108,7 @@ export const useWorkItemCommentOperations = (
       },
       removeComment: async (commentId) => {
         try {
-          if (!workspaceSlug || !projectId || !issueId) throw new Error("Missing fields");
+          if (!workspaceSlug || !projectId || !issueId) throw new Error("Thiếu trường");
           await removeComment(workspaceSlug, projectId, issueId, commentId);
           setToast({
             title: t("common.success"),
@@ -125,7 +125,7 @@ export const useWorkItemCommentOperations = (
       },
       uploadCommentAsset: async (blockId, file, commentId) => {
         try {
-          if (!workspaceSlug || !projectId) throw new Error("Missing fields");
+          if (!workspaceSlug || !projectId) throw new Error("Thiếu trường");
           const res = await uploadEditorAsset({
             blockId,
             data: {
@@ -144,7 +144,7 @@ export const useWorkItemCommentOperations = (
       },
       duplicateCommentAsset: async (assetId, commentId) => {
         try {
-          if (!workspaceSlug || !projectId) throw new Error("Missing fields");
+          if (!workspaceSlug || !projectId) throw new Error("Thiếu trường");
           const res = await duplicateEditorAsset({
             assetId,
             entityId: commentId || undefined,
@@ -154,40 +154,40 @@ export const useWorkItemCommentOperations = (
           });
           return res;
         } catch {
-          throw new Error("Asset duplication failed. Please try again later.");
+          throw new Error("Không thể sao chép tệp đính kèm. Vui lòng thử lại sau.");
         }
       },
       addCommentReaction: async (commentId, reaction) => {
         try {
-          if (!workspaceSlug || !projectId || !commentId) throw new Error("Missing fields");
+          if (!workspaceSlug || !projectId || !commentId) throw new Error("Thiếu trường");
           await createCommentReaction(workspaceSlug, projectId, commentId, reaction);
           setToast({
-            title: "Success!",
+            title: "Thành công!",
             type: "success",
-            message: "Reaction created successfully",
+            message: "Đã tạo cảm xúc.",
           });
         } catch {
           setToast({
-            title: "Error!",
+            title: "Lỗi!",
             type: "error",
-            message: "Reaction creation failed",
+            message: "Không thể thêm cảm xúc",
           });
         }
       },
       deleteCommentReaction: async (commentId, reaction) => {
         try {
-          if (!workspaceSlug || !projectId || !commentId || !currentUser?.id) throw new Error("Missing fields");
+          if (!workspaceSlug || !projectId || !commentId || !currentUser?.id) throw new Error("Thiếu trường");
           removeCommentReaction(workspaceSlug, projectId, commentId, reaction, currentUser.id);
           setToast({
-            title: "Success!",
+            title: "Thành công!",
             type: "success",
-            message: "Reaction removed successfully",
+            message: "Đã xóa cảm xúc.",
           });
         } catch {
           setToast({
-            title: "Error!",
+            title: "Lỗi!",
             type: "error",
-            message: "Reaction remove failed",
+            message: "Không thể xóa cảm xúc",
           });
         }
       },

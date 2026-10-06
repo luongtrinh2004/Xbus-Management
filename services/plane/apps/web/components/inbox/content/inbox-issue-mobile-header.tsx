@@ -124,14 +124,14 @@ export const InboxIssueActionsMobileHeader = observer(function InboxIssueActions
             variant="secondary"
             size="md"
             icon={<Icon icon={ChevronUpOutline} />}
-            aria-label="Previous work item"
+            aria-label={"Công việc trước"}
             onClick={() => handleInboxIssueNavigation("prev")}
           />
           <IconButton
             variant="secondary"
             size="md"
             icon={<Icon icon={ChevronDownOutline} />}
-            aria-label="Next work item"
+            aria-label={"Công việc tiếp theo"}
             onClick={() => handleInboxIssueNavigation("next")}
           />
         </div>
@@ -157,26 +157,28 @@ export const InboxIssueActionsMobileHeader = observer(function InboxIssueActions
               {isAcceptedOrDeclined && (
                 <MenuItem
                   icon={<Icon icon={LinkOutline} />}
-                  label="Copy work item link"
+                  label={"Sao chép liên kết công việc"}
                   onClick={handleCopyIssueLink}
                 />
               )}
               {isAcceptedOrDeclined && (
                 <MenuItem
                   icon={<Icon icon={NewTabOutline} />}
-                  label="Open work item"
+                  label={"Mở công việc"}
                   onClick={() => router.push(workItemLink)}
                 />
               )}
               {canMarkAsAccepted && !isAcceptedOrDeclined && (
                 <MenuItem
                   icon={<Icon icon={ClockOutline} />}
-                  label={inboxIssue?.snoozed_till && numberOfDaysLeft && numberOfDaysLeft > 0 ? "Un-snooze" : "Snooze"}
+                  label={
+                    inboxIssue?.snoozed_till && numberOfDaysLeft && numberOfDaysLeft > 0 ? "Bỏ tạm hoãn" : "Tạm hoãn"
+                  }
                   onClick={() =>
                     handleActionWithPermission(
                       isProjectAdmin,
                       handleIssueSnoozeAction,
-                      "Only project admins can snooze/Un-snooze work items"
+                      "Chỉ quản trị viên dự án mới có thể tạm hoãn/hủy tạm hoãn công việc"
                     )
                   }
                 />
@@ -184,12 +186,12 @@ export const InboxIssueActionsMobileHeader = observer(function InboxIssueActions
               {canMarkAsDuplicate && !isAcceptedOrDeclined && (
                 <MenuItem
                   icon={<Icon icon={DuplicateOfOutline} />}
-                  label="Mark as duplicate"
+                  label={"Đánh dấu là trùng lặp"}
                   onClick={() =>
                     handleActionWithPermission(
                       isProjectAdmin,
                       () => setSelectDuplicateIssue(true),
-                      "Only project admins can mark work items as duplicate"
+                      "Chỉ quản trị viên dự án có thể đánh dấu công việc trùng lặp"
                     )
                   }
                 />
@@ -198,12 +200,12 @@ export const InboxIssueActionsMobileHeader = observer(function InboxIssueActions
                 // Propel menu rows are neutral/accent/danger only, so the accept/decline tint lives on the glyph.
                 <MenuItem
                   icon={<Icon icon={<TickCircleFilled className="text-success-secondary" />} />}
-                  label="Accept"
+                  label={"Chấp nhận"}
                   onClick={() =>
                     handleActionWithPermission(
                       isProjectAdmin,
                       () => setAcceptIssueModal(true),
-                      "Only project admins can accept work items"
+                      "Chỉ quản trị viên dự án mới có thể chấp nhận công việc"
                     )
                   }
                 />
@@ -211,12 +213,12 @@ export const InboxIssueActionsMobileHeader = observer(function InboxIssueActions
               {canMarkAsDeclined && (
                 <MenuItem
                   icon={<Icon icon={<CloseCircleFilled className="text-danger-secondary" />} />}
-                  label="Decline"
+                  label={"Từ chối"}
                   onClick={() =>
                     handleActionWithPermission(
                       isProjectAdmin,
                       () => setDeclineIssueModal(true),
-                      "Only project admins can deny work items"
+                      "Chỉ quản trị viên dự án mới có thể từ chối công việc"
                     )
                   }
                 />
@@ -225,7 +227,7 @@ export const InboxIssueActionsMobileHeader = observer(function InboxIssueActions
                 <MenuItem
                   variant="danger"
                   icon={<Icon icon={DeleteOutline} />}
-                  label="Delete"
+                  label={"Xóa"}
                   onClick={() => setDeleteIssueModal(true)}
                 />
               )}

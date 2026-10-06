@@ -310,7 +310,7 @@ const IssueRowDetails = observer(function IssueRowDetails(props: IssueRowDetails
               {/* select checkbox */}
               {projectId && canSelectIssues && (
                 <Tooltip
-                  label="Only work items within the current project can be selected."
+                  label={"Chỉ có thể chọn công việc thuộc dự án hiện tại."}
                   layout="stacked"
                   disabled={issueDetail.project_id === projectId}
                 >

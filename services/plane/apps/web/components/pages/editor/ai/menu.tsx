@@ -43,26 +43,26 @@ const MENU_ITEMS: {
   {
     key: AI_EDITOR_TASKS.ASK_ANYTHING,
     icon: AiStar1Outline,
-    label: "Ask Pi",
+    label: "Hỏi Pi",
   },
 ];
 
 const TONES_LIST = [
   {
     key: "default",
-    label: "Default",
+    label: "Mặc định",
     casual_score: 5,
     formal_score: 5,
   },
   {
     key: "professional",
-    label: "💼 Professional",
+    label: "💼 Chuyên nghiệp",
     casual_score: 0,
     formal_score: 10,
   },
   {
     key: "casual",
-    label: "😃 Casual",
+    label: "😃 Thân thiện",
     casual_score: 10,
     formal_score: 0,
   },
@@ -236,9 +236,9 @@ export function EditorAIMenu(props: Props) {
                         className="rounded-sm p-1 text-13 font-medium text-tertiary outline-none hover:bg-layer-1"
                         onClick={() => handleInsertText(false)}
                       >
-                        Replace selection
+                        Thay thế nội dung đã chọn
                       </button>
-                      <Tooltip label="Add to next line">
+                      <Tooltip label={"Thêm vào dòng tiếp theo"}>
                         <button
                           type="button"
                           className="grid size-6 flex-shrink-0 place-items-center rounded-sm outline-none hover:bg-layer-1"
@@ -247,7 +247,7 @@ export function EditorAIMenu(props: Props) {
                           <CornerRightDownOutline className="size-4 text-tertiary" />
                         </button>
                       </Tooltip>
-                      <Tooltip label="Re-generate response">
+                      <Tooltip label={"Tạo lại câu trả lời"}>
                         <button
                           type="button"
                           className="grid size-6 flex-shrink-0 place-items-center rounded-sm outline-none hover:bg-layer-1"
@@ -269,7 +269,7 @@ export function EditorAIMenu(props: Props) {
                   </div>
                 ) : (
                   <p className="text-13 text-secondary">
-                    {activeTask ? LOADING_TEXTS[activeTask] : "Pi is writing"}...
+                    {activeTask ? LOADING_TEXTS[activeTask] : "Pi đang soạn nội dung"}...
                   </p>
                 )}
               </div>
@@ -304,7 +304,7 @@ export function EditorAIMenu(props: Props) {
             <WarningTriangleOutline className="size-3" />
           </span>
           <p className="flex-shrink-0 text-11 font-medium">
-            By using this feature, you consent to sharing the message with a 3rd party service.
+            Khi sử dụng tính năng này, bạn đồng ý chia sẻ nội dung với dịch vụ bên thứ ba.
           </p>
         </div>
       )}

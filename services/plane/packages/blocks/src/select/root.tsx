@@ -84,7 +84,7 @@ export function SelectRoot<T>(props: SelectProps<T>) {
     placeholder,
     searchPlaceholder,
     showSearch = true,
-    emptyMessage = "No results found",
+    emptyMessage = "Không tìm thấy kết quả",
     onClose,
     children,
     // The standard row is a fixed single line; hand-drawn and two-line rows are taller.

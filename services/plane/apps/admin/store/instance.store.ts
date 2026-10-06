@@ -117,7 +117,7 @@ export class InstanceStore implements IInstanceStore {
     } catch (error) {
       console.error("Error fetching the instance info");
       this.isLoading = false;
-      this.error = { message: "Failed to fetch the instance info" };
+      this.error = { message: "Không thể tải thông tin hệ thống" };
       this.instanceStatus = {
         status: EInstanceStatus.ERROR,
       };

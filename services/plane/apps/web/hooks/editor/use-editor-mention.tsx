@@ -37,7 +37,7 @@ export const useEditorMention = (args: TArgs) => {
         });
         const suggestionSections: TMentionSection[] = [];
         if (!res) {
-          throw new Error("No response found");
+          throw new Error("Không tìm thấy câu trả lời");
         }
         Object.keys(res).map((key) => {
           const responseKey = key as TSearchEntities;
@@ -59,7 +59,7 @@ export const useEditorMention = (args: TArgs) => {
             }));
             suggestionSections.push({
               key: "users",
-              title: "Users",
+              title: "Người dùng",
               items,
             });
           }

@@ -4,6 +4,8 @@
  * See the LICENSE file for details.
  */
 
+import { setDefaultOptions } from "date-fns";
+import { vi } from "date-fns/locale";
 import { initPromise } from "@plane/i18n";
 import { startTransition, StrictMode } from "react";
 import { hydrateRoot } from "react-dom/client";
@@ -13,6 +15,8 @@ import polyfills from "@/lib/polyfills";
 import { isStaleAssetErrorMessage, recoverFromStaleAsset } from "@/lib/stale-asset-error";
 
 void polyfills;
+
+setDefaultOptions({ locale: vi, weekStartsOn: 1 });
 
 // Production-only: in dev these errors come from the dev server itself (restarts,
 // stale optimized deps) and auto-reloading would mask them.

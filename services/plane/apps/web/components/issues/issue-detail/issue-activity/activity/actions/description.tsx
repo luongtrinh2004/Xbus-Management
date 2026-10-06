@@ -30,7 +30,7 @@ export const IssueDescriptionActivity = observer(function IssueDescriptionActivi
       ends={ends}
     >
       <>
-        updated the description
+        đã cập nhật mô tả
         {showIssue ? ` of ` : ``}
         {showIssue && <IssueLink activityId={activityId} />}.
       </>

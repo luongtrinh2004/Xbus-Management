@@ -64,8 +64,8 @@ export const usePageOperations = (
         await copyUrlToClipboard(pageLink);
         setToast({
           type: "success",
-          title: "Link Copied!",
-          message: "Page link copied to clipboard.",
+          title: "Đã sao chép liên kết!",
+          message: "Đã sao chép liên kết trang vào bộ nhớ tạm.",
         });
       },
       duplicate: async () => {
@@ -73,35 +73,35 @@ export const usePageOperations = (
           await duplicate();
           setToast({
             type: "success",
-            title: "Success!",
-            message: "Page duplicated successfully.",
+            title: "Thành công!",
+            message: "Đã tạo bản sao trang.",
           });
         } catch (_error) {
           setToast({
             type: "error",
-            title: "Error!",
-            message: "Page could not be duplicated. Please try again later.",
+            title: "Lỗi!",
+            message: "Không thể tạo bản sao trang. Vui lòng thử lại.",
           });
         }
       },
       move: async () => {},
       openInNewTab: () => window.open(pageLink, "_blank"),
       toggleAccess: async () => {
-        const changedPageType = access === EPageAccess.PUBLIC ? "private" : "public";
+        const changedPageType = access === EPageAccess.PUBLIC ? "riêng tư" : "công khai";
         try {
           if (access === EPageAccess.PUBLIC)
             await executeCollaborativeAction({ type: "sendMessageToServer", message: "make-private" });
           else await executeCollaborativeAction({ type: "sendMessageToServer", message: "make-public" });
           setToast({
             type: "success",
-            title: "Success!",
-            message: `The page has been marked ${changedPageType} and moved to the ${changedPageType} section.`,
+            title: "Thành công!",
+            message: `Đã đánh dấu trang là ${changedPageType} và chuyển vào mục ${changedPageType}.`,
           });
         } catch (_error) {
           setToast({
             type: "error",
-            title: "Error!",
-            message: `The page couldn't be marked ${changedPageType}. Please try again.`,
+            title: "Lỗi!",
+            message: `Không thể đánh dấu trang là ${changedPageType}. Vui lòng thử lại.`,
           });
         }
       },
@@ -111,14 +111,14 @@ export const usePageOperations = (
             await executeCollaborativeAction({ type: "sendMessageToServer", message: "unarchive" });
             setToast({
               type: "success",
-              title: "Success!",
-              message: "Page restored successfully.",
+              title: "Thành công!",
+              message: "Đã khôi phục trang.",
             });
           } catch (_error) {
             setToast({
               type: "error",
-              title: "Error!",
-              message: "Page could not be restored. Please try again later.",
+              title: "Lỗi!",
+              message: "Không thể khôi phục trang. Vui lòng thử lại.",
             });
           }
         } else {
@@ -126,14 +126,14 @@ export const usePageOperations = (
             await executeCollaborativeAction({ type: "sendMessageToServer", message: "archive" });
             setToast({
               type: "success",
-              title: "Success!",
-              message: "Page archived successfully.",
+              title: "Thành công!",
+              message: "Đã lưu trữ trang.",
             });
           } catch (_error) {
             setToast({
               type: "error",
-              title: "Error!",
-              message: "Page could not be archived. Please try again later.",
+              title: "Lỗi!",
+              message: "Không thể lưu trữ trang. Vui lòng thử lại.",
             });
           }
         }
@@ -144,14 +144,14 @@ export const usePageOperations = (
             await removePageFromFavorites();
             setToast({
               type: "success",
-              title: "Success!",
-              message: "Page removed from favorites.",
+              title: "Thành công!",
+              message: "Đã bỏ trang khỏi mục yêu thích.",
             });
           } catch (_error) {
             setToast({
               type: "error",
-              title: "Error!",
-              message: "Page could not be removed from favorites. Please try again later.",
+              title: "Lỗi!",
+              message: "Không thể bỏ trang khỏi mục yêu thích. Vui lòng thử lại sau.",
             });
           }
         } else {
@@ -160,14 +160,14 @@ export const usePageOperations = (
             if (!isFavoriteMenuOpen) toggleFavoriteMenu(true);
             setToast({
               type: "success",
-              title: "Success!",
-              message: "Page added to favorites.",
+              title: "Thành công!",
+              message: "Đã thêm trang vào mục yêu thích.",
             });
           } catch (_error) {
             setToast({
               type: "error",
-              title: "Error!",
-              message: "Page could not be added to favorites. Please try again later.",
+              title: "Lỗi!",
+              message: "Không thể thêm trang vào mục yêu thích. Vui lòng thử lại sau.",
             });
           }
         }
@@ -178,14 +178,14 @@ export const usePageOperations = (
             await executeCollaborativeAction({ type: "sendMessageToServer", message: "unlock" });
             setToast({
               type: "success",
-              title: "Success!",
-              message: "Page unlocked successfully.",
+              title: "Thành công!",
+              message: "Đã mở khóa trang.",
             });
           } catch (_error) {
             setToast({
               type: "error",
-              title: "Error!",
-              message: "Page could not be unlocked. Please try again later.",
+              title: "Lỗi!",
+              message: "Không thể mở khóa trang. Vui lòng thử lại.",
             });
           }
         } else {
@@ -193,14 +193,14 @@ export const usePageOperations = (
             await executeCollaborativeAction({ type: "sendMessageToServer", message: "lock" });
             setToast({
               type: "success",
-              title: "Success!",
-              message: "Page locked successfully.",
+              title: "Thành công!",
+              message: "Đã khóa trang.",
             });
           } catch (_error) {
             setToast({
               type: "error",
-              title: "Error!",
-              message: "Page could not be locked. Please try again later.",
+              title: "Lỗi!",
+              message: "Không thể khóa trang. Vui lòng thử lại.",
             });
           }
         }

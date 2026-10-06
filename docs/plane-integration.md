@@ -21,11 +21,12 @@ sau đó chạy:
 npm run plane:start
 ```
 
-Frontend dùng image local `xbus-plane-frontend:1.4.2-hydration-fix`, được build
-từ image Plane đã pin digest. Bản vá giữ `HydrateFallback` là `<div />` trong
-lần render đầu tiên, rồi hiển thị spinner sau khi mount để tránh lỗi React
-418/423 do theme của trình duyệt khác HTML prerender. Nếu đổi phiên bản Plane,
-cần cập nhật và kiểm tra lại `services/plane-xbus/Dockerfile.web`.
+Frontend dùng image local `xbus-plane-frontend:1.4.2-xbus-source`, build trực tiếp
+từ source tại `services/plane` bằng `services/plane-xbus/Dockerfile.web`.
+`npm run plane:start` build lại image để đưa thay đổi UI/UX vào module XBus.
+Build bật `VITE_XBUS_EMBEDDED=true` để ẩn thanh điều hướng trên cùng của Plane
+và dùng tiêu đề XBus Work. Hydration fallback được sửa trong source thay vì
+vá bundle đã biên dịch. API và các dịch vụ nền vẫn chạy riêng trong Docker.
 
 Plane mở tại `http://localhost:3100`. Thêm vào `.env.local` của XBus:
 
@@ -92,3 +93,47 @@ Không tự tạo dự án hoặc công việc mẫu.
 
 Local dùng cùng hostname `localhost` cho cả XBus và Plane. Production dùng
 cùng origin HTTPS qua Nginx; cookie Plane và NextAuth vẫn là các phiên riêng.
+
+## Giao diện tiếng Việt của module Quản lý công việc
+
+XBus dùng tiếng Việt (`vi-VN`) cho module Plane. Bản frontend nhúng bật
+`VITE_XBUS_EMBEDDED=true`, bỏ qua lựa chọn tiếng Anh còn lưu trên trình duyệt
+hoặc hồ sơ cũ, và chỉ hiển thị lựa chọn Tiếng Việt. Cầu nối nhân sự cập nhật
+`Profile.language` khi đồng bộ, áp dụng cả cho tài khoản đã tồn tại.
+
+Thuật ngữ thống nhất:
+
+| Nội dung | Cách hiển thị |
+| --- | --- |
+| Work item | Công việc |
+| Assignee | Người phụ trách |
+| Module | Nhóm công việc |
+| Intake | Tiếp nhận |
+| Cycle | Chu kỳ |
+| Due date | Hạn hoàn thành |
+| View | Chế độ xem |
+| Workspace | Không gian làm việc |
+
+Giữ tên sản phẩm, tên công nghệ và thuật ngữ chuyên ngành như Plane, GitHub,
+API, OAuth, SAML, SMTP, webhook, Kanban, Gantt, Epic và Sprint. Không dịch
+URL, mã định danh, khóa API, nội dung dự án/công việc hoặc tên trạng thái do
+người dùng tự đặt. Tên trạng thái mặc định được dịch ở lớp hiển thị bằng
+`getStateDisplayName`; tên, ID và nhóm trạng thái trong dữ liệu vẫn giữ nguyên.
+
+Sau khi sửa source, chạy `npm run plane:start` để build lại frontend và API.
+Để phát triển frontend bằng source, bật `VITE_XBUS_EMBEDDED=true` trong môi
+trường chạy Vite. Các image admin, space và live trong Compose vẫn là image
+upstream; thay đổi source ở những ứng dụng này cần quy trình build riêng nếu
+muốn triển khai giao diện quản trị, chia sẻ công khai hoặc dịch vụ realtime.
+
+Kiểm tra bộ dịch và trạng thái:
+
+```bash
+cd services/plane
+pnpm --filter @plane/i18n test:vi
+pnpm --filter web check:types
+VITE_XBUS_EMBEDDED=true pnpm turbo run build --filter=web
+```
+
+Các thành phần mới nên dùng `useTranslation` với khóa dịch trong
+`packages/i18n/src/locales`, thay vì viết thêm nhãn tiếng Anh trực tiếp.

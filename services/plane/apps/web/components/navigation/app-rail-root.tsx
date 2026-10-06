@@ -57,7 +57,7 @@ export const AppRailRoot = observer(() => {
               <div className="mx-2 border-t border-strong" />
               <AppSidebarItem
                 item={{
-                  label: "Settings",
+                  label: "Cài đặt",
                   icon: <SettingsOutline className="size-5" />,
                   href: `/${workspaceSlug}/settings`,
                   isActive: isWorkspaceSettingsPath,
@@ -70,16 +70,19 @@ export const AppRailRoot = observer(() => {
         <ContextMenuContent>
           <ContextMenuItem
             onClick={() => updateDisplayMode("icon_only")}
-            label="Icon only"
+            label={"Chỉ biểu tượng"}
             selected={preferences.displayMode === "icon_only"}
           />
           <ContextMenuItem
             onClick={() => updateDisplayMode("icon_with_label")}
-            label="Icon with name"
+            label={"Biểu tượng và tên"}
             selected={preferences.displayMode === "icon_with_label"}
           />
           <ContextMenuSeparator />
-          <ContextMenuItem onClick={toggleAppRail} label={isCollapsed ? "Dock App Rail" : "Undock App Rail"} />
+          <ContextMenuItem
+            onClick={toggleAppRail}
+            label={isCollapsed ? "Ghim thanh ứng dụng" : "Bỏ ghim thanh ứng dụng"}
+          />
         </ContextMenuContent>
       </ContextMenu>
     </div>

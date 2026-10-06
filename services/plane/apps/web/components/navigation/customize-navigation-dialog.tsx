@@ -219,8 +219,8 @@ export const CustomizeNavigationDialog = observer(function CustomizeNavigationDi
             <DialogHeading>
               <DialogTitle>{t("customize_navigation")}</DialogTitle>
               <DialogDescription>
-                Selected items will always stay visible in your sidebar. You can still find the others anytime from the
-                More menu. These changes are personal to you and won&apos;t affect anyone else on your workspace.
+                Các mục đã chọn sẽ luôn hiển thị trên thanh bên. Những mục khác nằm trong menu Xem thêm. Thiết lập này
+                chỉ áp dụng cho bạn.
               </DialogDescription>
             </DialogHeading>
           </DialogHeader>
@@ -309,7 +309,7 @@ export const CustomizeNavigationDialog = observer(function CustomizeNavigationDi
                         <div className="flex-1">
                           <div className="text-13 text-primary">{t("accordion_navigation_control")}</div>
                           <div className="text-11 text-secondary">
-                            Feature tabs will appear as nested items under project and acts as accordion.
+                            Các tính năng sẽ hiển thị dưới dự án trong danh sách có thể mở rộng hoặc thu gọn.
                           </div>
                         </div>
                       </label>
@@ -327,7 +327,7 @@ export const CustomizeNavigationDialog = observer(function CustomizeNavigationDi
                         <div className="flex-1">
                           <div className="text-13 text-primary">{t("horizontal_navigation_bar")}</div>
                           <div className="text-11 text-secondary">
-                            Feature tabs will appear as horizontal tabs inside a project.
+                            Các tính năng sẽ hiển thị thành tab ngang trong dự án.
                           </div>
                         </div>
                       </label>
@@ -367,7 +367,7 @@ export const CustomizeNavigationDialog = observer(function CustomizeNavigationDi
                               />
                             </div>
                             {parseInt(projectCountInput) < 1 && projectCountInput !== "" && (
-                              <span className="pl-0.5 text-11 text-danger-primary">Minimum value is 1</span>
+                              <span className="pl-0.5 text-11 text-danger-primary">Giá trị tối thiểu là 1</span>
                             )}
                           </div>
                         </div>

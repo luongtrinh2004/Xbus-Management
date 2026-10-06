@@ -93,8 +93,8 @@ export const usePowerKWorkItemContextBasedCommands = (): TPowerKCommandConfig[] 
       await updateEntity(workspaceSlug.toString(), entityDetails.project_id, entityDetails.id, formData).catch(() => {
         setToast({
           type: "error",
-          title: "Error!",
-          message: `${isEpic ? "Epic" : "Work item"} could not be updated. Please try again.`,
+          title: "Lỗi!",
+          message: `Không thể cập nhật ${isEpic ? "Epic" : "công việc"}. Vui lòng thử lại.`,
         });
       });
     },
@@ -323,8 +323,8 @@ export const usePowerKWorkItemContextBasedCommands = (): TPowerKCommandConfig[] 
         } catch {
           setToast({
             type: "error",
-            title: "Error!",
-            message: `${entityDetails.is_epic ? "Epic" : "Work item"} could not be updated. Please try again.`,
+            title: "Lỗi!",
+            message: `Không thể cập nhật ${entityDetails.is_epic ? "Epic" : "công việc"}. Vui lòng thử lại.`,
           });
         }
       },
@@ -355,8 +355,8 @@ export const usePowerKWorkItemContextBasedCommands = (): TPowerKCommandConfig[] 
         } catch {
           setToast({
             type: "error",
-            title: "Error!",
-            message: `${entityDetails.is_epic ? "Epic" : "Work item"} could not be updated. Please try again.`,
+            title: "Lỗi!",
+            message: `Không thể cập nhật ${entityDetails.is_epic ? "Epic" : "công việc"}. Vui lòng thử lại.`,
           });
         }
       },

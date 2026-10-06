@@ -42,35 +42,35 @@ export const IssueCommentReaction = observer(function IssueCommentReaction(props
     () => ({
       create: async (reaction: string) => {
         try {
-          if (!workspaceSlug || !projectId || !commentId) throw new Error("Missing fields");
+          if (!workspaceSlug || !projectId || !commentId) throw new Error("Thiếu trường");
           await createCommentReaction(workspaceSlug, projectId, commentId, reaction);
           setToast({
-            title: "Success!",
+            title: "Thành công!",
             type: "success",
-            message: "Reaction created successfully",
+            message: "Đã tạo cảm xúc.",
           });
         } catch (_error) {
           setToast({
-            title: "Error!",
+            title: "Lỗi!",
             type: "error",
-            message: "Reaction creation failed",
+            message: "Không thể thêm cảm xúc",
           });
         }
       },
       remove: async (reaction: string) => {
         try {
-          if (!workspaceSlug || !projectId || !commentId || !currentUser?.id) throw new Error("Missing fields");
+          if (!workspaceSlug || !projectId || !commentId || !currentUser?.id) throw new Error("Thiếu trường");
           removeCommentReaction(workspaceSlug, projectId, commentId, reaction, currentUser.id);
           setToast({
-            title: "Success!",
+            title: "Thành công!",
             type: "success",
-            message: "Reaction removed successfully",
+            message: "Đã xóa cảm xúc.",
           });
         } catch (_error) {
           setToast({
-            title: "Error!",
+            title: "Lỗi!",
             type: "error",
-            message: "Reaction remove failed",
+            message: "Không thể xóa cảm xúc",
           });
         }
       },

@@ -33,7 +33,7 @@ export type IconsListConfig = {
 export const adjustColorForContrast = (hex: string): string => {
   // Ensure hex color is valid
   if (!/^#([0-9A-F]{3}){1,2}$/i.test(hex)) {
-    throw new Error("Invalid hex color code");
+    throw new Error("Mã màu HEX không hợp lệ");
   }
 
   // Convert hex to RGB

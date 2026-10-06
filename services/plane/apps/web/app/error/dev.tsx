@@ -19,8 +19,8 @@ interface ErrorActionsProps {
 function ErrorActions({ onGoHome, onReload }: ErrorActionsProps) {
   return (
     <div className="flex gap-3 pt-2">
-      <Button variant="primary" size="md" stretch="auto" label="Go to home" onClick={onGoHome} />
-      {onReload && <Button variant="secondary" size="md" stretch="auto" label="Reload page" onClick={onReload} />}
+      <Button variant="primary" size="md" stretch="auto" label={"Đi đến trang chủ"} onClick={onGoHome} />
+      {onReload && <Button variant="secondary" size="md" stretch="auto" label={"Tải lại trang"} onClick={onReload} />}
     </div>
   );
 }
@@ -36,7 +36,7 @@ export function DevErrorComponent({ error, onGoHome, onReload }: DevErrorCompone
     return (
       <div className="flex min-h-screen items-start justify-center bg-surface-2 p-6 transition-none">
         <div className="mt-12 w-full max-w-4xl space-y-4 transition-none">
-          <Banner placement="page" variant="danger" icon={<InfoFilled />} title="Route Error Response" />
+          <Banner placement="page" variant="danger" icon={<InfoFilled />} title={"Lỗi phản hồi tuyến"} />
 
           <Card variant="with-shadow" className="!p-6 transition-none">
             <div className="space-y-4">
@@ -48,7 +48,7 @@ export function DevErrorComponent({ error, onGoHome, onReload }: DevErrorCompone
               </div>
 
               <div className="space-y-2">
-                <h3 className="text-13 font-medium tracking-wide text-tertiary uppercase">Error Data</h3>
+                <h3 className="text-13 font-medium tracking-wide text-tertiary uppercase">Dữ liệu lỗi</h3>
                 <div className="rounded-md bg-layer-1 p-4">
                   <p className="font-code text-13 text-secondary">{error.data}</p>
                 </div>
@@ -66,16 +66,16 @@ export function DevErrorComponent({ error, onGoHome, onReload }: DevErrorCompone
     return (
       <div className="flex min-h-screen items-start justify-center bg-surface-2 p-6 transition-none">
         <div className="mt-12 w-full max-w-4xl space-y-4 transition-none">
-          <Banner placement="page" variant="danger" icon={<InfoFilled />} title="Runtime Error" />
+          <Banner placement="page" variant="danger" icon={<InfoFilled />} title={"Lỗi khi chạy"} />
           <Card variant="with-shadow" className="!p-6 transition-none">
             <div className="space-y-4">
               <div>
-                <h2 className="mb-2 text-20 font-semibold text-danger-primary">Error</h2>
+                <h2 className="mb-2 text-20 font-semibold text-danger-primary">Lỗi</h2>
                 <div className="bg-subtle-1 h-px w-full" />
               </div>
 
               <div className="space-y-2">
-                <h3 className="text-13 font-medium tracking-wide text-tertiary uppercase">Message</h3>
+                <h3 className="text-13 font-medium tracking-wide text-tertiary uppercase">Nội dung</h3>
                 <div className="rounded-md bg-layer-1 p-4">
                   <p className="text-13 font-medium text-primary">{error.message}</p>
                 </div>
@@ -100,10 +100,10 @@ export function DevErrorComponent({ error, onGoHome, onReload }: DevErrorCompone
             <div className="flex items-start gap-3">
               <InfoFilled className="mt-0.5 size-5 flex-shrink-0 text-tertiary" />
               <div className="space-y-1">
-                <p className="text-13 font-medium text-secondary">Development Mode</p>
+                <p className="text-13 font-medium text-secondary">Chế độ phát triển</p>
                 <p className="text-11 text-tertiary">
-                  This detailed error view is only visible in development. In production, users will see a friendly
-                  error page.
+                  Chi tiết lỗi chỉ hiển thị trong môi trường phát triển. Khi triển khai, người dùng sẽ thấy thông báo
+                  lỗi dễ hiểu.
                 </p>
               </div>
             </div>
@@ -116,18 +116,18 @@ export function DevErrorComponent({ error, onGoHome, onReload }: DevErrorCompone
   return (
     <div className="flex min-h-screen items-start justify-center bg-surface-2 p-6 transition-none">
       <div className="mt-12 w-full max-w-4xl space-y-4 transition-none">
-        <Banner placement="page" variant="danger" icon={<InfoFilled />} title="Unknown Error" />
+        <Banner placement="page" variant="danger" icon={<InfoFilled />} title={"Lỗi không xác định"} />
 
         <Card variant="with-shadow" className="!p-6">
           <div className="space-y-4">
             <div>
-              <h2 className="mb-2 text-20 font-semibold text-primary">Unknown Error</h2>
+              <h2 className="mb-2 text-20 font-semibold text-primary">Lỗi không xác định</h2>
               <div className="bg-subtle-1 h-px w-full" />
             </div>
 
             <div className="rounded-md bg-layer-1 p-4">
               <p className="text-13 text-secondary">
-                An unknown error occurred. Please try refreshing the page or contact support if the problem persists.
+                Đã xảy ra lỗi không xác định. Hãy tải lại trang hoặc liên hệ hỗ trợ nếu lỗi vẫn tiếp diễn.
               </p>
             </div>
 

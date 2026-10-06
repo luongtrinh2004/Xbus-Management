@@ -160,17 +160,15 @@ function PageDetailsPage({ params }: Route.ComponentProps) {
   if (pageDetailsError || !canCurrentUserAccessPage)
     return (
       <div className="flex h-full w-full flex-col items-center justify-center">
-        <h3 className="text-center text-16 font-semibold">Page not found</h3>
-        <p className="mt-3 text-center text-13 text-secondary">
-          The page you are trying to access doesn{"'"}t exist or you don{"'"}t have permission to view it.
-        </p>
+        <h3 className="text-center text-16 font-semibold">Không tìm thấy trang</h3>
+        <p className="mt-3 text-center text-13 text-secondary">Trang không tồn tại hoặc bạn chưa có quyền truy cập.</p>
         <Button
           variant="secondary"
           size="sm"
           stretch="auto"
           render={<Link href={`/${workspaceSlug}/projects/${projectId}/pages`} className="mt-5" />}
         >
-          View other Pages
+          Xem trang khác
         </Button>
       </div>
     );

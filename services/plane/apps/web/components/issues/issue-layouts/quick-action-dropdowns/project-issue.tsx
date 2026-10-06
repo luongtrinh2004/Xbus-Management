@@ -71,7 +71,7 @@ export const ProjectIssueQuickActions = observer(function ProjectIssueQuickActio
   const { getStateById } = useProjectState();
   const { getProjectIdentifierById } = useProject();
   // derived values
-  const activeLayout = `${issuesFilter.issueFilters?.displayFilters?.layout} layout`;
+  const activeLayout = `${issuesFilter.issueFilters?.displayFilters?.layout} bố cục`;
   const stateDetails = getStateById(issue.state_id);
   const projectIdentifier = getProjectIdentifierById(issue?.project_id);
   // auth

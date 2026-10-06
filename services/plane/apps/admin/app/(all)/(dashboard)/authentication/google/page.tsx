@@ -44,14 +44,14 @@ const InstanceGoogleAuthenticationPage = observer(function InstanceGoogleAuthent
     const updateConfigPromise = updateInstanceConfigurations(payload);
 
     setPromiseToast(updateConfigPromise, {
-      loading: "Saving Configuration",
+      loading: "Đang lưu cấu hình",
       success: {
-        title: "Configuration saved",
+        title: "Đã lưu cấu hình",
         message: () => `Google authentication is now ${value === "1" ? "active" : "disabled"}.`,
       },
       error: {
-        title: "Error",
-        message: () => "Failed to save configuration",
+        title: "Lỗi",
+        message: () => "Không thể lưu cấu hình",
       },
     });
 
@@ -69,12 +69,11 @@ const InstanceGoogleAuthenticationPage = observer(function InstanceGoogleAuthent
       customHeader={
         <AuthenticationMethodCard
           name="Google"
-          description="Allow members to login or sign up to plane with their Google
-            accounts."
-          icon={<img src={GoogleLogo} height={24} width={24} alt="Google Logo" />}
+          description={"Cho phép đăng nhập hoặc đăng ký Plane bằng Google."}
+          icon={<img src={GoogleLogo} height={24} width={24} alt={"Logo Google"} />}
           config={
             <Switch
-              aria-label="Enable Google authentication"
+              aria-label={"Bật xác thực Google"}
               checked={Boolean(parseInt(enableGoogleConfig))}
               onCheckedChange={() => {
                 if (Boolean(parseInt(enableGoogleConfig)) === true) {
@@ -107,6 +106,6 @@ const InstanceGoogleAuthenticationPage = observer(function InstanceGoogleAuthent
   );
 });
 
-export const meta: Route.MetaFunction = () => [{ title: "Google Authentication - God Mode" }];
+export const meta: Route.MetaFunction = () => [{ title: "Xác thực Google - Quản trị hệ thống" }];
 
 export default InstanceGoogleAuthenticationPage;

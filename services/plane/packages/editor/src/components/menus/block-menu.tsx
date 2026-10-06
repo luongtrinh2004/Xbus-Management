@@ -151,7 +151,7 @@ export function BlockMenu(props: Props) {
     {
       icon: DeleteOutline,
       key: "delete",
-      label: "Delete",
+      label: "Xóa",
       onClick: (_e) => {
         // Execute the delete action
         editor.chain().deleteSelection().focus().run();
@@ -160,7 +160,7 @@ export function BlockMenu(props: Props) {
     {
       icon: CopyOutline,
       key: "duplicate",
-      label: "Duplicate",
+      label: "Trùng lặp",
       isDisabled:
         editor.state.selection.content().content.firstChild?.type.name === CORE_EXTENSIONS.IMAGE ||
         editor.isActive(CORE_EXTENSIONS.CUSTOM_IMAGE),
@@ -172,7 +172,7 @@ export function BlockMenu(props: Props) {
           const docSize = state.doc.content.size;
 
           if (!firstChild) {
-            throw new Error("No content selected or content is not duplicable.");
+            throw new Error("Chưa chọn nội dung hoặc nội dung không thể sao chép.");
           }
 
           // Directly use selection.to as the insertion position

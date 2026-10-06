@@ -19,7 +19,7 @@ export const SpreadsheetAttachmentColumn = observer(function SpreadsheetAttachme
 
   return (
     <Row className="flex h-11 w-full items-center border-b-[0.5px] border-subtle py-1 text-11 group-[.selected-issue-row]:bg-accent-primary/5 hover:bg-layer-1 group-[.selected-issue-row]:hover:bg-accent-primary/10">
-      {issue?.attachment_count ?? 0} {issue?.attachment_count === 1 ? "attachment" : "attachments"}
+      {issue?.attachment_count ?? 0} {issue?.attachment_count === 1 ? "Tệp đính kèm" : "Tệp đính kèm"}
     </Row>
   );
 });

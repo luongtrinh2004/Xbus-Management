@@ -69,7 +69,10 @@ export function WorkspaceJoinInvitesStep(props: Props) {
 
   return invitations && invitations.length > 0 ? (
     <div className="flex flex-col gap-10">
-      <CommonOnboardingHeader title="Join invites or create a workspace" description="All your work — unified." />
+      <CommonOnboardingHeader
+        title={"Chấp nhận lời mời hoặc tạo không gian làm việc"}
+        description={"Tập trung mọi công việc tại một nơi."}
+      />
       <div className="flex flex-col gap-3">
         {invitations &&
           invitations.length > 0 &&
@@ -94,7 +97,10 @@ export function WorkspaceJoinInvitesStep(props: Props) {
                   <p className="text-11 text-secondary">{ROLE[invitation.role]}</p>
                 </div>
                 <span className="pointer-events-none flex-shrink-0">
-                  <Checkbox checked={isSelected} aria-label={invitedWorkspace?.name ?? "Select workspace invitation"} />
+                  <Checkbox
+                    checked={isSelected}
+                    aria-label={invitedWorkspace?.name ?? "Chọn lời mời vào không gian làm việc"}
+                  />
                 </span>
               </div>
             );
@@ -108,19 +114,19 @@ export function WorkspaceJoinInvitesStep(props: Props) {
           onClick={submitInvitations}
           disabled={isJoiningWorkspaces || !invitationsRespond.length}
         >
-          {isJoiningWorkspaces ? <Spinner height="20px" width="20px" /> : "Continue"}
+          {isJoiningWorkspaces ? <Spinner height="20px" width="20px" /> : "Tiếp tục"}
         </ButtonElement>
         <Button
           variant="ghost"
           size="lg"
           stretch="full"
-          label="Create new workspace"
+          label={"Tạo không gian làm việc mới"}
           onClick={handleCurrentViewChange}
           disabled={isJoiningWorkspaces}
         />
       </div>
     </div>
   ) : (
-    <div>No Invitations found</div>
+    <div>Không tìm thấy lời mời</div>
   );
 }

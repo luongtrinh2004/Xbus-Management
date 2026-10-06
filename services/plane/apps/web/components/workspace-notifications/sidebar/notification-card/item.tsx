@@ -127,7 +127,7 @@ export const NotificationItem = observer(function NotificationItem(props: TNotif
                 <p className="flex flex-shrink-0 items-center justify-end gap-x-1 text-tertiary">
                   <ClockOutline className="h-4 w-4" />
                   <span>
-                    Till {renderFormattedDate(notification.snoozed_till)},&nbsp;
+                    Đến {renderFormattedDate(notification.snoozed_till)},&nbsp;
                     {renderFormattedTime(notification.snoozed_till, "12-hour")}
                   </span>
                 </p>

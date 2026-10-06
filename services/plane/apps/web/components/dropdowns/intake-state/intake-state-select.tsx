@@ -4,6 +4,8 @@
  * See the LICENSE file for details.
  */
 
+import { getStateDisplayName } from "@plane/utils";
+
 import { useCallback } from "react";
 import { observer } from "mobx-react";
 // plane imports
@@ -31,7 +33,7 @@ type IntakeStateSelectProps = {
 
 const mapIntakeStateToOption = (state: IIntakeState): IntakeStateOption => ({
   id: state.id,
-  name: state.name,
+  name: getStateDisplayName(state),
   color: state.color,
   group: state.group,
 });

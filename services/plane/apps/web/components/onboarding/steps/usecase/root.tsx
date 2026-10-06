@@ -53,14 +53,14 @@ export const UseCaseSetupStep = observer(function UseCaseSetupStep({ handleStepC
       [await updateUserProfile(profileUpdatePayload)];
       setToast({
         type: "success",
-        title: "Success",
-        message: "Profile setup completed!",
+        title: "Thành công",
+        message: "Đã hoàn tất thiết lập hồ sơ!",
       });
     } catch {
       setToast({
         type: "error",
-        title: "Error",
-        message: "Profile setup failed. Please try again!",
+        title: "Lỗi",
+        message: "Không thể thiết lập hồ sơ. Vui lòng thử lại!",
       });
     }
   };
@@ -83,18 +83,21 @@ export const UseCaseSetupStep = observer(function UseCaseSetupStep({ handleStepC
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-10">
       {/* Header */}
-      <CommonOnboardingHeader title="What brings you to Plane?" description="Tell us your goals and team size." />
+      <CommonOnboardingHeader
+        title={"Bạn sử dụng Plane cho mục đích gì?"}
+        description={"Cho biết mục tiêu và quy mô đội ngũ của bạn."}
+      />
 
       {/* Use Case Selection */}
       <div className="flex flex-col gap-3">
-        <p className="text-body-sm-semibold text-placeholder">Select one or more</p>
+        <p className="text-body-sm-semibold text-placeholder">Chọn một hoặc nhiều mục</p>
 
         <Controller
           control={control}
           name="use_case"
           rules={{
-            required: "Please select at least one option",
-            validate: (value) => (value && value.length > 0) || "Please select at least one option",
+            required: "Vui lòng chọn ít nhất một mục",
+            validate: (value) => (value && value.length > 0) || "Vui lòng chọn ít nhất một mục",
           }}
           render={({ field: { value, onChange } }) => (
             <div className="flex flex-col gap-3">
@@ -147,8 +150,15 @@ export const UseCaseSetupStep = observer(function UseCaseSetupStep({ handleStepC
 
       {/* Action Buttons */}
       <div className="space-y-3">
-        <Button variant="primary" type="submit" stretch="full" size="lg" disabled={isButtonDisabled} label="Continue" />
-        <Button variant="ghost" onClick={handleSkip} stretch="full" size="lg" label="Skip" />
+        <Button
+          variant="primary"
+          type="submit"
+          stretch="full"
+          size="lg"
+          disabled={isButtonDisabled}
+          label={"Tiếp tục"}
+        />
+        <Button variant="ghost" onClick={handleSkip} stretch="full" size="lg" label={"Bỏ qua"} />
       </div>
     </form>
   );

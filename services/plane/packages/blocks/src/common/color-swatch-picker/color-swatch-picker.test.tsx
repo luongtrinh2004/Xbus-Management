@@ -10,7 +10,7 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { ColorSwatchPicker } from "./color-swatch-picker";
 
-const hexField = () => screen.getByRole<HTMLInputElement>("textbox", { name: "Hex color" });
+const hexField = () => screen.getByRole<HTMLInputElement>("textbox", { name: "Màu hệ hex" });
 
 /** Every call site is controlled: it stores what `onChange` emits and feeds it straight back as `value`. */
 function ControlledPicker(props: { initial?: string; onChange: (hex: string) => void }) {
@@ -30,7 +30,7 @@ describe("ColorSwatchPicker", () => {
   it("fires onChange with the swatch's hex and marks the current one pressed", async () => {
     const onChange = vi.fn();
     render(<ColorSwatchPicker value="#FF6900" colors={["#FF6900", "#0693E3"]} onChange={onChange} />);
-    expect(screen.getByRole("group", { name: "Preset colors" }).children).toHaveLength(2);
+    expect(screen.getByRole("group", { name: "Màu có sẵn" }).children).toHaveLength(2);
     expect(screen.getByRole("button", { name: "#ff6900" }).getAttribute("aria-pressed")).toBe("true");
     expect(screen.getByRole("button", { name: "#0693e3" }).getAttribute("aria-pressed")).toBe("false");
     await userEvent.click(screen.getByRole("button", { name: "#0693e3" }));
@@ -97,6 +97,6 @@ describe("ColorSwatchPicker", () => {
 
   it("renders the ten default swatches when no palette is given", () => {
     render(<ColorSwatchPicker onChange={() => {}} />);
-    expect(screen.getByRole("group", { name: "Preset colors" }).children).toHaveLength(10);
+    expect(screen.getByRole("group", { name: "Màu có sẵn" }).children).toHaveLength(10);
   });
 });

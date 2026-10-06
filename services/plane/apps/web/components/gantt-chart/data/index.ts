@@ -15,35 +15,35 @@ export const generateWeeks = (startOfWeek: EStartOfTheWeek = EStartOfTheWeek.SUN
 ];
 
 export const weeks: WeekMonthDataType[] = [
-  { key: 0, shortTitle: "sun", title: "sunday", abbreviation: "Su" },
-  { key: 1, shortTitle: "mon", title: "monday", abbreviation: "M" },
-  { key: 2, shortTitle: "tue", title: "tuesday", abbreviation: "T" },
-  { key: 3, shortTitle: "wed", title: "wednesday", abbreviation: "W" },
-  { key: 4, shortTitle: "thurs", title: "thursday", abbreviation: "Th" },
-  { key: 5, shortTitle: "fri", title: "friday", abbreviation: "F" },
-  { key: 6, shortTitle: "sat", title: "saturday", abbreviation: "Sa" },
+  { key: 0, shortTitle: "sun", title: "Chủ nhật", abbreviation: "CN" },
+  { key: 1, shortTitle: "mon", title: "Thứ Hai", abbreviation: "T2" },
+  { key: 2, shortTitle: "tue", title: "Thứ Ba", abbreviation: "T3" },
+  { key: 3, shortTitle: "wed", title: "Thứ Tư", abbreviation: "T4" },
+  { key: 4, shortTitle: "thurs", title: "Thứ Năm", abbreviation: "T5" },
+  { key: 5, shortTitle: "fri", title: "Thứ Sáu", abbreviation: "T6" },
+  { key: 6, shortTitle: "sat", title: "Thứ Bảy", abbreviation: "T7" },
 ];
 
 export const months: WeekMonthDataType[] = [
-  { key: 0, shortTitle: "jan", title: "january", abbreviation: "Jan" },
-  { key: 1, shortTitle: "feb", title: "february", abbreviation: "Feb" },
-  { key: 2, shortTitle: "mar", title: "march", abbreviation: "Mar" },
-  { key: 3, shortTitle: "apr", title: "april", abbreviation: "Apr" },
-  { key: 4, shortTitle: "may", title: "may", abbreviation: "May" },
-  { key: 5, shortTitle: "jun", title: "june", abbreviation: "Jun" },
-  { key: 6, shortTitle: "jul", title: "july", abbreviation: "Jul" },
-  { key: 7, shortTitle: "aug", title: "august", abbreviation: "Aug" },
-  { key: 8, shortTitle: "sept", title: "september", abbreviation: "Sept" },
-  { key: 9, shortTitle: "oct", title: "october", abbreviation: "Oct" },
-  { key: 10, shortTitle: "nov", title: "november", abbreviation: "Nov" },
-  { key: 11, shortTitle: "dec", title: "december", abbreviation: "Dec" },
+  { key: 0, shortTitle: "jan", title: "Tháng 1", abbreviation: "Th1" },
+  { key: 1, shortTitle: "feb", title: "Tháng 2", abbreviation: "Th2" },
+  { key: 2, shortTitle: "mar", title: "Tháng 3", abbreviation: "Th3" },
+  { key: 3, shortTitle: "apr", title: "Tháng 4", abbreviation: "Th4" },
+  { key: 4, shortTitle: "may", title: "Tháng 5", abbreviation: "Th5" },
+  { key: 5, shortTitle: "jun", title: "Tháng 6", abbreviation: "Th6" },
+  { key: 6, shortTitle: "jul", title: "Tháng 7", abbreviation: "Th7" },
+  { key: 7, shortTitle: "aug", title: "Tháng 8", abbreviation: "Th8" },
+  { key: 8, shortTitle: "sept", title: "Tháng 9", abbreviation: "Th9" },
+  { key: 9, shortTitle: "oct", title: "Tháng 10", abbreviation: "Th10" },
+  { key: 10, shortTitle: "nov", title: "Tháng 11", abbreviation: "Th11" },
+  { key: 11, shortTitle: "dec", title: "Tháng 12", abbreviation: "Th12" },
 ];
 
 export const quarters: WeekMonthDataType[] = [
-  { key: 0, shortTitle: "Q1", title: "Jan - Mar", abbreviation: "Q1" },
-  { key: 1, shortTitle: "Q2", title: "Apr - Jun", abbreviation: "Q2" },
-  { key: 2, shortTitle: "Q3", title: "Jul - Sept", abbreviation: "Q3" },
-  { key: 3, shortTitle: "Q4", title: "Oct - Dec", abbreviation: "Q4" },
+  { key: 0, shortTitle: "Q1", title: "Tháng 1 - Tháng 3", abbreviation: "Q1" },
+  { key: 1, shortTitle: "Q2", title: "Tháng 4 - Tháng 6", abbreviation: "Q2" },
+  { key: 2, shortTitle: "Q3", title: "Tháng 7 - Tháng 9", abbreviation: "Q3" },
+  { key: 3, shortTitle: "Q4", title: "Tháng 10 - Tháng 12", abbreviation: "Q4" },
 ];
 
 export const charCapitalize = (word: string) => `${word.charAt(0).toUpperCase()}${word.substring(1)}`;

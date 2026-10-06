@@ -259,10 +259,10 @@ describe("Select on Propel combobox", () => {
     await openSelect(user);
     // The sentinel has fired and the append is still pending: the loader row is up.
     await waitFor(() => expect(getValues).toHaveBeenCalledTimes(2));
-    expect(popup().getByRole("status", { name: "Loading options" })).toBeDefined();
+    expect(popup().getByRole("status", { name: "Đang tải tùy chọn" })).toBeDefined();
 
     releaseSecondPage();
-    await waitFor(() => expect(popup().queryByRole("status", { name: "Loading options" })).toBeNull());
+    await waitFor(() => expect(popup().queryByRole("status", { name: "Đang tải tùy chọn" })).toBeNull());
   });
 
   it("opens a heading row whenever the option group changes", async () => {
@@ -672,7 +672,7 @@ describe("Select on Propel combobox", () => {
     // The empty row stands down while the failure is on screen.
     expect(popup().queryByText("No results found")).toBeNull();
 
-    await user.click(popup().getByRole("button", { name: /retry/i }));
+    await user.click(popup().getByRole("button", { name: /thử lại/i }));
     await waitFor(() => expect(getValues).toHaveBeenCalledTimes(2));
     await waitFor(() => expect(popup().queryByRole("alert")).toBeNull());
     expect(popup().getAllByRole("option")).toHaveLength(3);
@@ -727,11 +727,11 @@ describe("Select on Propel combobox", () => {
     expect(await popup().findByRole("option", { name: "All options" })).toBeDefined();
     // Matched loosely: i18n is not initialised here, so `t()` yields the key, and base-ui appends
     // an invisible Word Joiner to a freshly mounted status line to force its announcement.
-    expect(await popup().findByText(/searching/i)).toBeDefined();
+    expect(await popup().findByText(/đang tìm kiếm/i)).toBeDefined();
 
     releaseFirstPage();
     await waitFor(() => expect(popup().getAllByRole("option")).toHaveLength(6));
-    expect(popup().queryByText(/searching/i)).toBeNull();
+    expect(popup().queryByText(/đang tìm kiếm/i)).toBeNull();
   });
 
   it("says it is searching over the previous results while a cleared query reloads", async () => {
@@ -758,12 +758,12 @@ describe("Select on Propel combobox", () => {
     await user.clear(search());
     // Matched loosely: i18n is not initialised here, so `t()` yields the key, and base-ui appends
     // an invisible Word Joiner to a freshly mounted status line to force its announcement.
-    expect(await popup().findByText(/searching/i)).toBeDefined();
+    expect(await popup().findByText(/đang tìm kiếm/i)).toBeDefined();
     expect(popup().getAllByRole("option")).toHaveLength(2);
 
     releaseReload();
     await waitFor(() => expect(popup().getAllByRole("option")).toHaveLength(5));
-    expect(popup().queryByText(/searching/i)).toBeNull();
+    expect(popup().queryByText(/đang tìm kiếm/i)).toBeNull();
   });
 
   it("opens from a controlled `open` and reports the user's close", async () => {
@@ -1198,7 +1198,7 @@ describe("Select on Propel combobox", () => {
     expect(onChange).toHaveBeenCalledWith(["id-1"]);
 
     // Retry re-requests the page that failed rather than throwing the loaded pages away.
-    await user.click(popup().getByRole("button", { name: /retry/i }));
+    await user.click(popup().getByRole("button", { name: /thử lại/i }));
     await waitFor(() => expect(getValues).toHaveBeenCalledTimes(3));
     expect(getValues.mock.calls[2]?.[0]).toMatchObject({ cursor: "page-2" });
     await waitFor(() => expect(popup().queryByRole("alert")).toBeNull());

@@ -120,7 +120,7 @@ export class ProfileStore implements IUserProfileStore {
         this.isLoading = false;
         this.error = {
           status: "user-profile-fetch-error",
-          message: "Failed to fetch user profile",
+          message: "Không thể tải hồ sơ người dùng",
         };
       });
       throw error;
@@ -150,7 +150,7 @@ export class ProfileStore implements IUserProfileStore {
       runInAction(() => {
         this.error = {
           status: "user-profile-update-error",
-          message: "Failed to update user profile",
+          message: "Không thể cập nhật hồ sơ người dùng",
         };
       });
     }
@@ -193,7 +193,7 @@ export class ProfileStore implements IUserProfileStore {
       runInAction(() => {
         this.error = {
           status: "user-profile-onboard-finish-error",
-          message: "Failed to finish user onboarding",
+          message: "Không thể hoàn tất thiết lập tài khoản",
         };
       });
       throw error;
@@ -215,7 +215,7 @@ export class ProfileStore implements IUserProfileStore {
         this.mutateUserProfile({ is_tour_completed: isUserProfileTourCompleted });
         this.error = {
           status: "user-profile-tour-complete-error",
-          message: "Failed to update user profile is_tour_completed",
+          message: "Không thể cập nhật trạng thái hướng dẫn của người dùng",
         };
       });
       throw error;
@@ -247,7 +247,7 @@ export class ProfileStore implements IUserProfileStore {
         });
         this.error = {
           status: "user-profile-theme-update-error",
-          message: "Failed to update user profile theme",
+          message: "Không thể cập nhật giao diện của người dùng",
         };
       });
       throw error;

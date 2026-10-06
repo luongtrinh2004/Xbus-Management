@@ -32,7 +32,7 @@ type TCoverImageProps = {
 export function CoverImage(props: TCoverImageProps) {
   const {
     src,
-    alt = "Cover image",
+    alt = "Ảnh bìa",
     className,
     showDefaultWhenEmpty = false,
     fallbackUrl = DEFAULT_COVER_IMAGE_URL,

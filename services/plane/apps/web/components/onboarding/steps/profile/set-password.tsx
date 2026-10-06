@@ -90,8 +90,8 @@ export function SetPasswordRoot({ onPasswordChange, onConfirmPasswordChange, dis
       >
         <div className="flex items-center gap-1 text-tertiary">
           <LockOutline className="size-3" />
-          <span className="font-medium">Set a password</span>
-          <span>{`(Optional)`}</span>
+          <span className="font-medium">Đặt mật khẩu</span>
+          <span>{"(Không bắt buộc)"}</span>
         </div>
         <div className="flex items-center gap-2 text-placeholder">
           <ChevronDownOutline className={chevronIconClasses} />
@@ -103,10 +103,10 @@ export function SetPasswordRoot({ onPasswordChange, onConfirmPasswordChange, dis
         <div className="flex transform flex-col gap-2 pt-1 transition-all duration-300 ease-in-out">
           <PasswordInput
             id="password"
-            label="Password"
+            label={"Mật khẩu"}
             value={passwordState.password}
             onChange={(value) => handlePasswordChange("password", value)}
-            placeholder="Set a password"
+            placeholder={"Đặt mật khẩu"}
             className="transition-all duration-200"
           />
           {passwordState.password.length > 0 && <PasswordStrengthIndicator password={passwordState.password} />}
@@ -117,14 +117,14 @@ export function SetPasswordRoot({ onPasswordChange, onConfirmPasswordChange, dis
           <div className="transform transition-all delay-100 duration-300 ease-in-out">
             <PasswordInput
               id="confirm-password"
-              label="Confirm password"
+              label={"Xác nhận mật khẩu"}
               value={passwordState.confirmPassword}
               onChange={(value) => handlePasswordChange("confirmPassword", value)}
-              placeholder="Confirm password"
+              placeholder={"Xác nhận mật khẩu"}
               className="transition-all duration-200"
             />
-            {hasPasswordMismatch && <p className="mt-1 text-11 text-danger-primary">Passwords do not match</p>}
-            {isPasswordValid && <p className="mt-1 text-11 text-success-primary">✓ Passwords match</p>}
+            {hasPasswordMismatch && <p className="mt-1 text-11 text-danger-primary">Mật khẩu xác nhận không khớp</p>}
+            {isPasswordValid && <p className="mt-1 text-11 text-success-primary">✓ Mật khẩu khớp</p>}
           </div>
         </div>
       </div>

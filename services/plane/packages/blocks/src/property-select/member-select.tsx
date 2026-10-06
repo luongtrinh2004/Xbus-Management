@@ -166,7 +166,7 @@ export function MemberSelect(props: MemberSelectProps) {
     filterOption,
     testId,
     tabIndex,
-    suspendedLabel = "Suspended",
+    suspendedLabel = "Đã đình chỉ",
   } = props;
   const clearable = !props.multiple && !!props.clearable;
 
@@ -180,7 +180,7 @@ export function MemberSelect(props: MemberSelectProps) {
   const isSearchInput = kind === "search-input";
   // `search-input`'s box IS the trigger (no separate label), so `placeholder` doubles as its empty
   // text unless the caller sets a distinct `searchPlaceholder`.
-  const searchPlaceholder = searchPlaceholderProp ?? (isSearchInput ? placeholder : undefined) ?? "Search members...";
+  const searchPlaceholder = searchPlaceholderProp ?? (isSearchInput ? placeholder : undefined) ?? "Tìm thành viên…";
 
   // Only `avatar-group-*` maps its size onto the face — every other variant keeps the `xs` trigger face it
   // always had, so this fix doesn't reflow `pill-lg`/`select-lg`'s existing chrome. It's also not a Select
@@ -206,7 +206,9 @@ export function MemberSelect(props: MemberSelectProps) {
   const selectedList = props.multiple ? props.value : props.value ? [props.value] : [];
   const selectedIds = new Set(selectedList.map((member) => member.id));
 
-  const clearLabel = !props.multiple ? (props.clearLabel ?? (placeholder || "No assignee")) : "No assignee";
+  const clearLabel = !props.multiple
+    ? (props.clearLabel ?? (placeholder || "Không có người phụ trách"))
+    : "Không có người phụ trách";
   const clearOption = useMemo<MemberOption>(
     () => ({ id: CLEAR_OPTION_ID, display_name: clearLabel, avatar_url: null }),
     [clearLabel]

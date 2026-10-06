@@ -85,7 +85,7 @@ export const FilterMembers = observer(function FilterMembers(props: Props) {
                           size="xs"
                         />
                       }
-                      title={currentUser?.id === member.id ? "You" : member?.display_name}
+                      title={currentUser?.id === member.id ? "Bạn" : member?.display_name}
                     />
                   );
                 })}
@@ -95,12 +95,12 @@ export const FilterMembers = observer(function FilterMembers(props: Props) {
                     className="ml-8 text-11 font-medium text-accent-primary"
                     onClick={handleViewToggle}
                   >
-                    {itemsToRender === sortedOptions.length ? "View less" : "View all"}
+                    {itemsToRender === sortedOptions.length ? "Thu gọn" : "Xem tất cả"}
                   </button>
                 )}
               </>
             ) : (
-              <p className="text-11 text-placeholder italic">No matches found</p>
+              <p className="text-11 text-placeholder italic">Không tìm thấy kết quả phù hợp</p>
             )
           ) : (
             <Loader className="space-y-2">

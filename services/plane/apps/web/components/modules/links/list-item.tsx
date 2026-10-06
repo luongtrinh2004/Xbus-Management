@@ -41,8 +41,8 @@ export const ModulesLinksListItem = observer(function ModulesLinksListItem(props
     copyTextToClipboard(text).then(() =>
       setToast({
         type: "success",
-        title: "Copied to clipboard",
-        message: "The URL has been successfully copied to your clipboard",
+        title: "Đã sao chép vào bảng tạm",
+        message: "URL đã được sao chép thành công vào bảng tạm của bạn",
       })
     );
   };
@@ -99,9 +99,9 @@ export const ModulesLinksListItem = observer(function ModulesLinksListItem(props
       </div>
       <div className="px-5">
         <p className="mt-0.5 flex items-center gap-1.5 stroke-[1.5] text-11 text-tertiary">
-          Added {calculateTimeAgo(link.created_at)}{" "}
+          Đã thêm {calculateTimeAgo(link.created_at)}{" "}
           {createdByDetails && (
-            <>by {createdByDetails?.is_bot ? createdByDetails?.first_name + " Bot" : createdByDetails?.display_name}</>
+            <>bởi {createdByDetails?.is_bot ? createdByDetails?.first_name + "bot" : createdByDetails?.display_name}</>
           )}
         </p>
       </div>

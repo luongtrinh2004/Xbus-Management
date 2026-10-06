@@ -58,7 +58,7 @@ export function EstimateSelect(props: EstimateSelectProps) {
     onChange,
     disabled = false,
     placeholder = "",
-    searchPlaceholder = "Search estimates...",
+    searchPlaceholder = "Tìm ước lượng…",
     onClose,
     variant,
     className,
@@ -69,7 +69,7 @@ export function EstimateSelect(props: EstimateSelectProps) {
   } = props;
   // derived values
 
-  const resolvedClearLabel = clearLabel ?? (placeholder || "No estimate");
+  const resolvedClearLabel = clearLabel ?? (placeholder || "Không có ước tính");
   const clearOption = useMemo<EstimateOption>(
     () => ({ id: CLEAR_OPTION_ID, displayValue: resolvedClearLabel }),
     [resolvedClearLabel]

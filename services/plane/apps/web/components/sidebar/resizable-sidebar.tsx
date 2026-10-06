@@ -192,7 +192,7 @@ export function ResizableSidebar({
           maxWidth: `${isCollapsed ? 0 : width}px`,
         }}
         role="complementary"
-        aria-label="Main sidebar"
+        aria-label={"Thanh điều hướng chính"}
         data-prevent-outside-click={isMobile}
       >
         <aside
@@ -215,7 +215,7 @@ export function ResizableSidebar({
             onDoubleClick={() => toggleCollapsed()}
             onMouseDown={(e) => startResizing(e)}
             role="separator"
-            aria-label="Resize sidebar"
+            aria-label={"Đổi kích thước thanh bên"}
           />
         </aside>
       </div>
@@ -235,7 +235,7 @@ export function ResizableSidebar({
         onMouseEnter={handlePeekEnter}
         onMouseLeave={handlePeekLeave}
         role="complementary"
-        aria-label="Sidebar peek view"
+        aria-label={"Xem nhanh ở thanh bên"}
       >
         <aside
           className={cn(
@@ -257,7 +257,7 @@ export function ResizableSidebar({
             onDoubleClick={() => toggleCollapsed()}
             onMouseDown={(e) => startResizing(e)}
             role="separator"
-            aria-label="Resize sidebar"
+            aria-label={"Đổi kích thước thanh bên"}
           />
         </aside>
       </div>

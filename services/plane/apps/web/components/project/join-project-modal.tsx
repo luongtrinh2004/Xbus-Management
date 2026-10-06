@@ -68,24 +68,23 @@ export function JoinProjectModal(props: TJoinProjectModalProps) {
         <DialogMain>
           <DialogHeader>
             <DialogHeading>
-              <DialogTitle>Join Project?</DialogTitle>
+              <DialogTitle>Tham gia dự án?</DialogTitle>
             </DialogHeading>
           </DialogHeader>
           <DialogBody>
             <p>
-              Are you sure you want to join the project{" "}
-              <span className="font-semibold break-words">{project?.name}</span>? Please click the &apos;Join
-              Project&apos; button below to continue.
+              Bạn có muốn tham gia dự án <span className="font-semibold break-words">{project?.name}</span>? Nhấn nút
+              “Tham gia dự án” bên dưới để tiếp tục.
             </p>
           </DialogBody>
         </DialogMain>
         <DialogActions>
-          <Button variant="secondary" size="md" stretch="auto" label="Cancel" onClick={handleClose} />
+          <Button variant="secondary" size="md" stretch="auto" label={"Hủy"} onClick={handleClose} />
           <Button
             variant="primary"
             size="md"
             stretch="auto"
-            label={isJoiningLoading ? "Joining..." : "Join Project"}
+            label={isJoiningLoading ? "Đang tham gia…" : "Tham gia dự án"}
             onClick={handleJoin}
             loading={isJoiningLoading}
           />

@@ -62,15 +62,15 @@ export function CycleCreateUpdateModal(props: CycleModalProps) {
 
         setToast({
           type: "success",
-          title: "Success!",
-          message: "Cycle created successfully.",
+          title: "Thành công!",
+          message: "Đã tạo chu kỳ.",
         });
       })
       .catch((err) => {
         setToast({
           type: "error",
-          title: "Error!",
-          message: err?.detail ?? "Error in creating cycle. Please try again.",
+          title: "Lỗi!",
+          message: err?.detail ?? "Không thể tạo chu kỳ. Vui lòng thử lại.",
         });
       });
   };
@@ -83,15 +83,15 @@ export function CycleCreateUpdateModal(props: CycleModalProps) {
       .then((_res) => {
         setToast({
           type: "success",
-          title: "Success!",
-          message: "Cycle updated successfully.",
+          title: "Thành công!",
+          message: "Chu kỳ đã được cập nhật thành công.",
         });
       })
       .catch((err) => {
         setToast({
           type: "error",
-          title: "Error!",
-          message: err?.detail ?? "Error in updating cycle. Please try again.",
+          title: "Lỗi!",
+          message: err?.detail ?? "Không thể cập nhật chu kỳ. Vui lòng thử lại.",
         });
       });
   };
@@ -151,8 +151,8 @@ export function CycleCreateUpdateModal(props: CycleModalProps) {
     } else
       setToast({
         type: "error",
-        title: "Error!",
-        message: "You already have a cycle on the given dates, if you want to create a draft cycle, remove the dates.",
+        title: "Lỗi!",
+        message: "Đã có chu kỳ trong khoảng thời gian này. Hãy bỏ ngày bắt đầu và kết thúc nếu muốn tạo chu kỳ nháp.",
       });
   };
 

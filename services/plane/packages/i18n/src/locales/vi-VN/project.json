@@ -19,9 +19,9 @@
     "start_date": "Ngày bắt đầu",
     "end_date": "Ngày kết thúc",
     "in_your_timezone": "Trong múi giờ của bạn",
-    "transfer_work_items": "Chuyển {count} mục công việc",
+    "transfer_work_items": "Chuyển {count} công việc",
     "transfer": {
-      "no_cycles_available": "Không có chu kỳ nào khác để chuyển mục công việc."
+      "no_cycles_available": "Không có chu kỳ nào khác để chuyển công việc."
     },
     "date_range": "Khoảng thời gian",
     "add_date": "Thêm ngày",
@@ -29,9 +29,9 @@
       "label": "Chu kỳ hoạt động",
       "progress": "Tiến độ",
       "chart": "Biểu đồ burndown",
-      "priority_issue": "Mục công việc ưu tiên",
-      "assignees": "Người được giao",
-      "issue_burndown": "Burndown mục công việc",
+      "priority_issue": "Công việc ưu tiên",
+      "assignees": "Người phụ trách",
+      "issue_burndown": "Burndown công việc",
       "ideal": "Lý tưởng",
       "current": "Hiện tại",
       "labels": "Nhãn",
@@ -113,18 +113,18 @@
         }
       },
       "no_issues": {
-        "title": "Chưa thêm mục công việc vào chu kỳ",
-        "description": "Thêm hoặc tạo mục công việc bạn muốn đặt khung thời gian và giao trong chu kỳ này",
+        "title": "Chưa thêm công việc vào chu kỳ",
+        "description": "Thêm hoặc tạo công việc bạn muốn đặt khung thời gian và giao trong chu kỳ này",
         "primary_button": {
-          "text": "Tạo mục công việc mới"
+          "text": "Tạo công việc mới"
         },
         "secondary_button": {
-          "text": "Thêm mục công việc hiện có"
+          "text": "Thêm công việc hiện có"
         }
       },
       "completed_no_issues": {
-        "title": "Không có mục công việc trong chu kỳ",
-        "description": "Không có mục công việc trong chu kỳ. Mục công việc đã được chuyển hoặc ẩn. Để xem mục công việc đã ẩn (nếu có), vui lòng cập nhật thuộc tính hiển thị của bạn tương ứng."
+        "title": "Không có công việc trong chu kỳ",
+        "description": "Không có công việc trong chu kỳ. Công việc đã được chuyển hoặc ẩn. Để xem công việc đã ẩn (nếu có), vui lòng cập nhật thuộc tính hiển thị của bạn tương ứng."
       },
       "active": {
         "title": "Không có chu kỳ hoạt động",
@@ -144,7 +144,7 @@
         "primary_button": {
           "text": "Tạo chế độ xem đầu tiên của bạn",
           "comic": {
-            "title": "Chế độ xem hoạt động dựa trên thuộc tính mục công việc.",
+            "title": "Chế độ xem hoạt động dựa trên thuộc tính công việc.",
             "description": "Bạn có thể tạo chế độ xem ở đây sử dụng bất kỳ số lượng thuộc tính nào làm bộ lọc theo nhu cầu của bạn."
           }
         },
@@ -154,14 +154,14 @@
         }
       },
       "no_archived_issues": {
-        "title": "Chưa có mục công việc đã lưu trữ",
-        "description": "Thủ công hoặc thông qua tự động hóa, bạn có thể lưu trữ mục công việc đã hoàn thành hoặc đã hủy. Tìm chúng ở đây sau khi lưu trữ.",
+        "title": "Chưa có công việc đã lưu trữ",
+        "description": "Thủ công hoặc thông qua tự động hóa, bạn có thể lưu trữ công việc đã hoàn thành hoặc đã hủy. Tìm chúng ở đây sau khi lưu trữ.",
         "primary_button": {
           "text": "Thiết lập tự động hóa"
         }
       },
       "issues_empty_filter": {
-        "title": "Không tìm thấy mục công việc nào phù hợp với bộ lọc đã áp dụng",
+        "title": "Không tìm thấy công việc nào phù hợp với bộ lọc đã áp dụng",
         "secondary_button": {
           "text": "Xóa tất cả bộ lọc"
         }
@@ -190,25 +190,25 @@
   "project_issues": {
     "empty_state": {
       "no_issues": {
-        "title": "Tạo mục công việc và giao nó cho ai đó, thậm chí là chính bạn",
-        "description": "Xem mục công việc như công việc, nhiệm vụ hoặc công việc cần hoàn thành. Mục công việc và các mục công việc con của chúng thường dựa trên thời gian, được giao cho thành viên nhóm để thực hiện. Nhóm của bạn thúc đẩy dự án đạt được mục tiêu bằng cách tạo, giao và hoàn thành mục công việc.",
+        "title": "Tạo công việc và giao nó cho ai đó, thậm chí là chính bạn",
+        "description": "Xem công việc như công việc, nhiệm vụ hoặc công việc cần hoàn thành. Công việc và các công việc con của chúng thường dựa trên thời gian, được giao cho thành viên nhóm để thực hiện. Nhóm của bạn thúc đẩy dự án đạt được mục tiêu bằng cách tạo, giao và hoàn thành công việc.",
         "primary_button": {
-          "text": "Tạo mục công việc đầu tiên của bạn",
+          "text": "Tạo công việc đầu tiên của bạn",
           "comic": {
-            "title": "Mục công việc là khối xây dựng cơ bản trong Plane.",
-            "description": "Thiết kế lại giao diện Plane, định vị lại thương hiệu công ty hoặc ra mắt hệ thống phun nhiên liệu mới đều là ví dụ về mục công việc có thể chứa các mục công việc con."
+            "title": "Công việc là khối xây dựng cơ bản trong Plane.",
+            "description": "Thiết kế lại giao diện Plane, định vị lại thương hiệu công ty hoặc ra mắt hệ thống phun nhiên liệu mới đều là ví dụ về công việc có thể chứa các công việc con."
           }
         }
       },
       "no_archived_issues": {
-        "title": "Chưa có mục công việc đã lưu trữ",
-        "description": "Thông qua phương thức thủ công hoặc tự động, bạn có thể lưu trữ mục công việc đã hoàn thành hoặc đã hủy. Bạn có thể tìm thấy chúng ở đây sau khi lưu trữ.",
+        "title": "Chưa có công việc đã lưu trữ",
+        "description": "Thông qua phương thức thủ công hoặc tự động, bạn có thể lưu trữ công việc đã hoàn thành hoặc đã hủy. Bạn có thể tìm thấy chúng ở đây sau khi lưu trữ.",
         "primary_button": {
           "text": "Thiết lập tự động hóa"
         }
       },
       "issues_empty_filter": {
-        "title": "Không tìm thấy mục công việc phù hợp với bộ lọc",
+        "title": "Không tìm thấy công việc phù hợp với bộ lọc",
         "secondary_button": {
           "text": "Xóa tất cả bộ lọc"
         }
@@ -216,55 +216,55 @@
     }
   },
   "project_module": {
-    "add_module": "Thêm mô-đun",
-    "update_module": "Cập nhật mô-đun",
-    "create_module": "Tạo mô-đun",
-    "archive_module": "Lưu trữ mô-đun",
-    "restore_module": "Khôi phục mô-đun",
-    "delete_module": "Xóa mô-đun",
+    "add_module": "Thêm nhóm công việc",
+    "update_module": "Cập nhật nhóm công việc",
+    "create_module": "Tạo nhóm công việc",
+    "archive_module": "Lưu trữ nhóm công việc",
+    "restore_module": "Khôi phục nhóm công việc",
+    "delete_module": "Xóa nhóm công việc",
     "empty_state": {
       "general": {
-        "title": "Ánh xạ cột mốc dự án vào mô-đun, dễ dàng theo dõi công việc tổng hợp.",
-        "description": "Một nhóm mục công việc thuộc cấp cha trong cấu trúc logic tạo thành một mô-đun. Xem nó như một cách theo dõi công việc theo cột mốc dự án. Chúng có chu kỳ riêng và thời hạn cùng với các tính năng phân tích giúp bạn hiểu bạn đang ở đâu so với cột mốc.",
+        "title": "Ánh xạ cột mốc dự án vào nhóm công việc, dễ dàng theo dõi công việc tổng hợp.",
+        "description": "Một nhóm công việc thuộc cấp cha trong cấu trúc logic tạo thành một nhóm công việc. Xem nó như một cách theo dõi công việc theo cột mốc dự án. Chúng có chu kỳ riêng và thời hạn cùng với các tính năng phân tích giúp bạn hiểu bạn đang ở đâu so với cột mốc.",
         "primary_button": {
-          "text": "Xây dựng mô-đun đầu tiên của bạn",
+          "text": "Xây dựng nhóm công việc đầu tiên của bạn",
           "comic": {
-            "title": "Mô-đun giúp nhóm công việc theo cấu trúc phân cấp.",
-            "description": "Mô-đun giỏ hàng, mô-đun khung gầm và mô-đun kho đều là ví dụ tốt về nhóm như vậy."
+            "title": "Nhóm công việc giúp nhóm công việc theo cấu trúc phân cấp.",
+            "description": "Nhóm công việc giỏ hàng, nhóm công việc khung gầm và nhóm công việc kho đều là ví dụ tốt về nhóm như vậy."
           }
         }
       },
       "no_issues": {
-        "title": "Không có mục công việc trong mô-đun",
-        "description": "Tạo hoặc thêm mục công việc bạn muốn hoàn thành như một phần của mô-đun này",
+        "title": "Không có công việc trong nhóm công việc",
+        "description": "Tạo hoặc thêm công việc bạn muốn hoàn thành như một phần của nhóm công việc này",
         "primary_button": {
-          "text": "Tạo mục công việc mới"
+          "text": "Tạo công việc mới"
         },
         "secondary_button": {
-          "text": "Thêm mục công việc hiện có"
+          "text": "Thêm công việc hiện có"
         }
       },
       "archived": {
-        "title": "Chưa có mô-đun đã lưu trữ",
-        "description": "Để tổ chức dự án của bạn, hãy lưu trữ mô-đun đã hoàn thành hoặc đã hủy. Bạn có thể tìm thấy chúng ở đây sau khi lưu trữ."
+        "title": "Chưa có nhóm công việc đã lưu trữ",
+        "description": "Để tổ chức dự án của bạn, hãy lưu trữ nhóm công việc đã hoàn thành hoặc đã hủy. Bạn có thể tìm thấy chúng ở đây sau khi lưu trữ."
       },
       "sidebar": {
-        "in_active": "Mô-đun này chưa được kích hoạt.",
+        "in_active": "Nhóm công việc này chưa được kích hoạt.",
         "invalid_date": "Ngày không hợp lệ. Vui lòng nhập ngày hợp lệ."
       }
     },
     "quick_actions": {
-      "archive_module": "Lưu trữ mô-đun",
-      "archive_module_description": "Chỉ mô-đun đã hoàn thành hoặc đã hủy\ncó thể được lưu trữ.",
-      "delete_module": "Xóa mô-đun"
+      "archive_module": "Lưu trữ nhóm công việc",
+      "archive_module_description": "Chỉ nhóm công việc đã hoàn thành hoặc đã hủy\ncó thể được lưu trữ.",
+      "delete_module": "Xóa nhóm công việc"
     },
     "toast": {
       "copy": {
-        "success": "Đã sao chép liên kết mô-đun vào bảng tạm"
+        "success": "Đã sao chép liên kết nhóm công việc vào bảng tạm"
       },
       "delete": {
-        "success": "Đã xóa mô-đun thành công",
-        "error": "Xóa mô-đun thất bại"
+        "success": "Đã xóa nhóm công việc thành công",
+        "error": "Xóa nhóm công việc thất bại"
       }
     }
   },
@@ -272,7 +272,7 @@
     "empty_state": {
       "general": {
         "title": "Viết ghi chú, tài liệu hoặc cơ sở kiến thức đầy đủ. Để trợ lý AI Galileo của Plane giúp bạn bắt đầu",
-        "description": "Trang là không gian ghi lại suy nghĩ trong Plane. Ghi lại các ghi chú cuộc họp, định dạng dễ dàng, nhúng mục công việc, sử dụng thư viện thành phần để bố cục và lưu tất cả trong ngữ cảnh dự án. Để hoàn thành nhanh bất kỳ tài liệu nào, bạn có thể gọi AI Galileo của Plane thông qua phím tắt hoặc nhấp nút.",
+        "description": "Trang là không gian ghi lại suy nghĩ trong Plane. Ghi lại các ghi chú cuộc họp, định dạng dễ dàng, nhúng công việc, sử dụng thư viện thành phần để bố cục và lưu tất cả trong ngữ cảnh dự án. Để hoàn thành nhanh bất kỳ tài liệu nào, bạn có thể gọi AI Galileo của Plane thông qua phím tắt hoặc nhấp nút.",
         "primary_button": {
           "text": "Tạo trang đầu tiên của bạn"
         }
@@ -301,7 +301,7 @@
     "empty_state": {
       "inbox": {
         "title": "Dự án chưa bật tính năng thu thập.",
-        "description": "Tính năng thu thập giúp bạn quản lý các yêu cầu đến của dự án và thêm chúng như mục công việc trong quy trình làm việc. Bật tính năng thu thập từ cài đặt dự án để quản lý yêu cầu.",
+        "description": "Tính năng thu thập giúp bạn quản lý các yêu cầu đến của dự án và thêm chúng như công việc trong quy trình làm việc. Bật tính năng thu thập từ cài đặt dự án để quản lý yêu cầu.",
         "primary_button": {
           "text": "Quản lý tính năng"
         }
@@ -314,8 +314,8 @@
         }
       },
       "module": {
-        "title": "Dự án chưa bật tính năng mô-đun.",
-        "description": "Mô-đun là khối xây dựng cơ bản của dự án. Bật mô-đun từ cài đặt dự án để bắt đầu sử dụng chúng.",
+        "title": "Dự án chưa bật tính năng nhóm công việc.",
+        "description": "Nhóm công việc là khối xây dựng cơ bản của dự án. Bật nhóm công việc từ cài đặt dự án để bắt đầu sử dụng chúng.",
         "primary_button": {
           "text": "Quản lý tính năng"
         }
@@ -353,8 +353,8 @@
     "order_by": {
       "name": "Tên",
       "progress": "Tiến độ",
-      "issues": "Số lượng mục công việc",
-      "due_date": "Ngày hết hạn",
+      "issues": "Số lượng công việc",
+      "due_date": "Hạn hoàn thành",
       "created_at": "Ngày tạo",
       "manual": "Thủ công"
     }

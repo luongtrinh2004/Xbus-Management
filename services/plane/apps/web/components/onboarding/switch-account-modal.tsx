@@ -46,8 +46,8 @@ export function SwitchAccountModal(props: Props) {
     } catch {
       setToast({
         type: "error",
-        title: "Error!",
-        message: "Failed to sign out. Please try again.",
+        title: "Lỗi!",
+        message: "Không thể đăng xuất. Vui lòng thử lại.",
       });
     } finally {
       setSwitchingAccount(false);
@@ -61,16 +61,16 @@ export function SwitchAccountModal(props: Props) {
       handleSubmit={handleSwitchAccount}
       isSubmitting={switchingAccount}
       variant="primary"
-      title="Switch account"
+      title={"Chuyển tài khoản"}
       content={
         userData?.email ? (
           <>
-            If you have signed up via <span className="text-accent-primary">{userData.email}</span> un-intentionally,
-            you can switch your account to a different one from here.
+            Nếu bạn đã đăng ký qua <span className="text-accent-primary">{userData.email}</span> do nhầm lẫn, bạn có thể
+            chuyển tài khoản tại đây.
           </>
         ) : null
       }
-      primaryButtonText={{ loading: "Switching...", default: "Switch account" }}
+      primaryButtonText={{ loading: "Switching...", default: "Chuyển tài khoản" }}
     />
   );
 }

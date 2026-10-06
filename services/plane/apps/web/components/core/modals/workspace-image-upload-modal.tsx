@@ -89,8 +89,8 @@ export const WorkspaceImageUploadModal = observer(function WorkspaceImageUploadM
       console.log("error", error);
       setToast({
         type: "error",
-        title: "Error",
-        message: error.error || "Something went wrong",
+        title: "Lỗi",
+        message: error.error || "Đã xảy ra lỗi",
       });
     } finally {
       setIsImageUploading(false);
@@ -127,7 +127,7 @@ export const WorkspaceImageUploadModal = observer(function WorkspaceImageUploadM
         <DialogMain>
           <DialogHeader>
             <DialogHeading>
-              <DialogTitle>Upload image</DialogTitle>
+              <DialogTitle>Tải ảnh lên</DialogTitle>
             </DialogHeading>
           </DialogHeader>
           <DialogBody tabIndex={0}>
@@ -148,11 +148,11 @@ export const WorkspaceImageUploadModal = observer(function WorkspaceImageUploadM
                           type="button"
                           className="absolute top-0 right-0 z-40 translate-x-1/2 -translate-y-1/2 rounded-sm bg-surface-2 px-2 py-0.5 text-11 font-medium text-secondary"
                         >
-                          Edit
+                          Chỉnh sửa
                         </button>
                         <img
                           src={image ? URL.createObjectURL(image) : value ? getFileURL(value) : ""}
-                          alt="image"
+                          alt={"Ảnh"}
                           className="absolute top-0 left-0 h-full w-full rounded-md object-cover"
                         />
                       </>
@@ -160,7 +160,7 @@ export const WorkspaceImageUploadModal = observer(function WorkspaceImageUploadM
                       <div>
                         <UserOutline className="mx-auto h-16 w-16 text-secondary" />
                         <span className="mt-2 block text-13 font-medium text-secondary">
-                          {isDragActive ? "Drop image here to upload" : "Drag & drop image here"}
+                          {isDragActive ? "Thả ảnh vào đây để tải lên" : "Kéo và thả ảnh vào đây"}
                         </span>
                       </div>
                     )}
@@ -171,12 +171,12 @@ export const WorkspaceImageUploadModal = observer(function WorkspaceImageUploadM
                 {fileRejections.length > 0 && (
                   <p className="text-13 text-danger-primary">
                     {fileRejections[0].errors[0].code === "file-too-large"
-                      ? "The image size cannot exceed 5 MB."
-                      : "Please upload a file in a valid format."}
+                      ? "Dung lượng ảnh không được quá 5 MB."
+                      : "Vui lòng tải lên tệp có định dạng hợp lệ."}
                   </p>
                 )}
               </div>
-              <p className="text-13 text-secondary">File formats supported- .jpeg, .jpg, .png, .webp</p>
+              <p className="text-13 text-secondary">Định dạng hỗ trợ: .jpeg, .jpg, .png, .webp</p>
             </div>
           </DialogBody>
         </DialogMain>
@@ -186,18 +186,18 @@ export const WorkspaceImageUploadModal = observer(function WorkspaceImageUploadM
               variant="danger"
               size="md"
               stretch="auto"
-              label={isRemoving ? "Removing" : "Remove"}
+              label={isRemoving ? "Đang xóa" : "Xóa"}
               onClick={handleImageRemove}
               disabled={!value}
               loading={isRemoving}
             />
           </DialogInfo>
-          <Button variant="secondary" size="md" stretch="auto" label="Cancel" onClick={handleClose} />
+          <Button variant="secondary" size="md" stretch="auto" label={"Hủy"} onClick={handleClose} />
           <Button
             variant="primary"
             size="md"
             stretch="auto"
-            label={isImageUploading ? "Uploading" : "Upload & Save"}
+            label={isImageUploading ? "Đang tải lên" : "Tải lên và lưu"}
             onClick={handleSubmit}
             disabled={!image}
             loading={isImageUploading}

@@ -54,7 +54,7 @@
     "empty_state": {
       "general": {
         "title": "Tổng quan về dự án, hoạt động và chỉ số",
-        "description": "Chào mừng đến với Plane, chúng tôi rất vui khi bạn ở đây. Tạo dự án đầu tiên của bạn và theo dõi mục công việc, trang này sẽ trở thành không gian giúp bạn tiến triển. Quản trị viên cũng sẽ thấy dự án giúp nhóm tiến triển.",
+        "description": "Chào mừng đến với Plane, chúng tôi rất vui khi bạn ở đây. Tạo dự án đầu tiên của bạn và theo dõi công việc, trang này sẽ trở thành không gian giúp bạn tiến triển. Quản trị viên cũng sẽ thấy dự án giúp nhóm tiến triển.",
         "primary_button": {
           "text": "Xây dựng dự án đầu tiên của bạn",
           "comic": {
@@ -70,26 +70,26 @@
     "page_label": "{workspace} - Phân tích",
     "open_tasks": "Tổng nhiệm vụ đang mở",
     "error": "Đã xảy ra lỗi khi truy xuất dữ liệu.",
-    "work_items_closed_in": "Mục công việc đã đóng trong",
+    "work_items_closed_in": "Công việc đã đóng trong",
     "selected_projects": "Dự án đã chọn",
     "total_members": "Tổng số thành viên",
     "total_cycles": "Tổng số chu kỳ",
-    "total_modules": "Tổng số mô-đun",
+    "total_modules": "Tổng số nhóm công việc",
     "pending_work_items": {
-      "title": "Mục công việc đang chờ xử lý",
-      "empty_state": "Phân tích mục công việc đang chờ xử lý của đồng nghiệp sẽ hiển thị ở đây."
+      "title": "Công việc đang chờ xử lý",
+      "empty_state": "Phân tích công việc đang chờ xử lý của đồng nghiệp sẽ hiển thị ở đây."
     },
     "work_items_closed_in_a_year": {
-      "title": "Mục công việc đã đóng trong một năm",
-      "empty_state": "Đóng mục công việc để xem phân tích dưới dạng biểu đồ."
+      "title": "Công việc đã đóng trong một năm",
+      "empty_state": "Đóng công việc để xem phân tích dưới dạng biểu đồ."
     },
     "most_work_items_created": {
-      "title": "Tạo nhiều mục công việc nhất",
-      "empty_state": "Đồng nghiệp và số lượng mục công việc họ đã tạo sẽ hiển thị ở đây."
+      "title": "Tạo nhiều công việc nhất",
+      "empty_state": "Đồng nghiệp và số lượng công việc họ đã tạo sẽ hiển thị ở đây."
     },
     "most_work_items_closed": {
-      "title": "Đóng nhiều mục công việc nhất",
-      "empty_state": "Đồng nghiệp và số lượng mục công việc họ đã đóng sẽ hiển thị ở đây."
+      "title": "Đóng nhiều công việc nhất",
+      "empty_state": "Đồng nghiệp và số lượng công việc họ đã đóng sẽ hiển thị ở đây."
     },
     "tabs": {
       "scope_and_demand": "Phạm vi và nhu cầu",
@@ -110,15 +110,15 @@
     "empty_state": {
       "project_insights": {
         "title": "Chưa có dữ liệu",
-        "description": "Các hạng mục công việc được giao cho bạn, phân loại theo trạng thái, sẽ hiển thị tại đây."
+        "description": "Các hạng công việc được giao cho bạn, phân loại theo trạng thái, sẽ hiển thị tại đây."
       },
       "created_vs_resolved": {
         "title": "Chưa có dữ liệu",
-        "description": "Các hạng mục công việc được tạo và giải quyết theo thời gian sẽ hiển thị tại đây."
+        "description": "Các hạng công việc được tạo và giải quyết theo thời gian sẽ hiển thị tại đây."
       },
       "customized_insights": {
         "title": "Chưa có dữ liệu",
-        "description": "Các hạng mục công việc được giao cho bạn, phân loại theo trạng thái, sẽ hiển thị tại đây."
+        "description": "Các hạng công việc được giao cho bạn, phân loại theo trạng thái, sẽ hiển thị tại đây."
       },
       "general": {
         "title": "Theo dõi tiến độ, khối lượng công việc và phân bổ. Phát hiện xu hướng, loại bỏ rào cản và tăng tốc công việc",
@@ -126,26 +126,26 @@
         "primary_button": {
           "text": "Bắt đầu dự án đầu tiên của bạn",
           "comic": {
-            "title": "Phân tích hoạt động tốt nhất với Chu kỳ + Mô-đun",
-            "description": "Đầu tiên, giới hạn thời gian các vấn đề của bạn trong Chu kỳ và, nếu có thể, nhóm các vấn đề kéo dài hơn một chu kỳ vào Mô-đun. Kiểm tra cả hai trong điều hướng bên trái."
+            "title": "Phân tích hoạt động tốt nhất với Chu kỳ + Nhóm công việc",
+            "description": "Đầu tiên, giới hạn thời gian các vấn đề của bạn trong Chu kỳ và, nếu có thể, nhóm các vấn đề kéo dài hơn một chu kỳ vào Nhóm công việc. Kiểm tra cả hai trong điều hướng bên trái."
           }
         }
       },
       "cycle_progress": {
         "title": "Chưa có dữ liệu",
-        "description": "Phân tích tiến độ chu kỳ sẽ hiển thị ở đây. Thêm các hạng mục công việc vào chu kỳ để bắt đầu theo dõi tiến độ."
+        "description": "Phân tích tiến độ chu kỳ sẽ hiển thị ở đây. Thêm các hạng công việc vào chu kỳ để bắt đầu theo dõi tiến độ."
       },
       "module_progress": {
         "title": "Chưa có dữ liệu",
-        "description": "Phân tích tiến độ mô-đun sẽ hiển thị ở đây. Thêm các hạng mục công việc vào mô-đun để bắt đầu theo dõi tiến độ."
+        "description": "Phân tích tiến độ nhóm công việc sẽ hiển thị ở đây. Thêm các hạng công việc vào nhóm công việc để bắt đầu theo dõi tiến độ."
       },
       "intake_trends": {
         "title": "Chưa có dữ liệu",
-        "description": "Phân tích xu hướng intake sẽ hiển thị ở đây. Thêm các hạng mục công việc vào intake để bắt đầu theo dõi xu hướng."
+        "description": "Phân tích xu hướng intake sẽ hiển thị ở đây. Thêm các hạng công việc vào intake để bắt đầu theo dõi xu hướng."
       }
     },
     "upgrade_to_plan": "Nâng cấp lên {plan} để mở khóa {tab}",
-    "workitem_resolved_vs_pending": "Mục công việc đã giải quyết vs đang chờ",
+    "workitem_resolved_vs_pending": "Công việc đã giải quyết vs đang chờ",
     "projects_by_status": "Dự án theo trạng thái",
     "active_users": "Người dùng hoạt động",
     "intake_trends": "Xu hướng tiếp nhận"
@@ -169,8 +169,8 @@
     "error": {
       "permission": "Bạn không có quyền thực hiện thao tác này.",
       "cycle_delete": "Xóa chu kỳ thất bại",
-      "module_delete": "Xóa mô-đun thất bại",
-      "issue_delete": "Xóa mục công việc thất bại"
+      "module_delete": "Xóa nhóm công việc thất bại",
+      "issue_delete": "Xóa công việc thất bại"
     },
     "state": {
       "backlog": "Tồn đọng",
@@ -196,7 +196,7 @@
     "empty_state": {
       "general": {
         "title": "Không có dự án hoạt động",
-        "description": "Coi mỗi dự án như là cấp cha của công việc định hướng mục tiêu. Dự án là nơi chứa mục công việc, chu kỳ và mô-đun, cùng với đồng nghiệp giúp bạn đạt được mục tiêu. Tạo dự án mới hoặc lọc dự án đã lưu trữ.",
+        "description": "Coi mỗi dự án như là cấp cha của công việc định hướng mục tiêu. Dự án là nơi chứa công việc, chu kỳ và nhóm công việc, cùng với đồng nghiệp giúp bạn đạt được mục tiêu. Tạo dự án mới hoặc lọc dự án đã lưu trữ.",
         "primary_button": {
           "text": "Bắt đầu dự án đầu tiên của bạn",
           "comic": {
@@ -207,7 +207,7 @@
       },
       "no_projects": {
         "title": "Không có dự án",
-        "description": "Để tạo mục công việc hoặc quản lý công việc của bạn, bạn cần tạo dự án hoặc trở thành một phần của dự án.",
+        "description": "Để tạo công việc hoặc quản lý công việc của bạn, bạn cần tạo dự án hoặc trở thành một phần của dự án.",
         "primary_button": {
           "text": "Bắt đầu dự án đầu tiên của bạn",
           "comic": {
@@ -229,33 +229,33 @@
     "add_view": "Thêm chế độ xem",
     "empty_state": {
       "all-issues": {
-        "title": "Không có mục công việc trong dự án",
-        "description": "Dự án đầu tiên hoàn thành! Bây giờ, hãy chia nhỏ công việc của bạn thành các mục công việc có thể theo dõi. Hãy bắt đầu nào!",
+        "title": "Không có công việc trong dự án",
+        "description": "Dự án đầu tiên hoàn thành! Bây giờ, hãy chia nhỏ công việc của bạn thành các công việc có thể theo dõi. Hãy bắt đầu nào!",
         "primary_button": {
-          "text": "Tạo mục công việc mới"
+          "text": "Tạo công việc mới"
         }
       },
       "assigned": {
-        "title": "Chưa có mục công việc",
-        "description": "Mục công việc được giao cho bạn có thể được theo dõi tại đây.",
+        "title": "Chưa có công việc",
+        "description": "Công việc được giao cho bạn có thể được theo dõi tại đây.",
         "primary_button": {
-          "text": "Tạo mục công việc mới"
+          "text": "Tạo công việc mới"
         }
       },
       "created": {
-        "title": "Chưa có mục công việc",
-        "description": "Tất cả mục công việc bạn tạo sẽ xuất hiện ở đây, theo dõi chúng trực tiếp tại đây.",
+        "title": "Chưa có công việc",
+        "description": "Tất cả công việc bạn tạo sẽ xuất hiện ở đây, theo dõi chúng trực tiếp tại đây.",
         "primary_button": {
-          "text": "Tạo mục công việc mới"
+          "text": "Tạo công việc mới"
         }
       },
       "subscribed": {
-        "title": "Chưa có mục công việc",
-        "description": "Đăng ký mục công việc bạn quan tâm, theo dõi tất cả chúng tại đây."
+        "title": "Chưa có công việc",
+        "description": "Đăng ký công việc bạn quan tâm, theo dõi tất cả chúng tại đây."
       },
       "custom-view": {
-        "title": "Chưa có mục công việc",
-        "description": "Mục công việc phù hợp với bộ lọc, theo dõi tất cả chúng tại đây."
+        "title": "Chưa có công việc",
+        "description": "Công việc phù hợp với bộ lọc, theo dõi tất cả chúng tại đây."
       }
     },
     "delete_view": {
@@ -264,10 +264,10 @@
     }
   },
   "workspace_draft_issues": {
-    "draft_an_issue": "Nháp một mục công việc",
+    "draft_an_issue": "Nháp một công việc",
     "empty_state": {
-      "title": "Mục công việc viết dở và bình luận sắp ra mắt sẽ hiển thị ở đây.",
-      "description": "Để thử tính năng này, hãy bắt đầu thêm mục công việc và rời đi giữa chừng, hoặc tạo bản nháp đầu tiên của bạn bên dưới. 😉",
+      "title": "Công việc viết dở và bình luận sắp ra mắt sẽ hiển thị ở đây.",
+      "description": "Để thử tính năng này, hãy bắt đầu thêm công việc và rời đi giữa chừng, hoặc tạo bản nháp đầu tiên của bạn bên dưới. 😉",
       "primary_button": {
         "text": "Tạo bản nháp đầu tiên của bạn"
       }
@@ -279,7 +279,7 @@
     "toasts": {
       "created": {
         "success": "Đã tạo bản nháp",
-        "error": "Không thể tạo mục công việc. Vui lòng thử lại."
+        "error": "Không thể tạo công việc. Vui lòng thử lại."
       },
       "deleted": {
         "success": "Đã xóa bản nháp"
@@ -290,7 +290,7 @@
     "empty_state": {
       "general": {
         "title": "Viết ghi chú, tài liệu, hoặc cơ sở kiến thức đầy đủ. Nhờ Galileo, trợ lý AI của Plane, giúp bạn bắt đầu",
-        "description": "Trang là không gian lưu trữ ý tưởng trong Plane. Ghi lại ghi chú cuộc họp, định dạng chúng dễ dàng, nhúng mục công việc, bố trí chúng bằng thư viện các thành phần, và giữ tất cả trong ngữ cảnh dự án của bạn. Để làm ngắn gọn bất kỳ tài liệu nào, gọi Galileo, AI của Plane, bằng phím tắt hoặc nhấp vào nút.",
+        "description": "Trang là không gian lưu trữ ý tưởng trong Plane. Ghi lại ghi chú cuộc họp, định dạng chúng dễ dàng, nhúng công việc, bố trí chúng bằng thư viện các thành phần, và giữ tất cả trong ngữ cảnh dự án của bạn. Để làm ngắn gọn bất kỳ tài liệu nào, gọi Galileo, AI của Plane, bằng phím tắt hoặc nhấp vào nút.",
         "primary_button": {
           "text": "Tạo trang đầu tiên của bạn"
         }

@@ -34,12 +34,12 @@ type Options = {
 };
 
 export const cycleEstimateOptions: Options[] = [
-  { value: "issues", label: "Work items" },
-  { value: "points", label: "Estimates" },
+  { value: "issues", label: "Công việc" },
+  { value: "points", label: "Ước tính" },
 ];
 export const cycleChartOptions: Options[] = [
-  { value: "burndown", label: "Burn-down" },
-  { value: "burnup", label: "Burn-up" },
+  { value: "burndown", label: "Biểu đồ burndown" },
+  { value: "burnup", label: "Biểu đồ burnup" },
 ];
 
 export const validateCycleSnapshot = (cycleDetails: ICycle | null): ICycle | null => {

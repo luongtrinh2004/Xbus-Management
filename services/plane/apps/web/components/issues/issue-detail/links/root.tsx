@@ -49,57 +49,57 @@ export function IssueLinkRoot(props: TIssueLinkRoot) {
     () => ({
       create: async (data: Partial<TIssueLink>) => {
         try {
-          if (!workspaceSlug || !projectId || !issueId) throw new Error("Missing required fields");
+          if (!workspaceSlug || !projectId || !issueId) throw new Error("Vui lòng điền đầy đủ thông tin bắt buộc");
           await createLink(workspaceSlug, projectId, issueId, data);
           setToast({
-            message: "The link has been successfully created",
+            message: "Liên kết đã được tạo thành công",
             type: "success",
-            title: "Link created",
+            title: "Đã tạo liên kết",
           });
           toggleIssueLinkModal(false);
         } catch (error: any) {
           setToast({
-            message: error?.data?.error ?? "The link could not be created",
+            message: error?.data?.error ?? "Không thể tạo liên kết",
             type: "error",
-            title: "Link not created",
+            title: "Chưa tạo liên kết",
           });
           throw error;
         }
       },
       update: async (linkId: string, data: Partial<TIssueLink>) => {
         try {
-          if (!workspaceSlug || !projectId || !issueId) throw new Error("Missing required fields");
+          if (!workspaceSlug || !projectId || !issueId) throw new Error("Vui lòng điền đầy đủ thông tin bắt buộc");
           await updateLink(workspaceSlug, projectId, issueId, linkId, data);
           setToast({
-            message: "The link has been successfully updated",
+            message: "Liên kết đã được cập nhật thành công",
             type: "success",
-            title: "Link updated",
+            title: "Đã cập nhật liên kết",
           });
           toggleIssueLinkModal(false);
         } catch (error) {
           setToast({
-            message: "The link could not be updated",
+            message: "Không thể cập nhật liên kết",
             type: "error",
-            title: "Link not updated",
+            title: "Chưa cập nhật liên kết",
           });
           throw error;
         }
       },
       remove: async (linkId: string) => {
         try {
-          if (!workspaceSlug || !projectId || !issueId) throw new Error("Missing required fields");
+          if (!workspaceSlug || !projectId || !issueId) throw new Error("Vui lòng điền đầy đủ thông tin bắt buộc");
           await removeLink(workspaceSlug, projectId, issueId, linkId);
           setToast({
-            message: "The link has been successfully removed",
+            message: "Liên kết đã được xóa thành công",
             type: "success",
-            title: "Link removed",
+            title: "Đã xóa liên kết",
           });
           toggleIssueLinkModal(false);
         } catch {
           setToast({
-            message: "The link could not be removed",
+            message: "Không thể xóa liên kết",
             type: "error",
-            title: "Link not removed",
+            title: "Chưa xóa liên kết",
           });
         }
       },
@@ -122,7 +122,7 @@ export function IssueLinkRoot(props: TIssueLinkRoot) {
 
       <div className="py-1 text-11">
         <div className="flex items-center justify-between gap-2">
-          <h4>Links</h4>
+          <h4>Liên kết</h4>
           {!disabled && (
             <button
               type="button"

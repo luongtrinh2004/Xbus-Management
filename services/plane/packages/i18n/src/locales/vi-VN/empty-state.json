@@ -2,7 +2,7 @@
   "common_empty_state": {
     "progress": {
       "title": "Chưa có số liệu tiến độ để hiển thị.",
-      "description": "Bắt đầu đặt giá trị thuộc tính trong các mục công việc để xem số liệu tiến độ ở đây."
+      "description": "Bắt đầu đặt giá trị thuộc tính trong các công việc để xem số liệu tiến độ ở đây."
     },
     "updates": {
       "title": "Chưa có cập nhật.",
@@ -36,9 +36,9 @@
       "description": "Dự án bạn đang tìm kiếm không tồn tại."
     },
     "work_items": {
-      "title": "Bắt đầu với mục công việc đầu tiên của bạn.",
-      "description": "Các mục công việc là những khối xây dựng của dự án của bạn — chỉ định người sở hữu, đặt mức độ ưu tiên và theo dõi tiến độ dễ dàng.",
-      "cta_primary": "Tạo mục công việc đầu tiên của bạn"
+      "title": "Bắt đầu với công việc đầu tiên của bạn.",
+      "description": "Các công việc là những khối xây dựng của dự án của bạn — chỉ định người sở hữu, đặt mức độ ưu tiên và theo dõi tiến độ dễ dàng.",
+      "cta_primary": "Tạo công việc đầu tiên của bạn"
     },
     "cycles": {
       "title": "Nhóm và giới hạn thời gian công việc của bạn trong Chu kỳ.",
@@ -46,21 +46,21 @@
       "cta_primary": "Đặt chu kỳ đầu tiên của bạn"
     },
     "cycle_work_items": {
-      "title": "Không có mục công việc để hiển thị trong chu kỳ này",
-      "description": "Tạo các mục công việc để bắt đầu giám sát tiến độ của đội bạn trong chu kỳ này và đạt được mục tiêu đúng hạn.",
-      "cta_primary": "Tạo mục công việc",
-      "cta_secondary": "Thêm mục công việc hiện có"
+      "title": "Không có công việc để hiển thị trong chu kỳ này",
+      "description": "Tạo các công việc để bắt đầu giám sát tiến độ của đội bạn trong chu kỳ này và đạt được mục tiêu đúng hạn.",
+      "cta_primary": "Tạo công việc",
+      "cta_secondary": "Thêm công việc hiện có"
     },
     "modules": {
-      "title": "Ánh xạ mục tiêu dự án của bạn vào Mô-đun và theo dõi dễ dàng.",
-      "description": "Các mô-đun được tạo thành từ các mục công việc kết nối với nhau. Chúng hỗ trợ theo dõi tiến độ qua các giai đoạn dự án, mỗi giai đoạn có thời hạn và phân tích cụ thể để chỉ ra bạn gần đạt được các giai đoạn đó như thế nào.",
-      "cta_primary": "Đặt mô-đun đầu tiên của bạn"
+      "title": "Ánh xạ mục tiêu dự án của bạn vào Nhóm công việc và theo dõi dễ dàng.",
+      "description": "Các nhóm công việc được tạo thành từ các công việc kết nối với nhau. Chúng hỗ trợ theo dõi tiến độ qua các giai đoạn dự án, mỗi giai đoạn có thời hạn và phân tích cụ thể để chỉ ra bạn gần đạt được các giai đoạn đó như thế nào.",
+      "cta_primary": "Đặt nhóm công việc đầu tiên của bạn"
     },
     "module_work_items": {
-      "title": "Không có mục công việc để hiển thị trong Mô-đun này",
-      "description": "Tạo các mục công việc để bắt đầu giám sát mô-đun này.",
-      "cta_primary": "Tạo mục công việc",
-      "cta_secondary": "Thêm mục công việc hiện có"
+      "title": "Không có công việc để hiển thị trong Nhóm công việc này",
+      "description": "Tạo các công việc để bắt đầu giám sát nhóm công việc này.",
+      "cta_primary": "Tạo công việc",
+      "cta_secondary": "Thêm công việc hiện có"
     },
     "views": {
       "title": "Lưu chế độ xem tùy chỉnh cho dự án của bạn",
@@ -68,18 +68,18 @@
       "cta_primary": "Tạo chế độ xem"
     },
     "no_work_items_in_project": {
-      "title": "Chưa có mục công việc trong dự án",
-      "description": "Thêm các mục công việc vào dự án của bạn và chia nhỏ công việc thành các phần có thể theo dõi với chế độ xem.",
-      "cta_primary": "Thêm mục công việc"
+      "title": "Chưa có công việc trong dự án",
+      "description": "Thêm các công việc vào dự án của bạn và chia nhỏ công việc thành các phần có thể theo dõi với chế độ xem.",
+      "cta_primary": "Thêm công việc"
     },
     "work_item_filter": {
-      "title": "Không tìm thấy mục công việc",
+      "title": "Không tìm thấy công việc",
       "description": "Bộ lọc hiện tại của bạn không trả về kết quả nào. Hãy thử thay đổi bộ lọc.",
-      "cta_primary": "Thêm mục công việc"
+      "cta_primary": "Thêm công việc"
     },
     "pages": {
       "title": "Ghi chép mọi thứ — từ ghi chú đến PRD",
-      "description": "Các trang cho phép bạn ghi lại và tổ chức thông tin ở một nơi. Viết ghi chú cuộc họp, tài liệu dự án và PRD, nhúng các mục công việc và cấu trúc chúng với các thành phần sẵn sàng sử dụng.",
+      "description": "Các trang cho phép bạn ghi lại và tổ chức thông tin ở một nơi. Viết ghi chú cuộc họp, tài liệu dự án và PRD, nhúng các công việc và cấu trúc chúng với các thành phần sẵn sàng sử dụng.",
       "cta_primary": "Tạo Trang đầu tiên của bạn"
     },
     "archive_pages": {
@@ -92,18 +92,18 @@
       "cta_primary": "Tạo yêu cầu Tiếp nhận"
     },
     "intake_main": {
-      "title": "Chọn một mục công việc Tiếp nhận để xem chi tiết của nó"
+      "title": "Chọn một công việc Tiếp nhận để xem chi tiết của nó"
     },
     "epics": {
-      "title": "Biến các dự án phức tạp thành các câu chuyện sử thi có cấu trúc.",
-      "description": "Một câu chuyện sử thi giúp bạn tổ chức các mục tiêu lớn thành các nhiệm vụ nhỏ hơn, có thể theo dõi.",
-      "cta_primary": "Tạo Câu chuyện Sử thi",
+      "title": "Biến các dự án phức tạp thành các câu chuyện Epic có cấu trúc.",
+      "description": "Một câu chuyện Epic giúp bạn tổ chức các mục tiêu lớn thành các nhiệm vụ nhỏ hơn, có thể theo dõi.",
+      "cta_primary": "Tạo Câu chuyện Epic",
       "cta_secondary": "Tài liệu"
     },
     "epic_work_items": {
-      "title": "Bạn chưa thêm mục công việc vào câu chuyện sử thi này.",
-      "description": "Bắt đầu bằng cách thêm một số mục công việc vào câu chuyện sử thi này và theo dõi chúng ở đây.",
-      "cta_secondary": "Thêm mục công việc"
+      "title": "Bạn chưa thêm công việc vào câu chuyện Epic này.",
+      "description": "Bắt đầu bằng cách thêm một số công việc vào câu chuyện Epic này và theo dõi chúng ở đây.",
+      "cta_secondary": "Thêm công việc"
     }
   },
   "workspace_empty_state": {
@@ -112,8 +112,8 @@
       "description": "Bạn có thể lưu trữ các epic đã hoàn thành hoặc đã hủy. Tìm chúng tại đây sau khi lưu trữ."
     },
     "archive_work_items": {
-      "title": "Chưa có mục công việc được lưu trữ",
-      "description": "Thủ công hoặc thông qua tự động hóa, bạn có thể lưu trữ các mục công việc đã hoàn thành hoặc bị hủy. Tìm chúng ở đây sau khi lưu trữ.",
+      "title": "Chưa có công việc được lưu trữ",
+      "description": "Thủ công hoặc thông qua tự động hóa, bạn có thể lưu trữ các công việc đã hoàn thành hoặc bị hủy. Tìm chúng ở đây sau khi lưu trữ.",
       "cta_primary": "Thiết lập tự động hóa"
     },
     "archive_cycles": {
@@ -121,33 +121,33 @@
       "description": "Để sắp xếp dự án của bạn, hãy lưu trữ các chu kỳ đã hoàn thành. Tìm chúng ở đây sau khi lưu trữ."
     },
     "archive_modules": {
-      "title": "Chưa có Mô-đun được lưu trữ",
-      "description": "Để sắp xếp dự án của bạn, hãy lưu trữ các mô-đun đã hoàn thành hoặc bị hủy. Tìm chúng ở đây sau khi lưu trữ."
+      "title": "Chưa có Nhóm công việc được lưu trữ",
+      "description": "Để sắp xếp dự án của bạn, hãy lưu trữ các nhóm công việc đã hoàn thành hoặc bị hủy. Tìm chúng ở đây sau khi lưu trữ."
     },
     "home_widget_quick_links": {
       "title": "Giữ các tài liệu tham khảo, tài nguyên hoặc tài liệu quan trọng tiện lợi cho công việc của bạn"
     },
     "inbox_sidebar_all": {
-      "title": "Cập nhật cho các mục công việc bạn đăng ký sẽ xuất hiện ở đây"
+      "title": "Cập nhật cho các công việc bạn đăng ký sẽ xuất hiện ở đây"
     },
     "inbox_sidebar_mentions": {
-      "title": "Đề cập cho các mục công việc của bạn sẽ xuất hiện ở đây"
+      "title": "Đề cập cho các công việc của bạn sẽ xuất hiện ở đây"
     },
     "your_work_by_priority": {
-      "title": "Chưa có mục công việc được giao"
+      "title": "Chưa có công việc được giao"
     },
     "your_work_by_state": {
-      "title": "Chưa có mục công việc được giao"
+      "title": "Chưa có công việc được giao"
     },
     "views": {
       "title": "Chưa có Chế độ xem",
-      "description": "Thêm các mục công việc vào dự án của bạn và sử dụng chế độ xem để lọc, sắp xếp và giám sát tiến độ dễ dàng.",
-      "cta_primary": "Thêm mục công việc"
+      "description": "Thêm các công việc vào dự án của bạn và sử dụng chế độ xem để lọc, sắp xếp và giám sát tiến độ dễ dàng.",
+      "cta_primary": "Thêm công việc"
     },
     "drafts": {
-      "title": "Các mục công việc viết dở",
-      "description": "Để thử điều này, hãy bắt đầu thêm một mục công việc và để nó ở giữa chừng hoặc tạo bản nháp đầu tiên của bạn bên dưới. 😉",
-      "cta_primary": "Tạo mục công việc nháp"
+      "title": "Các công việc viết dở",
+      "description": "Để thử điều này, hãy bắt đầu thêm một công việc và để nó ở giữa chừng hoặc tạo bản nháp đầu tiên của bạn bên dưới. 😉",
+      "cta_primary": "Tạo công việc nháp"
     },
     "projects_archived": {
       "title": "Không có dự án được lưu trữ",
@@ -157,13 +157,13 @@
       "title": "Tạo dự án để trực quan hóa số liệu dự án ở đây."
     },
     "analytics_work_items": {
-      "title": "Tạo dự án với các mục công việc và người được giao để bắt đầu theo dõi hiệu suất, tiến độ và tác động của đội ở đây."
+      "title": "Tạo dự án với các công việc và người phụ trách để bắt đầu theo dõi hiệu suất, tiến độ và tác động của đội ở đây."
     },
     "analytics_no_cycle": {
       "title": "Tạo chu kỳ để tổ chức công việc thành các giai đoạn có giới hạn thời gian và theo dõi tiến độ qua các sprint."
     },
     "analytics_no_module": {
-      "title": "Tạo mô-đun để tổ chức công việc của bạn và theo dõi tiến độ qua các giai đoạn khác nhau."
+      "title": "Tạo nhóm công việc để tổ chức công việc của bạn và theo dõi tiến độ qua các giai đoạn khác nhau."
     },
     "analytics_no_intake": {
       "title": "Thiết lập tiếp nhận để quản lý các yêu cầu đến và theo dõi cách chúng được chấp nhận và từ chối"
@@ -188,7 +188,7 @@
     },
     "wiki": {
       "title": "Viết một ghi chú, một tài liệu hoặc một cơ sở kiến thức đầy đủ.",
-      "description": "Các trang là không gian ghi lại suy nghĩ trong Plane. Ghi chú cuộc họp, định dạng chúng dễ dàng, nhúng các mục công việc, bố trí chúng bằng thư viện các thành phần và giữ chúng tất cả trong bối cảnh dự án của bạn.",
+      "description": "Các trang là không gian ghi lại suy nghĩ trong Plane. Ghi chú cuộc họp, định dạng chúng dễ dàng, nhúng các công việc, bố trí chúng bằng thư viện các thành phần và giữ chúng tất cả trong bối cảnh dự án của bạn.",
       "cta_primary": "Tạo trang của bạn"
     },
     "project_overview_state_sidebar": {
@@ -199,12 +199,12 @@
   "settings_empty_state": {
     "estimates": {
       "title": "Chưa có ước tính",
-      "description": "Xác định cách đội của bạn đo lường nỗ lực và theo dõi nó một cách nhất quán trên tất cả các mục công việc.",
+      "description": "Xác định cách đội của bạn đo lường nỗ lực và theo dõi nó một cách nhất quán trên tất cả các công việc.",
       "cta_primary": "Thêm hệ thống ước tính"
     },
     "labels": {
       "title": "Chưa có nhãn",
-      "description": "Tạo nhãn cá nhân hóa để phân loại và quản lý các mục công việc của bạn một cách hiệu quả.",
+      "description": "Tạo nhãn cá nhân hóa để phân loại và quản lý các công việc của bạn một cách hiệu quả.",
       "cta_primary": "Tạo nhãn đầu tiên của bạn"
     },
     "exports": {
@@ -227,43 +227,43 @@
       "cta_primary": "Thêm webhook"
     },
     "work_item_types": {
-      "title": "Tạo và tùy chỉnh các loại mục công việc",
-      "description": "Xác định các loại mục công việc độc đáo cho dự án của bạn. Mỗi loại có thể có thuộc tính, quy trình làm việc và trường riêng - được điều chỉnh theo nhu cầu của dự án và đội của bạn.",
+      "title": "Tạo và tùy chỉnh các loại công việc",
+      "description": "Xác định các loại công việc độc đáo cho dự án của bạn. Mỗi loại có thể có thuộc tính, quy trình làm việc và trường riêng - được điều chỉnh theo nhu cầu của dự án và đội của bạn.",
       "cta_primary": "Kích hoạt"
     },
     "work_item_type_properties": {
-      "title": "Xác định thuộc tính và chi tiết bạn muốn thu thập cho loại mục công việc này. Tùy chỉnh nó để phù hợp với quy trình làm việc của dự án.",
+      "title": "Xác định thuộc tính và chi tiết bạn muốn thu thập cho loại công việc này. Tùy chỉnh nó để phù hợp với quy trình làm việc của dự án.",
       "cta_secondary": "Thêm thuộc tính"
     },
     "templates": {
       "title": "Chưa có mẫu",
-      "description": "Giảm thời gian thiết lập bằng cách tạo mẫu cho các mục công việc và trang — và bắt đầu công việc mới trong vài giây.",
+      "description": "Giảm thời gian thiết lập bằng cách tạo mẫu cho các công việc và trang — và bắt đầu công việc mới trong vài giây.",
       "cta_primary": "Tạo mẫu đầu tiên của bạn"
     },
     "recurring_work_items": {
-      "title": "Chưa có mục công việc định kỳ",
-      "description": "Thiết lập các mục công việc định kỳ để tự động hóa các nhiệm vụ lặp lại và giữ đúng lịch trình một cách dễ dàng.",
-      "cta_primary": "Tạo mục công việc định kỳ"
+      "title": "Chưa có công việc định kỳ",
+      "description": "Thiết lập các công việc định kỳ để tự động hóa các nhiệm vụ lặp lại và giữ đúng lịch trình một cách dễ dàng.",
+      "cta_primary": "Tạo công việc định kỳ"
     },
     "worklogs": {
       "title": "Theo dõi bảng chấm công cho tất cả thành viên",
-      "description": "Ghi nhật ký thời gian trên các mục công việc để xem bảng chấm công chi tiết cho bất kỳ thành viên nào trong đội qua các dự án."
+      "description": "Ghi nhật ký thời gian trên các công việc để xem bảng chấm công chi tiết cho bất kỳ thành viên nào trong đội qua các dự án."
     },
     "group_syncing": {
       "title": "Chưa có ánh xạ nhóm"
     },
     "template_setting": {
       "title": "Chưa có mẫu",
-      "description": "Giảm thời gian thiết lập bằng cách tạo mẫu cho dự án, mục công việc và trang — và bắt đầu công việc mới trong vài giây.",
+      "description": "Giảm thời gian thiết lập bằng cách tạo mẫu cho dự án, công việc và trang — và bắt đầu công việc mới trong vài giây.",
       "cta_primary": "Tạo mẫu"
     },
     "workflows": {
       "title": "Chưa có quy trình làm việc",
-      "description": "Tạo quy trình làm việc để quản lý tiến độ của các mục công việc.",
+      "description": "Tạo quy trình làm việc để quản lý tiến độ của các công việc.",
       "cta_primary": "Thêm quy trình làm việc mới",
       "states": {
         "title": "Thêm trạng thái",
-        "description": "Chọn các trạng thái mà mục công việc sẽ đi qua."
+        "description": "Chọn các trạng thái mà công việc sẽ đi qua."
       }
     }
   }

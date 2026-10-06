@@ -10,6 +10,6 @@ type Props = {
   emptyText?: string;
 };
 
-export function PowerKMenuEmptyState({ emptyText = "No results found" }: Props) {
+export function PowerKMenuEmptyState({ emptyText = "Không tìm thấy kết quả" }: Props) {
   return <div className="px-3 py-8 text-center text-13 text-tertiary">{emptyText}</div>;
 }

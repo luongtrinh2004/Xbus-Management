@@ -52,15 +52,15 @@ export const ModuleEmptyState = observer(function ModuleEmptyState() {
       .then(() =>
         setToast({
           type: "success",
-          title: "Success!",
-          message: "Work items added to the module successfully.",
+          title: "Thành công!",
+          message: "Đã thêm công việc vào nhóm công việc.",
         })
       )
       .catch(() =>
         setToast({
           type: "error",
-          title: "Error!",
-          message: "Selected work items could not be added to the module. Please try again.",
+          title: "Lỗi!",
+          message: "Không thể thêm công việc đã chọn vào nhóm công việc. Vui lòng thử lại.",
         })
       );
   };
@@ -83,7 +83,7 @@ export const ModuleEmptyState = observer(function ModuleEmptyState() {
             description={t("common_empty_state.search.description")}
             actions={[
               {
-                label: "Clear filters",
+                label: "Xóa bộ lọc",
                 onClick: moduleWorkItemFilter?.clearFilters,
                 disabled: !canPerformEmptyStateActions || !moduleWorkItemFilter,
                 variant: "secondary",

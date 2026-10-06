@@ -104,19 +104,19 @@ export const ANALYTICS_INSIGHTS_FIELDS: Record<TAnalyticsTabsBase, IInsightField
 
 export const ANALYTICS_DURATION_FILTER_OPTIONS = [
   {
-    name: "Yesterday",
+    name: "Hôm qua",
     value: "yesterday",
   },
   {
-    name: "Last 7 days",
+    name: "7 ngày qua",
     value: "last_7_days",
   },
   {
-    name: "Last 30 days",
+    name: "30 ngày qua",
     value: "last_30_days",
   },
   {
-    name: "Last 3 months",
+    name: "3 tháng qua",
     value: "last_3_months",
   },
 ];
@@ -124,62 +124,62 @@ export const ANALYTICS_DURATION_FILTER_OPTIONS = [
 export const ANALYTICS_X_AXIS_VALUES: { value: ChartXAxisProperty; label: string }[] = [
   {
     value: ChartXAxisProperty.STATES,
-    label: "State name",
+    label: "Tên trạng thái",
   },
   {
     value: ChartXAxisProperty.STATE_GROUPS,
-    label: "State group",
+    label: "Nhóm trạng thái",
   },
   {
     value: ChartXAxisProperty.PRIORITY,
-    label: "Priority",
+    label: "Ưu tiên",
   },
   {
     value: ChartXAxisProperty.LABELS,
-    label: "Label",
+    label: "Nhãn",
   },
   {
     value: ChartXAxisProperty.ASSIGNEES,
-    label: "Assignee",
+    label: "Người phụ trách",
   },
   {
     value: ChartXAxisProperty.ESTIMATE_POINTS,
-    label: "Estimate point",
+    label: "Điểm ước lượng",
   },
   {
     value: ChartXAxisProperty.CYCLES,
-    label: "Cycle",
+    label: "Chu kỳ",
   },
   {
     value: ChartXAxisProperty.MODULES,
-    label: "Module",
+    label: "Nhóm công việc",
   },
   {
     value: ChartXAxisProperty.COMPLETED_AT,
-    label: "Completed date",
+    label: "Ngày hoàn thành",
   },
   {
     value: ChartXAxisProperty.TARGET_DATE,
-    label: "Due date",
+    label: "Ngày hết hạn",
   },
   {
     value: ChartXAxisProperty.START_DATE,
-    label: "Start date",
+    label: "Ngày bắt đầu",
   },
   {
     value: ChartXAxisProperty.CREATED_AT,
-    label: "Created date",
+    label: "Ngày tạo",
   },
 ];
 
 export const ANALYTICS_Y_AXIS_VALUES: { value: ChartYAxisMetric; label: string }[] = [
   {
     value: ChartYAxisMetric.WORK_ITEM_COUNT,
-    label: "Work item",
+    label: "Công việc",
   },
   {
     value: ChartYAxisMetric.ESTIMATE_POINT_COUNT,
-    label: "Estimate",
+    label: "Ước tính",
   },
   {
     value: ChartYAxisMetric.EPIC_WORK_ITEM_COUNT,

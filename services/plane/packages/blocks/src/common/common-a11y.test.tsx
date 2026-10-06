@@ -15,12 +15,12 @@ describe("FavoriteStar", () => {
   it("is a named toggle that reflects the selected state", async () => {
     const onClick = vi.fn();
     const { rerender } = render(<FavoriteStar selected={false} onClick={onClick} />);
-    const button = screen.getByRole("button", { name: "Add to favorites" });
+    const button = screen.getByRole("button", { name: "Thêm vào mục yêu thích" });
     expect(button.getAttribute("aria-pressed")).toBe("false");
     await userEvent.click(button);
     expect(onClick).toHaveBeenCalledTimes(1);
     rerender(<FavoriteStar selected onClick={onClick} />);
-    expect(screen.getByRole("button", { name: "Add to favorites" }).getAttribute("aria-pressed")).toBe("true");
+    expect(screen.getByRole("button", { name: "Thêm vào mục yêu thích" }).getAttribute("aria-pressed")).toBe("true");
   });
 
   it("takes the accessible name from the caller when given", () => {
@@ -32,7 +32,7 @@ describe("FavoriteStar", () => {
 describe("DragHandle", () => {
   it("names the icon-only handle and hides its glyph", () => {
     render(<DragHandle />);
-    const button = screen.getByRole("button", { name: "Drag to rearrange" });
+    const button = screen.getByRole("button", { name: "Kéo để sắp xếp lại" });
     expect(button.querySelector("svg")?.getAttribute("aria-hidden")).toBe("true");
   });
 
@@ -50,7 +50,7 @@ describe("DragHandle", () => {
 describe("ColorPicker", () => {
   it("renders a named non-submit trigger", () => {
     render(<ColorPicker value="#000000" onChange={vi.fn()} />);
-    const trigger = screen.getByRole("button", { name: "Open color picker" });
+    const trigger = screen.getByRole("button", { name: "Mở bộ chọn màu" });
     expect(trigger.getAttribute("type")).toBe("button");
   });
 });

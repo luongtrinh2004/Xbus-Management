@@ -23,7 +23,7 @@ export function withDockItems<P extends WithDockItemsProps>(WrappedComponent: Re
 
     const dockItems: (AppSidebarItemData & { shouldRender: boolean })[] = [
       {
-        label: "Projects",
+        label: "Dự án",
         icon: <Projects className="size-5" />,
         href: `/${workspaceSlug}/`,
         isActive: isProjectsPath && !isNotificationsPath,

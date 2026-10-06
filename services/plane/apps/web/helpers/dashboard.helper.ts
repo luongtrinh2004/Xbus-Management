@@ -94,8 +94,8 @@ export const getDurationFilterDropdownLabel = (duration: EDurationFilters, custo
     const beforeDate = customDates.find((date) => date.includes("before"))?.split(";")[0];
 
     if (afterDate && beforeDate) return `${renderFormattedDate(afterDate)} - ${renderFormattedDate(beforeDate)}`;
-    else if (afterDate) return `After ${renderFormattedDate(afterDate)}`;
-    else if (beforeDate) return `Before ${renderFormattedDate(beforeDate)}`;
+    else if (afterDate) return `Sau ${renderFormattedDate(afterDate)}`;
+    else if (beforeDate) return `Trước ${renderFormattedDate(beforeDate)}`;
     else return "";
   }
 };

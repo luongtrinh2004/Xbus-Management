@@ -23,27 +23,27 @@ export const DURATION_FILTER_OPTIONS: {
 }[] = [
   {
     key: EDurationFilters.NONE,
-    label: "All time",
+    label: "Toàn bộ thời gian",
   },
   {
     key: EDurationFilters.TODAY,
-    label: "Due today",
+    label: "Đến hạn hôm nay",
   },
   {
     key: EDurationFilters.THIS_WEEK,
-    label: "Due this week",
+    label: "Đến hạn trong tuần này",
   },
   {
     key: EDurationFilters.THIS_MONTH,
-    label: "Due this month",
+    label: "Đến hạn trong tháng này",
   },
   {
     key: EDurationFilters.THIS_YEAR,
-    label: "Due this year",
+    label: "Đến hạn trong năm nay",
   },
   {
     key: EDurationFilters.CUSTOM,
-    label: "Custom",
+    label: "Tùy chỉnh",
   },
 ];
 
@@ -66,15 +66,15 @@ export const FILTERED_ISSUES_TABS_LIST: {
 }[] = [
   {
     key: "upcoming",
-    label: "Upcoming",
+    label: "Sắp tới",
   },
   {
     key: "overdue",
-    label: "Overdue",
+    label: "Quá hạn",
   },
   {
     key: "completed",
-    label: "Marked completed",
+    label: "Đã đánh dấu hoàn thành",
   },
 ];
 
@@ -85,11 +85,11 @@ export const UNFILTERED_ISSUES_TABS_LIST: {
 }[] = [
   {
     key: "pending",
-    label: "Pending",
+    label: "Đang chờ xử lý",
   },
   {
     key: "completed",
-    label: "Marked completed",
+    label: "Đã đánh dấu hoàn thành",
   },
 ];
 

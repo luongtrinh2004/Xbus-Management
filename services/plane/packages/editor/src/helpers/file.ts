@@ -21,12 +21,12 @@ export const isFileValid = (args: TArgs): boolean => {
   const { acceptedMimeTypes, file, maxFileSize, onError } = args;
 
   if (!file) {
-    onError(EFileError.NO_FILE_SELECTED, "No file selected. Please select a file to upload.");
+    onError(EFileError.NO_FILE_SELECTED, "Chưa chọn tệp. Vui lòng chọn tệp cần tải lên.");
     return false;
   }
 
   if (!acceptedMimeTypes.includes(file.type)) {
-    onError(EFileError.INVALID_FILE_TYPE, "Invalid file type.");
+    onError(EFileError.INVALID_FILE_TYPE, "Loại tệp không hợp lệ");
     return false;
   }
 

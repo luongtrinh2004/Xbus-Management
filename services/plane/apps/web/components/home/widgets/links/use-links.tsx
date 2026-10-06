@@ -39,7 +39,7 @@ export const useLinks = (workspaceSlug: string) => {
     () => ({
       create: async (data: Partial<TProjectLink>) => {
         try {
-          if (!workspaceSlug) throw new Error("Missing required fields");
+          if (!workspaceSlug) throw new Error("Vui lòng điền đầy đủ thông tin bắt buộc");
           await createLink(workspaceSlug, data);
           setToast({
             message: t("links.toasts.created.message"),
@@ -59,7 +59,7 @@ export const useLinks = (workspaceSlug: string) => {
       },
       update: async (linkId: string, data: Partial<TProjectLink>) => {
         try {
-          if (!workspaceSlug) throw new Error("Missing required fields");
+          if (!workspaceSlug) throw new Error("Vui lòng điền đầy đủ thông tin bắt buộc");
           await updateLink(workspaceSlug, linkId, data);
           setToast({
             message: t("links.toasts.updated.message"),
@@ -78,7 +78,7 @@ export const useLinks = (workspaceSlug: string) => {
       },
       remove: async (linkId: string) => {
         try {
-          if (!workspaceSlug) throw new Error("Missing required fields");
+          if (!workspaceSlug) throw new Error("Vui lòng điền đầy đủ thông tin bắt buộc");
           await removeLink(workspaceSlug, linkId);
           setToast({
             message: t("links.toasts.removed.message"),

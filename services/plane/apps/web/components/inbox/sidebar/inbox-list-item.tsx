@@ -82,14 +82,14 @@ export const InboxIssueListItem = observer(function InboxIssueListItem(props: In
 
           <div className="flex items-center justify-between">
             <div className="flex flex-wrap items-center gap-2">
-              <Tooltip label={`Created on: ${renderFormattedDate(issue.created_at ?? "") ?? ""}`} disabled={isMobile}>
+              <Tooltip label={`Ngày tạo: ${renderFormattedDate(issue.created_at ?? "") ?? ""}`} disabled={isMobile}>
                 <div className="text-11 text-secondary">{renderFormattedDate(issue.created_at ?? "")}</div>
               </Tooltip>
 
               <div className="rounded-full border-2 border-strong-1" />
 
               {issue.priority && (
-                <Tooltip label={`Priority: ${issue.priority ?? "None"}`}>
+                <Tooltip label={`Priority: ${issue.priority ?? "Không có"}`}>
                   <PriorityIcon priority={issue.priority} />
                 </Tooltip>
               )}
@@ -97,7 +97,7 @@ export const InboxIssueListItem = observer(function InboxIssueListItem(props: In
               {issue.label_ids && issue.label_ids.length > 3 ? (
                 <div className="relative flex !h-[17.5px] items-center gap-1 rounded-sm border border-strong px-1 text-11">
                   <span className="bg-orange-400 h-2 w-2 rounded-full" />
-                  <span className="max-w-28 truncate normal-case">{`${issue.label_ids.length} labels`}</span>
+                  <span className="max-w-28 truncate normal-case">{`${issue.label_ids.length} nhãn`}</span>
                 </div>
               ) : (
                 <>

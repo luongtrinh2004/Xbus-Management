@@ -63,12 +63,12 @@ export const PaidPlanUpgradeModal = observer(function PaidPlanUpgradeModal(props
               {/* Free Plan Section */}
               <div className={cn(COMMON_CARD_CLASSNAME)}>
                 <h2 id="paid-plan-upgrade-modal-title" className="flex text-24 leading-8 font-bold">
-                  Upgrade to a paid plan and unlock missing features.
+                  Nâng cấp lên gói trả phí để sử dụng thêm tính năng.
                 </h2>
                 <div className="mt-4 mb-2">
                   <p className="mb-4 pr-8 text-13 text-primary">
-                    Dashboards, Workflows, Approvals, Time Management, and other superpowers are just a click away.
-                    Upgrade today to unlock features your teams need yesterday.
+                    Nâng cấp để sử dụng bảng tổng quan, quy trình, phê duyệt, quản lý thời gian và nhiều tính năng khác
+                    cho đội ngũ.
                   </p>
                 </div>
 
@@ -90,7 +90,7 @@ export const PaidPlanUpgradeModal = observer(function PaidPlanUpgradeModal(props
                         target="_blank"
                         rel="noreferrer"
                       >
-                        See full features list
+                        Xem toàn bộ tính năng
                       </a>
                     </p>
                   }
@@ -112,7 +112,7 @@ export const PaidPlanUpgradeModal = observer(function PaidPlanUpgradeModal(props
                         target="_blank"
                         rel="noreferrer"
                       >
-                        See full features list
+                        Xem toàn bộ tính năng
                       </a>
                     </p>
                   }
@@ -134,7 +134,7 @@ export const PaidPlanUpgradeModal = observer(function PaidPlanUpgradeModal(props
                         target="_blank"
                         rel="noreferrer"
                       >
-                        See full features list
+                        Xem toàn bộ tính năng
                       </a>
                     </p>
                   }

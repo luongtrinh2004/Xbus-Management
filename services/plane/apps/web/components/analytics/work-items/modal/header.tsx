@@ -25,7 +25,7 @@ export const WorkItemsModalHeader = observer(function WorkItemsModalHeader(props
   return (
     <div className="flex items-center justify-between gap-4 bg-surface-1 px-5 py-4 text-13">
       <h3 className="break-words">
-        Analytics for {title} {cycle && `in ${cycle.name}`} {module && `in ${module.name}`}
+        Phân tích cho {title} {cycle && `in ${cycle.name}`} {module && `in ${module.name}`}
       </h3>
       <div className="flex items-center gap-2">
         <button

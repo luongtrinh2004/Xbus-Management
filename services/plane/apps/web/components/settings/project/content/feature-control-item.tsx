@@ -41,14 +41,14 @@ export const ProjectSettingsFeatureControlItem = observer(function ProjectSettin
     const updateProjectPromise = updateProject(workspaceSlug, projectId, settingsPayload);
 
     setPromiseToast(updateProjectPromise, {
-      loading: "Updating project feature...",
+      loading: "Đang cập nhật tính năng dự án...",
       success: {
-        title: "Success!",
-        message: () => "Project feature updated successfully.",
+        title: "Thành công!",
+        message: () => "Đã cập nhật tính năng dự án thành công.",
       },
       error: {
-        title: "Error!",
-        message: () => "Something went wrong while updating project feature. Please try again.",
+        title: "Lỗi!",
+        message: () => "Đã xảy ra lỗi khi cập nhật tính năng dự án. Vui lòng thử lại.",
       },
     });
     void updateProjectPromise.then(() => {
@@ -66,7 +66,7 @@ export const ProjectSettingsFeatureControlItem = observer(function ProjectSettin
           checked={value}
           onCheckedChange={handleSubmit}
           disabled={disabled}
-          aria-label={typeof title === "string" ? title : "Toggle project feature"}
+          aria-label={typeof title === "string" ? title : "Bật/tắt tính năng dự án"}
         />
       }
     />

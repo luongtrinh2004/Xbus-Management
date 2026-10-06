@@ -43,7 +43,7 @@ export const BlockItemAction = observer(function BlockItemAction(props: Props) {
     <>
       {/* page details */}
       <div className="cursor-default">
-        <Tooltip label={`Owned by: ${ownerDetails?.display_name ?? ""}`} layout="stacked">
+        <Tooltip label={`Chủ sở hữu: ${ownerDetails?.display_name ?? ""}`} layout="stacked">
           <Avatar
             alt={ownerDetails?.display_name}
             fallback={ownerDetails?.display_name?.[0]?.toUpperCase()}
@@ -53,7 +53,7 @@ export const BlockItemAction = observer(function BlockItemAction(props: Props) {
         </Tooltip>
       </div>
       <div className="cursor-default text-tertiary">
-        <Tooltip label={access === 0 ? "Public" : "Private"}>
+        <Tooltip label={access === 0 ? "Công khai" : "Riêng tư"}>
           {access === 0 ? <GlobeOutline className="h-4 w-4" /> : <LockOutline className="h-4 w-4" />}
         </Tooltip>
       </div>
@@ -61,7 +61,7 @@ export const BlockItemAction = observer(function BlockItemAction(props: Props) {
       <MinusOutline className="-mx-3 h-5 w-5 rotate-90 text-placeholder" />
 
       {/* page info */}
-      <Tooltip label={`Created on ${renderFormattedDate(created_at)}`} layout="stacked">
+      <Tooltip label={`Được tạo vào ${renderFormattedDate(created_at)}`} layout="stacked">
         <span className="grid h-4 w-4 cursor-default place-items-center">
           <InfoOutline className="h-4 w-4 text-tertiary" />
         </span>

@@ -22,9 +22,9 @@ const PAGE_SORTING_KEY_OPTIONS: {
   key: TPageFiltersSortKey;
   label: string;
 }[] = [
-  { key: "name", label: "Name" },
-  { key: "created_at", label: "Date created" },
-  { key: "updated_at", label: "Date modified" },
+  { key: "name", label: "Tên" },
+  { key: "created_at", label: "Ngày tạo" },
+  { key: "updated_at", label: "Ngày chỉnh sửa" },
 ];
 
 export function PageOrderByDropdown(props: Props) {

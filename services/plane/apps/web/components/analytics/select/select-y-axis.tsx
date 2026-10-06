@@ -67,7 +67,7 @@ export const SelectYAxis = observer(function SelectYAxis({ value, onChange, hidd
       <Select.Trigger variant="select-md" className="w-auto">
         <div className="flex items-center gap-2">
           <ProjectsOutline className="h-3 w-3" />
-          <span>{selected?.label ?? "Add Metric"}</span>
+          <span>{selected?.label ?? "Thêm chỉ số"}</span>
         </div>
       </Select.Trigger>
     </Select>

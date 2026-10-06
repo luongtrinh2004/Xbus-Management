@@ -4,6 +4,8 @@
  * See the LICENSE file for details.
  */
 
+import { getStateDisplayName } from "@plane/utils";
+
 import { observer } from "mobx-react";
 // plane imports
 import { PriorityIcon, StateGroupIcon } from "@plane/blocks/icons";
@@ -35,7 +37,7 @@ export const WorkItemPreviewCard = observer(function WorkItemPreviewCard(props: 
   const projectIdentifier = getProjectIdentifierById(projectId);
   const fallbackStateDetails = stateDetails.id ? getStateById(stateDetails.id) : undefined;
   const stateGroup = stateDetails?.group ?? fallbackStateDetails?.group ?? "backlog";
-  const stateName = stateDetails?.name ?? fallbackStateDetails?.name;
+  const stateName = getStateDisplayName(stateDetails) ?? getStateDisplayName(fallbackStateDetails);
 
   return (
     <div className="w-72 space-y-2">

@@ -68,7 +68,7 @@ export const TimezoneSelect = observer(function TimezoneSelect(props: TTimezoneS
     value,
     onChange,
     error = false,
-    label = "Select a timezone",
+    label = "Chọn múi giờ",
     size = "lg",
     className = "",
     disabled = false,

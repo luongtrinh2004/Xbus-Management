@@ -4,6 +4,8 @@
  * See the LICENSE file for details.
  */
 
+import { getStateDisplayName } from "@plane/utils";
+
 import React, { useMemo, useState } from "react";
 import { sortBy } from "lodash-es";
 import { observer } from "mobx-react";
@@ -70,7 +72,7 @@ export const FilterState = observer(function FilterState(props: Props) {
                         percentage={state?.order}
                       />
                     }
-                    title={state.name}
+                    title={getStateDisplayName(state)}
                   />
                 ))}
                 {sortedOptions.length > 5 && (
@@ -79,12 +81,12 @@ export const FilterState = observer(function FilterState(props: Props) {
                     className="ml-8 text-11 font-medium text-accent-primary"
                     onClick={handleViewToggle}
                   >
-                    {itemsToRender === sortedOptions.length ? "View less" : "View all"}
+                    {itemsToRender === sortedOptions.length ? "Thu gọn" : "Xem tất cả"}
                   </button>
                 )}
               </>
             ) : (
-              <p className="text-11 text-placeholder italic">No matches found</p>
+              <p className="text-11 text-placeholder italic">Không tìm thấy kết quả phù hợp</p>
             )
           ) : (
             <Loader className="space-y-2">

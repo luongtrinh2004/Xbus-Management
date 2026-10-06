@@ -157,21 +157,21 @@ export function NotificationSnoozeModal(props: TNotificationSnoozeModal) {
           <DialogMain>
             <DialogHeader>
               <DialogHeading>
-                <DialogTitle>Customize Snooze Time</DialogTitle>
+                <DialogTitle>Tùy chỉnh thời gian tạm hoãn</DialogTitle>
               </DialogHeading>
             </DialogHeader>
             <DialogBody tabIndex={0}>
               <div className="flex flex-col gap-3 md:!flex-row md:items-center">
                 <div className="flex-1 pb-3 md:pb-0">
-                  <h6 className="mb-2 block text-body-xs-medium text-placeholder">Pick a date</h6>
+                  <h6 className="mb-2 block text-body-xs-medium text-placeholder">Chọn ngày</h6>
                   <Controller
                     name="date"
                     control={control}
-                    rules={{ required: "Please select a date" }}
+                    rules={{ required: "Vui lòng chọn ngày" }}
                     render={({ field: { value, onChange } }) => (
                       <DateSelect
                         value={value ?? null}
-                        placeholder="Select date"
+                        placeholder={"Chọn ngày"}
                         onChange={(val) => {
                           setValue("time", undefined);
                           onChange(val ?? undefined);
@@ -185,11 +185,11 @@ export function NotificationSnoozeModal(props: TNotificationSnoozeModal) {
                   />
                 </div>
                 <div className="flex-1">
-                  <h6 className="mb-2 block text-body-xs-medium text-placeholder">Pick a time</h6>
+                  <h6 className="mb-2 block text-body-xs-medium text-placeholder">Chọn giờ</h6>
                   <Controller
                     control={control}
                     name="time"
-                    rules={{ required: "Please select a time" }}
+                    rules={{ required: "Vui lòng chọn giờ" }}
                     render={({ field: { value, onChange } }) => (
                       <Select<TTimeOption>
                         value={timeStamps.find((option) => option.value === value) ?? null}
@@ -199,7 +199,7 @@ export function NotificationSnoozeModal(props: TNotificationSnoozeModal) {
                         getOptionLabel={(option) => option.label}
                         showSearch={false}
                         pinSelected={false}
-                        emptyMessage="No available time for this date."
+                        emptyMessage={"Không có thời gian khả dụng trong ngày này."}
                         header={
                           <div className="mb-2 flex h-9 w-full overflow-hidden rounded-xs">
                             <button
@@ -242,7 +242,7 @@ export function NotificationSnoozeModal(props: TNotificationSnoozeModal) {
                                 {value} {watch("period").toLowerCase()}
                               </span>
                             ) : (
-                              <span className="text-body-xs-medium text-placeholder">Select a time</span>
+                              <span className="text-body-xs-medium text-placeholder">Chọn giờ</span>
                             )}
                           </span>
                         </Select.Trigger>
@@ -254,13 +254,13 @@ export function NotificationSnoozeModal(props: TNotificationSnoozeModal) {
             </DialogBody>
           </DialogMain>
           <DialogActions>
-            <Button variant="secondary" size="md" stretch="auto" label="Cancel" onClick={handleClose} />
+            <Button variant="secondary" size="md" stretch="auto" label={"Hủy"} onClick={handleClose} />
             <Button
               variant="primary"
               size="md"
               stretch="auto"
               type="submit"
-              label={isSubmitting ? "Submitting..." : "Submit"}
+              label={isSubmitting ? "Đang gửi…" : "Gửi"}
               loading={isSubmitting}
             />
           </DialogActions>

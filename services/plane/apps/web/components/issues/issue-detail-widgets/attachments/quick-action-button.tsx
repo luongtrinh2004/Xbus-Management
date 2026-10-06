@@ -62,8 +62,8 @@ export const IssueAttachmentActionButton = observer(function IssueAttachmentActi
           .catch(() => {
             setToast({
               type: "error",
-              title: "Error!",
-              message: "File could not be attached. Try uploading again.",
+              title: "Lỗi!",
+              message: "Không thể đính kèm tệp. Vui lòng tải lên lại.",
             });
           })
           .finally(() => {
@@ -76,11 +76,11 @@ export const IssueAttachmentActionButton = observer(function IssueAttachmentActi
 
       setToast({
         type: "error",
-        title: "Error!",
+        title: "Lỗi!",
         message:
           totalAttachedFiles > 1
-            ? "Only one file can be uploaded at a time."
-            : `File must be of ${maxFileSize / 1024 / 1024}MB or less in size.`,
+            ? "Chỉ có thể tải lên một tệp mỗi lần."
+            : `Dung lượng tệp phải ${maxFileSize / 1024 / 1024}MB trở xuống.`,
       });
       return;
     },

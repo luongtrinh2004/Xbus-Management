@@ -122,7 +122,7 @@ export function EmojiPicker(props: EmojiPickerProps) {
           : null,
         {
           key: "icon",
-          label: "Icon",
+          label: "Biểu tượng",
           content: (
             <IconRoot
               defaultColor={defaultIconColor}

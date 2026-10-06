@@ -115,12 +115,12 @@ export const AllIssueLayoutRoot = observer(function AllIssueLayoutRoot(props: Pr
   if (!isLoading && !globalViewsLoading && !issuesLoading && !viewDetails && !isDefaultView) {
     return (
       <EmptyStateDetailed
-        title="View does not exist"
-        description="The view you are looking for does not exist or you don't have permission to view it."
+        title={"Chế độ xem không tồn tại"}
+        description={"Chế độ xem không tồn tại hoặc bạn chưa có quyền truy cập."}
         assetKey="view"
         actions={[
           {
-            label: "Go to All work items",
+            label: "Xem tất cả công việc",
             onClick: () => router.push(`/${workspaceSlug}/workspace-views/all-issues`),
             variant: "primary",
           },
@@ -135,7 +135,7 @@ export const AllIssueLayoutRoot = observer(function AllIssueLayoutRoot(props: Pr
       <WorkspaceLevelWorkItemFiltersHOC
         enableSaveView
         saveViewOptions={{
-          label: "Save as",
+          label: "Lưu thành",
         }}
         enableUpdateView
         entityId={globalViewId}

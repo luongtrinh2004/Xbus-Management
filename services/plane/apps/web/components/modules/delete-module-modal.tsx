@@ -51,8 +51,8 @@ export const DeleteModuleModal = observer(function DeleteModuleModal(props: Prop
       if (moduleId || peekModule) router.push(`/${workspaceSlug}/projects/${data.project_id}/modules`);
       setToast({
         type: "success",
-        title: "Success!",
-        message: "Module deleted successfully.",
+        title: "Thành công!",
+        message: "Đã xóa nhóm công việc thành công",
       });
     } catch (errors) {
       const isPermissionError =
@@ -77,12 +77,11 @@ export const DeleteModuleModal = observer(function DeleteModuleModal(props: Prop
       handleSubmit={handleDeletion}
       isSubmitting={isDeleteLoading}
       isOpen={isOpen}
-      title="Delete module"
+      title={"Xóa nhóm công việc"}
       content={
         <>
-          Are you sure you want to delete module-{" "}
-          <span className="font-medium break-all text-primary">{data?.name}</span>? All of the data related to the
-          module will be permanently removed. This action cannot be undone.
+          Bạn có chắc muốn xóa nhóm công việc <span className="font-medium break-all text-primary">{data?.name}</span>?
+          Toàn bộ dữ liệu của nhóm công việc sẽ bị xóa vĩnh viễn. Thao tác này không thể hoàn tác.
         </>
       }
     />

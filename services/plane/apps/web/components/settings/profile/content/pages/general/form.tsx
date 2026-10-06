@@ -77,8 +77,8 @@ export const GeneralProfileSettingsForm = observer(function GeneralProfileSettin
       last_name: user.last_name || "",
       display_name: user.display_name || "",
       email: user.email || "",
-      role: profile.role || "Product / Project Manager",
-      language: profile.language || "en",
+      role: profile.role || "Quản lý sản phẩm/dự án",
+      language: process.env.VITE_XBUS_EMBEDDED === "true" ? "vi-VN" : profile.language || "vi-VN",
       user_timezone: user.user_timezone || "Asia/Kolkata",
     },
   });
@@ -100,8 +100,8 @@ export const GeneralProfileSettingsForm = observer(function GeneralProfileSettin
       .then(() => {
         setToast({
           type: "success",
-          title: "Success!",
-          message: "Profile picture deleted successfully.",
+          title: "Thành công!",
+          message: "Đã xóa ảnh đại diện.",
         });
         setValue("avatar_url", "");
         return;
@@ -109,8 +109,8 @@ export const GeneralProfileSettingsForm = observer(function GeneralProfileSettin
       .catch(() => {
         setToast({
           type: "error",
-          title: "Error!",
-          message: "There was some error in deleting your profile picture. Please try again.",
+          title: "Lỗi!",
+          message: "Không thể xóa ảnh đại diện. Vui lòng thử lại.",
         });
       })
       .finally(() => {
@@ -142,7 +142,7 @@ export const GeneralProfileSettingsForm = observer(function GeneralProfileSettin
       setToast({
         type: "error",
         title: t("toast.error"),
-        message: error instanceof Error ? error.message : "Failed to process cover image",
+        message: error instanceof Error ? error.message : "Không thể xử lý ảnh bìa",
       });
       setIsLoading(false);
       return;
@@ -165,13 +165,13 @@ export const GeneralProfileSettingsForm = observer(function GeneralProfileSettin
           | PromiseRejectedResult
           | undefined;
         if (rejectedResult) {
-          throw rejectedResult.reason ?? new Error("Failed to update profile");
+          throw rejectedResult.reason ?? new Error("Không thể cập nhật hồ sơ");
         }
         const values = results.map(
           (result) => (result as PromiseFulfilledResult<IUser | TUserProfile | undefined>).value
         );
         if (values.some((v) => v === undefined)) {
-          throw new Error("Failed to update profile");
+          throw new Error("Không thể cập nhật hồ sơ");
         }
         return values;
       })
@@ -180,12 +180,12 @@ export const GeneralProfileSettingsForm = observer(function GeneralProfileSettin
     setPromiseToast(updatePromise, {
       loading: "Updating...",
       success: {
-        title: "Success!",
-        message: () => `Profile updated successfully.`,
+        title: "Thành công!",
+        message: () => "Đã cập nhật hồ sơ.",
       },
       error: {
-        title: "Error!",
-        message: () => `There was some error in updating your profile. Please try again.`,
+        title: "Lỗi!",
+        message: () => "Không thể cập nhật hồ sơ. Vui lòng thử lại.",
       },
     });
   };
@@ -214,11 +214,7 @@ export const GeneralProfileSettingsForm = observer(function GeneralProfileSettin
       <form onSubmit={handleSubmit(onSubmit)} className="w-full">
         <div className="flex w-full flex-col gap-7">
           <div className="relative h-44 w-full">
-            <CoverImage
-              src={userCover}
-              className="h-44 w-full rounded-lg"
-              alt={currentUser?.first_name ?? "Cover image"}
-            />
+            <CoverImage src={userCover} className="h-44 w-full rounded-lg" alt={currentUser?.first_name ?? "Ảnh bìa"} />
             <div className="absolute -bottom-6 left-6 flex items-end justify-between">
               <div className="flex gap-3">
                 <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-surface-2">
@@ -277,7 +273,7 @@ export const GeneralProfileSettingsForm = observer(function GeneralProfileSettin
                   control={control}
                   name="first_name"
                   rules={{
-                    required: "Please enter first name",
+                    required: "Vui lòng nhập tên",
                     validate: validatePersonName,
                   }}
                   render={({ field: { value, onChange, ref } }) => (
@@ -291,7 +287,7 @@ export const GeneralProfileSettingsForm = observer(function GeneralProfileSettin
                           value={value}
                           onChange={onChange}
                           ref={ref}
-                          placeholder="Enter your first name"
+                          placeholder={"Nhập tên của bạn"}
                           maxLength={50}
                           autoComplete="on"
                         />
@@ -320,7 +316,7 @@ export const GeneralProfileSettingsForm = observer(function GeneralProfileSettin
                           value={value}
                           onChange={onChange}
                           ref={ref}
-                          placeholder="Enter your last name"
+                          placeholder={"Nhập họ của bạn"}
                           maxLength={50}
                           autoComplete="on"
                         />
@@ -339,7 +335,7 @@ export const GeneralProfileSettingsForm = observer(function GeneralProfileSettin
                   control={control}
                   name="display_name"
                   rules={{
-                    required: "Display name is required.",
+                    required: "Vui lòng nhập tên hiển thị.",
                     validate: validateDisplayName,
                   }}
                   render={({ field: { value, onChange, ref } }) => (
@@ -353,7 +349,7 @@ export const GeneralProfileSettingsForm = observer(function GeneralProfileSettin
                           value={value}
                           onChange={onChange}
                           ref={ref}
-                          placeholder="Enter your display name"
+                          placeholder={"Nhập tên hiển thị"}
                           maxLength={50}
                         />
                       </InputGroup>
@@ -373,7 +369,7 @@ export const GeneralProfileSettingsForm = observer(function GeneralProfileSettin
                   control={control}
                   name="email"
                   rules={{
-                    required: "Email is required.",
+                    required: "Email là bắt buộc",
                   }}
                   render={({ field: { value, ref } }) => (
                     <Field name="email" invalid={Boolean(errors.email)}>
@@ -385,7 +381,7 @@ export const GeneralProfileSettingsForm = observer(function GeneralProfileSettin
                           type="email"
                           value={value}
                           ref={ref}
-                          placeholder="Enter your email"
+                          placeholder={"Nhập email của bạn"}
                           autoComplete="on"
                           disabled
                         />

@@ -62,7 +62,7 @@ export const DraftIssueBlock = observer(function DraftIssueBlock(props: Props) {
   const MENU_ITEMS: TContextMenuItem[] = [
     {
       key: "edit",
-      title: "edit",
+      title: "Chỉnh sửa",
       icon: EditOutline,
       action: () => {
         setIssueToEdit(issue);
@@ -89,7 +89,7 @@ export const DraftIssueBlock = observer(function DraftIssueBlock(props: Props) {
     },
     {
       key: "delete",
-      title: "delete",
+      title: "Xóa",
       icon: DeleteOutline,
       action: () => {
         setDeleteIssueModal(true);

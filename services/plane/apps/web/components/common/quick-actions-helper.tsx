@@ -81,7 +81,7 @@ export const useCycleMenuItems = (props: UseCycleMenuItemsProps): MenuResult => 
     factory.createArchiveMenuItem(handlers.handleArchive, {
       shouldRender: isEditingAllowed && !isArchived,
       disabled: !isCompleted,
-      description: isCompleted ? undefined : "Only completed cycles can be archived",
+      description: isCompleted ? undefined : "Chỉ có thể lưu trữ chu kỳ đã hoàn thành",
     }),
     factory.createRestoreMenuItem(handlers.handleRestore, isEditingAllowed && isArchived),
     factory.createDeleteMenuItem(handlers.handleDelete, isEditingAllowed && !isCompleted && !isArchived),
@@ -106,7 +106,7 @@ export const useModuleMenuItems = (props: UseModuleMenuItemsProps): MenuResult =
     factory.createArchiveMenuItem(handlers.handleArchive, {
       shouldRender: isEditingAllowed && !isArchived,
       disabled: !isInArchivableGroup,
-      description: isInArchivableGroup ? undefined : "Only completed or cancelled modules can be archived",
+      description: isInArchivableGroup ? undefined : "Chỉ có thể lưu trữ nhóm công việc đã hoàn thành hoặc đã hủy",
     }),
     factory.createRestoreMenuItem(handlers.handleRestore, isEditingAllowed && isArchived),
     factory.createDeleteMenuItem(handlers.handleDelete, isEditingAllowed && !isArchived),

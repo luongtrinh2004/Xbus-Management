@@ -14,7 +14,7 @@ export const ProfileSettingsDefaultPreferencesList = observer(function ProfileSe
       <ThemeSwitcher
         option={{
           id: "theme",
-          title: "theme",
+          title: "Chủ đề",
           description: "select_or_customize_your_interface_color_scheme",
         }}
       />

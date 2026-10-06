@@ -14,52 +14,52 @@ export const MONTHS_LIST: {
   };
 } = {
   1: {
-    shortTitle: "Jan",
-    title: "January",
+    shortTitle: "Th1",
+    title: "Tháng 1",
   },
   2: {
-    shortTitle: "Feb",
-    title: "February",
+    shortTitle: "Th2",
+    title: "Tháng 2",
   },
   3: {
-    shortTitle: "Mar",
-    title: "March",
+    shortTitle: "Th3",
+    title: "Tháng 3",
   },
   4: {
-    shortTitle: "Apr",
-    title: "April",
+    shortTitle: "Th4",
+    title: "Tháng 4",
   },
   5: {
-    shortTitle: "May",
-    title: "May",
+    shortTitle: "Th5",
+    title: "Tháng 5",
   },
   6: {
-    shortTitle: "Jun",
-    title: "June",
+    shortTitle: "Th6",
+    title: "Tháng 6",
   },
   7: {
-    shortTitle: "Jul",
-    title: "July",
+    shortTitle: "Th7",
+    title: "Tháng 7",
   },
   8: {
-    shortTitle: "Aug",
-    title: "August",
+    shortTitle: "Th8",
+    title: "Tháng 8",
   },
   9: {
-    shortTitle: "Sep",
-    title: "September",
+    shortTitle: "Th9",
+    title: "Tháng 9",
   },
   10: {
-    shortTitle: "Oct",
-    title: "October",
+    shortTitle: "Th10",
+    title: "Tháng 10",
   },
   11: {
-    shortTitle: "Nov",
-    title: "November",
+    shortTitle: "Th11",
+    title: "Tháng 11",
   },
   12: {
-    shortTitle: "Dec",
-    title: "December",
+    shortTitle: "Th12",
+    title: "Tháng 12",
   },
 };
 
@@ -71,38 +71,38 @@ export const DAYS_LIST: {
   };
 } = {
   1: {
-    shortTitle: "Sun",
-    title: "Sunday",
+    shortTitle: "CN",
+    title: "Chủ nhật",
     value: EStartOfTheWeek.SUNDAY,
   },
   2: {
-    shortTitle: "Mon",
-    title: "Monday",
+    shortTitle: "T2",
+    title: "Thứ Hai",
     value: EStartOfTheWeek.MONDAY,
   },
   3: {
-    shortTitle: "Tue",
-    title: "Tuesday",
+    shortTitle: "T3",
+    title: "Thứ Ba",
     value: EStartOfTheWeek.TUESDAY,
   },
   4: {
-    shortTitle: "Wed",
-    title: "Wednesday",
+    shortTitle: "T4",
+    title: "Thứ Tư",
     value: EStartOfTheWeek.WEDNESDAY,
   },
   5: {
-    shortTitle: "Thu",
-    title: "Thursday",
+    shortTitle: "T5",
+    title: "Thứ Năm",
     value: EStartOfTheWeek.THURSDAY,
   },
   6: {
-    shortTitle: "Fri",
-    title: "Friday",
+    shortTitle: "T6",
+    title: "Thứ Sáu",
     value: EStartOfTheWeek.FRIDAY,
   },
   7: {
-    shortTitle: "Sat",
-    title: "Saturday",
+    shortTitle: "T7",
+    title: "Thứ Bảy",
     value: EStartOfTheWeek.SATURDAY,
   },
 };
@@ -115,10 +115,10 @@ export const CALENDAR_LAYOUTS: {
 } = {
   month: {
     key: "month",
-    title: "Month layout",
+    title: "Bố cục theo tháng",
   },
   week: {
     key: "week",
-    title: "Week layout",
+    title: "Bố cục theo tuần",
   },
 };

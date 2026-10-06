@@ -17,27 +17,27 @@ const sidebarOptions: {
 }[] = [
   {
     key: "work-items",
-    label: "Work items",
+    label: "Công việc",
     Icon: WorkItemsOutline,
   },
   {
     key: "cycles",
-    label: "Cycles",
+    label: "Chu kỳ",
     Icon: CyclesOutline,
   },
   {
     key: "modules",
-    label: "Modules",
+    label: "Nhóm công việc",
     Icon: ModuleOutline,
   },
   {
     key: "views",
-    label: "Views",
+    label: "Chế độ xem",
     Icon: ViewsOutline,
   },
   {
     key: "pages",
-    label: "Pages",
+    label: "Trang",
     Icon: PagesOutline,
   },
 ];
@@ -51,9 +51,9 @@ export function TourSidebar({ step, setStep }: Props) {
   return (
     <div className="col-span-3 hidden bg-surface-2 p-8 lg:block">
       <h3 className="text-16 font-medium">
-        Let{"'"}s get started!
+        Bắt đầu thôi!
         <br />
-        Get more out of Plane.
+        Khám phá thêm tính năng của Plane.
       </h3>
       <div className="mt-8 space-y-5">
         {sidebarOptions.map((option) => (

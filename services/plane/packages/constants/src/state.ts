@@ -21,31 +21,31 @@ export const STATE_GROUPS: {
 } = {
   backlog: {
     key: "backlog",
-    label: "Backlog",
+    label: "Tồn đọng",
     defaultStateName: "Backlog",
     color: "#d9d9d9",
   },
   unstarted: {
     key: "unstarted",
-    label: "Unstarted",
+    label: "Chưa bắt đầu",
     defaultStateName: "Todo",
     color: "#3f76ff",
   },
   started: {
     key: "started",
-    label: "Started",
+    label: "Đang tiến hành",
     defaultStateName: "In Progress",
     color: "#f59e0b",
   },
   completed: {
     key: "completed",
-    label: "Completed",
+    label: "Đã hoàn thành",
     defaultStateName: "Done",
     color: "#16a34a",
   },
   cancelled: {
     key: "cancelled",
-    label: "Canceled",
+    label: "Đã hủy",
     defaultStateName: "Cancelled",
     color: "#dc2626",
   },
@@ -91,22 +91,22 @@ export const STATE_DISTRIBUTION = {
 export const PROGRESS_STATE_GROUPS_DETAILS = [
   {
     key: "completed_issues",
-    title: "Completed",
+    title: "Đã hoàn thành",
     color: "#16A34A",
   },
   {
     key: "started_issues",
-    title: "Started",
+    title: "Đang tiến hành",
     color: "#F59E0B",
   },
   {
     key: "unstarted_issues",
-    title: "Unstarted",
+    title: "Chưa bắt đầu",
     color: "#3A3A3A",
   },
   {
     key: "backlog_issues",
-    title: "Backlog",
+    title: "Tồn đọng",
     color: "#A3A3A3",
   },
 ];

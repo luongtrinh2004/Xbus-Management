@@ -727,7 +727,7 @@ export abstract class BaseIssuesStore implements IBaseIssuesStore {
     runInAction(() => {
       issueIds.forEach((issueId) => {
         const issueBeforeUpdate = clone(this.rootIssueStore.issues.getIssueById(issueId));
-        if (!issueBeforeUpdate) throw new Error("Work item not found");
+        if (!issueBeforeUpdate) throw new Error("Không tìm thấy công việc");
         Object.keys(data.properties).forEach((key) => {
           const property = key as keyof TBulkOperationsPayload["properties"];
           const propertyValue = data.properties[property];

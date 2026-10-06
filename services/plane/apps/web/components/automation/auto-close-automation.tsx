@@ -4,6 +4,8 @@
  * See the LICENSE file for details.
  */
 
+import { getStateDisplayName } from "@plane/utils";
+
 import { useMemo, useState } from "react";
 import { observer } from "mobx-react";
 import { useParams } from "next/navigation";
@@ -176,7 +178,7 @@ export const AutoCloseAutomation = observer(function AutoCloseAutomation(props: 
                       onChange={(val) => void handleChange({ default_state: val })}
                       disabled={!multipleOptions}
                       getOptionValue={(state) => state.id}
-                      getOptionLabel={(state) => state.name}
+                      getOptionLabel={(state) => getStateDisplayName(state)}
                       getOptionIcon={(state) => (
                         <StateGroupIcon stateGroup={state.group} color={state.color} size={EIconSize.LG} />
                       )}

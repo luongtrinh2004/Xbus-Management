@@ -70,7 +70,7 @@ export function TableDragHandleDropdownColorSelector(props: Props) {
           </div>
         </div> */}
         <div className="space-y-1">
-          <p className="text-11 font-semibold text-tertiary">Background colors</p>
+          <p className="text-11 font-semibold text-tertiary">Màu nền</p>
           <div className="flex flex-wrap items-center gap-2">
             {COLORS_LIST.map((color) => (
               <button

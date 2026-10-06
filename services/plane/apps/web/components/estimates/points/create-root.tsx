@@ -170,7 +170,7 @@ export const EstimatePointCreateRoot = observer(function EstimatePointCreateRoot
           variant="ghost"
           size="sm"
           stretch="auto"
-          label={`Add ${estimateType}`}
+          label={`Thêm ${estimateType}`}
           icon={<Icon icon={AddOutline} />}
           iconPosition="start"
           onClick={handleCreate}

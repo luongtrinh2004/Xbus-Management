@@ -60,7 +60,7 @@ export const useMultipleSelect = (props: Props) => {
 
   useReloadConfirmations(
     selectedEntityIds && selectedEntityIds.length > 0,
-    "Are you sure you want to leave? Your current bulk operation selections will be lost.",
+    "Bạn có muốn rời khỏi? Các mục đã chọn cho thao tác hàng loạt sẽ bị mất.",
     true,
     () => {
       clearSelection();

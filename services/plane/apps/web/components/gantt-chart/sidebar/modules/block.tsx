@@ -57,7 +57,7 @@ export const ModulesSidebarBlock = observer(function ModulesSidebarBlock(props: 
           </div>
           {duration !== undefined && (
             <div className="flex-shrink-0 text-13 text-secondary">
-              {duration} day{duration > 1 ? "s" : ""}
+              {duration} ngày{duration > 1 ? "s" : ""}
             </div>
           )}
         </div>

@@ -77,7 +77,7 @@ export function SelectRepository(props: Props) {
             stretch="full"
             onClick={() => void setSize(size + 1)}
             disabled={isValidating}
-            label={isValidating ? "Loading..." : "Click to load more..."}
+            label={isValidating ? "Đang tải…" : "Nhấn để tải thêm…"}
           />
         ) : undefined
       }

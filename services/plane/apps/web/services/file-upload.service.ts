@@ -43,6 +43,6 @@ export class FileUploadService extends APIService {
   }
 
   cancelUpload() {
-    this.cancelSource.cancel("Upload canceled");
+    this.cancelSource.cancel("Đã hủy tải lên");
   }
 }

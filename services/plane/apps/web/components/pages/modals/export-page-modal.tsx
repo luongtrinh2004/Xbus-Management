@@ -79,11 +79,11 @@ const PAGE_FORMATS: {
   },
   {
     key: "LETTER",
-    label: "Letter",
+    label: "Khổ Letter",
   },
   {
     key: "LEGAL",
-    label: "Legal",
+    label: "Pháp lý",
   },
   {
     key: "TABLOID",
@@ -97,11 +97,11 @@ const CONTENT_VARIETY: {
 }[] = [
   {
     key: "everything",
-    label: "Everything",
+    label: "Tất cả",
   },
   {
     key: "no-assets",
-    label: "No images",
+    label: "Chưa có ảnh",
   },
 ];
 
@@ -199,16 +199,16 @@ export function ExportPageModal(props: Props) {
       }
       setToast({
         type: "success",
-        title: "Success!",
-        message: "Page exported successfully.",
+        title: "Thành công!",
+        message: "Đã xuất trang.",
       });
       handleClose();
     } catch (error) {
       console.error("Error in exporting page:", error);
       setToast({
         type: "error",
-        title: "Error!",
-        message: "Page could not be exported. Please try again later.",
+        title: "Lỗi!",
+        message: "Không thể xuất trang. Vui lòng thử lại.",
       });
     } finally {
       setIsExporting(false);
@@ -226,13 +226,13 @@ export function ExportPageModal(props: Props) {
         <DialogMain>
           <DialogHeader>
             <DialogHeading>
-              <DialogTitle>Export page</DialogTitle>
+              <DialogTitle>Xuất trang</DialogTitle>
             </DialogHeading>
           </DialogHeader>
           <DialogBody>
             <div className="space-y-3">
               <div className="flex items-center justify-between gap-2">
-                <h6 className="flex-shrink-0 text-13 text-secondary">Export format</h6>
+                <h6 className="flex-shrink-0 text-13 text-secondary">Định dạng xuất</h6>
                 <Controller
                   control={control}
                   name="export_format"
@@ -246,7 +246,7 @@ export function ExportPageModal(props: Props) {
                 />
               </div>
               <div className="flex items-center justify-between gap-2">
-                <h6 className="flex-shrink-0 text-13 text-secondary">Include content</h6>
+                <h6 className="flex-shrink-0 text-13 text-secondary">Bao gồm nội dung</h6>
                 <Controller
                   control={control}
                   name="content_variety"
@@ -261,7 +261,7 @@ export function ExportPageModal(props: Props) {
               </div>
               {isPDFSelected && (
                 <div className="flex items-center justify-between gap-2">
-                  <h6 className="flex-shrink-0 text-13 text-secondary">Page format</h6>
+                  <h6 className="flex-shrink-0 text-13 text-secondary">Định dạng trang</h6>
                   <Controller
                     control={control}
                     name="page_format"
@@ -279,12 +279,12 @@ export function ExportPageModal(props: Props) {
           </DialogBody>
         </DialogMain>
         <DialogActions>
-          <Button variant="secondary" size="md" stretch="auto" label="Cancel" onClick={handleClose} />
+          <Button variant="secondary" size="md" stretch="auto" label={"Hủy"} onClick={handleClose} />
           <Button
             variant="primary"
             size="md"
             stretch="auto"
-            label={isExporting ? "Exporting" : "Export"}
+            label={isExporting ? "Đang xuất" : "Xuất"}
             loading={isExporting}
             onClick={handleExport}
           />

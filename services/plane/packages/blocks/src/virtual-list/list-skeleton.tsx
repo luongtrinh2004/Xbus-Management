@@ -25,7 +25,7 @@ type VirtualListSkeletonProps = {
  */
 export function VirtualListSkeleton({ rows = 3, rowHeight = 52, className }: VirtualListSkeletonProps) {
   return (
-    <Skeleton ariaLabel="Loading more rows" className={cn("flex w-full flex-col gap-2", className)}>
+    <Skeleton ariaLabel={"Đang tải thêm hàng"} className={cn("flex w-full flex-col gap-2", className)}>
       {Array.from({ length: Math.max(1, rows) }).map((_, index) => (
         // oxlint-disable-next-line react/no-array-index-key -- static, identical placeholder rows
         <Skeleton.Item key={index} height={`${rowHeight}px`} width="100%" className="rounded-md" />

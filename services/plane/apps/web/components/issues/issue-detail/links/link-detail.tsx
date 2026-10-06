@@ -53,8 +53,8 @@ export function IssueLinkDetail(props: TIssueLinkDetail) {
             copyTextToClipboard(linkDetail.url);
             setToast({
               type: "success",
-              title: "Link copied!",
-              message: "Link copied to clipboard",
+              title: "Đã sao chép liên kết!",
+              message: "Đã sao chép liên kết vào bảng tạm",
             });
           }}
         >
@@ -111,11 +111,11 @@ export function IssueLinkDetail(props: TIssueLinkDetail) {
 
         <div className="px-5">
           <p className="mt-0.5 stroke-[1.5] text-11 text-tertiary">
-            Added {calculateTimeAgo(linkDetail.created_at)}
+            Đã thêm {calculateTimeAgo(linkDetail.created_at)}
             <br />
             {createdByDetails && (
               <>
-                by {createdByDetails?.is_bot ? createdByDetails?.first_name + " Bot" : createdByDetails?.display_name}
+                bởi {createdByDetails?.is_bot ? createdByDetails?.first_name + "bot" : createdByDetails?.display_name}
               </>
             )}
           </p>

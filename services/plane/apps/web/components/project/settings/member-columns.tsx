@@ -162,7 +162,7 @@ export const AccountTypeColumn = observer(function AccountTypeColumn(props: Acco
         <Controller
           name="role"
           control={control}
-          rules={{ required: "Role is required." }}
+          rules={{ required: "Vui lòng chọn vai trò." }}
           render={() => {
             const roleOptions: TRoleOption[] = Object.entries(checkCurrentOptionWorkspaceRole(rowData.member.id)).map(
               ([key, label]) => ({ key, label })
@@ -186,8 +186,8 @@ export const AccountTypeColumn = observer(function AccountTypeColumn(props: Acco
 
                       setToast({
                         type: "error",
-                        title: "You can’t change this role yet.",
-                        message: errorString ?? "An error occurred while updating member role. Please try again.",
+                        title: "Bạn chưa thể thay đổi vai trò này.",
+                        message: errorString ?? "Không thể cập nhật vai trò thành viên. Vui lòng thử lại.",
                       });
                     });
                   }}

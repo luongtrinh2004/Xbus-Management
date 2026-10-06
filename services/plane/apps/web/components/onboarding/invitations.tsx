@@ -66,8 +66,8 @@ export function Invitations(props: Props) {
   return invitations && invitations.length > 0 ? (
     <div className="space-y-4">
       <div className="mx-auto space-y-1 py-4 text-center">
-        <h3 className="text-24 font-bold text-primary">You are invited!</h3>
-        <p className="font-medium text-placeholder">Accept the invites to collaborate with your team.</p>
+        <h3 className="text-24 font-bold text-primary">Bạn đã được mời!</h3>
+        <p className="font-medium text-placeholder">Chấp nhận lời mời để cộng tác cùng đội ngũ.</p>
       </div>
       <div>
         {invitations &&
@@ -93,7 +93,10 @@ export function Invitations(props: Props) {
                   <p className="text-11 text-secondary">{ROLE[invitation.role]}</p>
                 </div>
                 <span className="pointer-events-none flex-shrink-0">
-                  <Checkbox checked={isSelected} aria-label={invitedWorkspace?.name ?? "Select workspace invitation"} />
+                  <Checkbox
+                    checked={isSelected}
+                    aria-label={invitedWorkspace?.name ?? "Chọn lời mời vào không gian làm việc"}
+                  />
                 </span>
               </div>
             );
@@ -107,11 +110,11 @@ export function Invitations(props: Props) {
         onClick={submitInvitations}
         disabled={isJoiningWorkspaces || !invitationsRespond.length}
       >
-        {isJoiningWorkspaces ? <Spinner height="20px" width="20px" /> : "Continue to workspace"}
+        {isJoiningWorkspaces ? <Spinner height="20px" width="20px" /> : "Vào không gian làm việc"}
       </ButtonElement>
       <div className="mx-auto mt-4 flex items-center sm:w-96">
         <hr className="w-full border-strong" />
-        <p className="mx-3 flex-shrink-0 text-center text-13 text-placeholder">or</p>
+        <p className="mx-3 flex-shrink-0 text-center text-13 text-placeholder">Hoặc</p>
         <hr className="w-full border-strong" />
       </div>
       <Button
@@ -121,10 +124,10 @@ export function Invitations(props: Props) {
         render={<button type="button" className="bg-surface-2 text-14" />}
         onClick={handleCurrentViewChange}
         disabled={isJoiningWorkspaces}
-        label="Create your own workspace"
+        label={"Tạo không gian làm việc của bạn"}
       />
     </div>
   ) : (
-    <div>No Invitations found</div>
+    <div>Không tìm thấy lời mời</div>
   );
 }

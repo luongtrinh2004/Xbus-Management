@@ -43,7 +43,7 @@ export const SpreadsheetLabelColumn = observer(function SpreadsheetLabelColumn(p
         hideDropdownArrow
         maxRender={1}
         disabled={disabled}
-        placeholderText="Select labels"
+        placeholderText={"Chọn nhãn"}
         onClose={onClose}
         noLabelBorder
         fullWidth

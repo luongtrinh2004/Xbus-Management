@@ -56,25 +56,23 @@ export function ConfirmIssueDiscard(props: Props) {
         <DialogMain>
           <DialogHeader>
             <DialogHeading>
-              <DialogTitle>Save this draft?</DialogTitle>
-              <DialogDescription>
-                You can save this work item to Drafts so you can come back to it later.
-              </DialogDescription>
+              <DialogTitle>Lưu bản nháp này?</DialogTitle>
+              <DialogDescription>Bạn có thể lưu công việc vào Bản nháp để tiếp tục sau.</DialogDescription>
             </DialogHeading>
           </DialogHeader>
         </DialogMain>
         <DialogActions>
           <DialogInfo>
-            <Button variant="secondary" size="sm" stretch="auto" onClick={onDiscard} label="Discard" />
+            <Button variant="secondary" size="sm" stretch="auto" onClick={onDiscard} label={"Hủy bỏ"} />
           </DialogInfo>
-          <Button variant="secondary" size="sm" stretch="auto" onClick={onClose} label="Cancel" />
+          <Button variant="secondary" size="sm" stretch="auto" onClick={onClose} label={"Hủy"} />
           <Button
             variant="primary"
             size="sm"
             stretch="auto"
             onClick={() => void handleDeletion()}
             loading={isLoading}
-            label={isLoading ? "Saving" : "Save to Drafts"}
+            label={isLoading ? "Đang lưu" : "Lưu vào bản nháp"}
           />
         </DialogActions>
       </DialogContent>

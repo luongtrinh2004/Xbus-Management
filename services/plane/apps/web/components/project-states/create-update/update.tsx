@@ -34,8 +34,8 @@ export const StateUpdate = observer(function StateUpdate(props: TStateUpdate) {
       await updateStateCallback(state.id, formData);
       setToast({
         type: "success",
-        title: "Success!",
-        message: "State updated successfully.",
+        title: "Thành công!",
+        message: "Đã cập nhật trạng thái.",
       });
       handleClose();
       return { status: "success" };
@@ -44,15 +44,15 @@ export const StateUpdate = observer(function StateUpdate(props: TStateUpdate) {
       if (errorStatus?.status === 400) {
         setToast({
           type: "error",
-          title: "Error!",
-          message: "Another state exists with the same name. Please try again with another name.",
+          title: "Lỗi!",
+          message: "Tên trạng thái đã tồn tại. Vui lòng chọn tên khác.",
         });
         return { status: "already_exists" };
       } else {
         setToast({
           type: "error",
-          title: "Error!",
-          message: "State could not be updated. Please try again.",
+          title: "Lỗi!",
+          message: "Không thể cập nhật trạng thái. Vui lòng thử lại.",
         });
         return { status: "error" };
       }
@@ -65,7 +65,7 @@ export const StateUpdate = observer(function StateUpdate(props: TStateUpdate) {
       onSubmit={onSubmit}
       onCancel={onCancel}
       buttonDisabled={loader}
-      buttonTitle={loader ? `Updating` : `Update`}
+      buttonTitle={loader ? "Đang cập nhật" : "Cập nhật"}
     />
   );
 });

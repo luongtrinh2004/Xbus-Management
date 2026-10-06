@@ -32,16 +32,16 @@ type Props = {
 };
 
 const PROJECT_ROLE_OPTIONS: IRoleOption[] = [
-  { value: String(EUserProjectRoles.ADMIN), label: "Admin" },
-  { value: String(EUserProjectRoles.MEMBER), label: "Member" },
-  { value: String(EUserProjectRoles.GUEST), label: "Guest" },
+  { value: String(EUserProjectRoles.ADMIN), label: "Quản trị viên" },
+  { value: String(EUserProjectRoles.MEMBER), label: "Thành viên" },
+  { value: String(EUserProjectRoles.GUEST), label: "Khách" },
 ];
 
 const WORKSPACE_ROLE_OPTIONS: IRoleOption[] = [
-  { value: String(EUserWorkspaceRoles.ADMIN), label: "Admin" },
-  { value: String(EUserWorkspaceRoles.MEMBER), label: "Member" },
-  { value: String(EUserWorkspaceRoles.GUEST), label: "Guest" },
-  { value: "suspended", label: "Suspended" },
+  { value: String(EUserWorkspaceRoles.ADMIN), label: "Quản trị viên" },
+  { value: String(EUserWorkspaceRoles.MEMBER), label: "Thành viên" },
+  { value: String(EUserWorkspaceRoles.GUEST), label: "Khách" },
+  { value: "suspended", label: "Đã đình chỉ" },
 ];
 
 // Dropdown component for member list filters
@@ -73,7 +73,7 @@ export const MemberListFiltersDropdown = observer(function MemberListFiltersDrop
       </div>
       <MenuContent side="bottom" align="start">
         <MenuGroup>
-          <MenuLabel meta={appliedFiltersCount > 0 ? String(appliedFiltersCount) : undefined}>Roles</MenuLabel>
+          <MenuLabel meta={appliedFiltersCount > 0 ? String(appliedFiltersCount) : undefined}>Vai trò</MenuLabel>
           {roleOptions.map((role) => (
             <MenuCheckboxItem
               key={`role-${role.value}`}

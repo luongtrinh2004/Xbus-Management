@@ -80,7 +80,7 @@ export const CustomThemeSelector = observer(function CustomThemeSelector() {
       setToast({
         type: "success",
         title: t("success"),
-        message: "Reloading to apply changes...",
+        message: "Đang tải lại để áp dụng thay đổi…",
       });
       // reload the page after showing the toast
       setTimeout(() => {
@@ -121,7 +121,7 @@ export const CustomThemeSelector = observer(function CustomThemeSelector() {
           size="md"
           stretch="auto"
           type="submit"
-          label={isSubmitting ? t("common.saving") : isLoadingPalette ? "Generating" : t("set_theme")}
+          label={isSubmitting ? t("common.saving") : isLoadingPalette ? "Đang tạo" : t("set_theme")}
           loading={isSubmitting || isLoadingPalette}
         />
         {/* Import/Export Section */}

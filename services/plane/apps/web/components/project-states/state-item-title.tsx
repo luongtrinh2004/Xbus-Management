@@ -4,6 +4,8 @@
  * See the LICENSE file for details.
  */
 
+import { getStateDisplayName } from "@plane/utils";
+
 import type { SetStateAction } from "react";
 import { observer } from "mobx-react";
 import { Icon } from "@makeplane/propel/components/icon";
@@ -61,7 +63,7 @@ export const StateItemTitle = observer(function StateItemTitle(props: TStateItem
         </div>
         {/* state title and description */}
         <div className="min-h-5 px-2 text-13">
-          <h6 className="text-13 font-medium">{state.name}</h6>
+          <h6 className="text-13 font-medium">{getStateDisplayName(state)}</h6>
           {shouldShowDescription && <p className="text-11 text-secondary">{state.description}</p>}
         </div>
       </div>

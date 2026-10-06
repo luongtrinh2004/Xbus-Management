@@ -15,7 +15,7 @@ import { ConfirmDialog } from "@plane/blocks/dialog";
 import { setToast } from "@plane/blocks/toast";
 import { useTranslation } from "@plane/i18n";
 import type { IState, TStateOperationsCallbacks } from "@plane/types";
-import { cn } from "@plane/utils";
+import { getStateDisplayName, cn } from "@plane/utils";
 // hooks
 import { usePlatformOS } from "@/hooks/use-platform-os";
 
@@ -50,15 +50,14 @@ export const StateDelete = observer(function StateDelete(props: TStateDelete) {
       if (errorStatus.status === 400) {
         setToast({
           type: "error",
-          title: "Error!",
-          message:
-            "This state contains some work items within it, please move them to some other state to delete this state.",
+          title: "Lỗi!",
+          message: "Trạng thái này còn công việc. Hãy chuyển công việc sang trạng thái khác trước khi xóa.",
         });
       } else {
         setToast({
           type: "error",
-          title: "Error!",
-          message: "State could not be deleted. Please try again.",
+          title: "Lỗi!",
+          message: "Không thể xóa trạng thái. Vui lòng thử lại.",
         });
       }
       setIsDelete(false);
@@ -72,18 +71,19 @@ export const StateDelete = observer(function StateDelete(props: TStateDelete) {
         handleSubmit={handleDeleteState}
         isSubmitting={isDelete}
         isOpen={isDeleteModal}
-        title="Delete State"
+        title={"Xóa trạng thái"}
         content={
           <>
-            Are you sure you want to delete state- <span className="font-medium text-primary">{state?.name}</span>? All
-            of the data related to the state will be permanently removed. This action cannot be undone.
+            Bạn có chắc muốn xóa trạng thái{" "}
+            <span className="font-medium text-primary">{getStateDisplayName(state)}</span>? Toàn bộ dữ liệu của trạng
+            thái sẽ bị xóa vĩnh viễn. Thao tác này không thể hoàn tác.
           </>
         }
       />
 
       <Tooltip
         label={
-          state.default ? "Cannot delete the default state." : totalStates === 1 ? `Cannot have an empty group.` : ``
+          state.default ? "Không thể xóa trạng thái mặc định." : totalStates === 1 ? "Nhóm không được để trống." : ``
         }
         layout="stacked"
         disabled={!isDeleteDisabled || isMobile}

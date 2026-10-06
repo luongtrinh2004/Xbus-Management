@@ -65,7 +65,7 @@ export const PlanCheckoutButton = observer(function PlanCheckoutButton(props: Pr
             />
           )}
         </div>
-        <div className="text-caption-md-medium text-tertiary">per user per month</div>
+        <div className="text-caption-md-medium text-tertiary">/người/tháng</div>
       </div>
       {isLoading ? (
         <Loader className="flex flex-col items-center justify-center">
@@ -89,7 +89,9 @@ export const PlanCheckoutButton = observer(function PlanCheckoutButton(props: Pr
               }}
               disabled={!!upgradeLoaderType}
               label={
-                upgradeLoaderType === planVariant ? "Redirecting to Stripe" : (upgradeCTA ?? `Upgrade to ${planeName}`)
+                upgradeLoaderType === planVariant
+                  ? "Đang chuyển đến Stripe"
+                  : (upgradeCTA ?? `Nâng cấp lên ${planeName}`)
               }
             />
           </div>

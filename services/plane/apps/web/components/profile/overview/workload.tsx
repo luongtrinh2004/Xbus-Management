@@ -36,9 +36,9 @@ export function ProfileWorkload({ stateDistribution }: Props) {
                 <div className="flex-col space-y-1">
                   <span className="text-13 text-placeholder">
                     {group.state_group === "unstarted"
-                      ? "Not started"
+                      ? "Chưa bắt đầu"
                       : group.state_group === "started"
-                        ? "Working on"
+                        ? "Đang làm"
                         : STATE_GROUPS[group.state_group].label}
                   </span>
                   <p className="text-18 font-semibold">{group.state_count}</p>

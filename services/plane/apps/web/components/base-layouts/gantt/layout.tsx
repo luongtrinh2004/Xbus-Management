@@ -39,7 +39,7 @@ export const BaseGanttLayout = observer(function BaseGanttLayout<T extends IBase
     showAllBlocks = false,
     showToday = true,
     border = false,
-    title = "Items",
+    title = "Công việc",
     loaderTitle = "items",
     quickAdd,
     loadMoreItems,

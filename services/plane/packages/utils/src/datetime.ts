@@ -9,16 +9,16 @@ import { isNumber } from "lodash-es";
 
 // Format Date Helpers
 /**
- * @returns {string | null} formatted date in the desired format or platform default format (MMM dd, yyyy)
+ * @returns {string | null} formatted date in the desired format or platform default format (dd/MM/yyyy)
  * @description Returns date in the formatted format
  * @param {Date | string} date
- * @param {string} formatToken (optional) // default MMM dd, yyyy
- * @example renderFormattedDate("2024-01-01", "MM-DD-YYYY") // Jan 01, 2024
- * @example renderFormattedDate("2024-01-01") // Jan 01, 2024
+ * @param {string} formatToken (optional) // default dd/MM/yyyy
+ * @example renderFormattedDate("2024-01-01", "MM-DD-YYYY") // 01/01/2024
+ * @example renderFormattedDate("2024-01-01") // 01/01/2024
  */
 export const renderFormattedDate = (
   date: string | Date | undefined | null,
-  formatToken: string = "MMM dd, yyyy"
+  formatToken: string = "dd/MM/yyyy"
 ): string | undefined => {
   // Parse the date to check if it is valid
   const parsedDate = getDate(date);
@@ -28,20 +28,20 @@ export const renderFormattedDate = (
   if (!isValid(parsedDate)) return; // Return null for invalid dates
   let formattedDate;
   try {
-    // Format the date in the format provided or default format (MMM dd, yyyy)
+    // Format the date in the format provided or default format (dd/MM/yyyy)
     formattedDate = format(parsedDate, formatToken);
   } catch (_e) {
-    // Format the date in format (MMM dd, yyyy) in case of any error
-    formattedDate = format(parsedDate, "MMM dd, yyyy");
+    // Format the date in format (dd/MM/yyyy) in case of any error
+    formattedDate = format(parsedDate, "dd/MM/yyyy");
   }
   return formattedDate;
 };
 
 /**
- * @returns {string} formatted date in the format of MMM dd
+ * @returns {string} formatted date in the format of dd/MM
  * @description Returns date in the formatted format
  * @param {string | Date} date
- * @example renderShortDateFormat("2024-01-01") // Jan 01
+ * @example renderShortDateFormat("2024-01-01") // 01/01
  */
 export const renderFormattedDateWithoutYear = (date: string | Date): string => {
   // Parse the date to check if it is valid
@@ -50,8 +50,8 @@ export const renderFormattedDateWithoutYear = (date: string | Date): string => {
   if (!parsedDate) return "";
   // Check if the parsed date is valid before formatting
   if (!isValid(parsedDate)) return ""; // Return empty string for invalid dates
-  // Format the date in short format (MMM dd)
-  const formattedDate = format(parsedDate, "MMM dd");
+  // Format the date in short format (dd/MM)
+  const formattedDate = format(parsedDate, "dd/MM");
   return formattedDate;
 };
 
@@ -59,7 +59,7 @@ export const renderFormattedDateWithoutYear = (date: string | Date): string => {
  * @returns {string | null} formatted date in the format of yyyy-mm-dd to be used in payload
  * @description Returns date in the formatted format to be used in payload
  * @param {Date | string} date
- * @example renderFormattedPayloadDate("Jan 01, 20224") // "2024-01-01"
+ * @example renderFormattedPayloadDate("01/01, 20224") // "2024-01-01"
  */
 export const renderFormattedPayloadDate = (date: Date | string | undefined | null): string | undefined => {
   // Parse the date to check if it is valid

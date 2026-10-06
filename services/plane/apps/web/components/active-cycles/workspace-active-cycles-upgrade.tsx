@@ -28,42 +28,41 @@ import { useUser } from "@/hooks/store/user";
 export const WORKSPACE_ACTIVE_CYCLES_DETAILS = [
   {
     key: "10000_feet_view",
-    title: "10,000-feet view of all active cycles.",
+    title: "Góc nhìn tổng quan về tất cả chu kỳ hoạt động.",
     description:
-      "Zoom out to see running cycles across all your projects at once instead of going from Cycle to Cycle in each project.",
+      "Phóng to tầm nhìn để xem tất cả chu kỳ đang diễn ra trong tất cả dự án cùng một lúc, thay vì xem từng chu kỳ trong mỗi dự án.",
     icon: FolderOutline,
   },
   {
     key: "get_snapshot_of_each_active_cycle",
-    title: "Get a snapshot of each active cycle.",
+    title: "Nhận ảnh chụp nhanh của mỗi chu kỳ hoạt động.",
     description:
-      "Track high-level metrics for all active cycles, see their state of progress, and get a sense of scope against deadlines.",
+      "Theo dõi số liệu tổng hợp cho tất cả chu kỳ hoạt động, xem trạng thái tiến độ và hiểu phạm vi liên quan đến thời hạn.",
     icon: CircleDashed,
   },
   {
     key: "compare_burndowns",
-    title: "Compare burndowns.",
-    description: "Monitor how each of your teams are performing with a peek into each cycle’s burndown report.",
+    title: "So sánh biểu đồ burndown.",
+    description: "Theo dõi hiệu suất của từng nhóm qua báo cáo burndown của mỗi chu kỳ.",
     icon: BarOutline,
   },
   {
     key: "quickly_see_make_or_break_issues",
-    title: "Quickly see make-or-break work items. ",
+    title: "Nhanh chóng xem các vấn đề quan trọng.",
     description:
-      "Preview high-priority work items for each cycle against due dates. See all of them per cycle in one click.",
+      "Xem trước các công việc ưu tiên cao liên quan đến thời hạn trong mỗi chu kỳ. Xem tất cả công việc trong mỗi chu kỳ chỉ bằng một cú nhấp chuột.",
     icon: AlertOctagonOutline,
   },
   {
     key: "zoom_into_cycles_that_need_attention",
-    title: "Zoom into cycles that need attention. ",
-    description: "Investigate the state of any cycle that doesn’t conform to expectations in one click.",
+    title: "Phóng to vào chu kỳ cần chú ý.",
+    description: "Kiểm tra nhanh trạng thái của chu kỳ có tiến độ chưa đạt kỳ vọng.",
     icon: SearchOutline,
   },
   {
     key: "stay_ahead_of_blockers",
-    title: "Stay ahead of blockers.",
-    description:
-      "Spot challenges from one project to another and see inter-cycle dependencies that aren’t obvious from any other view.",
+    title: "Đi trước các yếu tố chặn.",
+    description: "Phát hiện vướng mắc giữa các dự án và quan hệ phụ thuộc giữa các chu kỳ.",
     icon: Microscope,
   },
 ];

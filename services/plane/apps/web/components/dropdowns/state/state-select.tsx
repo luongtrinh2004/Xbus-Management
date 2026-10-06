@@ -4,6 +4,8 @@
  * See the LICENSE file for details.
  */
 
+import { getStateDisplayName } from "@plane/utils";
+
 import type { ReactNode } from "react";
 import { useCallback, useMemo } from "react";
 import { observer } from "mobx-react";
@@ -39,7 +41,7 @@ type StateSelectWebProps = {
 
 const toOption = (state: IState): StateOption => ({
   id: state.id,
-  name: state.name,
+  name: getStateDisplayName(state),
   color: state.color,
   group: state.group,
   order: state.order,
@@ -96,7 +98,7 @@ export const StateSelect = observer(function StateSelect(props: StateSelectWebPr
       const results = (stateIds ?? [])
         .map((stateId) => getStateById(stateId))
         .filter((state): state is IState => !!state)
-        .filter((state) => !query || state.name.toLowerCase().includes(query))
+        .filter((state) => !query || getStateDisplayName(state).toLowerCase().includes(query))
         .map(toOption);
       return { results, next_page_results: false };
     },

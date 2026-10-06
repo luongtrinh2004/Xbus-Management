@@ -49,7 +49,7 @@ import type {
 import { EIssuesStoreType } from "@plane/types";
 // plane ui
 
-import { renderFormattedDate, getFileURL } from "@plane/utils";
+import { getStateDisplayName, renderFormattedDate, getFileURL } from "@plane/utils";
 // store
 import { store } from "@/lib/store-context";
 import { ISSUE_FILTER_DEFAULT_DATA } from "@/store/issue/helpers/base-issues.store";
@@ -128,7 +128,7 @@ export const getGroupByColumns = ({
     return [
       {
         id: "All Issues",
-        name: `All ${isEpic ? "Epics" : "work items"}`,
+        name: `Tất cả ${isEpic ? "Epics" : "work items"}`,
         payload: {},
         icon: undefined,
       },
@@ -200,7 +200,7 @@ const getCycleColumns = (): IGroupByColumn[] | undefined => {
       icon: <CycleGroupIcon cycleGroup={cycleStatus} className="h-3.5 w-3.5" />,
       payload: { cycle_id: cycle.id },
       isDropDisabled,
-      dropErrorMessage: isDropDisabled ? "Work item cannot be moved to completed cycles" : undefined,
+      dropErrorMessage: isDropDisabled ? "Không thể chuyển công việc vào chu kỳ đã hoàn thành" : undefined,
     });
   });
   cycles.push({
@@ -246,7 +246,7 @@ const getStateColumns = ({ projectId }: TGetColumns): IGroupByColumn[] | undefin
   // map project states to group by columns
   return _states.map((state) => ({
     id: state.id,
-    name: state.name,
+    name: getStateDisplayName(state),
     icon: (
       <div className="size-4 rounded-full">
         <StateGroupIcon stateGroup={state.group} color={state.color} size={EIconSize.LG} percentage={state.order} />
@@ -739,10 +739,10 @@ export const getBlockViewDetails = (
 
   if (isBlockVisibleOnChart && !isBlockComplete) {
     if (block?.start_date) {
-      message = `From ${renderFormattedDate(block.start_date)}`;
+      message = `Từ ${renderFormattedDate(block.start_date)}`;
       blockStyle.maskImage = `linear-gradient(to right, ${backgroundColor} 50%, transparent 95%)`;
     } else if (block?.target_date) {
-      message = `Till ${renderFormattedDate(block.target_date)}`;
+      message = `Đến ${renderFormattedDate(block.target_date)}`;
       blockStyle.maskImage = `linear-gradient(to left, ${backgroundColor} 50%, transparent 95%)`;
     }
   } else if (isBlockComplete) {

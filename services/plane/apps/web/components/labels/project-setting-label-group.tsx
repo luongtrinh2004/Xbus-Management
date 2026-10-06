@@ -63,7 +63,7 @@ export const ProjectSettingLabelGroup = observer(function ProjectSettingLabelGro
         setIsUpdating(true);
       },
       isVisible: true,
-      text: "Edit label",
+      text: "Chỉnh sửa nhãn",
       key: "edit_label",
     },
     {
@@ -72,7 +72,7 @@ export const ProjectSettingLabelGroup = observer(function ProjectSettingLabelGro
         handleLabelDelete(label);
       },
       isVisible: true,
-      text: "Delete label",
+      text: "Xóa nhãn",
       key: "delete_label",
     },
   ];

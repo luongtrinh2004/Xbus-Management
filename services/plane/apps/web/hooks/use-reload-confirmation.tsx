@@ -10,7 +10,7 @@ import { useCallback, useEffect, useState } from "react";
 const useReloadConfirmations = (isActive = true, message?: string, defaultShowAlert = false, onLeave?: () => void) => {
   const [showAlert, setShowAlert] = useState(defaultShowAlert);
 
-  const alertMessage = message ?? "Are you sure you want to leave? Changes you made may not be saved.";
+  const alertMessage = message ?? "Bạn có muốn rời khỏi? Thay đổi có thể chưa được lưu.";
 
   const handleBeforeUnload = useCallback(
     (event: BeforeUnloadEvent) => {

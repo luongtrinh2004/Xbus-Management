@@ -97,7 +97,7 @@ export const CreateUpdateLabelInline = observer(
       } catch (error) {
         const errorMessage = getErrorMessage(error, "create");
         setToast({
-          title: "Error!",
+          title: "Lỗi!",
           type: "error",
           message: errorMessage,
         });
@@ -115,7 +115,7 @@ export const CreateUpdateLabelInline = observer(
       } catch (error) {
         const errorMessage = getErrorMessage(error, "update");
         setToast({
-          title: "Oops!",
+          title: "Đã xảy ra lỗi!",
           type: "error",
           message: errorMessage,
         });

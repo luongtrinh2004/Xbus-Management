@@ -87,7 +87,7 @@ export const AllIssueQuickActions = observer(function AllIssueQuickActions(props
     issue,
     workspaceSlug: workspaceSlug?.toString(),
     projectIdentifier,
-    activeLayout: "Global issues",
+    activeLayout: "Công việc toàn hệ thống",
     isEditingAllowed,
     isArchivingAllowed,
     isDeletingAllowed: isEditingAllowed,

@@ -55,16 +55,16 @@ export const ProjectMemberListItem = observer(function ProjectMemberListItem(pro
         .catch((err) => {
           setToast({
             type: "error",
-            title: "You can’t leave this project yet.",
-            message: err?.error || "Something went wrong. Please try again.",
+            title: "Bạn chưa thể rời dự án này.",
+            message: err?.error || "Đã xảy ra lỗi. Vui lòng thử lại.",
           });
         });
     } else
       await removeMemberFromProject(workspaceSlug.toString(), projectId.toString(), memberId).catch((err) =>
         setToast({
           type: "error",
-          title: "You can't remove the member from this project yet.",
-          message: err?.error || "Something went wrong. Please try again.",
+          title: "Bạn chưa thể loại thành viên khỏi dự án này.",
+          message: err?.error || "Đã xảy ra lỗi. Vui lòng thử lại.",
         })
       );
   };

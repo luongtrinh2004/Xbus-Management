@@ -81,7 +81,7 @@ export const ModuleIssueQuickActions = observer(function ModuleIssueQuickActions
   const isInArchivableGroup = !!stateDetails && ARCHIVABLE_STATE_GROUPS.includes(stateDetails?.group);
   const isDeletingAllowed = isEditingAllowed;
 
-  const activeLayout = `${issuesFilter.issueFilters?.displayFilters?.layout} layout`;
+  const activeLayout = `${issuesFilter.issueFilters?.displayFilters?.layout} bố cục`;
 
   const duplicateIssuePayload = omit(
     {

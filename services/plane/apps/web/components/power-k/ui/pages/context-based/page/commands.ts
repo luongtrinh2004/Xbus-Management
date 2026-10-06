@@ -62,7 +62,7 @@ export const usePowerKPageContextBasedActions = (): TPowerKCommandConfig[] => {
     } catch {
       setToast({
         type: "error",
-        title: "Some error occurred",
+        title: "Đã xảy ra lỗi",
       });
     }
   }, [addToFavorites, removePageFromFavorites, isFavorite]);

@@ -105,9 +105,9 @@ export const SendProjectInvitationModal = observer(function SendProjectInvitatio
         if (onSuccess) onSuccess();
         onClose();
         setToast({
-          title: "Success!",
+          title: "Thành công!",
           type: "success",
-          message: "Members added successfully.",
+          message: "Đã thêm thành viên.",
         });
       })
       .catch((error) => {
@@ -196,14 +196,14 @@ export const SendProjectInvitationModal = observer(function SendProjectInvitatio
                       <Controller
                         control={control}
                         name={`members.${index}.member_id`}
-                        rules={{ required: "Please select a member" }}
+                        rules={{ required: "Vui lòng chọn thành viên" }}
                         render={({ field: { value, onChange } }) => (
                           <MemberSelect
                             value={value || null}
                             onChange={(val: string) => handleMemberChange(index, val, onChange)}
                             variant="select-lg"
                             memberIds={uninvitedPeople}
-                            placeholder="Select co-worker"
+                            placeholder={"Chọn đồng nghiệp"}
                           />
                         )}
                       />
@@ -219,7 +219,7 @@ export const SendProjectInvitationModal = observer(function SendProjectInvitatio
                         <Controller
                           name={`members.${index}.role`}
                           control={control}
-                          rules={{ required: "Select Role" }}
+                          rules={{ required: "Chọn vai trò" }}
                           render={({ field: { value, onChange } }) => {
                             const roleOptions = getRoleOptions(watch(`members.${index}.member_id`));
                             return (
@@ -230,17 +230,17 @@ export const SendProjectInvitationModal = observer(function SendProjectInvitatio
                                   onChange={(key) => onChange(parseInt(key))}
                                   getOptionValue={(role) => String(role.key)}
                                   getOptionLabel={(role) => role.label}
-                                  placeholder="Select role"
+                                  placeholder={"Chọn vai trò"}
                                   showSearch={false}
                                   pinSelected={false}
                                 >
                                   <Select.Trigger<TRoleOption>
                                     variant="pill-md"
                                     appendIcon={<ChevronDownOutline />}
-                                    tooltip={{ emptyContent: "Select role" }}
+                                    tooltip={{ emptyContent: "Chọn vai trò" }}
                                   >
                                     <span className="min-w-0 grow truncate text-left capitalize">
-                                      {value ? ROLE[value] : "Select role"}
+                                      {value ? ROLE[value] : "Chọn vai trò"}
                                     </span>
                                   </Select.Trigger>
                                 </Select>

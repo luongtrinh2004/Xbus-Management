@@ -26,7 +26,7 @@ export const FavoriteItemDragHandle = observer(function FavoriteItemDragHandle(p
 
   return (
     <Tooltip
-      label={sort_order === null ? "Join the project to rearrange" : "Drag to rearrange"}
+      label={sort_order === null ? "Tham gia dự án để sắp xếp lại" : "Kéo để sắp xếp lại"}
       align="end"
       disabled={isDragging || isMobile}
     >

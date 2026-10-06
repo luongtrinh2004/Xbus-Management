@@ -155,7 +155,7 @@ export const ActiveCycleStats = observer(function ActiveCycleStats(props: Active
                               tooltip
                             />
                             {issue.target_date && (
-                              <Tooltip label={`Target Date: ${renderFormattedDate(issue.target_date) ?? ""}`}>
+                              <Tooltip label={`Ngày mục tiêu: ${renderFormattedDate(issue.target_date) ?? ""}`}>
                                 <div className="flex h-full cursor-pointer items-center gap-1.5 truncate rounded-sm bg-layer-1 px-2 py-0.5 text-11 group-hover:bg-surface-1">
                                   <CompletedAtOutline className="h-3 w-3 flex-shrink-0" />
                                   <span className="truncate text-11">
@@ -231,7 +231,13 @@ export const ActiveCycleStats = observer(function ActiveCycleStats(props: Active
                         title={
                           <div className="flex items-center gap-2">
                             <div className="h-5 w-5 rounded-full border-2 border-subtle bg-layer-1">
-                              <img src={userImage} height="100%" width="100%" className="rounded-full" alt="User" />
+                              <img
+                                src={userImage}
+                                height="100%"
+                                width="100%"
+                                className="rounded-full"
+                                alt={"Người dùng"}
+                              />
                             </div>
                             <span>{t("no_assignee")}</span>
                           </div>
@@ -270,7 +276,7 @@ export const ActiveCycleStats = observer(function ActiveCycleStats(props: Active
                             backgroundColor: label.color ?? "#000000",
                           }}
                         />
-                        <span className="truncate text-11 text-ellipsis">{label.label_name ?? "No labels"}</span>
+                        <span className="truncate text-11 text-ellipsis">{label.label_name ?? "Chưa có nhãn"}</span>
                       </div>
                     }
                     completed={label.completed_issues}

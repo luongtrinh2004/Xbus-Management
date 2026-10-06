@@ -214,12 +214,12 @@ export class DashboardStore implements IDashboardStore {
   ): Promise<any> => {
     // find all widgets in dashboard
     const widgets = this.widgetDetails?.[workspaceSlug]?.[dashboardId];
-    if (!widgets) throw new Error("Dashboard not found");
+    if (!widgets) throw new Error("Không tìm thấy bảng tổng quan");
     // find widget index
     const widgetIndex = widgets.findIndex((widget) => widget.id === widgetId);
     // get original widget
     const originalWidget = { ...widgets[widgetIndex] };
-    if (widgetIndex === -1) throw new Error("Widget not found");
+    if (widgetIndex === -1) throw new Error("Không tìm thấy tiện ích");
 
     try {
       runInAction(() => {
@@ -253,7 +253,7 @@ export class DashboardStore implements IDashboardStore {
     data: TWidgetFiltersFormData
   ): Promise<TWidget> => {
     const widgetDetails = this.getWidgetDetails(workspaceSlug, dashboardId, data.widgetKey);
-    if (!widgetDetails) throw new Error("Widget not found");
+    if (!widgetDetails) throw new Error("Không tìm thấy tiện ích");
     try {
       const updatedWidget = {
         ...widgetDetails,

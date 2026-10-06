@@ -25,7 +25,7 @@ function WorkspaceViewsPage() {
   const { currentWorkspace } = useWorkspace();
   const { t } = useTranslation();
   // derived values
-  const pageTitle = currentWorkspace?.name ? `${currentWorkspace?.name} - All Views` : undefined;
+  const pageTitle = currentWorkspace?.name ? `${currentWorkspace?.name} - Tất cả chế độ xem` : undefined;
 
   return (
     <>
@@ -38,8 +38,8 @@ function WorkspaceViewsPage() {
               size="2xl"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search"
-              aria-label="Search"
+              placeholder={"Tìm kiếm"}
+              aria-label={"Tìm kiếm"}
             />
           </InputGroup>
         </div>

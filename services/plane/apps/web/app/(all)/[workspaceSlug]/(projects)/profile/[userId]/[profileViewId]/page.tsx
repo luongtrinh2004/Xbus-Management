@@ -11,9 +11,9 @@ import { ProfileIssuesPage } from "@/components/profile/profile-issues";
 import type { Route } from "./+types/page";
 
 const ProfilePageHeader = {
-  assigned: "Profile - Assigned",
-  created: "Profile - Created",
-  subscribed: "Profile - Subscribed",
+  assigned: "Hồ sơ - Công việc được giao",
+  created: "Hồ sơ - Công việc đã tạo",
+  subscribed: "Hồ sơ - Công việc đang theo dõi",
 };
 
 function isValidProfileViewId(viewId: string): viewId is keyof typeof ProfilePageHeader {

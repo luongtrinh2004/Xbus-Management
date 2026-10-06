@@ -32,38 +32,38 @@ export const IssueLinkActivity = observer(function IssueLinkActivity(props: TIss
       <>
         {activity.verb === "created" ? (
           <>
-            <span>added </span>
+            <span>Đã thêm </span>
             <a
               href={`${activity.new_value}`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 font-medium text-primary hover:underline"
             >
-              link
+              Liên kết
             </a>
           </>
         ) : activity.verb === "updated" ? (
           <>
-            <span>updated the </span>
+            <span>đã cập nhật </span>
             <a
               href={`${activity.old_value}`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 font-medium text-primary hover:underline"
             >
-              link
+              Liên kết
             </a>
           </>
         ) : (
           <>
-            <span>removed this </span>
+            <span>đã xóa mục này </span>
             <a
               href={`${activity.old_value}`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 font-medium text-primary hover:underline"
             >
-              link
+              Liên kết
             </a>
           </>
         )}

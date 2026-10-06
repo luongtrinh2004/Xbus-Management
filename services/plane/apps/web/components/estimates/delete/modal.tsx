@@ -53,16 +53,16 @@ export const DeleteEstimateModal = observer(function DeleteEstimateModal(props: 
       setButtonLoader(false);
       setToast({
         type: "success",
-        title: "Estimate deleted",
-        message: "Estimate has been removed from your project.",
+        title: "Đã xóa ước lượng",
+        message: "Đã xóa ước lượng khỏi dự án.",
       });
       handleClose();
     } catch (_error) {
       setButtonLoader(false);
       setToast({
         type: "error",
-        title: "Estimate creation failed",
-        message: "We were unable to delete the estimate, please try again.",
+        title: "Không thể tạo điểm ước tính",
+        message: "Không thể xóa ước lượng. Vui lòng thử lại.",
       });
     }
   };
@@ -83,16 +83,16 @@ export const DeleteEstimateModal = observer(function DeleteEstimateModal(props: 
           {/* heading */}
           <DialogHeader>
             <DialogHeading>
-              <DialogTitle>Delete Estimate System</DialogTitle>
+              <DialogTitle>Xóa hệ thống ước lượng</DialogTitle>
             </DialogHeading>
           </DialogHeader>
 
           {/* estimate steps */}
           <DialogBody tabIndex={0}>
             <div className="text-14 text-secondary">
-              Deleting the estimate <span className="font-bold text-primary">{estimate?.name}</span>
-              &nbsp;system will remove it from all work items permanently. This action cannot be undone. If you add
-              estimates again, you will need to update all the work items.
+              Đang xóa ước lượng <span className="font-bold text-primary">{estimate?.name}</span>
+              hệ thống sẽ xóa vĩnh viễn ước lượng khỏi tất cả công việc. Thao tác này không thể hoàn tác. Nếu thêm lại
+              ước lượng, bạn cần cập nhật từng công việc.
             </div>
           </DialogBody>
         </DialogMain>
@@ -104,7 +104,7 @@ export const DeleteEstimateModal = observer(function DeleteEstimateModal(props: 
             onClick={handleClose}
             disabled={buttonLoader}
             stretch="auto"
-            label="Cancel"
+            label={"Hủy"}
           />
           <Button
             variant="danger"
@@ -112,7 +112,7 @@ export const DeleteEstimateModal = observer(function DeleteEstimateModal(props: 
             onClick={handleDeleteEstimate}
             disabled={buttonLoader}
             stretch="auto"
-            label={buttonLoader ? "Deleting" : "Delete Estimate"}
+            label={buttonLoader ? "Đang xóa" : "Xóa ước lượng"}
           />
         </DialogActions>
       </DialogContent>

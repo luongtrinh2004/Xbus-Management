@@ -79,16 +79,16 @@ export const useTabPreferences = (workspaceSlug: string, projectId: string): TTa
       .then(() => {
         setToast({
           type: "success",
-          title: "Success!",
-          message: "Default tab updated successfully.",
+          title: "Thành công!",
+          message: "Đã cập nhật tab mặc định.",
         });
         return;
       })
       .catch(() => {
         setToast({
           type: "error",
-          title: "Error!",
-          message: "Failed to update default tab. Please try again later.",
+          title: "Lỗi!",
+          message: "Không thể cập nhật tab mặc định. Vui lòng thử lại.",
         });
       });
   };
@@ -107,8 +107,8 @@ export const useTabPreferences = (workspaceSlug: string, projectId: string): TTa
       console.error("Error hiding tab:", error);
       setToast({
         type: "error",
-        title: "Error!",
-        message: "Failed to hide tab. Please try again later.",
+        title: "Lỗi!",
+        message: "Không thể ẩn tab. Vui lòng thử lại sau.",
       });
     }
   };
@@ -127,8 +127,8 @@ export const useTabPreferences = (workspaceSlug: string, projectId: string): TTa
       console.error("Error showing tab:", error);
       setToast({
         type: "error",
-        title: "Error!",
-        message: "Something went wrong. Please try again later.",
+        title: "Lỗi!",
+        message: "Đã xảy ra lỗi. Vui lòng thử lại sau.",
       });
     }
   };

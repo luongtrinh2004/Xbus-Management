@@ -76,12 +76,12 @@ function ImagePickerPopoverComponent<TFieldValues extends FieldValues = FieldVal
       },
       {
         key: "images",
-        title: "Images",
+        title: "Ảnh",
         isEnabled: true,
       },
       {
         key: "upload",
-        title: "Upload",
+        title: "Tải lên",
         isEnabled: true,
       },
     ],
@@ -141,9 +141,9 @@ function ImagePickerPopoverComponent<TFieldValues extends FieldValues = FieldVal
           console.error("Error uploading user cover image:", error);
           setIsImageUploading(false);
           setToast({
-            message: error?.error ?? "The image could not be uploaded",
+            message: error?.error ?? "Không thể tải ảnh lên",
             type: "error",
-            title: "Image not uploaded",
+            title: "Không thể tải ảnh lên",
           });
         });
     } else {
@@ -162,9 +162,9 @@ function ImagePickerPopoverComponent<TFieldValues extends FieldValues = FieldVal
           console.error("Error uploading project cover image:", error);
           setIsImageUploading(false);
           setToast({
-            message: error?.error ?? "The image could not be uploaded",
+            message: error?.error ?? "Không thể tải ảnh lên",
             type: "error",
-            title: "Image not uploaded",
+            title: "Không thể tải ảnh lên",
           });
         });
     }
@@ -236,7 +236,7 @@ function ImagePickerPopoverComponent<TFieldValues extends FieldValues = FieldVal
                                         value={value}
                                         onChange={(e) => setFormData({ ...formData, search: e.target.value })}
                                         ref={ref}
-                                        placeholder="Search for images"
+                                        placeholder={"Tìm ảnh"}
                                       />
                                     </InputGroup>
                                   )}
@@ -245,7 +245,7 @@ function ImagePickerPopoverComponent<TFieldValues extends FieldValues = FieldVal
                                   variant="primary"
                                   size="lg"
                                   stretch="auto"
-                                  label="Search"
+                                  label={"Tìm kiếm"}
                                   onClick={() => setSearchParams(formData.search)}
                                 />
                               </div>
@@ -258,9 +258,7 @@ function ImagePickerPopoverComponent<TFieldValues extends FieldValues = FieldVal
                                         key={image.id}
                                         className="relative col-span-2 aspect-video md:col-span-1"
                                         aria-label={
-                                          image.alt_description
-                                            ? `Select image: ${image.alt_description}`
-                                            : "Select image"
+                                          image.alt_description ? `Chọn ảnh: ${image.alt_description}` : "Chọn ảnh"
                                         }
                                         onClick={() => {
                                           setIsOpen(false);
@@ -276,7 +274,7 @@ function ImagePickerPopoverComponent<TFieldValues extends FieldValues = FieldVal
                                     ))}
                                   </div>
                                 ) : (
-                                  <p className="pt-7 text-center text-11 text-secondary">No images found.</p>
+                                  <p className="pt-7 text-center text-11 text-secondary">Không tìm thấy ảnh.</p>
                                 )
                               ) : (
                                 <Loader className="grid grid-cols-4 gap-4">
@@ -301,12 +299,12 @@ function ImagePickerPopoverComponent<TFieldValues extends FieldValues = FieldVal
                               type="button"
                               key={imageUrl}
                               className="relative col-span-2 aspect-video md:col-span-1"
-                              aria-label={`Select cover image ${index + 1}`}
+                              aria-label={`Chọn ảnh bìa ${index + 1}`}
                               onClick={() => handleStaticImageSelect(imageUrl)}
                             >
                               <img
                                 src={imageUrl}
-                                alt={`Cover image ${index + 1}`}
+                                alt={`Ảnh bìa ${index + 1}`}
                                 className="absolute top-0 left-0 h-full w-full cursor-pointer rounded-sm object-cover transition-opacity hover:opacity-80"
                               />
                             </button>
@@ -328,20 +326,20 @@ function ImagePickerPopoverComponent<TFieldValues extends FieldValues = FieldVal
                                 type="button"
                                 className="absolute top-0 right-0 z-40 -translate-y-1/2 rounded-sm bg-surface-2 px-2 py-0.5 text-11 font-medium text-secondary"
                               >
-                                Edit
+                                Chỉnh sửa
                               </button>
                               {image !== null || (value && value !== "") ? (
                                 <>
                                   <img
                                     src={image ? URL.createObjectURL(image) : getCoverImageDisplayURL(value, "")}
-                                    alt="image"
+                                    alt={"Ảnh"}
                                     className="h-full w-full rounded-lg object-cover"
                                   />
                                 </>
                               ) : (
                                 <div>
                                   <span className="mt-2 block text-13 font-medium text-secondary">
-                                    {isDragActive ? "Drop image here to upload" : "Drag & drop image here"}
+                                    {isDragActive ? "Thả ảnh vào đây để tải lên" : "Kéo và thả ảnh vào đây"}
                                   </span>
                                 </div>
                               )}
@@ -352,19 +350,19 @@ function ImagePickerPopoverComponent<TFieldValues extends FieldValues = FieldVal
                           {fileRejections.length > 0 && (
                             <p className="text-13 text-danger-primary">
                               {fileRejections[0].errors[0].code === "file-too-large"
-                                ? "The image size cannot exceed 5 MB."
-                                : "Please upload a file in a valid format."}
+                                ? "Dung lượng ảnh không được quá 5 MB."
+                                : "Vui lòng tải lên tệp có định dạng hợp lệ."}
                             </p>
                           )}
 
-                          <p className="text-13 text-secondary">File formats supported- .jpeg, .jpg, .png, .webp</p>
+                          <p className="text-13 text-secondary">Định dạng hỗ trợ: .jpeg, .jpg, .png, .webp</p>
 
                           <div className="flex h-12 items-start justify-end gap-2">
                             <Button
                               variant="secondary"
                               size="sm"
                               stretch="auto"
-                              label="Cancel"
+                              label={"Hủy"}
                               onClick={() => {
                                 setIsOpen(false);
                                 setImage(null);
@@ -374,7 +372,7 @@ function ImagePickerPopoverComponent<TFieldValues extends FieldValues = FieldVal
                               variant="primary"
                               size="sm"
                               stretch="full"
-                              label={isImageUploading ? "Uploading" : "Upload & Save"}
+                              label={isImageUploading ? "Đang tải lên" : "Tải lên và lưu"}
                               onClick={handleSubmit}
                               disabled={!image}
                               loading={isImageUploading}

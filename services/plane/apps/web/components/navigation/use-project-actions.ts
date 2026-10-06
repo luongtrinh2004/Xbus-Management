@@ -30,14 +30,14 @@ export const useProjectActions = ({ workspaceSlug, projectId, activeItem }: UseP
       await copyUrlToClipboard(pathToCopy);
       setToast({
         type: "info",
-        title: "Link copied!",
-        message: "Project link copied to clipboard.",
+        title: "Đã sao chép liên kết!",
+        message: "Đã sao chép liên kết dự án vào bảng tạm",
       });
     } catch (_error) {
       setToast({
         type: "error",
-        title: "Copy failed",
-        message: "We couldn't copy the link. Please try again.",
+        title: "Không thể sao chép",
+        message: "Không thể sao chép liên kết. Vui lòng thử lại.",
       });
     }
   }, [activeItem, projectId, workspaceSlug]);

@@ -52,7 +52,7 @@ export const AuthRoot = observer(function AuthRoot(props: TAuthRoot) {
   // translation
   const { t } = useTranslation();
   // derived values
-  const oAuthActionText = authMode === EAuthModes.SIGN_UP ? "Sign up" : "Sign in";
+  const oAuthActionText = authMode === EAuthModes.SIGN_UP ? "Đăng ký" : "Đăng nhập";
   const { isOAuthEnabled, oAuthOptions } = useOAuthConfig(oAuthActionText);
   const isEmailBasedAuthEnabled = config?.is_email_password_enabled || config?.is_magic_login_enabled;
   const noAuthMethodsAvailable = !isOAuthEnabled && !isEmailBasedAuthEnabled;
@@ -109,8 +109,8 @@ export const AuthRoot = observer(function AuthRoot(props: TAuthRoot) {
     return (
       <AuthContainer>
         <AuthHeaderBase
-          header="No authentication methods available"
-          subHeader="Please contact your administrator to enable authentication for your instance."
+          header={"Chưa có phương thức xác thực"}
+          subHeader={"Hãy liên hệ quản trị viên để bật xác thực cho hệ thống."}
         />
       </AuthContainer>
     );

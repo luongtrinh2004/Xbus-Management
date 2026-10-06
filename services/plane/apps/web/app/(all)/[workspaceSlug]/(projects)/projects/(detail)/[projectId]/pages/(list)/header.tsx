@@ -55,8 +55,8 @@ export const PagesListHeader = observer(function PagesListHeader() {
       .catch((err) => {
         setToast({
           type: "error",
-          title: "Error!",
-          message: err?.data?.error || "Page could not be created. Please try again.",
+          title: "Lỗi!",
+          message: err?.data?.error || "Không thể tạo trang. Vui lòng thử lại.",
         });
       })
       .finally(() => setIsCreatingPage(false));
@@ -74,7 +74,7 @@ export const PagesListHeader = observer(function PagesListHeader() {
           <Breadcrumbs.Item
             component={
               <BreadcrumbLink
-                label="Pages"
+                label={"Trang"}
                 href={`/${workspaceSlug}/projects/${currentProjectDetails?.id}/pages/`}
                 icon={<PagesOutline className="h-4 w-4 text-tertiary" />}
                 isLast
@@ -90,7 +90,7 @@ export const PagesListHeader = observer(function PagesListHeader() {
             variant="primary"
             size="md"
             stretch="auto"
-            label={isCreatingPage ? "Adding" : "Add page"}
+            label={isCreatingPage ? "Đang thêm" : "Thêm trang"}
             onClick={handleCreatePage}
             loading={isCreatingPage}
           />

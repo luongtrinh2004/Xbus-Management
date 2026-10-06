@@ -73,9 +73,8 @@ export const IssueAttachmentDeleteModal = observer(function IssueAttachmentDelet
       content={
         <>
           {/* TODO: Translate here */}
-          Are you sure you want to delete attachment-{" "}
-          <span className="font-bold">{getFileName(attachment.attributes.name)}</span>? This attachment will be
-          permanently removed. This action cannot be undone.
+          Bạn có chắc muốn xóa tệp đính kèm <span className="font-bold">{getFileName(attachment.attributes.name)}</span>
+          ? Tệp đính kèm sẽ bị xóa vĩnh viễn. Thao tác này không thể hoàn tác.
         </>
       }
     />

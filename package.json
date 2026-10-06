@@ -14,7 +14,7 @@
     "db:migrate": "node scripts/migrate-mysql.mjs",
     "trash:randomize-month": "node scripts/randomize-trash-month.mjs",
     "build:icons": "tsx src/assets/iconify-icons/bundle-icons-css.mjs",
-    "plane:start": "docker compose --project-directory . --env-file plane.env -p xbus-plane -f services/plane/deployments/cli/community/docker-compose.yml -f docker-compose.plane.override.yml up -d",
+    "plane:start": "docker compose --project-directory . --env-file plane.env -p xbus-plane -f services/plane/deployments/cli/community/docker-compose.yml -f docker-compose.plane.override.yml up -d --build",
     "plane:sync-personnel": "tsx --tsconfig jsconfig.json scripts/sync-plane-personnel.mjs",
     "plane:stop": "docker compose --project-directory . --env-file plane.env -p xbus-plane -f services/plane/deployments/cli/community/docker-compose.yml -f docker-compose.plane.override.yml down",
     "plane:logs": "docker compose --project-directory . --env-file plane.env -p xbus-plane -f services/plane/deployments/cli/community/docker-compose.yml -f docker-compose.plane.override.yml logs -f --tail=200",

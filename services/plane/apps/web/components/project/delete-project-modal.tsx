@@ -54,7 +54,7 @@ export function DeleteProjectModal(props: DeleteProjectModal) {
     watch,
   } = useForm({ defaultValues });
 
-  const canDelete = watch("projectName") === project?.name && watch("confirmDelete") === "delete my project";
+  const canDelete = watch("projectName") === project?.name && watch("confirmDelete") === "xóa dự án của tôi";
 
   const handleClose = () => {
     const timer = setTimeout(() => {
@@ -74,14 +74,14 @@ export function DeleteProjectModal(props: DeleteProjectModal) {
       handleClose();
       setToast({
         type: "success",
-        title: "Success!",
-        message: "Project deleted successfully.",
+        title: "Thành công!",
+        message: "Đã xóa dự án.",
       });
     } catch (_error) {
       setToast({
         type: "error",
-        title: "Error!",
-        message: "Something went wrong. Please try again later.",
+        title: "Lỗi!",
+        message: "Đã xảy ra lỗi. Vui lòng thử lại sau.",
       });
     }
   };
@@ -102,21 +102,19 @@ export function DeleteProjectModal(props: DeleteProjectModal) {
                   <WarningTriangleOutline className="h-6 w-6 text-danger-primary" aria-hidden="true" />
                 </span>
                 <DialogHeading>
-                  <DialogTitle>Delete project</DialogTitle>
+                  <DialogTitle>Xóa dự án</DialogTitle>
                 </DialogHeading>
               </div>
             </DialogHeader>
             <DialogBody>
               <div className="flex flex-col gap-6">
                 <p className="text-13 leading-7 text-secondary">
-                  Are you sure you want to delete project{" "}
-                  <span className="font-semibold break-words">{project?.name}</span>? All of the data related to the
-                  project will be permanently removed. This action cannot be undone
+                  Bạn có chắc muốn xóa dự án <span className="font-semibold break-words">{project?.name}</span>? Toàn bộ
+                  dữ liệu của dự án sẽ bị xóa vĩnh viễn. Thao tác này không thể hoàn tác.
                 </p>
                 <div className="text-secondary">
                   <p className="text-13 break-words">
-                    Enter the project name <span className="font-medium text-primary">{project?.name}</span> to
-                    continue:
+                    Nhập tên dự án <span className="font-medium text-primary">{project?.name}</span> để tiếp tục:
                   </p>
                   <Controller
                     control={control}
@@ -132,7 +130,7 @@ export function DeleteProjectModal(props: DeleteProjectModal) {
                             value={value}
                             onChange={onChange}
                             ref={ref}
-                            placeholder="Project name"
+                            placeholder={"Tên dự án"}
                             autoComplete="off"
                           />
                         </InputGroup>
@@ -142,7 +140,7 @@ export function DeleteProjectModal(props: DeleteProjectModal) {
                 </div>
                 <div className="text-secondary">
                   <p className="text-13">
-                    To confirm, type <span className="font-medium text-primary">delete my project</span> below:
+                    Để xác nhận, hãy nhập <span className="font-medium text-primary">xóa dự án của tôi</span> bên dưới:
                   </p>
                   <Controller
                     control={control}
@@ -158,7 +156,7 @@ export function DeleteProjectModal(props: DeleteProjectModal) {
                             value={value}
                             onChange={onChange}
                             ref={ref}
-                            placeholder="Enter 'delete my project'"
+                            placeholder={"Nhập “xóa dự án của tôi”"}
                             autoComplete="off"
                           />
                         </InputGroup>
@@ -170,13 +168,13 @@ export function DeleteProjectModal(props: DeleteProjectModal) {
             </DialogBody>
           </DialogMain>
           <DialogActions>
-            <Button variant="secondary" size="md" stretch="auto" label="Cancel" onClick={handleClose} />
+            <Button variant="secondary" size="md" stretch="auto" label={"Hủy"} onClick={handleClose} />
             <Button
               variant="danger"
               size="md"
               stretch="auto"
               type="submit"
-              label={isSubmitting ? "Deleting" : "Delete project"}
+              label={isSubmitting ? "Đang xóa" : "Xóa dự án"}
               disabled={!canDelete}
               loading={isSubmitting}
             />

@@ -9,10 +9,16 @@ import { LANGUAGE_STORAGE_KEY } from "../constants/language";
 import type { TLanguage } from "../types";
 
 export async function setLanguage(lng: TLanguage): Promise<void> {
+  // XBus uses one Vietnamese interface, including profiles created before localization.
+  if (process.env.VITE_XBUS_EMBEDDED === "true") lng = "vi-VN";
   await initPromise;
   await i18nInstance.changeLanguage(lng);
   if (typeof window !== "undefined") {
-    localStorage.setItem(LANGUAGE_STORAGE_KEY, lng);
+    try {
+      window.localStorage.setItem(LANGUAGE_STORAGE_KEY, lng);
+    } catch {
+      // Keep the selected language even when browser storage is unavailable.
+    }
     document.documentElement.lang = lng;
   }
 }

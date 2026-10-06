@@ -41,14 +41,14 @@ export function DeleteWebhookModal(props: IDeleteWebhook) {
       router.replace(`/${workspaceSlug}/settings/webhooks/`);
       setToast({
         type: "success",
-        title: "Success!",
-        message: "Webhook deleted successfully.",
+        title: "Thành công!",
+        message: "Đã xóa webhook.",
       });
     } catch (_error) {
       setToast({
         type: "error",
-        title: "Error!",
-        message: "Webhook could not be deleted. Please try again.",
+        title: "Lỗi!",
+        message: "Không thể xóa webhook. Vui lòng thử lại.",
       });
     }
     setIsDeleting(false);
@@ -60,11 +60,11 @@ export function DeleteWebhookModal(props: IDeleteWebhook) {
       handleSubmit={handleDelete}
       isSubmitting={isDeleting}
       isOpen={isOpen}
-      title="Delete webhook"
+      title={"Xóa webhook"}
       content={
         <>
-          Are you sure you want to delete this webhook? Future events will not be delivered to this webhook. This action
-          cannot be undone.
+          Bạn có chắc muốn xóa webhook này? Các sự kiện mới sẽ không được gửi đến webhook. Thao tác này không thể hoàn
+          tác.
         </>
       }
     />

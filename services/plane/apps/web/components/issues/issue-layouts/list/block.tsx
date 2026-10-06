@@ -195,10 +195,10 @@ export const IssueBlock = observer(function IssueBlock(props: IssueBlockProps) {
           if (!isDraggingAllowed) {
             setToast({
               type: "warning",
-              title: "Cannot move work item",
+              title: "Không thể chuyển công việc",
               message: !canEditIssueProperties
-                ? "You are not allowed to move this work item"
-                : "Drag and drop is disabled for the current grouping",
+                ? "Bạn không có quyền chuyển công việc này"
+                : "Cách nhóm hiện tại không hỗ trợ kéo và thả",
             });
           }
         }}
@@ -209,7 +209,7 @@ export const IssueBlock = observer(function IssueBlock(props: IssueBlockProps) {
               {/* select checkbox */}
               {projectId && canSelectIssues && !isEpic && (
                 <Tooltip
-                  label="Only work items within the current project can be selected."
+                  label={"Chỉ có thể chọn công việc thuộc dự án hiện tại."}
                   layout="stacked"
                   disabled={issue.project_id === projectId}
                 >

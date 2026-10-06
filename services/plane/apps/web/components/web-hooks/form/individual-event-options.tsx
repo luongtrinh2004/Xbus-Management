@@ -16,28 +16,28 @@ export const INDIVIDUAL_WEBHOOK_OPTIONS: {
 }[] = [
   {
     key: "project",
-    label: "Projects",
-    description: "Project created, updated, or deleted",
+    label: "Dự án",
+    description: "Dự án được tạo, cập nhật hoặc xóa",
   },
   {
     key: "cycle",
-    label: "Cycles",
-    description: "Cycle created, updated, or deleted",
+    label: "Chu kỳ",
+    description: "Chu kỳ được tạo, cập nhật hoặc xóa",
   },
   {
     key: "issue",
-    label: "Work items",
-    description: "Work item created, updated, deleted, added to a cycle or module",
+    label: "Công việc",
+    description: "Công việc được tạo, cập nhật, xóa hoặc thêm vào chu kỳ hay nhóm công việc",
   },
   {
     key: "module",
-    label: "Modules",
-    description: "Module created, updated, or deleted",
+    label: "Nhóm công việc",
+    description: "Nhóm công việc được tạo, cập nhật hoặc xóa",
   },
   {
     key: "issue_comment",
-    label: "Work item comments",
-    description: "Comment posted, updated, or deleted",
+    label: "Bình luận công việc",
+    description: "Bình luận được đăng, cập nhật hoặc xóa",
   },
 ];
 

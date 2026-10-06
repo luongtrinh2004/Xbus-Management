@@ -104,7 +104,7 @@ export function AuthUniqueCodeForm(props: TAuthUniqueCodeForm) {
           {uniqueCodeFormData.email.length > 0 && (
             <button
               type="button"
-              aria-label="Clear email"
+              aria-label={"Xóa email"}
               className="absolute right-3 hover:cursor-pointer"
               onClick={handleEmailClear}
               tabIndex={-1}
@@ -117,7 +117,7 @@ export function AuthUniqueCodeForm(props: TAuthUniqueCodeForm) {
 
       <div className="space-y-1">
         <label className="text-13 font-medium text-tertiary" htmlFor="code">
-          Unique code
+          Mã duy nhất
         </label>
         <div className="relative flex h-10 items-center rounded-md border border-subtle bg-surface-1 pr-12 pl-3 [&_input]:disable-autofill-style">
           <Input
@@ -135,7 +135,7 @@ export function AuthUniqueCodeForm(props: TAuthUniqueCodeForm) {
         <div className="flex w-full items-center justify-between px-1 pt-1 text-11">
           <p className="flex items-center gap-1 font-medium text-success-primary">
             <TickCircleOutline height={12} width={12} />
-            Paste the code sent to your email
+            Dán mã xác minh đã gửi đến email của bạn
           </p>
           <button
             type="button"
@@ -150,8 +150,8 @@ export function AuthUniqueCodeForm(props: TAuthUniqueCodeForm) {
             {resendTimerCode > 0
               ? `Resend in ${resendTimerCode}s`
               : isRequestingNewCode
-                ? "Requesting new code"
-                : "Resend"}
+                ? "Đang yêu cầu mã mới"
+                : "Gửi lại"}
           </button>
         </div>
       </div>
@@ -164,7 +164,7 @@ export function AuthUniqueCodeForm(props: TAuthUniqueCodeForm) {
           stretch="full"
           disabled={isButtonDisabled}
           loading={isSubmitting && !isRequestingNewCode}
-          label={isRequestingNewCode ? "Sending code" : "Continue"}
+          label={isRequestingNewCode ? "Đang gửi mã" : "Tiếp tục"}
         />
       </div>
     </form>

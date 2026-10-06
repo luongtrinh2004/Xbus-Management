@@ -36,7 +36,7 @@ export const PageFavoriteControl = observer(function PageFavoriteControl({ page 
       onClick={() => {
         pageOperations.toggleFavorite();
       }}
-      aria-label={is_favorite ? "Remove favorite" : "Add to favorites"}
+      aria-label={is_favorite ? "Bỏ yêu thích" : "Thêm vào mục yêu thích"}
       render={
         <button
           type="button"

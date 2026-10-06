@@ -223,7 +223,7 @@ export const InboxIssueActionsHeader = observer(function InboxIssueActionsHeader
     else {
       setToast({
         type: "error",
-        title: "Permission denied",
+        title: "Không có quyền truy cập",
         message: errorMessage,
       });
     }
@@ -324,14 +324,14 @@ export const InboxIssueActionsHeader = observer(function InboxIssueActionsHeader
                 variant="secondary"
                 size="md"
                 icon={<Icon icon={ChevronUpOutline} />}
-                aria-label="Previous work item"
+                aria-label={"Công việc trước"}
                 onClick={() => handleInboxIssueNavigation("prev")}
               />
               <IconButton
                 variant="secondary"
                 size="md"
                 icon={<Icon icon={ChevronDownOutline} />}
-                aria-label="Next work item"
+                aria-label={"Công việc tiếp theo"}
                 onClick={() => handleInboxIssueNavigation("next")}
               />
             </div>
@@ -435,7 +435,7 @@ export const InboxIssueActionsHeader = observer(function InboxIssueActionsHeader
                             handleActionWithPermission(
                               isProjectAdmin,
                               () => setSelectDuplicateIssue(true),
-                              "Only project admins can mark work item as duplicate"
+                              "Chỉ quản trị viên dự án có thể đánh dấu công việc trùng lặp"
                             )
                           }
                         />

@@ -130,8 +130,8 @@ export const useGanttResizable = (
       } catch {
         setToast({
           type: "error",
-          title: "Error",
-          message: "Something went wrong while updating block dates",
+          title: "Lỗi",
+          message: "Không thể cập nhật ngày của khối",
         });
       }
 

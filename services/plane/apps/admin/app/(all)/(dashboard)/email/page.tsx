@@ -35,14 +35,14 @@ const InstanceEmailPage = observer(function InstanceEmailPage(_props: Route.Comp
         await disableEmail();
         setIsSMTPEnabled(false);
         setToast({
-          title: "Email feature disabled",
-          message: "Email feature has been disabled",
+          title: "Đã tắt tính năng email",
+          message: "Tính năng email đã bị tắt",
           type: "success",
         });
       } catch (_error) {
         setToast({
-          title: "Error disabling email",
-          message: "Failed to disable email feature. Please try again.",
+          title: "Không thể tắt email",
+          message: "Không thể tắt tính năng email. Vui lòng thử lại.",
           type: "error",
         });
       } finally {
@@ -61,13 +61,15 @@ const InstanceEmailPage = observer(function InstanceEmailPage(_props: Route.Comp
   return (
     <PageWrapper
       header={{
-        title: "Secure emails from your own instance",
+        title: "Gửi email an toàn từ hệ thống của bạn",
         description: (
           <>
-            Plane can send useful emails to you and your users from your own instance without talking to the Internet.
+            Plane có thể gửi email cho bạn và người dùng từ hệ thống tự triển khai.
             <div className="text-13 font-regular text-tertiary">
-              Set it up below and please test your settings before you save them.&nbsp;
-              <span className="text-danger-primary">Misconfigs can lead to email bounces and errors.</span>
+              Thiết lập bên dưới và kiểm tra cấu hình trước khi lưu.
+              <span className="text-danger-primary">
+                Cấu hình không đúng có thể khiến email bị trả lại hoặc không gửi được.
+              </span>
             </div>
           </>
         ),
@@ -77,7 +79,7 @@ const InstanceEmailPage = observer(function InstanceEmailPage(_props: Route.Comp
           </Skeleton>
         ) : (
           <Switch
-            aria-label="Enable SMTP email"
+            aria-label={"Bật email SMTP"}
             checked={isSMTPEnabled}
             onCheckedChange={handleToggle}
             size="sm"
@@ -105,6 +107,6 @@ const InstanceEmailPage = observer(function InstanceEmailPage(_props: Route.Comp
   );
 });
 
-export const meta: Route.MetaFunction = () => [{ title: "Email Settings - God Mode" }];
+export const meta: Route.MetaFunction = () => [{ title: "Cài đặt email - Quản trị hệ thống" }];
 
 export default InstanceEmailPage;

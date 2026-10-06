@@ -141,7 +141,7 @@ const InviteMemberInput = observer(function InviteMemberInput(props: InviteMembe
             rules={{
               pattern: {
                 value: emailRegex,
-                message: "Invalid Email ID",
+                message: "Email không hợp lệ",
               },
             }}
             render={({ field: { value, onChange, ref } }) => (
@@ -214,7 +214,7 @@ const InviteMemberInput = observer(function InviteMemberInput(props: InviteMembe
       {email && !emailRegex.test(email) && (
         <div className="mx-8 my-1">
           <span className="text-13">🤥</span>{" "}
-          <span className="mt-1 text-11 text-danger-primary">That doesn{"'"}t look like an email address.</span>
+          <span className="mt-1 text-11 text-danger-primary">Email không hợp lệ.</span>
         </div>
       )}
     </div>
@@ -264,15 +264,15 @@ export const InviteTeamStep = observer(function InviteTeamStep(props: Props) {
       .then(async () => {
         setToast({
           type: "success",
-          title: "Success!",
-          message: "Invitations sent successfully.",
+          title: "Thành công!",
+          message: "Đã gửi lời mời thành công",
         });
         await nextStep();
       })
       .catch((err) => {
         setToast({
           type: "error",
-          title: "Error!",
+          title: "Lỗi!",
           message: err?.error,
         });
       });
@@ -306,13 +306,13 @@ export const InviteTeamStep = observer(function InviteTeamStep(props: Props) {
       }}
     >
       <CommonOnboardingHeader
-        title="Invite your teammates"
-        description="Work in plane happens best with your team. Invite them now to use Plane to its potential."
+        title={"Mời đồng nghiệp"}
+        description={"Mời đội ngũ tham gia để cùng quản lý công việc trong Plane."}
       />
       <div className="w-full py-4 text-13">
         <div className="group relative mx-8 grid grid-cols-10 gap-4 py-2">
           <div className="col-span-6 px-1 text-13 font-medium text-secondary">Email</div>
-          <div className="col-span-4 px-1 text-13 font-medium text-secondary">Role</div>
+          <div className="col-span-4 px-1 text-13 font-medium text-secondary">Vai trò</div>
         </div>
         <div className="mb-3 space-y-3 sm:space-y-4">
           {fields.map((field, index) => (
@@ -338,7 +338,7 @@ export const InviteTeamStep = observer(function InviteTeamStep(props: Props) {
           onClick={appendField}
         >
           <AddOutline className="h-4 w-4" />
-          Add another
+          Thêm mục khác
         </button>
       </div>
       <div className="mx-auto flex w-full flex-col items-center justify-center gap-4 px-8 sm:px-2">
@@ -349,9 +349,9 @@ export const InviteTeamStep = observer(function InviteTeamStep(props: Props) {
           stretch="full"
           disabled={isInvitationDisabled || !isValid || isSubmitting}
         >
-          {isSubmitting ? <Spinner height="20px" width="20px" /> : "Continue"}
+          {isSubmitting ? <Spinner height="20px" width="20px" /> : "Tiếp tục"}
         </ButtonElement>
-        <Button variant="ghost" size="lg" stretch="full" onClick={nextStep} label="I’ll do it later" />
+        <Button variant="ghost" size="lg" stretch="full" onClick={nextStep} label={"Để sau"} />
       </div>
     </form>
   );

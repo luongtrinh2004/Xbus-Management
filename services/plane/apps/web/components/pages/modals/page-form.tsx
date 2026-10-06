@@ -80,7 +80,7 @@ export function PageForm(props: Props) {
       <DialogMain>
         <DialogHeader>
           <DialogHeading>
-            <DialogTitle>Create page</DialogTitle>
+            <DialogTitle>Tạo trang</DialogTitle>
           </DialogHeading>
         </DialogHeader>
         <DialogBody tabIndex={0}>
@@ -132,12 +132,8 @@ export function PageForm(props: Props) {
                 orientation="vertical"
                 value={formData.name}
                 onChange={(e) => handleFormData("name", e.target.value)}
-                placeholder="Title"
-                error={
-                  isTitleLengthMoreThan255Character
-                    ? "Max length of the name should be less than 255 characters"
-                    : undefined
-                }
+                placeholder={"Tiêu đề"}
+                error={isTitleLengthMoreThan255Character ? "Tên phải ít hơn 255 ký tự" : undefined}
                 tabIndex={getIndex("name")}
                 required
                 // the title is the dialog's only field; focus it on open as the legacy form did
@@ -164,7 +160,7 @@ export function PageForm(props: Props) {
           variant="secondary"
           size="md"
           stretch="auto"
-          label="Cancel"
+          label={"Hủy"}
           onClick={handleModalClose}
           tabIndex={getIndex("cancel")}
         />
@@ -173,7 +169,7 @@ export function PageForm(props: Props) {
           size="md"
           stretch="auto"
           type="submit"
-          label={isSubmitting ? "Creating" : "Create Page"}
+          label={isSubmitting ? "Đang tạo" : "Tạo trang"}
           loading={isSubmitting}
           disabled={isTitleLengthMoreThan255Character}
           tabIndex={getIndex("submit")}

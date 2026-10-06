@@ -36,13 +36,13 @@ type Props = {
 const integrationDetails: { [key: string]: any } = {
   github: {
     logo: GithubLogo,
-    installed: "Activate GitHub on individual projects to sync with specific repositories.",
-    notInstalled: "Connect with GitHub with your Plane workspace to sync project work items.",
+    installed: "Bật GitHub trong từng dự án để đồng bộ với repository tương ứng.",
+    notInstalled: "Kết nối GitHub với không gian làm việc để đồng bộ công việc trong dự án.",
   },
   slack: {
     logo: SlackLogo,
-    installed: "Activate Slack on individual projects to sync with specific channels.",
-    notInstalled: "Connect with Slack with your Plane workspace to sync project work items.",
+    installed: "Bật Slack trong từng dự án để đồng bộ với kênh tương ứng.",
+    notInstalled: "Kết nối Slack với không gian làm việc để đồng bộ công việc trong dự án.",
   },
 };
 
@@ -91,8 +91,8 @@ export const SingleIntegrationCard = observer(function SingleIntegrationCard({ i
 
         setToast({
           type: "success",
-          title: "Deleted successfully!",
-          message: `${integration.title} integration deleted successfully.`,
+          title: "Đã xóa thành công!",
+          message: `Đã xóa tích hợp ${integration.title}.`,
         });
       })
       .catch(() => {
@@ -100,8 +100,8 @@ export const SingleIntegrationCard = observer(function SingleIntegrationCard({ i
 
         setToast({
           type: "error",
-          title: "Error!",
-          message: `${integration.title} integration could not be deleted. Please try again.`,
+          title: "Lỗi!",
+          message: `Không thể xóa tích hợp ${integration.title}. Vui lòng thử lại.`,
         });
       });
   };
@@ -132,7 +132,7 @@ export const SingleIntegrationCard = observer(function SingleIntegrationCard({ i
               ? isInstalled
                 ? integrationDetails[integration.provider].installed
                 : integrationDetails[integration.provider].notInstalled
-              : "Loading..."}
+              : "Đang tải…"}
           </p>
         </div>
       </div>
@@ -140,7 +140,7 @@ export const SingleIntegrationCard = observer(function SingleIntegrationCard({ i
       {workspaceIntegrations ? (
         isInstalled ? (
           <Tooltip
-            label={!isUserAdmin ? "You don't have permission to perform this" : ""}
+            label={!isUserAdmin ? "Bạn không có quyền thực hiện thao tác này" : ""}
             layout="stacked"
             disabled={isUserAdmin || isMobile}
           >
@@ -155,12 +155,12 @@ export const SingleIntegrationCard = observer(function SingleIntegrationCard({ i
               }}
               disabled={!isUserAdmin}
               loading={deletingIntegration}
-              label={deletingIntegration ? "Uninstalling..." : "Uninstall"}
+              label={deletingIntegration ? "Đang gỡ cài đặt..." : "Gỡ cài đặt"}
             />
           </Tooltip>
         ) : (
           <Tooltip
-            label={!isUserAdmin ? "You don't have permission to perform this" : ""}
+            label={!isUserAdmin ? "Bạn không có quyền thực hiện thao tác này" : ""}
             layout="stacked"
             disabled={isUserAdmin || isMobile}
           >
@@ -174,7 +174,7 @@ export const SingleIntegrationCard = observer(function SingleIntegrationCard({ i
                 startAuth();
               }}
               loading={isInstalling}
-              label={isInstalling ? "Installing..." : "Install"}
+              label={isInstalling ? "Đang cài đặt…" : "Cài đặt"}
             />
           </Tooltip>
         )

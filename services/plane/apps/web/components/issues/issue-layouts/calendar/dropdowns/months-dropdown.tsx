@@ -34,14 +34,14 @@ export const CalendarMonthsDropdown = observer(function CalendarMonthsDropdown(p
   const getWeekLayoutHeader = (): string => {
     const allDaysOfActiveWeek = issueCalendarView.allDaysOfActiveWeek;
 
-    if (!allDaysOfActiveWeek) return "Week view";
+    if (!allDaysOfActiveWeek) return "Chế độ xem tuần";
 
     const daysList = Object.keys(allDaysOfActiveWeek);
 
     const firstDay = getDate(daysList[0]);
     const lastDay = getDate(daysList[daysList.length - 1]);
 
-    if (!firstDay || !lastDay) return "Week view";
+    if (!firstDay || !lastDay) return "Chế độ xem tuần";
 
     if (firstDay.getMonth() === lastDay.getMonth() && firstDay.getFullYear() === lastDay.getFullYear())
       return `${MONTHS_LIST[firstDay.getMonth() + 1].title} ${firstDay.getFullYear()}`;

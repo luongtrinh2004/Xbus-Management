@@ -139,7 +139,7 @@ export const CycleIssuesHeader = observer(function CycleIssuesHeader() {
               <Breadcrumbs.Item
                 component={
                   <BreadcrumbLink
-                    label="Cycles"
+                    label={"Chu kỳ"}
                     href={`/${workspaceSlug}/projects/${projectId}/cycles/`}
                     icon={<CyclesOutline className="h-4 w-4 text-tertiary" />}
                   />
@@ -164,7 +164,7 @@ export const CycleIssuesHeader = observer(function CycleIssuesHeader() {
             </Breadcrumbs>
             {workItemsCount && workItemsCount > 0 ? (
               <Tooltip
-                label={`There are ${workItemsCount} ${workItemsCount > 1 ? "work items" : "work item"} in this cycle`}
+                label={`Có ${workItemsCount} ${workItemsCount > 1 ? "Công việc" : "Công việc"} trong chu kỳ này`}
                 layout="stacked"
                 side="bottom"
                 disabled={isMobile}
@@ -231,7 +231,7 @@ export const CycleIssuesHeader = observer(function CycleIssuesHeader() {
                     variant="secondary"
                     size="md"
                     stretch="auto"
-                    label="Analytics"
+                    label={"Phân tích"}
                     onClick={() => setAnalyticsModal(true)}
                   />
                 </span>
@@ -240,7 +240,7 @@ export const CycleIssuesHeader = observer(function CycleIssuesHeader() {
                     variant="secondary"
                     size="md"
                     icon={<Icon icon={BarOutline} />}
-                    aria-label="Analytics"
+                    aria-label={"Phân tích"}
                     onClick={() => setAnalyticsModal(true)}
                   />
                 </span>
@@ -262,7 +262,7 @@ export const CycleIssuesHeader = observer(function CycleIssuesHeader() {
               variant={isSidebarCollapsed ? "ghost" : "tertiary"}
               size="md"
               icon={<Icon icon={RightSidePaneOutline} />}
-              aria-label="Toggle sidebar"
+              aria-label={"Mở/đóng thanh bên"}
               aria-pressed={!isSidebarCollapsed}
               onClick={toggleSidebar}
             />

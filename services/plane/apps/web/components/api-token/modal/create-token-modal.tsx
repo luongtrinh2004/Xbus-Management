@@ -45,7 +45,9 @@ export function CreateApiTokenModal(props: Props) {
     const csvData = {
       Title: data.label,
       Description: data.description,
-      Expiry: data.expired_at ? (renderFormattedDate(data.expired_at)?.replace(",", " ") ?? "") : "Never expires",
+      Expiry: data.expired_at
+        ? (renderFormattedDate(data.expired_at)?.replace(",", " ") ?? "")
+        : "Không bao giờ hết hạn",
       "Secret key": data.token ?? "",
     };
 
@@ -73,7 +75,7 @@ export function CreateApiTokenModal(props: Props) {
       .catch((err) => {
         setToast({
           type: "error",
-          title: "Error!",
+          title: "Lỗi!",
           message: err.message || err.detail,
         });
 

@@ -77,7 +77,7 @@ export const ConfirmProjectMemberRemove = observer(function ConfirmProjectMember
               </div>
               <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
                 <DialogHeading>
-                  <DialogTitle>{isCurrentUser ? "Leave project?" : `Remove ${data?.display_name}?`}</DialogTitle>
+                  <DialogTitle>{isCurrentUser ? "Rời dự án?" : `Xóa ${data?.display_name}?`}</DialogTitle>
                 </DialogHeading>
               </div>
             </div>
@@ -86,27 +86,25 @@ export const ConfirmProjectMemberRemove = observer(function ConfirmProjectMember
             <p className="text-13 text-secondary">
               {isCurrentUser ? (
                 <>
-                  Are you sure you want to leave the <span className="font-bold">{currentProjectDetails?.name}</span>{" "}
-                  project? You will be able to join the project if invited again or if it{"'"}s public.
+                  Bạn có chắc muốn rời khỏi <span className="font-bold">{currentProjectDetails?.name}</span> dự án? Bạn
+                  có thể tham gia lại nếu được mời hoặc là dự án công khai.
                 </>
               ) : (
                 <>
-                  Are you sure you want to remove member- <span className="font-bold">{data?.display_name}</span>? They
-                  will no longer have access to this project. This action cannot be undone.
+                  Bạn có chắc muốn loại thành viên <span className="font-bold">{data?.display_name}</span>? Thành viên
+                  sẽ không còn quyền truy cập dự án. Thao tác này không thể hoàn tác.
                 </>
               )}
             </p>
           </DialogBody>
         </DialogMain>
         <DialogActions>
-          <Button variant="secondary" size="md" stretch="auto" label="Cancel" onClick={handleClose} />
+          <Button variant="secondary" size="md" stretch="auto" label={"Hủy"} onClick={handleClose} />
           <Button
             variant="danger"
             size="md"
             stretch="auto"
-            label={
-              isCurrentUser ? (isDeleteLoading ? "Leaving..." : "Leave") : isDeleteLoading ? "Removing..." : "Remove"
-            }
+            label={isCurrentUser ? (isDeleteLoading ? "Đang rời khỏi…" : "Rời") : isDeleteLoading ? "Đang xóa…" : "Xóa"}
             onClick={handleDeletion}
             loading={isDeleteLoading}
           />

@@ -16,10 +16,10 @@ export function NotAWorkspaceMember() {
       <div className="grid h-full place-items-center p-4">
         <div className="space-y-8 text-center">
           <div className="space-y-2">
-            <h3 className="text-16 font-semibold">Not Authorized!</h3>
+            <h3 className="text-16 font-semibold">Bạn không có quyền truy cập!</h3>
             <p className="mx-auto w-1/2 text-13 text-secondary">
-              You{"'"}re not a member of this workspace. Please contact the workspace admin to get an invitation or
-              check your pending invitations.
+              Bạn chưa là thành viên của không gian làm việc này. Hãy liên hệ quản trị viên để nhận lời mời hoặc kiểm
+              tra lời mời đang chờ.
             </p>
           </div>
           <div className="flex items-center justify-center gap-2">
@@ -27,7 +27,7 @@ export function NotAWorkspaceMember() {
               variant="secondary"
               size="sm"
               stretch="auto"
-              label="Check pending invites"
+              label={"Kiểm tra lời mời đang chờ"}
               nativeButton={false}
               render={<Link href="/invitations" />}
             />
@@ -35,7 +35,7 @@ export function NotAWorkspaceMember() {
               variant="primary"
               size="sm"
               stretch="auto"
-              label="Create new workspace"
+              label={"Tạo không gian làm việc mới"}
               nativeButton={false}
               render={<Link href="/create-workspace" />}
             />

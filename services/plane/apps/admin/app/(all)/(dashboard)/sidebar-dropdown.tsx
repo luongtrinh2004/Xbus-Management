@@ -58,13 +58,13 @@ export const AdminSidebarDropdown = observer(function AdminSidebarDropdown() {
       <MenuSeparator />
       <MenuItem
         icon={<Icon icon={PaletteOutline} />}
-        label={`Switch to ${resolvedTheme === "dark" ? "light" : "dark"} mode`}
+        label={`Switch to ${resolvedTheme === "dark" ? "Sáng" : "Tối"} mode`}
         onClick={handleThemeSwitch}
       />
       <MenuSeparator />
       <MenuItem
         icon={<Icon icon={LogOutOutline} />}
-        label="Sign out"
+        label={"Đăng xuất"}
         onClick={() => signOutFormRef.current?.requestSubmit()}
       />
     </MenuContent>
@@ -97,7 +97,7 @@ export const AdminSidebarDropdown = observer(function AdminSidebarDropdown() {
               render={
                 <button
                   type="button"
-                  aria-label="Instance admin menu"
+                  aria-label={"Menu quản trị hệ thống"}
                   className={cn("grid flex-shrink-0 place-items-center outline-none", {
                     "cursor-default": !isSidebarCollapsed,
                   })}
@@ -113,7 +113,7 @@ export const AdminSidebarDropdown = observer(function AdminSidebarDropdown() {
 
           {!isSidebarCollapsed && (
             <div className="flex w-full gap-2">
-              <h4 className="grow truncate text-body-md-medium text-primary">Instance admin</h4>
+              <h4 className="grow truncate text-body-md-medium text-primary">Quản trị viên hệ thống</h4>
             </div>
           )}
         </div>
@@ -125,11 +125,11 @@ export const AdminSidebarDropdown = observer(function AdminSidebarDropdown() {
             render={
               <button
                 type="button"
-                aria-label="Account menu"
+                aria-label={"Menu tài khoản"}
                 className="grid flex-shrink-0 place-items-center outline-none"
               >
                 <WorkspaceAvatar
-                  alt={currentUser.display_name ?? "Admin user"}
+                  alt={currentUser.display_name ?? "Quản trị viên"}
                   fallback={currentUser.display_name?.[0]?.toUpperCase()}
                   src={getFileURL(currentUser.avatar_url)}
                   size="sm"

@@ -920,7 +920,7 @@ importers:
         version: 4.1.17
       '@tailwindcss/typography':
         specifier: 'catalog:'
-        version: 0.5.19
+        version: 0.5.19(tailwindcss@4.1.17)
       '@types/lodash-es':
         specifier: 'catalog:'
         version: 4.17.12
@@ -1116,7 +1116,7 @@ importers:
         version: 4.1.17
       '@tailwindcss/typography':
         specifier: 'catalog:'
-        version: 0.5.19
+        version: 0.5.19(tailwindcss@4.1.17)
       '@types/lodash-es':
         specifier: 'catalog:'
         version: 4.17.12
@@ -1132,6 +1132,9 @@ importers:
       dotenv:
         specifier: 'catalog:'
         version: 16.4.7
+      tailwindcss:
+        specifier: 'catalog:'
+        version: 4.1.17
       typescript:
         specifier: 5.8.3
         version: 5.8.3
@@ -10121,9 +10124,10 @@ snapshots:
       postcss: 8.5.25
       tailwindcss: 4.1.17
 
-  '@tailwindcss/typography@0.5.19':
+  '@tailwindcss/typography@0.5.19(tailwindcss@4.1.17)':
     dependencies:
       postcss-selector-parser: 6.0.10
+      tailwindcss: 4.1.17
 
   '@tanstack/react-table@8.21.3(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:

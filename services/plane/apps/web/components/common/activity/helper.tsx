@@ -95,7 +95,7 @@ export const messages = (activity: TProjectActivity): { message: string | ReactN
       return {
         message: (
           <>
-            set the priority to <span className="font-medium text-primary">{newValue || "none"}</span>
+            đã đặt độ ưu tiên thành <span className="font-medium text-primary">{newValue || "Không có"}</span>
           </>
         ),
       };
@@ -108,7 +108,7 @@ export const messages = (activity: TProjectActivity): { message: string | ReactN
       return {
         message: (
           <>
-            renamed the project to <span className="font-medium text-primary">{newValue}</span>
+            đã đổi tên dự án thành <span className="font-medium text-primary">{newValue}</span>
           </>
         ),
       };
@@ -122,7 +122,7 @@ export const messages = (activity: TProjectActivity): { message: string | ReactN
           <>
             {newValue ? (
               <>
-                set the start date to <span className="font-medium text-primary">{newValue}</span>
+                đã đặt ngày bắt đầu là <span className="font-medium text-primary">{newValue}</span>
               </>
             ) : (
               "removed the start date"
@@ -136,7 +136,7 @@ export const messages = (activity: TProjectActivity): { message: string | ReactN
           <>
             {newValue ? (
               <>
-                set the target date to <span className="font-medium text-primary">{newValue}</span>
+                đã đặt ngày mục tiêu là <span className="font-medium text-primary">{newValue}</span>
               </>
             ) : (
               "removed the target date"
@@ -148,7 +148,7 @@ export const messages = (activity: TProjectActivity): { message: string | ReactN
       return {
         message: (
           <>
-            set the state to <span className="font-medium text-primary">{newValue || "none"}</span>
+            đã đặt trạng thái thành <span className="font-medium text-primary">{newValue || "Không có"}</span>
           </>
         ),
       };
@@ -158,11 +158,11 @@ export const messages = (activity: TProjectActivity): { message: string | ReactN
           <>
             {newValue ? (
               <>
-                set the estimate point to <span className="font-medium text-primary">{newValue}</span>
+                đã đặt điểm ước lượng là <span className="font-medium text-primary">{newValue}</span>
               </>
             ) : (
               <>
-                removed the estimate point
+                đã bỏ điểm ước lượng
                 {oldValue && (
                   <>
                     {" "}
@@ -179,7 +179,7 @@ export const messages = (activity: TProjectActivity): { message: string | ReactN
         message: (
           <>
             <span>
-              {verb} this project {verb === "removed" ? "from" : "to"} the cycle{" "}
+              {verb} dự án này {verb === "removed" ? " từ" : "đến"} chu kỳ{" "}
             </span>
             {verb !== "removed" ? (
               <a
@@ -191,7 +191,7 @@ export const messages = (activity: TProjectActivity): { message: string | ReactN
                 {activity.new_value}
               </a>
             ) : (
-              <span className="font-medium text-primary">{activity.old_value || "Unknown cycle"}</span>
+              <span className="font-medium text-primary">{activity.old_value || "Chu kỳ không xác định"}</span>
             )}
           </>
         ),
@@ -201,10 +201,10 @@ export const messages = (activity: TProjectActivity): { message: string | ReactN
         message: (
           <>
             <span>
-              {verb} this project {verb === "removed" ? "from" : "to"} the module{" "}
+              {verb} dự án này {verb === "removed" ? " từ" : "đến"} nhóm công việc{" "}
             </span>
             <span className="font-medium text-primary">
-              {verb === "removed" ? oldValue : newValue || "Unknown module"}
+              {verb === "removed" ? oldValue : newValue || "Nhóm công việc không xác định"}
             </span>
           </>
         ),
@@ -213,33 +213,32 @@ export const messages = (activity: TProjectActivity): { message: string | ReactN
       return {
         message: (
           <>
-            {verb} the label{" "}
-            <span className="font-medium text-primary">{newValue || oldValue || "Untitled label"}</span>
+            {verb} nhãn <span className="font-medium text-primary">{newValue || oldValue || "Nhãn chưa có tên"}</span>
           </>
         ),
       };
     case "inbox":
       return {
-        message: <>{newValue ? "enabled" : "disabled"} inbox</>,
+        message: <>{newValue ? "enabled" : "disabled"} Hộp thư đến</>,
       };
     case "page":
       return {
         message: (
           <>
-            {newValue ? "created" : "removed"} the project page{" "}
-            <span className="font-medium text-primary">{newValue || oldValue || "Untitled page"}</span>
+            {newValue ? "created" : "removed"} trang dự án{" "}
+            <span className="font-medium text-primary">{newValue || oldValue || "Trang không có tên"}</span>
           </>
         ),
       };
     case "network":
       return {
-        message: <>{newValue ? "enabled" : "disabled"} network access</>,
+        message: <>{newValue ? "enabled" : "disabled"} truy cập mạng</>,
       };
     case "identifier":
       return {
         message: (
           <>
-            updated project identifier to <span className="font-medium text-primary">{newValue || "none"}</span>
+            đã đổi mã dự án thành <span className="font-medium text-primary">{newValue || "Không có"}</span>
           </>
         ),
       };
@@ -247,7 +246,7 @@ export const messages = (activity: TProjectActivity): { message: string | ReactN
       return {
         message: (
           <>
-            changed project timezone to <span className="font-medium text-primary">{newValue || "default"}</span>
+            đã đổi múi giờ dự án thành <span className="font-medium text-primary">{newValue || "Mặc định"}</span>
           </>
         ),
       };
@@ -259,13 +258,13 @@ export const messages = (activity: TProjectActivity): { message: string | ReactN
       return {
         message: (
           <>
-            {getBooleanActionText(newValue)} {activityType.replace(/_view$/, "").replace(/_/g, " ")} view
+            {getBooleanActionText(newValue)} {activityType.replace(/_view$/, "").replace(/_/g, " ")} Xem
           </>
         ),
       };
     case "is_project_updates_enabled":
       return {
-        message: <>{getBooleanActionText(newValue)} project updates</>,
+        message: <>{getBooleanActionText(newValue)} cập nhật dự án</>,
       };
     case "is_epic_enabled":
       return {
@@ -273,15 +272,15 @@ export const messages = (activity: TProjectActivity): { message: string | ReactN
       };
     case "is_workflow_enabled":
       return {
-        message: <>{getBooleanActionText(newValue)} custom workflow</>,
+        message: <>{getBooleanActionText(newValue)} quy trình tùy chỉnh</>,
       };
     case "is_time_tracking_enabled":
       return {
-        message: <>{getBooleanActionText(newValue)} time tracking</>,
+        message: <>{getBooleanActionText(newValue)} Theo dõi thời gian</>,
       };
     case "is_issue_type_enabled":
       return {
-        message: <>{getBooleanActionText(newValue)} work item types</>,
+        message: <>{getBooleanActionText(newValue)} loại công việc</>,
       };
     default:
       return {

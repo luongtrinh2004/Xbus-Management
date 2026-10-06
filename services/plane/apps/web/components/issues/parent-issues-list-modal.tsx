@@ -128,13 +128,13 @@ export function ParentIssuesListModal({
             <div className="vertical-scrollbar scrollbar-md max-h-80 scroll-py-2 overflow-x-hidden overflow-y-auto overscroll-contain">
               {searchTerm !== "" && (
                 <h5 className="mx-2 text-13 text-secondary">
-                  Search results for{" "}
+                  Kết quả tìm kiếm cho{" "}
                   <span className="text-primary">
                     {'"'}
                     {searchTerm}
                     {'"'}
                   </span>{" "}
-                  in project:
+                  trong dự án:
                 </h5>
               )}
 

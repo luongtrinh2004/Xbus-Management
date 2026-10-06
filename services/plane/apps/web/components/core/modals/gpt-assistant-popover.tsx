@@ -90,12 +90,12 @@ export function GptAssistantPopover(props: Props) {
     const error = err?.data?.error;
     const errorMessage =
       err?.status === 429
-        ? error || "You have reached the maximum number of requests of 50 requests per month per user."
-        : error || "Some error occurred. Please try again.";
+        ? error || "Bạn đã đạt giới hạn 50 yêu cầu mỗi tháng cho mỗi người dùng."
+        : error || "Đã xảy ra lỗi. Vui lòng thử lại.";
 
     setToast({
       type: "error",
-      title: "Error!",
+      title: "Lỗi!",
       message: errorMessage,
     });
 
@@ -121,8 +121,8 @@ export function GptAssistantPopover(props: Props) {
   const handleInvalidTask = () => {
     setToast({
       type: "error",
-      title: "Error!",
-      message: "Please enter some task to get AI assistance.",
+      title: "Lỗi!",
+      message: "Vui lòng nhập yêu cầu để AI hỗ trợ.",
     });
   };
 
@@ -174,7 +174,7 @@ export function GptAssistantPopover(props: Props) {
       variant="primary"
       size="sm"
       stretch="auto"
-      label="Use this response"
+      label={"Sử dụng câu trả lời này"}
       onClick={() => {
         onResponse(response);
         onClose();
@@ -183,10 +183,10 @@ export function GptAssistantPopover(props: Props) {
   );
 
   const generateResponseButtonText = isSubmitting
-    ? "Generating response..."
+    ? "Đang tạo câu trả lời"
     : response === ""
-      ? "Generate response"
-      : "Generate again";
+      ? "Tạo câu trả lời"
+      : "Tạo lại";
 
   return (
     <div className="relative w-min text-left">
@@ -217,7 +217,7 @@ export function GptAssistantPopover(props: Props) {
               <div className="vertical-scroll-enable max-h-72 space-y-4 overflow-y-auto">
                 {prompt && (
                   <div className="text-13">
-                    Content:
+                    Nội dung:
                     <RichTextEditor
                       editable={false}
                       id="ai-assistant-content"
@@ -232,7 +232,7 @@ export function GptAssistantPopover(props: Props) {
                 )}
                 {response !== "" && (
                   <div className="page-block-section max-h-[8rem] text-13">
-                    Response:
+                    Câu trả lời:
                     <RichTextEditor
                       editable={false}
                       id="ai-assistant-response"
@@ -246,8 +246,7 @@ export function GptAssistantPopover(props: Props) {
                 )}
                 {invalidResponse && (
                   <div className="text-13 text-danger-primary">
-                    No response could be generated. This may be due to insufficient content or task information. Please
-                    try again.
+                    Không thể tạo câu trả lời do thiếu nội dung hoặc thông tin yêu cầu. Vui lòng thử lại.
                   </div>
                 )}
               </div>
@@ -266,9 +265,7 @@ export function GptAssistantPopover(props: Props) {
                     onChange={onChange}
                     ref={ref}
                     placeholder={`${
-                      prompt && prompt !== ""
-                        ? "Tell AI what action to perform on this content..."
-                        : "Ask AI anything..."
+                      prompt && prompt !== "" ? "Nhập yêu cầu cho AI về nội dung này…" : "Đặt câu hỏi cho AI…"
                     }`}
                     autoFocus
                   />
@@ -282,12 +279,12 @@ export function GptAssistantPopover(props: Props) {
                 <>
                   <div className="flex items-start justify-center gap-2 text-13 text-accent-primary">
                     <WarningCircleOutline className="h-4 w-4" />
-                    <p>By using this feature, you consent to sharing the message with a 3rd party service. </p>
+                    <p>Khi sử dụng tính năng này, bạn đồng ý chia sẻ nội dung với dịch vụ bên thứ ba. </p>
                   </div>
                 </>
               )}
               <div className="flex items-center gap-2">
-                <Button variant="secondary" size="sm" stretch="auto" label="Close" onClick={onClose} />
+                <Button variant="secondary" size="sm" stretch="auto" label={"Đóng"} onClick={onClose} />
                 <Button
                   variant="primary"
                   size="sm"

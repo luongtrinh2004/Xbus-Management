@@ -83,7 +83,7 @@ export class PdfExportService extends Effect.Service<PdfExportService>()("PdfExp
           () => pageService.fetchDescriptionBinary(pageId),
           (cause) =>
             new PdfContentFetchError({
-              message: "Failed to fetch page content",
+              message: "Không thể tải nội dung trang",
               cause,
             })
         ).pipe(
@@ -96,7 +96,7 @@ export class PdfExportService extends Effect.Service<PdfExportService>()("PdfExp
         if (!descriptionBinary) {
           return yield* Effect.fail(
             new PdfContentFetchError({
-              message: "Page content not found",
+              message: "Không tìm thấy nội dung trang",
             })
           );
         }
@@ -185,7 +185,7 @@ export class PdfExportService extends Effect.Service<PdfExportService>()("PdfExp
               () => fetch(url),
               (cause) =>
                 new PdfImageProcessingError({
-                  message: "Failed to fetch image",
+                  message: "Không thể tải ảnh",
                   assetId,
                   cause,
                 })
@@ -204,7 +204,7 @@ export class PdfExportService extends Effect.Service<PdfExportService>()("PdfExp
               () => response.arrayBuffer(),
               (cause) =>
                 new PdfImageProcessingError({
-                  message: "Failed to read image body",
+                  message: "Không thể đọc dữ liệu ảnh",
                   assetId,
                   cause,
                 })
@@ -220,7 +220,7 @@ export class PdfExportService extends Effect.Service<PdfExportService>()("PdfExp
                   .toBuffer(),
               (cause) =>
                 new PdfImageProcessingError({
-                  message: "Failed to process image",
+                  message: "Không thể xử lý ảnh",
                   assetId,
                   cause,
                 })
@@ -284,7 +284,7 @@ export class PdfExportService extends Effect.Service<PdfExportService>()("PdfExp
             }),
           (cause) =>
             new PdfGenerationError({
-              message: "Failed to render PDF",
+              message: "Không thể tạo PDF",
               cause,
             })
         ).pipe(withTimeoutAndRetry("render PDF", { timeoutMs: PDF_RENDER_TIMEOUT_MS, maxRetries: 0 }));

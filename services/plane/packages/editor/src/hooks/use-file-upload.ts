@@ -71,7 +71,7 @@ export const useUploader = (args: TUploaderArgs) => {
         const url = await editorCommand(file);
 
         if (!url) {
-          throw new Error("Something went wrong while uploading the file.");
+          throw new Error("Không thể tải tệp lên.");
         }
         onUpload(url, file);
       } catch {

@@ -99,8 +99,8 @@ export const ProfileSetupStep = observer(function ProfileSetupStep({ handleStepC
     } catch {
       setToast({
         type: "error",
-        title: "Error",
-        message: "User details update failed. Please try again!",
+        title: "Lỗi",
+        message: "Không thể cập nhật thông tin người dùng. Vui lòng thử lại!",
       });
     }
   };
@@ -147,7 +147,7 @@ export const ProfileSetupStep = observer(function ProfileSetupStep({ handleStepC
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-10">
       {/* Header */}
-      <CommonOnboardingHeader title="Create your profile." description="This is how you will appear in Plane." />
+      <CommonOnboardingHeader title={"Tạo hồ sơ của bạn."} description={"Đây là tên hiển thị của bạn trong Plane."} />
 
       {/* Profile Picture Section */}
       <Controller
@@ -190,7 +190,7 @@ export const ProfileSetupStep = observer(function ProfileSetupStep({ handleStepC
           onClick={() => setIsImageUploadModalOpen(true)}
         >
           <ImageOutline className="size-4" />
-          <span className="text-13">{userAvatar ? "Change image" : "Upload image"}</span>
+          <span className="text-13">{userAvatar ? "Đổi ảnh" : "Tải ảnh lên"}</span>
         </button>
       </div>
 
@@ -201,17 +201,17 @@ export const ProfileSetupStep = observer(function ProfileSetupStep({ handleStepC
             className="block text-13 font-medium text-tertiary after:ml-0.5 after:text-danger-primary after:content-['*']"
             htmlFor="first_name"
           >
-            Name
+            Tên
           </label>
           <Controller
             control={control}
             name="first_name"
             rules={{
-              required: "Name is required",
+              required: "Tên là bắt buộc",
               validate: validatePersonName,
               maxLength: {
                 value: 50,
-                message: "Name must be within 50 characters.",
+                message: "Tên không được quá 50 ký tự.",
               },
             }}
             render={({ field: { value, onChange, ref } }) => (
@@ -230,7 +230,7 @@ export const ProfileSetupStep = observer(function ProfileSetupStep({ handleStepC
                     "border-danger-strong": errors.first_name,
                   }
                 )}
-                placeholder="Enter your full name"
+                placeholder={"Nhập họ và tên"}
                 autoComplete="on"
               />
             )}
@@ -247,7 +247,7 @@ export const ProfileSetupStep = observer(function ProfileSetupStep({ handleStepC
         )}
       </div>
       {/* Continue Button */}
-      <Button variant="primary" type="submit" stretch="full" size="lg" disabled={isButtonDisabled} label="Continue" />
+      <Button variant="primary" type="submit" stretch="full" size="lg" disabled={isButtonDisabled} label={"Tiếp tục"} />
 
       {/* Marketing Consent */}
       {!instanceConfig?.is_self_managed && (

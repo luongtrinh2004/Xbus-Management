@@ -31,13 +31,13 @@ type Props = {
 };
 
 const ROLES = [
-  { id: "product-manager", label: "Product Manager", icon: CubeOutline },
-  { id: "engineering-manager", label: "Engineering Manager", icon: ViewsOutline },
-  { id: "designer", label: "Designer", icon: PenTool },
-  { id: "developer", label: "Developer", icon: MonitorOutline },
-  { id: "founder-executive", label: "Founder/Executive", icon: RocketOutline },
-  { id: "operations-manager", label: "Operations Manager", icon: RefreshOutline },
-  { id: "others", label: "Others", icon: CubeOutline },
+  { id: "product-manager", label: "Quản lý sản phẩm", icon: CubeOutline },
+  { id: "engineering-manager", label: "Trưởng bộ phận kỹ thuật", icon: ViewsOutline },
+  { id: "designer", label: "Nhà thiết kế", icon: PenTool },
+  { id: "developer", label: "Lập trình viên", icon: MonitorOutline },
+  { id: "founder-executive", label: "Nhà sáng lập / lãnh đạo", icon: RocketOutline },
+  { id: "operations-manager", label: "Trưởng bộ phận vận hành", icon: RefreshOutline },
+  { id: "others", label: "Khác", icon: CubeOutline },
 ];
 
 const defaultValues = {
@@ -69,14 +69,14 @@ export const RoleSetupStep = observer(function RoleSetupStep({ handleStepChange 
       [await updateUserProfile(profileUpdatePayload)];
       setToast({
         type: "success",
-        title: "Success",
-        message: "Profile setup completed!",
+        title: "Thành công",
+        message: "Đã hoàn tất thiết lập hồ sơ!",
       });
     } catch {
       setToast({
         type: "error",
-        title: "Error",
-        message: "Profile setup failed. Please try again!",
+        title: "Lỗi",
+        message: "Không thể thiết lập hồ sơ. Vui lòng thử lại!",
       });
     }
   };
@@ -96,15 +96,18 @@ export const RoleSetupStep = observer(function RoleSetupStep({ handleStepChange 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-10">
       {/* Header */}
-      <CommonOnboardingHeader title="What's your role?" description="Let's set up Plane for how you work." />
+      <CommonOnboardingHeader
+        title={"Vai trò của bạn là gì?"}
+        description={"Thiết lập Plane phù hợp với cách làm việc của bạn."}
+      />
       {/* Role Selection */}
       <div className="flex flex-col gap-3">
-        <p className="text-body-sm-semibold text-placeholder">Select one</p>
+        <p className="text-body-sm-semibold text-placeholder">Chọn một mục</p>
         <Controller
           control={control}
           name="role"
           rules={{
-            required: "This field is required",
+            required: "Trường này là bắt buộc",
           }}
           render={({ field: { value, onChange } }) => (
             <div className="flex flex-col gap-3">
@@ -149,14 +152,21 @@ export const RoleSetupStep = observer(function RoleSetupStep({ handleStepChange 
       </div>
       {/* Action Buttons */}
       <div className="space-y-3">
-        <Button variant="primary" type="submit" stretch="full" size="lg" disabled={isButtonDisabled} label="Continue" />
+        <Button
+          variant="primary"
+          type="submit"
+          stretch="full"
+          size="lg"
+          disabled={isButtonDisabled}
+          label={"Tiếp tục"}
+        />
         <Button
           variant="ghost"
           onClick={handleSkip}
           stretch="full"
           size="lg"
           render={<button type="button" className="text-tertiary" />}
-          label="Skip"
+          label={"Bỏ qua"}
         />
       </div>
     </form>

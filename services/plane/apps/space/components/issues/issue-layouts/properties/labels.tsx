@@ -21,16 +21,16 @@ export const IssueBlockLabels = observer(function IssueBlockLabels({ labelIds, s
 
   const labels = getLabelsByIds(labelIds);
 
-  const labelsString = labels.length > 0 ? labels.map((label) => label.name).join(", ") : "No Labels";
+  const labelsString = labels.length > 0 ? labels.map((label) => label.name).join(", ") : "Chưa có nhãn";
 
   if (labels.length <= 0)
     return (
-      <Tooltip side="top" label="Labels: None">
+      <Tooltip side="top" label={"Nhãn: Chưa có"}>
         <div
           className={`flex h-full items-center justify-center gap-2 rounded-sm border-[0.5px] border-strong px-2.5 py-1 text-11`}
         >
           <LabelsOutline className="h-3.5 w-3.5" />
-          {shouldShowLabel && <span>No Labels</span>}
+          {shouldShowLabel && <span>Chưa có nhãn</span>}
         </div>
       </Tooltip>
     );

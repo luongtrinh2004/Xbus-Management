@@ -82,10 +82,10 @@ export const ProjectSelect = observer(function ProjectSelect(props: Props) {
         {(selectedOptions) => (
           <span className="truncate">
             {selectedOptions.length > 3
-              ? `3+ projects`
+              ? "Từ 3 dự án"
               : selectedOptions.length > 0
                 ? selectedOptions.map((option) => option.name).join(", ")
-                : "All projects"}
+                : "Tất cả dự án"}
           </span>
         )}
       </Select.Trigger>

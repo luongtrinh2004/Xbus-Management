@@ -92,22 +92,22 @@ const HeadingItem = <T extends SupportedHeadingLevels>(
 });
 
 export const HeadingOneItem = (editor: Editor): EditorMenuItem<"h1"> =>
-  HeadingItem(editor, 1, "h1", "Heading 1", H1Outline);
+  HeadingItem(editor, 1, "h1", "Tiêu đề 1", H1Outline);
 
 export const HeadingTwoItem = (editor: Editor): EditorMenuItem<"h2"> =>
-  HeadingItem(editor, 2, "h2", "Heading 2", H2Outline);
+  HeadingItem(editor, 2, "h2", "Tiêu đề 2", H2Outline);
 
 export const HeadingThreeItem = (editor: Editor): EditorMenuItem<"h3"> =>
-  HeadingItem(editor, 3, "h3", "Heading 3", H3Outline);
+  HeadingItem(editor, 3, "h3", "Tiêu đề 3", H3Outline);
 
 export const HeadingFourItem = (editor: Editor): EditorMenuItem<"h4"> =>
-  HeadingItem(editor, 4, "h4", "Heading 4", H4Outline);
+  HeadingItem(editor, 4, "h4", "Tiêu đề 4", H4Outline);
 
 export const HeadingFiveItem = (editor: Editor): EditorMenuItem<"h5"> =>
-  HeadingItem(editor, 5, "h5", "Heading 5", H5Outline);
+  HeadingItem(editor, 5, "h5", "Tiêu đề 5", H5Outline);
 
 export const HeadingSixItem = (editor: Editor): EditorMenuItem<"h6"> =>
-  HeadingItem(editor, 6, "h6", "Heading 6", H6Outline);
+  HeadingItem(editor, 6, "h6", "Tiêu đề 6", H6Outline);
 
 export const BoldItem = (editor: Editor): EditorMenuItem<"bold"> => ({
   key: "bold",

@@ -50,8 +50,8 @@ describe("MemberSelect suspended members", () => {
     await openMembers(user, "Lead");
     const row = popup().getByRole("option", { name: /Bob/ });
     expect(row.getAttribute("aria-disabled")).toBe("true");
-    expect(within(row).getByText("Suspended")).toBeDefined();
-    expect(within(popup().getByRole("option", { name: /Ada/ })).queryByText("Suspended")).toBeNull();
+    expect(within(row).getByText("Đã đình chỉ")).toBeDefined();
+    expect(within(popup().getByRole("option", { name: /Ada/ })).queryByText("Đã đình chỉ")).toBeNull();
 
     await user.click(row);
     expect(onChange).not.toHaveBeenCalled();

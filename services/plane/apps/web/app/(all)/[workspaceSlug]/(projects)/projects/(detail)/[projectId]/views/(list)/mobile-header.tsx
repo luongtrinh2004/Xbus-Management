@@ -40,12 +40,12 @@ export const ViewMobileHeader = observer(function ViewMobileHeader() {
         <div className="flex flex-grow items-center justify-center border-l border-subtle text-13 text-secondary">
           <FiltersDropdown
             icon={<FilterOutline className="h-3 w-3" />}
-            title="Filters"
+            title={"Bộ lọc"}
             placement="bottom-end"
             isFiltersApplied={false}
             menuButton={
               <Row className="flex items-center text-13 text-secondary">
-                Filters
+                Bộ lọc
                 <ChevronDownOutline className="ml-2 h-4 w-4 text-secondary" />
               </Row>
             }

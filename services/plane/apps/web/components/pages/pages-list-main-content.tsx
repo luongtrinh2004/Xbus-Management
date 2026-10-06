@@ -66,8 +66,8 @@ export const PagesListMainContent = observer(function PagesListMainContent(props
       .catch((err) => {
         setToast({
           type: "error",
-          title: "Error!",
-          message: err?.data?.error || "Page could not be created. Please try again.",
+          title: "Lỗi!",
+          message: err?.data?.error || "Không thể tạo trang. Vui lòng thử lại.",
         });
       })
       .finally(() => setIsCreatingPage(false));

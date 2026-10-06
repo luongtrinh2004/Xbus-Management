@@ -30,17 +30,17 @@ export const CustomThemeColorInputs = observer(function CustomThemeColorInputs(p
       {/* Neutral Color */}
       <div className="flex flex-col gap-2">
         <h3 className="text-body-sm-medium">
-          Neutral color<span className="text-danger-primary">*</span>
+          Màu trung tính<span className="text-danger-primary">*</span>
         </h3>
         <div className="w-full">
           <Controller
             control={control}
             name="background"
             rules={{
-              required: "Neutral color is required",
+              required: "Vui lòng chọn màu trung tính",
               pattern: {
                 value: /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/,
-                message: "Enter a valid hex code",
+                message: "Nhập mã màu HEX hợp lệ",
               },
             }}
             render={({ field: { value, onChange } }) => (
@@ -63,17 +63,17 @@ export const CustomThemeColorInputs = observer(function CustomThemeColorInputs(p
       {/* Brand Color */}
       <div className="flex flex-col gap-2">
         <h3 className="text-body-sm-medium">
-          Brand color<span className="text-danger-primary">*</span>
+          Màu thương hiệu<span className="text-danger-primary">*</span>
         </h3>
         <div className="w-full">
           <Controller
             control={control}
             name="primary"
             rules={{
-              required: "Brand color is required",
+              required: "Vui lòng chọn màu thương hiệu",
               pattern: {
                 value: /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/,
-                message: "Enter a valid hex code",
+                message: "Nhập mã màu HEX hợp lệ",
               },
             }}
             render={({ field: { value, onChange } }) => (

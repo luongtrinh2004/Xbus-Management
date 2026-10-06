@@ -43,7 +43,7 @@ export const useNavigationItems = ({
       {
         i18n_key: "sidebar.work_items",
         key: "work_items",
-        name: "Work items",
+        name: "Công việc",
         href: `/${workspaceSlug}/projects/${projectId}/issues`,
         icon: WorkItemsOutline,
         access: [EUserPermissions.ADMIN, EUserPermissions.MEMBER, EUserPermissions.GUEST],
@@ -53,7 +53,7 @@ export const useNavigationItems = ({
       {
         i18n_key: "sidebar.cycles",
         key: "cycles",
-        name: "Cycles",
+        name: "Chu kỳ",
         href: `/${workspaceSlug}/projects/${projectId}/cycles`,
         icon: CyclesOutline,
         access: [EUserPermissions.ADMIN, EUserPermissions.MEMBER],
@@ -63,7 +63,7 @@ export const useNavigationItems = ({
       {
         i18n_key: "sidebar.modules",
         key: "modules",
-        name: "Modules",
+        name: "Nhóm công việc",
         href: `/${workspaceSlug}/projects/${projectId}/modules`,
         icon: ModuleOutline,
         access: [EUserPermissions.ADMIN, EUserPermissions.MEMBER],
@@ -73,7 +73,7 @@ export const useNavigationItems = ({
       {
         i18n_key: "sidebar.views",
         key: "views",
-        name: "Views",
+        name: "Chế độ xem",
         href: `/${workspaceSlug}/projects/${projectId}/views`,
         icon: ViewsOutline,
         access: [EUserPermissions.ADMIN, EUserPermissions.MEMBER, EUserPermissions.GUEST],
@@ -83,7 +83,7 @@ export const useNavigationItems = ({
       {
         i18n_key: "sidebar.pages",
         key: "pages",
-        name: "Pages",
+        name: "Trang",
         href: `/${workspaceSlug}/projects/${projectId}/pages`,
         icon: PagesOutline,
         access: [EUserPermissions.ADMIN, EUserPermissions.MEMBER, EUserPermissions.GUEST],
@@ -93,7 +93,7 @@ export const useNavigationItems = ({
       {
         i18n_key: "sidebar.intake",
         key: "intake",
-        name: "Intake",
+        name: "Tiếp nhận",
         href: `/${workspaceSlug}/projects/${projectId}/intake`,
         icon: IntakeOutline,
         access: [EUserPermissions.ADMIN, EUserPermissions.MEMBER, EUserPermissions.GUEST],

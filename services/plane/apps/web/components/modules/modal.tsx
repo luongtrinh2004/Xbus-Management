@@ -64,15 +64,15 @@ export const CreateUpdateModuleModal = observer(function CreateUpdateModuleModal
         handleClose();
         setToast({
           type: "success",
-          title: "Success!",
-          message: "Module created successfully.",
+          title: "Thành công!",
+          message: "Đã tạo nhóm công việc.",
         });
       })
       .catch((err) => {
         setToast({
           type: "error",
-          title: "Error!",
-          message: err?.detail ?? err?.error ?? "Module could not be created. Please try again.",
+          title: "Lỗi!",
+          message: err?.detail ?? err?.error ?? "Không thể tạo nhóm công việc. Vui lòng thử lại.",
         });
       });
   };
@@ -87,15 +87,15 @@ export const CreateUpdateModuleModal = observer(function CreateUpdateModuleModal
 
         setToast({
           type: "success",
-          title: "Success!",
-          message: "Module updated successfully.",
+          title: "Thành công!",
+          message: "Đã cập nhật nhóm công việc.",
         });
       })
       .catch((err) => {
         setToast({
           type: "error",
-          title: "Error!",
-          message: err?.detail ?? err?.error ?? "Module could not be updated. Please try again.",
+          title: "Lỗi!",
+          message: err?.detail ?? err?.error ?? "Không thể cập nhật nhóm công việc. Vui lòng thử lại.",
         });
       });
   };

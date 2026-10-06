@@ -92,7 +92,7 @@ export class IssueStore implements IIssueStore {
     this.fetchingIssueDetails = issueId;
     const issue = await this.issueService.retrieve(workspaceSlug, projectId, issueId, query);
 
-    if (!issue) throw new Error("Work item not found");
+    if (!issue) throw new Error("Không tìm thấy công việc");
 
     const issuePayload = this.addIssueToStore(issue);
 
@@ -279,7 +279,7 @@ export class IssueStore implements IIssueStore {
       ? this.rootIssueDetailStore.rootIssueStore.epicDetail
       : this.rootIssueDetailStore.rootIssueStore.issueDetail;
 
-    if (!issue || !projectId || !issueId) throw new Error("Issue not found");
+    if (!issue || !projectId || !issueId) throw new Error("Không tìm thấy công việc");
 
     const issuePayload = this.addIssueToStore(issue);
     this.rootIssueDetailStore.rootIssueStore.issues.addIssue([issuePayload]);

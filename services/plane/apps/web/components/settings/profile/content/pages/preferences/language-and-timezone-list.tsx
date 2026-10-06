@@ -35,14 +35,14 @@ export const ProfileSettingsLanguageAndTimezonePreferencesList = observer(
       try {
         await updateCurrentUser({ user_timezone: value });
         setToast({
-          title: "Success!",
-          message: "Timezone updated successfully",
+          title: "Thành công!",
+          message: "Đã cập nhật múi giờ",
           type: "success",
         });
       } catch (_error) {
         setToast({
-          title: "Error!",
-          message: "Failed to update timezone",
+          title: "Lỗi!",
+          message: "Không thể cập nhật múi giờ",
           type: "error",
         });
       }
@@ -52,14 +52,14 @@ export const ProfileSettingsLanguageAndTimezonePreferencesList = observer(
       try {
         await updateUserProfile({ language: value });
         setToast({
-          title: "Success!",
-          message: "Language updated successfully",
+          title: "Thành công!",
+          message: "Đã cập nhật ngôn ngữ",
           type: "success",
         });
       } catch (_error) {
         setToast({
-          title: "Error!",
-          message: "Failed to update language",
+          title: "Lỗi!",
+          message: "Không thể cập nhật ngôn ngữ",
           type: "error",
         });
       }
@@ -75,7 +75,8 @@ export const ProfileSettingsLanguageAndTimezonePreferencesList = observer(
       value: item.value,
       label: item.label,
     }));
-    const selectedLanguageOption = languageOptions.find((option) => option.value === profile?.language) ?? null;
+    const currentLanguage = process.env.VITE_XBUS_EMBEDDED === "true" ? "vi-VN" : profile?.language || "vi-VN";
+    const selectedLanguageOption = languageOptions.find((option) => option.value === currentLanguage) ?? null;
 
     return (
       <div className="flex flex-col gap-y-1">
@@ -94,14 +95,14 @@ export const ProfileSettingsLanguageAndTimezonePreferencesList = observer(
               onChange={(value) => void handleLanguageChange(value)}
               getOptionValue={(option) => option.value}
               getOptionLabel={(option) => option.label}
-              placeholder="Select a language"
+              placeholder={"Chọn ngôn ngữ"}
               showSearch={false}
               pinSelected={false}
               contentSizing="anchor"
             >
               <Select.Trigger<LanguageOption> variant="select-md" className="w-42 max-w-full">
                 <span className="min-w-0 grow truncate text-left">
-                  {profile?.language ? getLanguageLabel(profile.language) : "Select a language"}
+                  {currentLanguage ? getLanguageLabel(currentLanguage) : "Chọn ngôn ngữ"}
                 </span>
               </Select.Trigger>
             </Select>
@@ -109,8 +110,8 @@ export const ProfileSettingsLanguageAndTimezonePreferencesList = observer(
         />
         <StartOfWeekPreference
           option={{
-            title: "First day of the week",
-            description: "This will change how all calendars in your app look.",
+            title: "Ngày đầu tuần",
+            description: "Thiết lập này thay đổi ngày bắt đầu tuần trên tất cả lịch trong ứng dụng.",
           }}
         />
       </div>

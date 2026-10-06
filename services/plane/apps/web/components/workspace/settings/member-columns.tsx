@@ -139,7 +139,7 @@ export const AccountTypeColumn = observer(function AccountTypeColumn(props: Acco
     <>
       {isSuspended ? (
         <div className="flex w-32">
-          <Badge variant="neutral" size="sm" label="Suspended" />
+          <Badge variant="neutral" size="sm" label={"Đã đình chỉ"} />
         </div>
       ) : isRoleNonEditable ? (
         <div className="flex w-32">
@@ -149,7 +149,7 @@ export const AccountTypeColumn = observer(function AccountTypeColumn(props: Acco
         <Controller
           name="role"
           control={control}
-          rules={{ required: "Role is required." }}
+          rules={{ required: "Vui lòng chọn vai trò." }}
           render={() => (
             <div className="w-32">
               <Select<TRoleOption>
@@ -164,8 +164,8 @@ export const AccountTypeColumn = observer(function AccountTypeColumn(props: Acco
 
                     setToast({
                       type: "error",
-                      title: "Error!",
-                      message: errorString ?? "An error occurred while updating member role. Please try again.",
+                      title: "Lỗi!",
+                      message: errorString ?? "Không thể cập nhật vai trò thành viên. Vui lòng thử lại.",
                     });
                   });
                 }}

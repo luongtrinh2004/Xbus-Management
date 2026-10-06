@@ -20,8 +20,20 @@ i18nInstance
   .use(initReactI18next)
   .use(resourcesToBackend((language: string, namespace: string) => import(`../locales/${language}/${namespace}.json`)));
 
-const initialLng =
-  typeof window !== "undefined" ? localStorage.getItem(LANGUAGE_STORAGE_KEY) || FALLBACK_LANGUAGE : FALLBACK_LANGUAGE;
+function getInitialLanguage(): string {
+  if (process.env.VITE_XBUS_EMBEDDED === "true") return "vi-VN";
+  if (typeof window !== "undefined") {
+    try {
+      const stored = window.localStorage.getItem(LANGUAGE_STORAGE_KEY);
+      if (SUPPORTED_LANGUAGES.some((language) => language.value === stored)) return stored!;
+    } catch {
+      // Storage can be unavailable; the interface must still initialize.
+    }
+  }
+  return FALLBACK_LANGUAGE;
+}
+
+const initialLng = getInitialLanguage();
 
 export const initPromise = i18nInstance
   .init({

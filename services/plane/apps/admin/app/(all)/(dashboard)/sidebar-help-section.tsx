@@ -69,24 +69,24 @@ export const AdminSidebarHelpSection = observer(function AdminSidebarHelpSection
               className={`relative flex items-center gap-1 rounded-sm bg-layer-1 px-2 py-1 text-body-xs-medium whitespace-nowrap text-secondary`}
             >
               <NewTabOutline width={14} height={14} />
-              {!isSidebarCollapsed && "Redirect to Plane"}
+              {!isSidebarCollapsed && "Chuyển đến Plane"}
             </a>
           </>
         ) : (
-          <Tooltip label="Redirect to Plane" side="right">
+          <Tooltip label={"Chuyển đến Plane"} side="right">
             <a
               href={redirectionLink}
               className={`relative flex items-center gap-1 rounded-sm bg-layer-1 px-2 py-1 text-body-xs-medium whitespace-nowrap text-secondary`}
             >
               <NewTabOutline width={14} height={14} />
-              {!isSidebarCollapsed && "Redirect to Plane"}
+              {!isSidebarCollapsed && "Chuyển đến Plane"}
             </a>
           </Tooltip>
         )}
-        <Tooltip label="Help" side={isSidebarCollapsed ? "right" : "top"}>
+        <Tooltip label={"Trợ giúp"} side={isSidebarCollapsed ? "right" : "top"}>
           <button
             type="button"
-            aria-label="Help"
+            aria-label={"Trợ giúp"}
             className={`ml-auto grid place-items-center rounded-md p-1.5 text-secondary outline-none hover:bg-layer-1-hover hover:text-primary ${
               isSidebarCollapsed ? "w-full" : ""
             }`}
@@ -95,10 +95,10 @@ export const AdminSidebarHelpSection = observer(function AdminSidebarHelpSection
             <HelpOutline className="size-4" />
           </button>
         </Tooltip>
-        <Tooltip label="Toggle sidebar" side={isSidebarCollapsed ? "right" : "top"}>
+        <Tooltip label={"Mở/đóng thanh bên"} side={isSidebarCollapsed ? "right" : "top"}>
           <button
             type="button"
-            aria-label="Toggle sidebar"
+            aria-label={"Mở/đóng thanh bên"}
             className={`grid place-items-center rounded-md p-1.5 text-secondary outline-none hover:bg-layer-1-hover hover:text-primary ${
               isSidebarCollapsed ? "w-full" : ""
             }`}
@@ -146,7 +146,7 @@ export const AdminSidebarHelpSection = observer(function AdminSidebarHelpSection
                   );
               })}
             </div>
-            <div className="px-2 pt-2 pb-1 text-10">Version: v{instance?.current_version}</div>
+            <div className="px-2 pt-2 pb-1 text-10">Phiên bản: v{instance?.current_version}</div>
           </div>
         )}
       </div>

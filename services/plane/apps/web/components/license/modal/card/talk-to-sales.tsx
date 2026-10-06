@@ -60,10 +60,10 @@ export const TalkToSalesCard = observer(function TalkToSalesCard(props: TalkToSa
               <Loader.Item height="36px" width="4rem" />
             </Loader>
           ) : (
-            <>Quote on request</>
+            <>Liên hệ để nhận báo giá</>
           )}
         </div>
-        <div className="text-caption-md-medium text-tertiary">per user per month</div>
+        <div className="text-caption-md-medium text-tertiary">/người/tháng</div>
       </div>
       {isLoading ? (
         <Loader className="flex flex-col items-center justify-center">
@@ -79,10 +79,10 @@ export const TalkToSalesCard = observer(function TalkToSalesCard(props: TalkToSa
               nativeButton={false}
               render={
                 <a href={href} target="_blank" rel="noreferrer">
-                  Talk to Sales
+                  Liên hệ bộ phận bán hàng
                 </a>
               }
-              label="Talk to Sales"
+              label={"Liên hệ bộ phận bán hàng"}
             />
           </div>
           {isTrialAllowed && !isSelfHosted && (

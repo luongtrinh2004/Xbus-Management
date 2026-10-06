@@ -98,7 +98,7 @@ export class UserSettingsStore implements IUserSettingsStore {
         this.isLoading = false;
         this.error = {
           status: "error",
-          message: "Failed to fetch user settings",
+          message: "Không thể tải cài đặt người dùng",
         };
       });
       throw error;

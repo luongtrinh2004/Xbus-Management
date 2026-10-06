@@ -38,7 +38,7 @@ export const PlanDetail = observer(function PlanDetail(props: TPlanDetailProps) 
   const isSubscriptionActive = planDetail.isActive;
   // pricing details
   const displayPrice = billingFrequency === "month" ? planDetail.monthlyPrice : planDetail.yearlyPrice;
-  const pricingDescription = isSubscriptionActive ? "a user per month" : "Quote on request";
+  const pricingDescription = isSubscriptionActive ? "a user per month" : "Liên hệ để nhận báo giá";
   const pricingSecondaryDescription =
     billingFrequency === "month"
       ? planDetail.monthlyPriceSecondaryDescription
@@ -60,7 +60,7 @@ export const PlanDetail = observer(function PlanDetail(props: TPlanDetailProps) 
           <span>{subscriptionName}</span>
           {subscriptionType === EProductSubscriptionEnum.PRO && (
             <span className="rounded-sm bg-accent-primary px-2 py-0.5 text-caption-sm-medium text-on-color">
-              Popular
+              Phổ biến
             </span>
           )}
         </div>
@@ -104,7 +104,7 @@ export const PlanDetail = observer(function PlanDetail(props: TPlanDetailProps) 
           variant="primary"
           size="md"
           stretch="full"
-          label={isSubscriptionActive ? `Upgrade to ${subscriptionName}` : t("common.upgrade_cta.talk_to_sales")}
+          label={isSubscriptionActive ? `Nâng cấp lên ${subscriptionName}` : t("common.upgrade_cta.talk_to_sales")}
           onClick={handleRedirection}
         />
       </div>

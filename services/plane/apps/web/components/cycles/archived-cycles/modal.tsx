@@ -43,8 +43,8 @@ export function ArchiveCycleModal(props: Props) {
       .then(() => {
         setToast({
           type: "success",
-          title: "Archive success",
-          message: "Your archives can be found in project archives.",
+          title: "Lưu trữ thành công",
+          message: "Mục đã lưu trữ của bạn có thể được tìm thấy trong phần lưu trữ của dự án.",
         });
         onClose();
         router.push(`/${workspaceSlug}/projects/${projectId}/cycles`);
@@ -53,8 +53,8 @@ export function ArchiveCycleModal(props: Props) {
       .catch(() => {
         setToast({
           type: "error",
-          title: "Error!",
-          message: "Cycle could not be archived. Please try again.",
+          title: "Lỗi!",
+          message: "Không thể lưu trữ chu kỳ. Vui lòng thử lại.",
         });
       })
       .finally(() => setIsArchiving(false));
@@ -67,8 +67,8 @@ export function ArchiveCycleModal(props: Props) {
       handleSubmit={handleArchiveCycle}
       isSubmitting={isArchiving}
       variant="primary"
-      title={`Archive cycle ${cycleName ?? ""}`}
-      content="Are you sure you want to archive the cycle? All your archives can be restored later."
+      title={`Lưu trữ chu kỳ ${cycleName ?? ""}`}
+      content={"Bạn có muốn lưu trữ chu kỳ? Bạn có thể khôi phục sau."}
       primaryButtonText={{ loading: "Archiving", default: "Archive" }}
       secondaryButtonText="Cancel"
     />

@@ -63,23 +63,23 @@ export function CreateUpdateModuleLinkModal(props: Props) {
         await createLink(payload);
         setToast({
           type: "success",
-          title: "Success!",
-          message: "Module link created successfully.",
+          title: "Thành công!",
+          message: "Đã tạo liên kết nhóm công việc.",
         });
       } else {
         await updateLink(payload, data.id);
         setToast({
           type: "success",
-          title: "Success!",
-          message: "Module link updated successfully.",
+          title: "Thành công!",
+          message: "Đã cập nhật liên kết nhóm công việc.",
         });
       }
       onClose();
     } catch (error: any) {
       setToast({
         type: "error",
-        title: "Error!",
-        message: error?.data?.error ?? "Some error occurred. Please try again.",
+        title: "Lỗi!",
+        message: error?.data?.error ?? "Đã xảy ra lỗi. Vui lòng thử lại.",
       });
     }
   };
@@ -103,7 +103,7 @@ export function CreateUpdateModuleLinkModal(props: Props) {
           <DialogMain>
             <DialogHeader>
               <DialogHeading>
-                <DialogTitle>{data ? "Update" : "Add"} link</DialogTitle>
+                <DialogTitle>{data ? "Cập nhật" : "Thêm"} Liên kết</DialogTitle>
               </DialogHeading>
             </DialogHeader>
             <DialogBody tabIndex={0}>
@@ -112,7 +112,7 @@ export function CreateUpdateModuleLinkModal(props: Props) {
                   control={control}
                   name="url"
                   rules={{
-                    required: "URL is required",
+                    required: "URL là bắt buộc",
                   }}
                   render={({ field: { value, onChange, ref } }) => (
                     <InputField
@@ -125,7 +125,7 @@ export function CreateUpdateModuleLinkModal(props: Props) {
                       onChange={onChange}
                       ref={ref}
                       error={errors.url?.message}
-                      placeholder="Type or paste a URL"
+                      placeholder={"Nhập hoặc dán URL"}
                     />
                   )}
                 />
@@ -138,13 +138,13 @@ export function CreateUpdateModuleLinkModal(props: Props) {
                       type="text"
                       size="xl"
                       orientation="vertical"
-                      label="Display title"
-                      description="Optional"
+                      label={"Tiêu đề hiển thị"}
+                      description={"Tùy chọn"}
                       value={value}
                       onChange={onChange}
                       ref={ref}
                       error={errors.title?.message}
-                      placeholder="What you'd like to see this link as"
+                      placeholder={"Bạn muốn hiển thị liên kết này như thế nào"}
                     />
                   )}
                 />
@@ -152,7 +152,7 @@ export function CreateUpdateModuleLinkModal(props: Props) {
             </DialogBody>
           </DialogMain>
           <DialogActions>
-            <Button variant="secondary" size="md" stretch="auto" onClick={onClose} label="Cancel" />
+            <Button variant="secondary" size="md" stretch="auto" onClick={onClose} label={"Hủy"} />
             <Button
               variant="primary"
               size="md"
@@ -160,7 +160,13 @@ export function CreateUpdateModuleLinkModal(props: Props) {
               type="submit"
               loading={isSubmitting}
               label={
-                data ? (isSubmitting ? "Updating link" : "Update link") : isSubmitting ? "Adding link" : "Add link"
+                data
+                  ? isSubmitting
+                    ? "Đang cập nhật liên kết"
+                    : "Cập nhật liên kết"
+                  : isSubmitting
+                    ? "Đang thêm liên kết"
+                    : "Thêm liên kết"
               }
             />
           </DialogActions>

@@ -28,35 +28,35 @@ export class ProjectPage extends BasePage implements TProjectPage {
     // initialize base instance
     super(store, page, {
       update: async (payload) => {
-        if (!workspaceSlug || !projectId || !page.id) throw new Error("Missing required fields.");
+        if (!workspaceSlug || !projectId || !page.id) throw new Error("Vui lòng điền đầy đủ thông tin bắt buộc.");
         return await projectPageService.update(workspaceSlug, projectId, page.id, payload);
       },
       updateDescription: async (document) => {
-        if (!workspaceSlug || !projectId || !page.id) throw new Error("Missing required fields.");
+        if (!workspaceSlug || !projectId || !page.id) throw new Error("Vui lòng điền đầy đủ thông tin bắt buộc.");
         await projectPageService.updateDescription(workspaceSlug, projectId, page.id, document);
       },
       updateAccess: async (payload) => {
-        if (!workspaceSlug || !projectId || !page.id) throw new Error("Missing required fields.");
+        if (!workspaceSlug || !projectId || !page.id) throw new Error("Vui lòng điền đầy đủ thông tin bắt buộc.");
         await projectPageService.updateAccess(workspaceSlug, projectId, page.id, payload);
       },
       lock: async () => {
-        if (!workspaceSlug || !projectId || !page.id) throw new Error("Missing required fields.");
+        if (!workspaceSlug || !projectId || !page.id) throw new Error("Vui lòng điền đầy đủ thông tin bắt buộc.");
         await projectPageService.lock(workspaceSlug, projectId, page.id);
       },
       unlock: async () => {
-        if (!workspaceSlug || !projectId || !page.id) throw new Error("Missing required fields.");
+        if (!workspaceSlug || !projectId || !page.id) throw new Error("Vui lòng điền đầy đủ thông tin bắt buộc.");
         await projectPageService.unlock(workspaceSlug, projectId, page.id);
       },
       archive: async () => {
-        if (!workspaceSlug || !projectId || !page.id) throw new Error("Missing required fields.");
+        if (!workspaceSlug || !projectId || !page.id) throw new Error("Vui lòng điền đầy đủ thông tin bắt buộc.");
         return await projectPageService.archive(workspaceSlug, projectId, page.id);
       },
       restore: async () => {
-        if (!workspaceSlug || !projectId || !page.id) throw new Error("Missing required fields.");
+        if (!workspaceSlug || !projectId || !page.id) throw new Error("Vui lòng điền đầy đủ thông tin bắt buộc.");
         await projectPageService.restore(workspaceSlug, projectId, page.id);
       },
       duplicate: async () => {
-        if (!workspaceSlug || !projectId || !page.id) throw new Error("Missing required fields.");
+        if (!workspaceSlug || !projectId || !page.id) throw new Error("Vui lòng điền đầy đủ thông tin bắt buộc.");
         return await projectPageService.duplicate(workspaceSlug, projectId, page.id);
       },
     });

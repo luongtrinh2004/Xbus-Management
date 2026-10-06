@@ -6,7 +6,7 @@
 
 export const CORE_HEADER_SEGMENT_LABELS: Record<string, string> = {
   general: "General",
-  ai: "Artificial Intelligence",
+  ai: "Trí tuệ nhân tạo",
   email: "Email",
   authentication: "Authentication",
   image: "Image",

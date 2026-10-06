@@ -27,10 +27,9 @@ export const NewUserPopup = observer(function NewUserPopup() {
     <div className="shadow-md absolute right-8 bottom-8 w-96 rounded-lg border border-subtle bg-surface-1 p-6">
       <div className="flex gap-4">
         <div className="grow">
-          <div className="text-14 font-semibold">Create workspace</div>
+          <div className="text-14 font-semibold">Tạo không gian làm việc</div>
           <div className="py-2 text-13 font-medium text-tertiary">
-            Instance setup done! Welcome to Plane instance portal. Start your journey with by creating your first
-            workspace.
+            Đã thiết lập hệ thống Plane! Hãy tạo không gian làm việc đầu tiên để bắt đầu.
           </div>
           <div className="flex items-center gap-4 pt-2">
             <Button
@@ -39,9 +38,9 @@ export const NewUserPopup = observer(function NewUserPopup() {
               stretch="auto"
               nativeButton={false}
               render={<Link href="/workspace/create" />}
-              label="Create workspace"
+              label={"Tạo không gian làm việc"}
             />
-            <Button variant="secondary" size="md" stretch="auto" onClick={toggleNewUserPopup} label="Close" />
+            <Button variant="secondary" size="md" stretch="auto" onClick={toggleNewUserPopup} label={"Đóng"} />
           </div>
         </div>
         <div className="flex shrink-0 items-center justify-center">
@@ -49,7 +48,7 @@ export const NewUserPopup = observer(function NewUserPopup() {
             src={resolveGeneralTheme(resolvedTheme) === "dark" ? TakeoffIconDark : TakeoffIconLight}
             height={80}
             width={80}
-            alt="Plane icon"
+            alt={"Biểu tượng Plane"}
           />
         </div>
       </div>

@@ -15,7 +15,7 @@ type SelectOptionsSkeletonProps = {
 // `flex items-center gap-2 px-2 py-1.5` of a real `Combobox.Option`), shown while options load.
 export function SelectOptionsSkeleton({ rows = 3 }: SelectOptionsSkeletonProps) {
   return (
-    <Skeleton ariaLabel="Loading options" className="flex w-full flex-col">
+    <Skeleton ariaLabel={"Đang tải tùy chọn"} className="flex w-full flex-col">
       {Array.from({ length: Math.max(1, rows) }).map((_, index) => (
         // oxlint-disable-next-line react/no-array-index-key -- static, identical placeholder rows
         <div key={index} className="flex items-center gap-2 px-2 py-1.5">

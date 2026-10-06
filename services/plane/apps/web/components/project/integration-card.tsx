@@ -26,11 +26,11 @@ type Props = {
 const integrationDetails: { [key: string]: any } = {
   github: {
     logo: GithubLogo,
-    description: "Select GitHub repository to enable sync.",
+    description: "Chọn repository GitHub để bật đồng bộ.",
   },
   slack: {
     logo: SlackLogo,
-    description: "Get regular updates and control which notification you want to receive.",
+    description: "Nhận cập nhật thường xuyên và chọn các thông báo bạn muốn nhận.",
   },
 };
 
@@ -68,16 +68,16 @@ export function IntegrationCard({ integration }: Props) {
 
         setToast({
           type: "success",
-          title: "Success!",
-          message: `${login}/${name} repository synced with the project successfully.`,
+          title: "Thành công!",
+          message: `Đã đồng bộ repository ${login}/${name} với dự án.`,
         });
       })
       .catch((err) => {
         console.error(err);
         setToast({
           type: "error",
-          title: "Error!",
-          message: "Repository could not be synced with the project. Please try again.",
+          title: "Lỗi!",
+          message: "Không thể đồng bộ repository với dự án. Vui lòng thử lại.",
         });
       });
   };
@@ -112,7 +112,7 @@ export function IntegrationCard({ integration }: Props) {
               label={
                 syncedGithubRepository && syncedGithubRepository.length > 0
                   ? `${syncedGithubRepository[0].repo_detail.owner}/${syncedGithubRepository[0].repo_detail.name}`
-                  : "Select Repository"
+                  : "Chọn repository"
               }
               onChange={handleChange}
             />

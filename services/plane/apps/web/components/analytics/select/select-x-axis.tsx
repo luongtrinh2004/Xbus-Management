@@ -36,7 +36,7 @@ export function SelectXAxis(props: Props) {
     const visible = options
       .filter((item) => !hidden.has(item.value))
       .map((item) => ({ id: item.value, label: item.label, value: item.value }));
-    return allowNoValue ? [{ id: NO_VALUE_ID, label: "No value", value: null }, ...visible] : visible;
+    return allowNoValue ? [{ id: NO_VALUE_ID, label: "Chưa có giá trị", value: null }, ...visible] : visible;
   }, [options, hiddenOptions, allowNoValue]);
   const selected = useMemo(
     () => selectOptions.find((option) => option.value === value) ?? null,

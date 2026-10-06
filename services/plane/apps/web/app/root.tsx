@@ -4,7 +4,7 @@
  * See the LICENSE file for details.
  */
 
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Links, Meta, Outlet, Scripts } from "react-router";
 import type { LinksFunction } from "react-router";
 import { ThemeProvider, useTheme } from "next-themes";
@@ -32,7 +32,7 @@ import interVariableWoff2 from "@fontsource-variable/inter/files/inter-latin-wgh
 import "@fontsource/material-symbols-rounded";
 import "@fontsource/ibm-plex-mono";
 
-const APP_TITLE = "Plane | Simple, extensible, open-source project management tool.";
+const APP_TITLE = process.env.VITE_XBUS_EMBEDDED === "true" ? "XBus Work" : "Plane | Quản lý dự án và công việc";
 
 export const links: LinksFunction = () => [
   { rel: "icon", type: "image/png", sizes: "32x32", href: favicon32 },
@@ -55,18 +55,18 @@ export const links: LinksFunction = () => [
 
 export function Layout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="vi-VN" suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#fff" />
         {/* Meta info for PWA */}
         <meta name="application-name" content="Plane" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-capable" content={"Có"} />
+        <meta name="apple-mobile-web-app-status-bar-style" content={"Mặc định"} />
         <meta name="apple-mobile-web-app-title" content={SITE_NAME} />
         <meta name="format-detection" content="telephone=no" />
-        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="mobile-web-app-capable" content={"Có"} />
         <Meta />
         <Links />
       </head>
@@ -88,13 +88,13 @@ export const meta: Route.MetaFunction = () => [
   { property: "og:title", content: APP_TITLE },
   {
     property: "og:description",
-    content: "Open-source project management tool to manage work items, cycles, and product roadmaps easily",
+    content: "Công cụ quản lý dự án mã nguồn mở giúp tổ chức công việc, chu kỳ và lộ trình sản phẩm.",
   },
   { property: "og:url", content: "https://app.plane.so/" },
   { property: "og:image", content: ogImage },
   { property: "og:image:width", content: "1200" },
   { property: "og:image:height", content: "630" },
-  { property: "og:image:alt", content: "Plane - Modern project management" },
+  { property: "og:image:alt", content: "Plane - Quản lý dự án hiện đại" },
   {
     name: "keywords",
     content:
@@ -105,7 +105,7 @@ export const meta: Route.MetaFunction = () => [
   { name: "twitter:image", content: ogImage },
   { name: "twitter:image:width", content: "1200" },
   { name: "twitter:image:height", content: "630" },
-  { name: "twitter:image:alt", content: "Plane - Modern project management" },
+  { name: "twitter:image:alt", content: "Plane - Quản lý dự án hiện đại" },
 ];
 
 // Root stays shell-thin: in SPA mode React Router server-builds only the root route, so
@@ -116,10 +116,12 @@ export default function Root() {
 }
 
 export function HydrateFallback() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   const { resolvedTheme } = useTheme();
 
   // if we are on the server or the theme is not resolved, return an empty div
-  if (typeof window === "undefined" || resolvedTheme === undefined) return <div />;
+  if (!mounted || typeof window === "undefined" || resolvedTheme === undefined) return <div />;
 
   return (
     <div className="relative flex h-screen w-full items-center justify-center bg-canvas">

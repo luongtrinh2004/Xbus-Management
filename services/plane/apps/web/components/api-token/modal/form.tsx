@@ -40,22 +40,22 @@ type Props = {
 const EXPIRY_DATE_OPTIONS = [
   {
     key: "1_week",
-    label: "1 week",
+    label: "1 tuần",
     value: { weeks: 1 },
   },
   {
     key: "1_month",
-    label: "1 month",
+    label: "1 tháng",
     value: { months: 1 },
   },
   {
     key: "3_months",
-    label: "3 months",
+    label: "3 tháng",
     value: { months: 3 },
   },
   {
     key: "1_year",
-    label: "1 year",
+    label: "1 năm",
     value: { years: 1 },
   },
 ];
@@ -65,7 +65,7 @@ type TExpiryOption = { key: string; label: string };
 
 const EXPIRY_SELECT_OPTIONS: TExpiryOption[] = [
   ...EXPIRY_DATE_OPTIONS.map(({ key, label }) => ({ key, label })),
-  { key: "custom", label: "Custom" },
+  { key: "custom", label: "Tùy chỉnh" },
 ];
 
 const defaultValues: Partial<IApiToken> = {
@@ -111,8 +111,8 @@ export function CreateApiTokenForm(props: Props) {
     if (!neverExpires && (!data.expired_at || (data.expired_at === "custom" && !customDate)))
       return setToast({
         type: "error",
-        title: "Error!",
-        message: "Please select an expiration date.",
+        title: "Lỗi!",
+        message: "Vui lòng chọn ngày hết hạn.",
       });
 
     const payload: Partial<IApiToken> = {
@@ -220,7 +220,7 @@ export function CreateApiTokenForm(props: Props) {
                           the longest label here ("Set expiration date"). */}
                         <Select.Trigger variant="select-md" className="w-auto" prependIcon={<CalendarOutline />}>
                           <span className="min-w-0 grow truncate text-left">
-                            {value === "custom" ? "Custom date" : (selectedOption?.label ?? "Set expiration date")}
+                            {value === "custom" ? "Ngày tùy chỉnh" : (selectedOption?.label ?? "Chọn ngày hết hạn")}
                           </span>
                         </Select.Trigger>
                       </Select>
@@ -233,7 +233,7 @@ export function CreateApiTokenForm(props: Props) {
                     onChange={(date) => setCustomDate(date)}
                     minDate={tomorrow}
                     icon={<CalendarOutline />}
-                    placeholder="Set date"
+                    placeholder={"Chọn ngày"}
                     disabled={neverExpires}
                     clearable
                     weekStartsOn={userProfile?.start_of_the_week}
@@ -245,10 +245,10 @@ export function CreateApiTokenForm(props: Props) {
                 <span className="text-caption-sm-regular text-placeholder">
                   {expiredAt === "custom"
                     ? customDate
-                      ? `Expires ${renderFormattedDate(customDateFormatted ?? "")} at ${renderFormattedTime(customDateFormatted ?? "")}`
+                      ? `Hết hạn vào ${renderFormattedDate(customDateFormatted ?? "")} at ${renderFormattedTime(customDateFormatted ?? "")}`
                       : null
                     : expiredAt
-                      ? `Expires ${renderFormattedDate(expiryDate ?? "")} at ${renderFormattedTime(expiryDate ?? "")}`
+                      ? `Hết hạn vào ${renderFormattedDate(expiryDate ?? "")} at ${renderFormattedTime(expiryDate ?? "")}`
                       : null}
                 </span>
               )}

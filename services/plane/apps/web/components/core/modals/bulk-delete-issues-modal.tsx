@@ -103,8 +103,8 @@ export const BulkDeleteIssuesModal = observer(function BulkDeleteIssuesModal(pro
     if (!data.delete_issue_ids || data.delete_issue_ids.length === 0) {
       setToast({
         type: "error",
-        title: "Error!",
-        message: "Please select at least one work item.",
+        title: "Lỗi!",
+        message: "Vui lòng chọn ít nhất một công việc.",
       });
       return;
     }
@@ -115,16 +115,16 @@ export const BulkDeleteIssuesModal = observer(function BulkDeleteIssuesModal(pro
       .then(() => {
         setToast({
           type: "success",
-          title: "Success!",
-          message: "Work items deleted successfully!",
+          title: "Thành công!",
+          message: "Đã xóa công việc.",
         });
         handleClose();
       })
       .catch(() =>
         setToast({
           type: "error",
-          title: "Error!",
-          message: "Something went wrong. Please try again.",
+          title: "Lỗi!",
+          message: "Đã xảy ra lỗi. Vui lòng thử lại.",
         })
       );
   };
@@ -132,9 +132,7 @@ export const BulkDeleteIssuesModal = observer(function BulkDeleteIssuesModal(pro
   const issueList =
     issues.length > 0 ? (
       <div className="p-2">
-        {query === "" && (
-          <h2 className="mt-4 mb-2 px-3 text-11 font-semibold text-primary">Select work items to delete</h2>
-        )}
+        {query === "" && <h2 className="mt-4 mb-2 px-3 text-11 font-semibold text-primary">Chọn công việc cần xóa</h2>}
         <ComboboxList aria-label={t("power_k.actions_commands.bulk_delete_work_items")}>
           {issues.map((issue) => (
             <BulkDeleteIssuesModalItem issue={issue} key={issue.id} />
@@ -206,12 +204,12 @@ export const BulkDeleteIssuesModal = observer(function BulkDeleteIssuesModal(pro
           </Combobox>
           {issues.length > 0 && (
             <DialogActions>
-              <Button variant="secondary" size="md" stretch="auto" label="Cancel" onClick={handleClose} />
+              <Button variant="secondary" size="md" stretch="auto" label={"Hủy"} onClick={handleClose} />
               <Button
                 variant="danger"
                 size="md"
                 stretch="auto"
-                label={isSubmitting ? "Deleting..." : "Delete selected work items"}
+                label={isSubmitting ? "Đang xóa…" : "Xóa công việc đã chọn"}
                 onClick={() => void handleSubmit(handleDelete)()}
                 loading={isSubmitting}
               />

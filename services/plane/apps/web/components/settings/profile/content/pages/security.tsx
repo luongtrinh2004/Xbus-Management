@@ -162,7 +162,7 @@ export const SecurityProfileSettings = observer(function SecurityProfileSettings
                         type="button"
                         className="grid size-5 place-items-center"
                         onClick={() => handleShowPassword("oldPassword")}
-                        aria-label={showPassword?.oldPassword ? "Hide password" : "Show password"}
+                        aria-label={showPassword?.oldPassword ? "Ẩn mật khẩu" : "Hiển thị mật khẩu"}
                       >
                         {showPassword?.oldPassword ? (
                           <HideOutline className="size-5 text-placeholder" />
@@ -206,7 +206,7 @@ export const SecurityProfileSettings = observer(function SecurityProfileSettings
                         type="button"
                         className="grid size-5 place-items-center"
                         onClick={() => handleShowPassword("password")}
-                        aria-label={showPassword?.password ? "Hide password" : "Show password"}
+                        aria-label={showPassword?.password ? "Ẩn mật khẩu" : "Hiển thị mật khẩu"}
                       >
                         {showPassword?.password ? (
                           <HideOutline className="size-5 text-placeholder" />
@@ -254,7 +254,7 @@ export const SecurityProfileSettings = observer(function SecurityProfileSettings
                         type="button"
                         className="grid size-5 place-items-center"
                         onClick={() => handleShowPassword("confirmPassword")}
-                        aria-label={showPassword?.confirmPassword ? "Hide password" : "Show password"}
+                        aria-label={showPassword?.confirmPassword ? "Ẩn mật khẩu" : "Hiển thị mật khẩu"}
                       >
                         {showPassword?.confirmPassword ? (
                           <HideOutline className="size-5 text-placeholder" />

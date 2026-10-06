@@ -63,8 +63,8 @@ export const ViewQuickActions = observer(function ViewQuickActions(props: Props)
     copyUrlToClipboard(viewLink).then(() => {
       setToast({
         type: "success",
-        title: "Link Copied!",
-        message: "View link copied to clipboard.",
+        title: "Đã sao chép liên kết!",
+        message: "Đã sao chép liên kết xem vào bảng tạm",
       });
     });
   const handleOpenInNewTab = () => window.open(`/${viewLink}`, "_blank");

@@ -4,6 +4,8 @@
  * See the LICENSE file for details.
  */
 
+import { getStateDisplayName } from "@plane/utils";
+
 import { observer } from "mobx-react";
 import { StateGroupIcon } from "@plane/blocks/icons";
 import type { IState } from "@plane/types";
@@ -29,7 +31,7 @@ export const PowerKProjectStatesMenuItems = observer(function PowerKProjectState
         <PowerKModalCommandItem
           key={state.id}
           iconNode={<StateGroupIcon stateGroup={state.group} color={state.color} className="size-3.5 shrink-0" />}
-          label={state.name}
+          label={getStateDisplayName(state)}
           isSelected={state.id === selectedStateId}
           onSelect={() => handleSelect(state.id)}
         />

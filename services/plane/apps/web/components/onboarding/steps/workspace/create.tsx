@@ -119,9 +119,8 @@ export const WorkspaceCreateStep = observer(function WorkspaceCreateStep({
     return (
       <div className="flex flex-col gap-10">
         <span className="text-center text-14 text-tertiary">
-          You don&apos;t seem to have any invites to a workspace and your instance admin has restricted creation of new
-          workspaces. Please ask a workspace owner or admin to invite you to a workspace first and come back to this
-          screen to join.
+          Bạn chưa có lời mời vào không gian làm việc và quản trị viên đã tắt quyền tạo mới. Hãy nhờ chủ sở hữu hoặc
+          quản trị viên gửi lời mời, rồi quay lại đây để tham gia.
         </span>
       </div>
     );
@@ -133,7 +132,10 @@ export const WorkspaceCreateStep = observer(function WorkspaceCreateStep({
         void handleSubmit(handleCreateWorkspace)(e);
       }}
     >
-      <CommonOnboardingHeader title="Create your workspace" description="All your work — unified." />
+      <CommonOnboardingHeader
+        title={"Tạo không gian làm việc của bạn"}
+        description={"Tập trung mọi công việc tại một nơi."}
+      />
       <div className="flex flex-col gap-8">
         <div className="flex flex-col gap-2">
           <label
@@ -167,7 +169,7 @@ export const WorkspaceCreateStep = observer(function WorkspaceCreateStep({
                       shouldValidate: true,
                     });
                   }}
-                  placeholder="Enter workspace name"
+                  placeholder={"Nhập tên không gian làm việc"}
                   ref={ref}
                   className={cn(
                     "w-full rounded-md border border-strong bg-surface-1 px-3 py-2 text-secondary transition-all duration-200 placeholder:text-placeholder focus:border-transparent focus:ring-2 focus:ring-accent-strong focus:outline-none",
@@ -300,7 +302,7 @@ export const WorkspaceCreateStep = observer(function WorkspaceCreateStep({
             size="lg"
             stretch="full"
             onClick={handleCurrentViewChange}
-            label="Join existing workspace"
+            label={"Tham gia không gian làm việc có sẵn"}
           />
         )}
       </div>

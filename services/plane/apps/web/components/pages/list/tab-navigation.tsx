@@ -20,15 +20,15 @@ type TPageTabNavigation = {
 const pageTabs: { key: TPageNavigationTabs; label: string }[] = [
   {
     key: "public",
-    label: "Public",
+    label: "Công khai",
   },
   {
     key: "private",
-    label: "Private",
+    label: "Riêng tư",
   },
   {
     key: "archived",
-    label: "Archived",
+    label: "Đã lưu trữ",
   },
 ];
 

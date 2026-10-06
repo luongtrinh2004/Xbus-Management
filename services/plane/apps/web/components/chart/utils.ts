@@ -38,7 +38,7 @@ const getDateGroupingName = (date: string, dateGrouping: ChartXAxisDateGrouping)
       break;
     case ChartXAxisDateGrouping.WEEK: {
       const month = renderFormattedDate(formattedData, "MMM");
-      parsedName = `${month}, Week ${getWeekOfMonth(formattedData)}`;
+      parsedName = `${month}, tuần ${getWeekOfMonth(formattedData)}`;
       break;
     }
     case ChartXAxisDateGrouping.MONTH:

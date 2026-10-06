@@ -239,8 +239,8 @@ export class ProjectPageStore implements IProjectPageStore {
       runInAction(() => {
         this.loader = undefined;
         this.error = {
-          title: "Failed",
-          description: "Failed to fetch the pages, Please try again later.",
+          title: "Thất bại",
+          description: "Không thể tải danh sách trang. Vui lòng thử lại sau.",
         };
       });
       throw error;
@@ -282,8 +282,8 @@ export class ProjectPageStore implements IProjectPageStore {
       runInAction(() => {
         this.loader = undefined;
         this.error = {
-          title: "Failed",
-          description: "Failed to fetch the page, Please try again later.",
+          title: "Thất bại",
+          description: "Không thể tải trang. Vui lòng thử lại.",
         };
       });
       throw error;
@@ -315,8 +315,8 @@ export class ProjectPageStore implements IProjectPageStore {
       runInAction(() => {
         this.loader = undefined;
         this.error = {
-          title: "Failed",
-          description: "Failed to create a page, Please try again later.",
+          title: "Thất bại",
+          description: "Không thể tạo trang. Vui lòng thử lại.",
         };
       });
       throw error;
@@ -341,8 +341,8 @@ export class ProjectPageStore implements IProjectPageStore {
       runInAction(() => {
         this.loader = undefined;
         this.error = {
-          title: "Failed",
-          description: "Failed to delete a page, Please try again later.",
+          title: "Thất bại",
+          description: "Không thể xóa trang. Vui lòng thử lại.",
         };
       });
       throw error;

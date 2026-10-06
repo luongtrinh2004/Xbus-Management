@@ -16,37 +16,37 @@ export const coreSidebarMenuLinks: Record<TCoreSidebarMenuKey, TSidebarMenuItem>
   general: {
     Icon: SettingsOutline,
     name: "General",
-    description: "Identify your instances and get key details.",
+    description: "Xem thông tin định danh và thông số chính của hệ thống.",
     href: `/general/`,
   },
   email: {
     Icon: MailOutline,
     name: "Email",
-    description: "Configure your SMTP controls.",
+    description: "Cấu hình SMTP.",
     href: `/email/`,
   },
   workspace: {
     Icon: WorkspaceOutline,
     name: "Workspaces",
-    description: "Manage all workspaces on this instance.",
+    description: "Quản lý tất cả không gian làm việc trên hệ thống.",
     href: `/workspace/`,
   },
   authentication: {
     Icon: LockOutline,
     name: "Authentication",
-    description: "Configure authentication modes.",
+    description: "Thiết lập phương thức xác thực.",
     href: `/authentication/`,
   },
   ai: {
     Icon: BrainCog,
     name: "Artificial intelligence",
-    description: "Configure your OpenAI creds.",
+    description: "Cấu hình thông tin kết nối OpenAI.",
     href: `/ai/`,
   },
   image: {
     Icon: ImageOutline,
     name: "Images in Plane",
-    description: "Allow third-party image libraries.",
+    description: "Cho phép thư viện ảnh bên thứ ba.",
     href: `/image/`,
   },
 };

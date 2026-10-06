@@ -69,12 +69,12 @@ export function TabNavigationOverflowMenu({ overflowItems, isActive, tabPreferen
                         onShow(item.key);
                       }}
                       className="invisible rounded-sm p-1 text-tertiary transition-colors group-hover/menu-item:visible hover:text-primary"
-                      title="Show"
+                      title={"Hiển thị"}
                     >
                       <PinOutline className="size-3" />
                     </button>
                   )}
-                  <Tooltip label={isDefault ? "Clear default" : "Set as default"}>
+                  <Tooltip label={isDefault ? "Bỏ thiết lập mặc định" : "Đặt làm mặc định"}>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -87,7 +87,7 @@ export function TabNavigationOverflowMenu({ overflowItems, isActive, tabPreferen
                           visible: isDefault,
                         }
                       )}
-                      title={isDefault ? "Clear default" : "Set as default"}
+                      title={isDefault ? "Bỏ thiết lập mặc định" : "Đặt làm mặc định"}
                     >
                       <DefaultTabOutline className="size-3" />
                     </button>

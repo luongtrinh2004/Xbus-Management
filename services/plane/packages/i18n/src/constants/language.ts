@@ -6,9 +6,9 @@
 
 import type { TLanguage, ILanguageOption } from "../types";
 
-export const FALLBACK_LANGUAGE: TLanguage = "en";
+export const FALLBACK_LANGUAGE: TLanguage = "vi-VN";
 
-export const SUPPORTED_LANGUAGES: ILanguageOption[] = [
+const ALL_SUPPORTED_LANGUAGES: ILanguageOption[] = [
   { label: "English", value: "en" },
   { label: "Français", value: "fr" },
   { label: "Español", value: "es" },
@@ -26,10 +26,15 @@ export const SUPPORTED_LANGUAGES: ILanguageOption[] = [
   { label: "Português Brasil", value: "pt-BR" },
   { label: "Indonesian", value: "id" },
   { label: "Română", value: "ro" },
-  { label: "Tiếng việt", value: "vi-VN" },
+  { label: "Tiếng Việt", value: "vi-VN" },
   { label: "Türkçe", value: "tr-TR" },
   { label: "ქართული", value: "ka-ge" },
   { label: "Nederlands", value: "nl" },
 ];
+
+export const SUPPORTED_LANGUAGES =
+  process.env.VITE_XBUS_EMBEDDED === "true"
+    ? ALL_SUPPORTED_LANGUAGES.filter((language) => language.value === "vi-VN")
+    : ALL_SUPPORTED_LANGUAGES;
 
 export const LANGUAGE_STORAGE_KEY = "userLanguage";

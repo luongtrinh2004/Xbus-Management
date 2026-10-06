@@ -33,6 +33,17 @@ class XBusBridgeTests(TestCase):
         self.assertEqual(WorkspaceMember.objects.get(member=staff).role, 15)
         self.assertEqual(Profile.objects.get(user=staff).goals["xbus"]["code"], "NV002")
 
+    def test_sync_sets_vietnamese_for_new_and_existing_profiles(self):
+        sync_roster(roster())
+        staff = User.objects.get(pk=identity_id("staff-1"))
+        profile = Profile.objects.get(user=staff)
+        self.assertEqual(profile.language, "vi-VN")
+        profile.language = "en"
+        profile.save()
+        sync_roster(roster())
+        profile.refresh_from_db()
+        self.assertEqual(profile.language, "vi-VN")
+
     def test_disabled_and_removed_users_lose_access_without_deletion(self):
         sync_roster(roster())
         rows = roster()

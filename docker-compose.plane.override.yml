@@ -19,10 +19,10 @@ services:
     environment:
       DEBUG: "0"
   web:
-    image: xbus-plane-frontend:1.4.2-hydration-fix
+    image: xbus-plane-frontend:1.4.2-xbus-source
     build:
-      context: ./services/plane-xbus
-      dockerfile: Dockerfile.web
+      context: ./services/plane
+      dockerfile: ../plane-xbus/Dockerfile.web
   proxy:
     environment:
       XBUS_FRAME_ANCESTORS: ${XBUS_FRAME_ANCESTORS:-http://localhost:3000}

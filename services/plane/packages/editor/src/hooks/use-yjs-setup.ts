@@ -65,7 +65,7 @@ export const useYjsSetup = ({ docId, serverUrl, authToken, onStateChange }: UseY
       url: serverUrl,
       onAuthenticationFailed: () => {
         if (isDisposedRef.current) return;
-        const error: CollaborationError = { type: "auth-failed", message: "Authentication failed" };
+        const error: CollaborationError = { type: "auth-failed", message: "Xác thực thất bại" };
         const newStage = { kind: "disconnected" as const, error };
         stageRef.current = newStage;
         setStage(newStage);

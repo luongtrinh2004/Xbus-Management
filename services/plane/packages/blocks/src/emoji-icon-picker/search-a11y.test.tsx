@@ -16,9 +16,9 @@ describe("emoji/icon picker search fields", () => {
   it("names the icon tab search with the translated label", () => {
     render(<IconRoot defaultColor="#6d7b8a" onChange={vi.fn()} iconType="material" />);
     // Assert the explicit attribute: the accessible-name algorithm would otherwise fall back to the placeholder.
-    const search = screen.getByRole("textbox", { name: "Search" });
-    expect(search.getAttribute("aria-label")).toBe("Search");
-    expect(search.getAttribute("placeholder")).toBe("Search");
+    const search = screen.getByRole("textbox", { name: "Tìm kiếm" });
+    expect(search.getAttribute("aria-label")).toBe("Tìm kiếm");
+    expect(search.getAttribute("placeholder")).toBe("Tìm kiếm");
   });
 
   it("names the icon tab search with the caller's placeholder", () => {
@@ -28,6 +28,6 @@ describe("emoji/icon picker search fields", () => {
 
   it("names the emoji tab search with the translated label", () => {
     render(<EmojiRoot onChange={vi.fn()} />);
-    expect(screen.getByRole("searchbox", { name: "Search" }).getAttribute("aria-label")).toBe("Search");
+    expect(screen.getByRole("searchbox", { name: "Tìm kiếm" }).getAttribute("aria-label")).toBe("Tìm kiếm");
   });
 });

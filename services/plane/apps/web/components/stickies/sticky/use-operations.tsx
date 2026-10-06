@@ -77,7 +77,7 @@ export const useStickyOperations = (props: TProps) => {
               return;
             }
           }
-          if (!workspaceSlug) throw new Error("Missing required fields");
+          if (!workspaceSlug) throw new Error("Vui lòng điền đầy đủ thông tin bắt buộc");
           if (!isValid(payload)) return;
           await createSticky(workspaceSlug, payload);
           setToast({
@@ -96,7 +96,7 @@ export const useStickyOperations = (props: TProps) => {
       },
       update: async (stickyId: string, data: Partial<TSticky>) => {
         try {
-          if (!workspaceSlug) throw new Error("Missing required fields");
+          if (!workspaceSlug) throw new Error("Vui lòng điền đầy đủ thông tin bắt buộc");
           if (!isValid(data)) return;
           await updateSticky(workspaceSlug, stickyId, data);
         } catch (error) {
@@ -110,7 +110,7 @@ export const useStickyOperations = (props: TProps) => {
       },
       remove: async (stickyId: string) => {
         try {
-          if (!workspaceSlug) throw new Error("Missing required fields");
+          if (!workspaceSlug) throw new Error("Vui lòng điền đầy đủ thông tin bắt buộc");
           await deleteSticky(workspaceSlug, stickyId);
           setToast({
             type: "success",
@@ -133,7 +133,7 @@ export const useStickyOperations = (props: TProps) => {
         instruction: InstructionType
       ) => {
         try {
-          if (!workspaceSlug) throw new Error("Missing required fields");
+          if (!workspaceSlug) throw new Error("Vui lòng điền đầy đủ thông tin bắt buộc");
           await updateStickyPosition(workspaceSlug, sourceId, droppedId, instruction);
         } catch (error) {
           console.error("Error in updating sticky position:", error);

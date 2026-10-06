@@ -55,15 +55,15 @@ export const ConfirmWorkspaceMemberRemove = observer(function ConfirmWorkspaceMe
       handleClose={handleClose}
       handleSubmit={handleDeletion}
       isSubmitting={isRemoving}
-      title={isSelf ? "Leave workspace?" : `Remove ${userDetails?.display_name}?`}
+      title={isSelf ? "Rời không gian làm việc?" : `Xóa ${userDetails?.display_name}?`}
       content={
         isSelf ? (
           t("workspace_settings.settings.members.leave_confirmation")
         ) : (
           <>
             {/* TODO: Add translation here */}
-            Are you sure you want to remove member- <span className="font-bold">{userDetails?.display_name}</span>? They
-            will no longer have access to this workspace. This action cannot be undone.
+            Bạn có chắc muốn loại thành viên <span className="font-bold">{userDetails?.display_name}</span>? Thành viên
+            sẽ không còn quyền truy cập không gian làm việc. Thao tác này không thể hoàn tác.
           </>
         )
       }

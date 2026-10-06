@@ -79,7 +79,7 @@ export const IssueAttachmentsListItem = observer(function IssueAttachmentsListIt
                 <Tooltip
                   label={`${
                     getUserDetails(attachment?.created_by)?.display_name ?? ""
-                  } uploaded on ${renderFormattedDate(attachment.updated_at)}`}
+                  } được tải lên vào ${renderFormattedDate(attachment.updated_at)}`}
                   layout="stacked"
                   disabled={isMobile}
                 >

@@ -256,7 +256,7 @@ export class WorkspaceMemberStore implements IWorkspaceMemberStore {
    */
   updateMember = async (workspaceSlug: string, userId: string, data: { role: EUserPermissions }) => {
     const memberDetails = this.getWorkspaceMemberDetails(userId);
-    if (!memberDetails) throw new Error("Member not found");
+    if (!memberDetails) throw new Error("Không tìm thấy thành viên");
     // original data to revert back in case of error
     const originalProjectMemberData = { ...this.workspaceMemberMap?.[workspaceSlug]?.[userId] };
     try {
@@ -280,7 +280,7 @@ export class WorkspaceMemberStore implements IWorkspaceMemberStore {
    */
   removeMemberFromWorkspace = async (workspaceSlug: string, userId: string) => {
     const memberDetails = this.getWorkspaceMemberDetails(userId);
-    if (!memberDetails) throw new Error("Member not found");
+    if (!memberDetails) throw new Error("Không tìm thấy thành viên");
     // oxlint-disable-next-line promise/always-return
     await this.workspaceService.deleteWorkspaceMember(workspaceSlug, memberDetails?.id).then(() => {
       runInAction(() => {

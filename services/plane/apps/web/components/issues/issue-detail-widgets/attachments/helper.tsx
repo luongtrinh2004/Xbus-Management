@@ -40,17 +40,17 @@ export const useAttachmentOperations = (
   const attachmentOperations: TAttachmentOperations = useMemo(
     () => ({
       create: async (file) => {
-        if (!workspaceSlug || !projectId || !issueId) throw new Error("Missing required fields");
+        if (!workspaceSlug || !projectId || !issueId) throw new Error("Vui lòng điền đầy đủ thông tin bắt buộc");
         const attachmentUploadPromise = createAttachment(workspaceSlug, projectId, issueId, file);
         setPromiseToast(attachmentUploadPromise, {
-          loading: "Uploading attachment...",
+          loading: "Đang tải tệp đính kèm lên…",
           success: {
-            title: "Attachment uploaded",
-            message: () => "The attachment has been successfully uploaded",
+            title: "Đã tải tệp đính kèm lên",
+            message: () => "Đã tải tệp đính kèm lên",
           },
           error: {
-            title: "Attachment not uploaded",
-            message: () => "The attachment could not be uploaded",
+            title: "Không thể tải tệp đính kèm lên",
+            message: () => "Không thể tải tệp đính kèm lên",
           },
         });
 
@@ -58,18 +58,18 @@ export const useAttachmentOperations = (
       },
       remove: async (attachmentId) => {
         try {
-          if (!workspaceSlug || !projectId || !issueId) throw new Error("Missing required fields");
+          if (!workspaceSlug || !projectId || !issueId) throw new Error("Vui lòng điền đầy đủ thông tin bắt buộc");
           await removeAttachment(workspaceSlug, projectId, issueId, attachmentId);
           setToast({
-            message: "The attachment has been successfully removed",
+            message: "Đã xóa tệp đính kèm",
             type: "success",
-            title: "Attachment removed",
+            title: "Đã xóa tệp đính kèm",
           });
         } catch (_error) {
           setToast({
-            message: "The Attachment could not be removed",
+            message: "Không thể xóa tệp đính kèm",
             type: "error",
-            title: "Attachment not removed",
+            title: "Không thể xóa tệp đính kèm",
           });
         }
       },

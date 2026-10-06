@@ -20,7 +20,7 @@ export const useExportColumns = () => {
   const columns = [
     {
       key: "Exported By",
-      content: "Exported By",
+      content: "Người xuất",
       tdRender: (rowData: RowData) => {
         const { avatar_url, display_name, email } = rowData.initiated_by_detail;
         return (
@@ -47,14 +47,14 @@ export const useExportColumns = () => {
     },
     {
       key: "Exported On",
-      content: "Exported On",
+      content: "Thời gian xuất",
       tdRender: (rowData: RowData) => <span>{renderFormattedDate(rowData.created_at)}</span>,
     },
 
     {
       key: "Exported projects",
-      content: "Exported projects",
-      tdRender: (rowData: RowData) => <div className="text-13">{rowData.project.length} project(s)</div>,
+      content: "Dự án đã xuất",
+      tdRender: (rowData: RowData) => <div className="text-13">{rowData.project.length} dự án</div>,
     },
     {
       key: "Format",
@@ -102,7 +102,7 @@ export const useExportColumns = () => {
               <a target="_blank" href={rowData?.url} rel="noopener noreferrer">
                 <button className="flex w-full items-center gap-1 font-medium text-accent-primary">
                   <DownloadOutline className="h-4 w-4" />
-                  <div>Download</div>
+                  <div>Tải xuống</div>
                 </button>
               </a>
             ) : (
@@ -110,7 +110,7 @@ export const useExportColumns = () => {
             )}
           </>
         ) : (
-          <div className="text-11 text-danger-primary">Expired</div>
+          <div className="text-11 text-danger-primary">Đã hết hạn</div>
         ),
     },
   ];

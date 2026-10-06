@@ -63,18 +63,18 @@ export function InstanceGoogleConfigForm(props: Props) {
     {
       key: "GOOGLE_CLIENT_ID",
       type: "text",
-      label: "Client ID",
+      label: "ID khách hàng",
       description: (
         <>
-          Your client ID lives in your Google API Console.{" "}
+          Tìm client ID trong Google API Console.{" "}
           <a
             href="https://developers.google.com/identity/protocols/oauth2/javascript-implicit-flow#creatingcred"
             target="_blank"
             className="text-accent-primary hover:underline"
             rel="noreferrer"
-            aria-label="Google OAuth client ID documentation"
+            aria-label={"Tài liệu OAuth client ID của Google"}
           >
-            Learn more
+            Tìm hiểu thêm
           </a>
         </>
       ),
@@ -85,18 +85,18 @@ export function InstanceGoogleConfigForm(props: Props) {
     {
       key: "GOOGLE_CLIENT_SECRET",
       type: "password",
-      label: "Client secret",
+      label: "Secret khách hàng",
       description: (
         <>
-          Your client secret should also be in your Google API Console.{" "}
+          Tìm client secret trong Google API Console.{" "}
           <a
             href="https://developers.google.com/identity/oauth2/web/guides/get-google-api-clientid"
             target="_blank"
             className="text-accent-primary hover:underline"
             rel="noreferrer"
-            aria-label="Google OAuth client secret documentation"
+            aria-label={"Tài liệu OAuth client secret của Google"}
           >
-            Learn more
+            Tìm hiểu thêm
           </a>
         </>
       ),
@@ -109,20 +109,20 @@ export function InstanceGoogleConfigForm(props: Props) {
   const GOOGLE_COMMON_SERVICE_DETAILS: TCopyField[] = [
     {
       key: "Origin_URL",
-      label: "Origin URL",
+      label: "URL nguồn gốc",
       url: originURL,
       description: (
         <p>
-          We will auto-generate this. Paste this into your{" "}
-          <CodeBlock darkerShade>Authorized JavaScript origins</CodeBlock> field. For this OAuth client{" "}
+          Thông tin sẽ được tạo tự động. Dán vào <CodeBlock darkerShade>Origin JavaScript được phép</CodeBlock> trường.
+          Với OAuth client này{" "}
           <a
             href="https://console.cloud.google.com/apis/credentials/oauthclient"
             target="_blank"
             className="text-accent-primary hover:underline"
             rel="noreferrer"
-            aria-label="Google Cloud Console OAuth client credentials"
+            aria-label={"Thông tin OAuth client trong Google Cloud Console"}
           >
-            here.
+            tại đây.
           </a>
         </p>
       ),
@@ -132,20 +132,20 @@ export function InstanceGoogleConfigForm(props: Props) {
   const GOOGLE_SERVICE_DETAILS: TCopyField[] = [
     {
       key: "Callback_URI",
-      label: "Callback URI",
+      label: "URI callback",
       url: `${originURL}/auth/google/callback/`,
       description: (
         <p>
-          We will auto-generate this. Paste this into your <CodeBlock darkerShade>Authorized Redirect URI</CodeBlock>{" "}
-          field. For this OAuth client{" "}
+          Thông tin sẽ được tạo tự động. Dán vào <CodeBlock darkerShade>URI chuyển hướng được phép</CodeBlock> trường.
+          Với OAuth client này{" "}
           <a
             href="https://console.cloud.google.com/apis/credentials/oauthclient"
             target="_blank"
             className="text-accent-primary hover:underline"
             rel="noreferrer"
-            aria-label="Google Cloud Console OAuth client credentials"
+            aria-label={"Thông tin OAuth client trong Google Cloud Console"}
           >
-            here.
+            tại đây.
           </a>
         </p>
       ),
@@ -159,8 +159,8 @@ export function InstanceGoogleConfigForm(props: Props) {
       const response = await updateInstanceConfigurations(payload);
       setToast({
         type: "success",
-        title: "Done!",
-        message: "Your Google authentication is configured. You should test it now.",
+        title: "Hoàn tất",
+        message: "Đã cấu hình xác thực Google. Hãy kiểm tra kết nối.",
       });
       reset({
         GOOGLE_CLIENT_ID: response.find((item) => item.key === "GOOGLE_CLIENT_ID")?.value,
@@ -189,7 +189,7 @@ export function InstanceGoogleConfigForm(props: Props) {
       <div className="flex flex-col gap-8">
         <div className="grid w-full grid-cols-2 gap-x-12 gap-y-8">
           <div className="col-span-2 flex flex-col gap-y-4 pt-1 md:col-span-1">
-            <div className="pt-2.5 text-18 font-medium">Google-provided details for Plane</div>
+            <div className="pt-2.5 text-18 font-medium">Thông tin Google cung cấp cho Plane</div>
             {GOOGLE_FORM_FIELDS.map((field) => (
               <ControllerInput
                 key={field.key}
@@ -213,7 +213,7 @@ export function InstanceGoogleConfigForm(props: Props) {
                   onClick={(e) => void handleSubmit(onSubmit)(e)}
                   loading={isSubmitting}
                   disabled={!isDirty}
-                  label={isSubmitting ? "Saving" : "Save changes"}
+                  label={isSubmitting ? "Đang lưu" : "Lưu thay đổi"}
                 />
                 <Button
                   variant="secondary"
@@ -221,13 +221,13 @@ export function InstanceGoogleConfigForm(props: Props) {
                   stretch="auto"
                   nativeButton={false}
                   render={<Link href="/authentication" onClick={handleGoBack} />}
-                  label="Go back"
+                  label={"Quay lại"}
                 />
               </div>
             </div>
           </div>
           <div className="col-span-2 flex flex-col gap-y-6 md:col-span-1">
-            <div className="pt-2 text-18 font-medium">Plane-provided details for Google</div>
+            <div className="pt-2 text-18 font-medium">Thông tin Plane cung cấp cho Google</div>
 
             <div className="flex flex-col gap-y-4">
               {/* common service details */}

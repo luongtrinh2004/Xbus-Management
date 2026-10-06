@@ -58,15 +58,15 @@ export const CycleEmptyState = observer(function CycleEmptyState() {
       .then(() =>
         setToast({
           type: "success",
-          title: "Success!",
-          message: "Work items added to the cycle successfully.",
+          title: "Thành công!",
+          message: "Đã thêm công việc vào chu kỳ.",
         })
       )
       .catch(() =>
         setToast({
           type: "error",
-          title: "Error!",
-          message: "Selected work items could not be added to the cycle. Please try again.",
+          title: "Lỗi!",
+          message: "Không thể thêm công việc đã chọn vào chu kỳ. Vui lòng thử lại.",
         })
       );
   };
@@ -96,7 +96,7 @@ export const CycleEmptyState = observer(function CycleEmptyState() {
             description={t("common_empty_state.search.description")}
             actions={[
               {
-                label: "Clear filters",
+                label: "Xóa bộ lọc",
                 onClick: cycleWorkItemFilter?.clearFilters,
                 disabled: !canPerformEmptyStateActions || !cycleWorkItemFilter,
                 variant: "secondary",

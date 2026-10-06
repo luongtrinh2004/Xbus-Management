@@ -110,21 +110,21 @@ export const PageActions = observer(function PageActions(props: Props) {
           action: () => {
             pageOperations.toggleAccess();
           },
-          title: access === EPageAccess.PUBLIC ? "Make private" : "Make public",
+          title: access === EPageAccess.PUBLIC ? "Chuyển thành riêng tư" : "Chuyển thành công khai",
           icon: access === EPageAccess.PUBLIC ? LockOutline : GlobeOutline,
           shouldRender: canCurrentUserChangeAccess && !archived_at,
         },
         {
           key: "open-in-new-tab",
           action: pageOperations.openInNewTab,
-          title: "Open in new tab",
+          title: "Mở trong tab mới",
           icon: NewTabOutline,
           shouldRender: true,
         },
         {
           key: "copy-link",
           action: pageOperations.copyLink,
-          title: "Copy link",
+          title: "Sao chép liên kết",
           icon: LinkOutline,
           shouldRender: true,
         },
@@ -133,7 +133,7 @@ export const PageActions = observer(function PageActions(props: Props) {
           action: () => {
             pageOperations.duplicate();
           },
-          title: "Make a copy",
+          title: "Tạo bản sao",
           icon: CopyOutline,
           shouldRender: canCurrentUserDuplicatePage,
         },
@@ -151,14 +151,14 @@ export const PageActions = observer(function PageActions(props: Props) {
           action: () => {
             setDeletePageModal(true);
           },
-          title: "Delete",
+          title: "Xóa",
           icon: DeleteOutline,
           shouldRender: canCurrentUserDeletePage && !!archived_at,
         },
         {
           key: "move",
           action: () => setMovePageModal(true),
-          title: "Move",
+          title: "Di chuyển",
           icon: ExportOutline,
           shouldRender: canCurrentUserMovePage && isMovePageEnabled,
         },

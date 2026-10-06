@@ -36,7 +36,7 @@ export function SingleExport({ service, refreshing }: Props) {
       <div>
         <h4 className="flex items-center gap-2 text-13">
           <span>
-            Export to{" "}
+            Xuất đến{" "}
             <span className="font-medium">
               {provider === "csv" ? "CSV" : provider === "xlsx" ? "Excel" : provider === "json" ? "JSON" : ""}
             </span>{" "}
@@ -54,12 +54,12 @@ export function SingleExport({ service, refreshing }: Props) {
                       : ""
             }`}
           >
-            {refreshing ? "Refreshing..." : service.status}
+            {refreshing ? "Đang làm mới…" : service.status}
           </span>
         </h4>
         <div className="mt-2 flex items-center gap-2 text-11 text-secondary">
           <span>{renderFormattedDate(service.created_at)}</span>|
-          <span>Exported by {service?.initiated_by_detail?.display_name}</span>
+          <span>Người xuất {service?.initiated_by_detail?.display_name}</span>
         </div>
       </div>
       {checkExpiry(service.created_at) ? (
@@ -82,7 +82,7 @@ export function SingleExport({ service, refreshing }: Props) {
           )}
         </>
       ) : (
-        <div className="text-11 text-danger-primary">Expired</div>
+        <div className="text-11 text-danger-primary">Đã hết hạn</div>
       )}
     </div>
   );
