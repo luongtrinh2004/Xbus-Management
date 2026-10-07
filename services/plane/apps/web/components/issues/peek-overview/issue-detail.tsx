@@ -14,6 +14,7 @@ import type { TNameDescriptionLoader } from "@plane/types";
 // components
 import { DescriptionVersionsRoot } from "@/components/core/description-versions";
 import { DescriptionInput } from "@/components/editor/rich-text/description-input";
+import { XBusReview } from "@/components/issues/xbus-review";
 // hooks
 import { useIssueDetail } from "@/hooks/store/use-issue-detail";
 import { useMember } from "@/hooks/store/use-member";
@@ -82,6 +83,7 @@ export const PeekOverviewIssueDetails = observer(function PeekOverviewIssueDetai
 
   return (
     <div className="space-y-2">
+      <XBusReview workspaceSlug={workspaceSlug} projectId={issue.project_id} issueId={issueId} />
       {issue.parent_id && (
         <IssueParentDetail
           workspaceSlug={workspaceSlug}

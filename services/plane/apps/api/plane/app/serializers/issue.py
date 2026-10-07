@@ -122,6 +122,16 @@ class IssueCreateSerializer(BaseSerializer):
         return data
 
     def validate(self, attrs):
+        # XBus adds an opt-in review policy; upstream-only installations remain compatible.
+        from django.apps import apps
+
+        if self.instance and apps.is_installed("plane.xbus_review"):
+            from plane.xbus_review.models import Review
+
+            review = Review.objects.filter(issue_id=self.instance.pk).first()
+            target_state = attrs.get("state")
+            if review and target_state and target_state.group == "completed" and target_state.pk != self.instance.state_id:
+                raise serializers.ValidationError({"state": "Hãy duyệt công việc qua mục Nghiệm thu trước khi hoàn thành."})
         allow_triage = self.context.get("allow_triage_state", False)
         state_manager = State.triage_objects if allow_triage else State.objects
 

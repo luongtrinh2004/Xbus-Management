@@ -4,6 +4,18 @@
 @import "./emoji.css";
 @plugin "@tailwindcss/typography";
 
+:root,
+html,
+body,
+button,
+input,
+optgroup,
+select,
+textarea,
+[data-base-ui-portal] {
+  font-family: "Inter Variable", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
 /* stickies and editor colors
  * Text colors and the themed light/dark background ramps come from
  * @plane/editor/styles (imported above), which is their single source of truth.

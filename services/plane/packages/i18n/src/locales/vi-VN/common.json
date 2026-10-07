@@ -468,7 +468,7 @@
     "epics": "Epics",
     "work_item": "Công việc",
     "work_items": "Công việc",
-    "sub_work_item": "Công việc con",
+    "sub_work_item": "Subtask",
     "views": "Chế độ xem",
     "pages": "Trang",
     "add": "Thêm",
@@ -511,7 +511,7 @@
       "private": "Riêng tư"
     },
     "done": "Hoàn thành",
-    "sub_work_items": "Công việc con",
+    "sub_work_items": "Subtask",
     "comment": "Bình luận",
     "workspace_level": "Cấp không gian làm việc",
     "order_by": {

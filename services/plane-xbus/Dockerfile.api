@@ -1,4 +1,7 @@
 FROM makeplane/plane-backend@sha256:90032ce088708889b60c00d491897916f4deb882facda27db59fd10fb68729ef
-COPY xbus_bridge.py xbus_urls.py xbus_tests.py /code/plane/
+COPY apps/api/plane/ /code/plane/
+COPY --from=xbus_integration xbus_bridge.py xbus_urls.py xbus_tests.py /code/plane/
+COPY --from=xbus_integration xbus_review/ /code/plane/xbus_review/
 RUN sed -i 's/ROOT_URLCONF = "plane.urls"/ROOT_URLCONF = "plane.xbus_urls"/' /code/plane/settings/common.py \
-    && grep -Fq 'ROOT_URLCONF = "plane.xbus_urls"' /code/plane/settings/common.py
+    && grep -Fq 'ROOT_URLCONF = "plane.xbus_urls"' /code/plane/settings/common.py \
+    && printf '\nINSTALLED_APPS.append("plane.xbus_review")\nMIDDLEWARE.append("plane.xbus_review.middleware.ReviewGuardMiddleware")\n' >> /code/plane/settings/common.py

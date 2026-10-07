@@ -40,8 +40,14 @@ fi
 
 echo "📦 [1/5] Đồng bộ source lên VPS (giữ nguyên các file môi trường trên VPS)"
 "${SSH[@]}" "${VPS_TARGET}" "mkdir -p '${VPS_DIR}'"
-COPYFILE_DISABLE=1 tar \
+# macOS tar otherwise stores extended attributes in PAX/AppleDouble metadata.
+TAR_METADATA_OPTIONS=()
+if [[ "$(uname -s)" == "Darwin" ]]; then
+  TAR_METADATA_OPTIONS=(--no-xattrs --no-mac-metadata)
+fi
+COPYFILE_DISABLE=1 tar "${TAR_METADATA_OPTIONS[@]}" \
   --exclude='._*' \
+  --exclude='.DS_Store' \
   --exclude='.deploy.env' \
   --exclude='.git' \
   --exclude='.next' \
@@ -99,6 +105,10 @@ upsert_env .env PLANE_PUBLIC_URL "${PUBLIC_PLANE_URL}"
 upsert_env plane.env WEB_URL "${PUBLIC_PLANE_URL}"
 upsert_env plane.env CORS_ALLOWED_ORIGINS "${PUBLIC_PLANE_URL},${PUBLIC_APP_URL}"
 upsert_env plane.env XBUS_FRAME_ANCESTORS "${PUBLIC_APP_URL}"
+
+# Earlier macOS uploads may have left AppleDouble files in the source tree.
+# These are metadata, not translation/source files.
+find services/plane -type f -name '._*' -delete
 
 PLANE_COMPOSE="$DOCKER_COMPOSE --project-directory . --env-file plane.env -p xbus-plane -f services/plane/deployments/cli/community/docker-compose.yml -f docker-compose.plane.override.yml"
 $PLANE_COMPOSE up --detach --build

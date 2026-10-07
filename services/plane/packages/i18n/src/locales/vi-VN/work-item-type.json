@@ -439,7 +439,7 @@
       "content": {
         "intro": "Loại công việc {workItemTypeName} có:",
         "parent_items": "{count, plural, other {Sẽ xóa # liên kết cấp cha}}.",
-        "child_items": "{count, plural, other {công việc con}}",
+        "child_items": "{count, plural, other {Subtask}}",
         "parent_line_suffix_when_also_children": ", và ",
         "footer": "Thay đổi này sẽ gỡ bỏ quan hệ cha-con khỏi các công việc hiện có thuộc loại {workItemTypeName}."
       },

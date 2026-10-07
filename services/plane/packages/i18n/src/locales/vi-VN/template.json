@@ -243,7 +243,7 @@
         "description": "Chưa có công việc nào. Thêm một để cấu trúc công việc của bạn tốt hơn."
       },
       "no_sub_work_items": {
-        "description": "Chưa có công việc con. Thêm một để cấu trúc công việc của bạn tốt hơn."
+        "description": "Chưa có Subtask. Thêm một để cấu trúc công việc của bạn tốt hơn."
       },
       "page": {
         "no_templates": {

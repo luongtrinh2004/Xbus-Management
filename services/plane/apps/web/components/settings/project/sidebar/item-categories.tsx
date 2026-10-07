@@ -67,7 +67,7 @@ export const ProjectSettingsSidebarItemCategories = observer(function ProjectSet
                     href={`/${workspaceSlug}/settings/projects/${projectId}${item.href}/`}
                     isActive={isItemActive}
                     icon={PROJECT_SETTINGS_ICONS[item.key]}
-                    label={t(item.i18n_label)}
+                    label={item.key === "workflows" ? "Workflow" : t(item.i18n_label)}
                   />
                 );
               })}

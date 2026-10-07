@@ -17,6 +17,7 @@ import {
   PagesOutline,
   ViewsOutline,
   WorkItemsOutline,
+  SettingsOutline,
 } from "@makeplane/propel/icons";
 import type { EUserProjectRoles } from "@plane/types";
 // plane ui
@@ -206,6 +207,21 @@ export const ProjectNavigation = observer(function ProjectNavigation(props: TPro
           </Link>
         );
       })}
+      {allowPermissions(
+        [EUserPermissions.ADMIN, EUserPermissions.MEMBER],
+        EUserPermissionsLevel.PROJECT,
+        workspaceSlug,
+        project.id
+      ) && (
+        <Link href={`/${workspaceSlug}/settings/projects/${project.id}/`} onClick={handleProjectClick}>
+          <SidebarNavItem isActive={pathname.includes(`/settings/projects/${project.id}`)}>
+            <div className="flex items-center gap-1.5 py-[1px]">
+              <SettingsOutline className="size-4 shrink-0" />
+              <span className="text-11 font-medium">Cài đặt dự án</span>
+            </div>
+          </SidebarNavItem>
+        </Link>
+      )}
     </>
   );
 });

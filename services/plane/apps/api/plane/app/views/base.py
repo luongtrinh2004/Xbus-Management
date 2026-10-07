@@ -72,6 +72,10 @@ class BaseViewSet(TimezoneMixin, ReadReplicaControlMixin, ModelViewSet, BasePagi
         Handle any exception that occurs, by returning an appropriate response,
         or re-raising the error.
         """
+        if isinstance(exc, IntegrityError) and "XBUS_WORKFLOW_DENIED" in str(exc):
+            return Response({"error": "Workflow không cho phép tạo hoặc chuyển công việc sang trạng thái này với quyền hiện tại."}, status=status.HTTP_409_CONFLICT)
+        if isinstance(exc, IntegrityError) and "XBUS_REVIEW_REQUIRED" in str(exc):
+            return Response({"error": "Công việc phải được duyệt qua mục Nghiệm thu trước khi hoàn thành."}, status=status.HTTP_409_CONFLICT)
         try:
             response = super().handle_exception(exc)
             return response
@@ -169,6 +173,10 @@ class BaseAPIView(TimezoneMixin, ReadReplicaControlMixin, APIView, BasePaginator
         Handle any exception that occurs, by returning an appropriate response,
         or re-raising the error.
         """
+        if isinstance(exc, IntegrityError) and "XBUS_WORKFLOW_DENIED" in str(exc):
+            return Response({"error": "Workflow không cho phép tạo hoặc chuyển công việc sang trạng thái này với quyền hiện tại."}, status=status.HTTP_409_CONFLICT)
+        if isinstance(exc, IntegrityError) and "XBUS_REVIEW_REQUIRED" in str(exc):
+            return Response({"error": "Công việc phải được duyệt qua mục Nghiệm thu trước khi hoàn thành."}, status=status.HTTP_409_CONFLICT)
         try:
             response = super().handle_exception(exc)
             return response

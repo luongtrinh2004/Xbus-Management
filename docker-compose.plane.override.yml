@@ -1,21 +1,26 @@
 services:
   api:
-    image: xbus-plane-backend:1.4.2-identity-bridge
+    image: xbus-plane-backend:1.4.2-review
     build:
-      context: ./services/plane-xbus
-      dockerfile: Dockerfile.api
+      context: ./services/plane
+      dockerfile: ../plane-xbus/Dockerfile.api
+      additional_contexts:
+        xbus_integration: ./services/plane-xbus
     environment:
       # Do not inherit a host-level DEBUG value (for example "release").
       # Plane's Django settings require this value to be numeric.
       DEBUG: "0"
       XBUS_BRIDGE_SECRET: ${XBUS_BRIDGE_SECRET:?Set XBUS_BRIDGE_SECRET in plane.env}
   worker:
+    image: xbus-plane-backend:1.4.2-review
     environment:
       DEBUG: "0"
   beat-worker:
+    image: xbus-plane-backend:1.4.2-review
     environment:
       DEBUG: "0"
   migrator:
+    image: xbus-plane-backend:1.4.2-review
     environment:
       DEBUG: "0"
   web:

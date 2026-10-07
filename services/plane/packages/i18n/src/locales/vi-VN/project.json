@@ -191,12 +191,12 @@
     "empty_state": {
       "no_issues": {
         "title": "Tạo công việc và giao nó cho ai đó, thậm chí là chính bạn",
-        "description": "Xem công việc như công việc, nhiệm vụ hoặc công việc cần hoàn thành. Công việc và các công việc con của chúng thường dựa trên thời gian, được giao cho thành viên nhóm để thực hiện. Nhóm của bạn thúc đẩy dự án đạt được mục tiêu bằng cách tạo, giao và hoàn thành công việc.",
+        "description": "Xem công việc như công việc, nhiệm vụ hoặc công việc cần hoàn thành. Công việc và các Subtask của chúng thường dựa trên thời gian, được giao cho thành viên nhóm để thực hiện. Nhóm của bạn thúc đẩy dự án đạt được mục tiêu bằng cách tạo, giao và hoàn thành công việc.",
         "primary_button": {
           "text": "Tạo công việc đầu tiên của bạn",
           "comic": {
             "title": "Công việc là khối xây dựng cơ bản trong XBus Office.",
-            "description": "Thiết kế lại giao diện XBus Office, định vị lại thương hiệu công ty hoặc ra mắt hệ thống phun nhiên liệu mới đều là ví dụ về công việc có thể chứa các công việc con."
+            "description": "Thiết kế lại giao diện XBus Office, định vị lại thương hiệu công ty hoặc ra mắt hệ thống phun nhiên liệu mới đều là ví dụ về công việc có thể chứa các Subtask."
           }
         }
       },
