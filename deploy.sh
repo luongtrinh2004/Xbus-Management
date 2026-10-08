@@ -2,6 +2,38 @@
 set -Eeuo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+# Ghi cả stdout/stderr và giữ nguyên exit code; mỗi lần chạy thay log cũ.
+if [[ "${XBUS_DEPLOY_LOG_CAPTURED:-0}" != 1 && "${1:-}" != --help && "${1:-}" != -h ]]; then
+  mkdir -p "${SCRIPT_DIR}/logs"
+  DEPLOY_LOG="${SCRIPT_DIR}/logs/deploy-latest.log"
+  (umask 077; : > "${DEPLOY_LOG}")
+  chmod 600 "${DEPLOY_LOG}"
+  set +e
+  XBUS_DEPLOY_LOG_CAPTURED=1 bash "${BASH_SOURCE[0]}" "$@" 2>&1 | tee "${DEPLOY_LOG}"
+  DEPLOY_STATUSES=("${PIPESTATUS[@]}")
+  DEPLOY_STATUS="${DEPLOY_STATUSES[0]}"
+  if [[ "${DEPLOY_STATUS}" == 0 ]]; then DEPLOY_STATUS="${DEPLOY_STATUSES[1]}"; fi
+  printf 'Kết thúc: %s | exit code: %s\n' "$(date '+%Y-%m-%d %H:%M:%S %z')" "${DEPLOY_STATUS}" | tee -a "${DEPLOY_LOG}"
+  echo "Log lần gần nhất: ${DEPLOY_LOG}"
+  exit "${DEPLOY_STATUS}"
+fi
+echo "Bắt đầu: $(date '+%Y-%m-%d %H:%M:%S %z') | chế độ: ${1:-deploy VPS}"
+case "${1:-}" in
+  --build-only)
+    if [[ $# -ne 1 ]]; then
+      echo "Cách dùng: bash deploy.sh [--build-only]" >&2
+      exit 2
+    fi
+    exec bash "${SCRIPT_DIR}/scripts/build-office-plane.sh"
+    ;;
+  --help|-h)
+    echo "bash deploy.sh               Build Plane + XBus Office trên VPS và deploy"
+    echo "bash deploy.sh --build-only  Build cả hai tại local, không SSH/restart/migrate"
+    exit 0
+    ;;
+  "") ;;
+  *) echo "Cách dùng: bash deploy.sh [--build-only]" >&2; exit 2 ;;
+esac
 if [[ -f "${SCRIPT_DIR}/.deploy.env" ]]; then
   set -a
   source "${SCRIPT_DIR}/.deploy.env"
@@ -55,13 +87,14 @@ COPYFILE_DISABLE=1 tar "${TAR_METADATA_OPTIONS[@]}" \
   --exclude='.env' \
   --exclude='.env.*' \
   --exclude='plane.env' \
+  --exclude='logs' \
   --exclude='src/data/json' \
   --exclude='public/uploads' \
   --exclude='public/images/avatars' \
   --exclude='public/images/afternoon-tea' \
   -C "${SCRIPT_DIR}" -czf - . | "${SSH[@]}" "${VPS_TARGET}" "tar -xzf - -C '${VPS_DIR}'"
 
-echo "🏗️  [2/5] Khởi động Plane, build XBus trên VPS và restart container"
+echo "🏗️  [2/5] Build Plane + XBus Office trên VPS, sau đó restart container"
 "${SSH[@]}" "${VPS_TARGET}" bash -s -- \
   "${VPS_DIR}" "${LOCAL_IMAGE_NAME}" "${PUBLIC_APP_URL}" "${PUBLIC_PLANE_URL}" <<'REMOTE_SCRIPT'
 set -Eeuo pipefail
@@ -74,10 +107,8 @@ cd "${VPS_DIR}"
 
 if docker compose version >/dev/null 2>&1; then
   DOCKER_COMPOSE="docker compose"
-elif command -v docker-compose >/dev/null 2>&1; then
-  DOCKER_COMPOSE="docker-compose"
 else
-  echo "Không tìm thấy Docker Compose trên VPS" >&2
+  echo "Cần Docker Compose v2 trên VPS để build Plane với additional_contexts." >&2
   exit 1
 fi
 
@@ -111,20 +142,37 @@ upsert_env plane.env XBUS_FRAME_ANCESTORS "${PUBLIC_APP_URL}"
 find services/plane -type f -name '._*' -delete
 
 PLANE_COMPOSE="$DOCKER_COMPOSE --project-directory . --env-file plane.env -p xbus-plane -f services/plane/deployments/cli/community/docker-compose.yml -f docker-compose.plane.override.yml"
-$PLANE_COMPOSE up --detach --build
+
+export XBUS_IMAGE="${LOCAL_IMAGE_NAME}"
+export NEXT_PUBLIC_APP_URL="${PUBLIC_APP_URL}"
+export NEXT_PUBLIC_PLANE_URL="${PUBLIC_PLANE_URL}"
+bash scripts/build-office-plane.sh
+
+# Chỉ thay container sau khi cả ba image đã build thành công.
+$PLANE_COMPOSE up --detach plane-db plane-redis plane-mq plane-minio
+$PLANE_COMPOSE run --rm --no-deps migrator
+$PLANE_COMPOSE up --detach --no-build --pull never --force-recreate api worker beat-worker web
+$PLANE_COMPOSE up --detach --no-build --pull never
+
+for service in api web; do
+  container_id="$($PLANE_COMPOSE ps -q "$service")"
+  image_name="$(docker inspect --format '{{.Config.Image}}' "$container_id")"
+  running_image="$(docker inspect --format '{{.Image}}' "$container_id")"
+  built_image="$(docker image inspect --format '{{.Id}}' "$image_name")"
+  if [[ "$running_image" != "$built_image" ]]; then
+    echo "Plane ${service} vẫn chạy image cũ; dừng deploy." >&2
+    exit 1
+  fi
+  echo "Plane ${service}: container đã dùng image mới ${running_image}."
+done
 
 APP_HOST="${PUBLIC_APP_URL#*://}"
 APP_HOST="${APP_HOST%%/*}"
 APP_HOST="${APP_HOST%%:*}"
 bash scripts/install-plane-nginx.sh "${APP_HOST}"
 
-export XBUS_IMAGE="${LOCAL_IMAGE_NAME}"
-export NEXT_PUBLIC_APP_URL="${PUBLIC_APP_URL}"
-export NEXT_PUBLIC_PLANE_URL="${PUBLIC_PLANE_URL}"
-
 # Image XBus được build trực tiếp tại VPS, không push/pull qua Docker Hub.
 $DOCKER_COMPOSE up --detach minio redis
-$DOCKER_COMPOSE build --pull xbus-office
 $DOCKER_COMPOSE up --detach --no-build --force-recreate xbus-office gallery-worker
 $DOCKER_COMPOSE ps
 docker image prune --force

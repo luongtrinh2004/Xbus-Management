@@ -16,3 +16,4 @@ plane.env
 *.docx
 Xbus-Management
 services/plane
+logs

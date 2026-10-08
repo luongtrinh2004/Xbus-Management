@@ -35,6 +35,7 @@ public/uploads/
 .env.production.local
 .deploy.env
 plane.env
+logs/
 
 # OS & Editor
 .DS_Store

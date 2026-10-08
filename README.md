@@ -63,6 +63,32 @@ Build hiện dùng `--no-lint` vì dự án chưa có cấu hình ESLint hoàn c
 
 ## Deploy VPS bằng Docker Compose
 
+Để build cả Plane backend, Plane frontend và XBus Office tại local bằng một lệnh
+(Docker Desktop cần đang chạy; cần `.env` và `plane.env`):
+
+```bash
+bash deploy.sh --build-only
+```
+
+Lệnh này không SSH, không chạy migration và không restart container. Image XBus
+mặc định là `xbus-office:local`; có thể đổi bằng `XBUS_IMAGE`. URL build mặc định
+là `http://localhost:3000` và `http://localhost:3100`; có thể đặt
+`NEXT_PUBLIC_APP_URL` và `NEXT_PUBLIC_PLANE_URL` nếu cần build cho môi trường khác.
+
+Để build và deploy lên VPS đã cấu hình trong `.deploy.env`:
+
+```bash
+bash deploy.sh
+```
+
+Mỗi lần chạy tự ghi đè `logs/deploy-latest.log` tại máy chạy script, gồm stdout,
+stderr và exit code cuối cùng. Log không được commit hoặc đồng bộ lên VPS.
+
+Script đồng bộ source, build lần lượt cả ba image trên VPS, chạy migration Plane,
+rồi khởi động container, áp dụng migration XBus và kiểm tra dịch vụ. Nếu một bước
+build thất bại, script dừng trước bước thay container. Worker Plane và gallery
+worker dùng chung image backend/Office tương ứng, không cần build riêng.
+
 ### 1. Chuẩn bị
 
 ```bash

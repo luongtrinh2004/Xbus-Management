@@ -45,6 +45,12 @@ npm run plane:stop
 
 ## Production
 
+`bash deploy.sh` build cả Plane backend, Plane frontend và XBus Office trên VPS.
+Các build chạy tuần tự và hoàn tất trước bước thay container. Để kiểm tra cùng
+quy trình build tại local, chạy `bash deploy.sh --build-only`; chế độ này không
+SSH, không restart và không chạy migration. Cả hai chế độ dùng
+`scripts/build-office-plane.sh` để giữ thống nhất các lệnh build.
+
 Plane được tích hợp như module trên cùng origin HTTPS của XBus. Người dùng
 vào `/work/projects`; iframe dùng `/xbus-office/projects/`. Nginx chuyển các
 route Plane được liệt kê trong `services/plane-xbus/nginx.module.conf` tới
@@ -67,7 +73,8 @@ phù hợp nếu proxy đang áp CSP chung.
 
 ## Nhân sự và đăng nhập XBus
 
-API Plane dùng image local `xbus-plane-backend:1.4.2-identity-bridge`.
+API Plane dùng image local `xbus-plane-backend:1.4.2-review`, gồm source backend,
+identity bridge và các tùy chỉnh Workflow/nghiệm thu XBus.
 Cấu hình một secret ngẫu nhiên (ít nhất 32 byte), giống nhau tại hai nơi:
 `PLANE_BRIDGE_SECRET` trong môi trường server XBus và `XBUS_BRIDGE_SECRET`
 trong `plane.env`. Không dùng tiền tố `NEXT_PUBLIC_` cho secret.
