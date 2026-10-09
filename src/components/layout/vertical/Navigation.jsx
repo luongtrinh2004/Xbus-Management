@@ -13,7 +13,6 @@ import { styled, useColorScheme, useTheme } from "@mui/material/styles";
 import Divider from "@mui/material/Divider";
 import VerticalNav, { NavHeader, NavCollapseIcons } from "@menu/vertical-menu";
 import VerticalMenu from "./VerticalMenu";
-import NavUser from "./NavUser";
 import Logo from "@components/layout/shared/Logo";
 
 // Hook Imports
@@ -121,7 +120,6 @@ const Navigation = (props) => {
       <Divider sx={{ borderColor: "divider", opacity: 0.6 }} />
       <StyledBoxForShadow ref={shadowRef} />
       <VerticalMenu scrollMenu={scrollMenu} />
-      <NavUser />
     </VerticalNav>
   );
 };

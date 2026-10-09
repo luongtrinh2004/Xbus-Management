@@ -32,6 +32,7 @@ const SubMenuContent = (props, ref) => {
   const SubMenuContentRef = ref
 
   useEffect(() => {
+    let transitionTimer
     if (mounted) {
       if (open || (open && isHovered)) {
         const target = SubMenuContentRef?.current
@@ -45,7 +46,7 @@ const SubMenuContent = (props, ref) => {
           target.style.blockSize = '0px'
           target.offsetHeight
           target.style.blockSize = `${height}px`
-          setTimeout(() => {
+          transitionTimer = setTimeout(() => {
             target.style.overflow = 'auto'
             target.style.blockSize = 'auto'
           }, transitionDuration)
@@ -58,13 +59,14 @@ const SubMenuContent = (props, ref) => {
           target.style.blockSize = `${target.offsetHeight}px`
           target.offsetHeight
           target.style.blockSize = '0px'
-          setTimeout(() => {
+          transitionTimer = setTimeout(() => {
             target.style.overflow = 'auto'
             target.style.display = 'none'
           }, transitionDuration)
         }
       }
     }
+    return () => clearTimeout(transitionTimer)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, mounted, SubMenuContentRef])
   useEffect(() => {

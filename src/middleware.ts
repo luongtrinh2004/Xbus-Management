@@ -10,6 +10,8 @@ const accessControl: Record<Role, string[]> = {
     "/users",
     "/water-schedule",
     "/fund",
+    "/overtime",
+    "/late-early",
     "/assets",
     "/work",
     "/afternoon-tea",
@@ -20,6 +22,8 @@ const accessControl: Record<Role, string[]> = {
     "/users",
     "/water-schedule",
     "/fund",
+    "/overtime",
+    "/late-early",
     "/assets",
     "/work",
     "/afternoon-tea",
@@ -53,10 +57,15 @@ export async function middleware(req: NextRequest) {
   if (publicRoutes.includes(pathname)) {
     // Nếu đã đăng nhập rồi mà vẫn vào /login -> chuyển về /home
     if (token && pathname === "/login") {
-      url.pathname = token.status === "disabled" ? "/pending-approval" : "/home";
+      url.pathname =
+        token.status === "disabled" ? "/pending-approval" : "/home";
       return NextResponse.redirect(url);
     }
-    if (token && pathname === "/pending-approval" && token.status !== "disabled") {
+    if (
+      token &&
+      pathname === "/pending-approval" &&
+      token.status !== "disabled"
+    ) {
       url.pathname = "/home";
       return NextResponse.redirect(url);
     }
@@ -100,6 +109,8 @@ export const config = {
     "/users",
     "/water-schedule",
     "/fund",
+    "/overtime/:path*",
+    "/late-early",
     "/assets",
     "/work/:path*",
     "/afternoon-tea",

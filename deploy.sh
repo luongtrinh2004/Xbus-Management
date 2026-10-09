@@ -150,7 +150,9 @@ bash scripts/build-office-plane.sh
 
 # Chỉ thay container sau khi cả ba image đã build thành công.
 $PLANE_COMPOSE up --detach plane-db plane-redis plane-mq plane-minio
-$PLANE_COMPOSE run --rm --no-deps migrator
+# This script arrives on stdin through ssh/bash -s. Compose run defaults to
+# interactive stdin and can consume the remaining script after the migrator.
+$PLANE_COMPOSE run --rm --no-deps -T --interactive=false migrator
 $PLANE_COMPOSE up --detach --no-build --pull never --force-recreate api worker beat-worker web
 $PLANE_COMPOSE up --detach --no-build --pull never
 
@@ -174,6 +176,17 @@ bash scripts/install-plane-nginx.sh "${APP_HOST}"
 # Image XBus được build trực tiếp tại VPS, không push/pull qua Docker Hub.
 $DOCKER_COMPOSE up --detach minio redis
 $DOCKER_COMPOSE up --detach --no-build --force-recreate xbus-office gallery-worker
+for service in xbus-office gallery-worker; do
+  container_id="$($DOCKER_COMPOSE ps -q "$service")"
+  running_image="$(docker inspect --format '{{.Image}}' "$container_id")"
+  image_name="$(docker inspect --format '{{.Config.Image}}' "$container_id")"
+  built_image="$(docker image inspect --format '{{.Id}}' "$image_name")"
+  if [[ "$running_image" != "$built_image" ]]; then
+    echo "XBus ${service} vẫn chạy image cũ; dừng deploy." >&2
+    exit 1
+  fi
+  echo "XBus ${service}: container đã dùng image mới ${running_image}."
+done
 $DOCKER_COMPOSE ps
 docker image prune --force
 REMOTE_SCRIPT

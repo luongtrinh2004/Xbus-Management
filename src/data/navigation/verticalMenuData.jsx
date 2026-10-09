@@ -19,6 +19,23 @@ const verticalMenuData = [
     roles: ["user", "assistant", "admin"],
   },
   {
+    label: "Báo cáo",
+    icon: "tabler-report",
+    roles: ["user", "assistant", "admin"],
+    children: [
+      {
+        label: "Làm thêm giờ",
+        href: "/overtime",
+        roles: ["user", "assistant", "admin"],
+      },
+      {
+        label: "Đi muộn về sớm",
+        href: "/late-early",
+        roles: ["user", "assistant", "admin"],
+      },
+    ],
+  },
+  {
     label: "Tài chính",
     href: "/fund",
     icon: "tabler-wallet",
