@@ -7,6 +7,7 @@
 import { getStateDisplayName } from "@plane/utils";
 
 import { useState } from "react";
+import { useTranslation } from "@plane/i18n";
 import { observer } from "mobx-react";
 import { EIconSize } from "@plane/constants";
 import { StateGroupIcon } from "@plane/blocks/icons";
@@ -23,6 +24,7 @@ type Props = {
 };
 
 export const FilterState = observer(function FilterState(props: Props) {
+  useTranslation(); // Recompute display labels when the interface language changes.
   const { states, searchQuery } = props;
 
   const [itemsToRender, setItemsToRender] = useState(5);
@@ -35,7 +37,7 @@ export const FilterState = observer(function FilterState(props: Props) {
   const appliedFiltersCount = filterValue?.length ?? 0;
 
   const filteredOptions = states?.filter((state) =>
-    getStateDisplayName(state).toLowerCase().includes(searchQuery.toLowerCase())
+    getStateDisplayName(state).toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const handleViewToggle = () => {

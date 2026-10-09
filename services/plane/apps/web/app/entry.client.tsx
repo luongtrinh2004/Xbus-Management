@@ -4,9 +4,8 @@
  * See the LICENSE file for details.
  */
 
-import { setDefaultOptions } from "date-fns";
-import { vi } from "date-fns/locale";
-import { initPromise } from "@plane/i18n";
+import { initPromise, i18nInstance } from "@plane/i18n";
+import { setDisplayLanguage } from "@plane/utils";
 import { startTransition, StrictMode } from "react";
 import { hydrateRoot } from "react-dom/client";
 import { HydratedRouter } from "react-router/dom";
@@ -16,7 +15,10 @@ import { isStaleAssetErrorMessage, recoverFromStaleAsset } from "@/lib/stale-ass
 
 void polyfills;
 
-setDefaultOptions({ locale: vi, weekStartsOn: 1 });
+i18nInstance.on("languageChanged", (language) => {
+  setDisplayLanguage(language);
+  document.documentElement.lang = language;
+});
 
 // Production-only: in dev these errors come from the dev server itself (restarts,
 // stale optimized deps) and auto-reloading would mask them.
@@ -30,7 +32,8 @@ if (import.meta.env.PROD) {
   });
 
   window.addEventListener("unhandledrejection", (event) => {
-    const reason = event.reason instanceof Error ? event.reason.message : String(event.reason ?? "");
+    const reason =
+      event.reason instanceof Error ? event.reason.message : String(event.reason ?? "");
     if (isStaleAssetErrorMessage(reason)) recoverFromStaleAsset();
   });
 }
@@ -43,12 +46,14 @@ if (import.meta.env.PROD) {
 void initPromise
   .catch(() => {})
   .then(() => {
+    setDisplayLanguage(i18nInstance.language);
+    document.documentElement.lang = i18nInstance.language;
     startTransition(() => {
       hydrateRoot(
         document,
         <StrictMode>
           <HydratedRouter />
-        </StrictMode>
+        </StrictMode>,
       );
     });
   });

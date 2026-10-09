@@ -6,8 +6,14 @@
 
 import { useEffect, useRef, useState } from "react";
 import { combine } from "@atlaskit/pragmatic-drag-and-drop/combine";
-import { draggable, dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
-import { attachInstruction, extractInstruction } from "@atlaskit/pragmatic-drag-and-drop-hitbox/tree-item";
+import {
+  draggable,
+  dropTargetForElements,
+} from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
+import {
+  attachInstruction,
+  extractInstruction,
+} from "@atlaskit/pragmatic-drag-and-drop-hitbox/tree-item";
 import { observer } from "mobx-react";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
@@ -34,15 +40,23 @@ type TExtendedSidebarItemProps = {
   handleOnNavigationItemDrop?: (
     sourceId: string | undefined,
     destinationId: string | undefined,
-    shouldDropAtEnd: boolean
+    shouldDropAtEnd: boolean,
   ) => void;
   disableDrag?: boolean;
   disableDrop?: boolean;
   isLastChild: boolean;
 };
 
-export const ExtendedSidebarItem = observer(function ExtendedSidebarItem(props: TExtendedSidebarItemProps) {
-  const { item, handleOnNavigationItemDrop, disableDrag = false, disableDrop = false, isLastChild } = props;
+export const ExtendedSidebarItem = observer(function ExtendedSidebarItem(
+  props: TExtendedSidebarItemProps,
+) {
+  const {
+    item,
+    handleOnNavigationItemDrop,
+    disableDrag = false,
+    disableDrop = false,
+    isLastChild,
+  } = props;
   const { t } = useTranslation();
   // states
   const [isDragging, setIsDragging] = useState(false);
@@ -58,7 +72,8 @@ export const ExtendedSidebarItem = observer(function ExtendedSidebarItem(props: 
   const { toggleExtendedSidebar } = useAppTheme();
   const { data } = useUser();
   const { allowPermissions } = useUserPermissions();
-  const { preferences: workspacePreferences, toggleWorkspaceItem } = useWorkspaceNavigationPreferences();
+  const { preferences: workspacePreferences, toggleWorkspaceItem } =
+    useWorkspaceNavigationPreferences();
 
   // derived values
   const isPinned = workspacePreferences.items[item.key]?.is_pinned ?? false;
@@ -87,7 +102,9 @@ export const ExtendedSidebarItem = observer(function ExtendedSidebarItem(props: 
       dropTargetForElements({
         element,
         canDrop: ({ source }) =>
-          !disableDrop && source?.data?.id !== item.key && source?.data?.dragInstanceId === "NAVIGATION",
+          !disableDrop &&
+          source?.data?.id !== item.key &&
+          source?.data?.dragInstanceId === "NAVIGATION",
         // oxlint-disable-next-line no-shadow
         getData: ({ input, element }) => {
           // oxlint-disable-next-line no-shadow
@@ -110,7 +127,7 @@ export const ExtendedSidebarItem = observer(function ExtendedSidebarItem(props: 
               ? extractedInstruction === "reorder-below" && isLastChild
                 ? "DRAG_BELOW"
                 : "DRAG_OVER"
-              : undefined
+              : undefined,
           );
         },
         onDragLeave: () => {
@@ -130,9 +147,13 @@ export const ExtendedSidebarItem = observer(function ExtendedSidebarItem(props: 
           const destinationId = self?.data?.id as string | undefined;
 
           if (handleOnNavigationItemDrop)
-            handleOnNavigationItemDrop(sourceId, destinationId, currentInstruction === "DRAG_BELOW");
+            handleOnNavigationItemDrop(
+              sourceId,
+              destinationId,
+              currentInstruction === "DRAG_BELOW",
+            );
         },
-      })
+      }),
     );
   }, [isLastChild, handleOnNavigationItemDrop, disableDrag, disableDrop, item.key]);
 
@@ -152,7 +173,9 @@ export const ExtendedSidebarItem = observer(function ExtendedSidebarItem(props: 
 
   const icon = getSidebarNavigationItemIcon(item.key);
 
-  if (!allowPermissions(item.access as any, EUserPermissionsLevel.WORKSPACE, workspaceSlug.toString())) {
+  if (
+    !allowPermissions(item.access as any, EUserPermissionsLevel.WORKSPACE, workspaceSlug.toString())
+  ) {
     return null;
   }
 
@@ -167,7 +190,7 @@ export const ExtendedSidebarItem = observer(function ExtendedSidebarItem(props: 
       <DropIndicator classNames="absolute top-0" isVisible={instruction === "DRAG_OVER"} />
       <div
         className={cn(
-          "group/project-item relative flex w-full items-center rounded-md text-primary hover:bg-surface-2"
+          "group/project-item relative flex w-full items-center rounded-md text-primary hover:bg-surface-2",
         )}
         id={`${item.key}`}
       >
@@ -180,7 +203,7 @@ export const ExtendedSidebarItem = observer(function ExtendedSidebarItem(props: 
                 {
                   "cursor-grabbing": isDragging,
                   "opacity-100": isDragging,
-                }
+                },
               )}
               ref={dragHandleRef}
             >
@@ -202,7 +225,7 @@ export const ExtendedSidebarItem = observer(function ExtendedSidebarItem(props: 
               </div>
             )}
             {isPinned ? (
-              <Tooltip label={"Bỏ ghim"}>
+              <Tooltip label={t("xbus_navigation.unpin")}>
                 <UnpinOutline
                   className="size-3.5 flex-shrink-0 text-placeholder outline-none hover:text-tertiary"
                   onClick={() => unPinNavigationItem(item.key)}

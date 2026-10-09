@@ -4,8 +4,18 @@
  * See the LICENSE file for details.
  */
 
-import { differenceInDays, format, formatDistanceToNow, isAfter, isEqual, isValid, parseISO } from "date-fns";
+import {
+  differenceInDays,
+  format,
+  formatDistanceToNow,
+  isAfter,
+  isEqual,
+  isValid,
+  parseISO,
+} from "date-fns";
 import { isNumber } from "lodash-es";
+
+import { getDisplayLanguage } from "./display-language";
 
 // Format Date Helpers
 /**
@@ -18,7 +28,7 @@ import { isNumber } from "lodash-es";
  */
 export const renderFormattedDate = (
   date: string | Date | undefined | null,
-  formatToken: string = "dd/MM/yyyy"
+  formatToken: string = getDisplayLanguage() === "vi-VN" ? "dd/MM/yyyy" : "MMM dd, yyyy",
 ): string | undefined => {
   // Parse the date to check if it is valid
   const parsedDate = getDate(date);
@@ -61,7 +71,9 @@ export const renderFormattedDateWithoutYear = (date: string | Date): string => {
  * @param {Date | string} date
  * @example renderFormattedPayloadDate("01/01, 20224") // "2024-01-01"
  */
-export const renderFormattedPayloadDate = (date: Date | string | undefined | null): string | undefined => {
+export const renderFormattedPayloadDate = (
+  date: Date | string | undefined | null,
+): string | undefined => {
   // Parse the date to check if it is valid
   const parsedDate = getDate(date);
   // return if undefined
@@ -82,7 +94,10 @@ export const renderFormattedPayloadDate = (date: Date | string | undefined | nul
  * @example renderFormattedTime("2024-01-01 13:00:00") // 13:00
  * @example renderFormattedTime("2024-01-01 13:00:00", "12-hour") // 01:00 PM
  */
-export const renderFormattedTime = (date: string | Date, timeFormat: "12-hour" | "24-hour" = "24-hour"): string => {
+export const renderFormattedTime = (
+  date: string | Date,
+  timeFormat: "12-hour" | "24-hour" = "24-hour",
+): string => {
   // Parse the date to check if it is valid
   const parsedDate = new Date(date);
   // return if undefined
@@ -111,7 +126,7 @@ export const renderFormattedTime = (date: string | Date, timeFormat: "12-hour" |
 export const findTotalDaysInRange = (
   startDate: Date | string | undefined | null,
   endDate: Date | string | undefined | null,
-  inclusive: boolean = true
+  inclusive: boolean = true,
 ): number | undefined => {
   // Parse the dates to check if they are valid
   const parsedStartDate = getDate(startDate);
@@ -132,7 +147,10 @@ export const findTotalDaysInRange = (
  * @param numberOfDays
  * @returns
  */
-export const addDaysToDate = (startDate: Date | string | undefined | null, numberOfDays: number) => {
+export const addDaysToDate = (
+  startDate: Date | string | undefined | null,
+  numberOfDays: number,
+) => {
   // Parse the dates to check if they are valid
   const parsedStartDate = getDate(startDate);
 
@@ -154,7 +172,7 @@ export const addDaysToDate = (startDate: Date | string | undefined | null, numbe
  */
 export const findHowManyDaysLeft = (
   date: Date | string | undefined | null,
-  inclusive: boolean = true
+  inclusive: boolean = true,
 ): number | undefined => {
   if (!date) return undefined;
   // Pass the date to findTotalDaysInRange function to find the total number of days in range from today
@@ -171,7 +189,8 @@ export const findHowManyDaysLeft = (
 export const calculateTimeAgo = (time: string | number | Date | null): string => {
   if (!time) return "";
   // Parse the time to check if it is valid
-  const parsedTime = typeof time === "string" || typeof time === "number" ? parseISO(String(time)) : time;
+  const parsedTime =
+    typeof time === "string" || typeof time === "number" ? parseISO(String(time)) : time;
   // return if undefined
   if (!parsedTime) return ""; // Return empty string for invalid dates
   // Format the time in the form of amount of time passed since the event happened
@@ -263,7 +282,7 @@ export const getWeekNumberOfDate = (date: Date): number => {
  */
 export const checkIfDatesAreEqual = (
   date1: Date | string | null | undefined,
-  date2: Date | string | null | undefined
+  date2: Date | string | null | undefined,
 ): boolean => {
   const parsedDate1 = getDate(date1);
   const parsedDate2 = getDate(date2);
@@ -343,7 +362,8 @@ export const getCurrentDateTimeInISO = () => {
  * @returns { number } minutes
  * @example convertHoursMinutesToMinutes(2, 30) // Output: 150
  */
-export const convertHoursMinutesToMinutes = (hours: number, minutes: number): number => hours * 60 + minutes;
+export const convertHoursMinutesToMinutes = (hours: number, minutes: number): number =>
+  hours * 60 + minutes;
 
 /**
  * @description converts minutes to hours and minutes
@@ -351,7 +371,9 @@ export const convertHoursMinutesToMinutes = (hours: number, minutes: number): nu
  * @returns { number, number } hours and minutes
  * @example convertMinutesToHoursAndMinutes(150) // Output: { hours: 2, minutes: 30 }
  */
-export const convertMinutesToHoursAndMinutes = (mins: number): { hours: number; minutes: number } => {
+export const convertMinutesToHoursAndMinutes = (
+  mins: number,
+): { hours: number; minutes: number } => {
   const hours = Math.floor(mins / 60);
   const minutes = Math.floor(mins % 60);
 
@@ -471,7 +493,11 @@ export const parseDateFilter = (filterValue: string): { type: "after" | "before"
  * @param type The type of comparison ('after' or 'before')
  * @returns boolean indicating if the date meets the criteria
  */
-export const checkDateCriteria = (dateToCheck: Date | null, filterDate: Date, type: "after" | "before"): boolean => {
+export const checkDateCriteria = (
+  dateToCheck: Date | null,
+  filterDate: Date,
+  type: "after" | "before",
+): boolean => {
   if (!dateToCheck) return false;
 
   const checkDate = new Date(dateToCheck);
@@ -479,7 +505,9 @@ export const checkDateCriteria = (dateToCheck: Date | null, filterDate: Date, ty
   const normalizedFilter = new Date(filterDate.getTime());
   normalizedFilter.setHours(0, 0, 0, 0);
 
-  return type === "after" ? normalizedCheck >= normalizedFilter : normalizedCheck <= normalizedFilter;
+  return type === "after"
+    ? normalizedCheck >= normalizedFilter
+    : normalizedCheck <= normalizedFilter;
 };
 
 /**
@@ -491,7 +519,7 @@ export const checkDateCriteria = (dateToCheck: Date | null, filterDate: Date, ty
  */
 export const formatDateRange = (
   parsedStartDate: Date | null | undefined,
-  parsedEndDate: Date | null | undefined
+  parsedEndDate: Date | null | undefined,
 ): string => {
   // If no dates are provided
   if (!parsedStartDate && !parsedEndDate) {
@@ -592,4 +620,6 @@ export const formatDuration = (seconds: number | undefined | null): string => {
  * @returns Whether the date is valid or not
  */
 export const isValidDate = (date: unknown): date is string | Date =>
-  (typeof date === "string" || typeof date === "object") && date !== null && !isNaN(Date.parse(date as string));
+  (typeof date === "string" || typeof date === "object") &&
+  date !== null &&
+  !isNaN(Date.parse(date as string));

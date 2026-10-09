@@ -51,7 +51,8 @@ export const ProjectNavigation = observer(function ProjectNavigation(props: TPro
   const { workItem: workItemIdentifierFromRoute } = useParams();
   // store hooks
   const { t } = useTranslation();
-  const { isExtendedProjectSidebarOpened, toggleExtendedProjectSidebar, toggleSidebar } = useAppTheme();
+  const { isExtendedProjectSidebarOpened, toggleExtendedProjectSidebar, toggleSidebar } =
+    useAppTheme();
   const { getPartialProjectById } = useProject();
   const { allowPermissions } = useUserPermissions();
   const {
@@ -139,7 +140,7 @@ export const ProjectNavigation = observer(function ProjectNavigation(props: TPro
         sortOrder: 6,
       },
     ],
-    [project]
+    [project],
   );
 
   // memoized navigation items and adding additional navigation items
@@ -156,7 +157,7 @@ export const ProjectNavigation = observer(function ProjectNavigation(props: TPro
 
     // sort navigation items by sortOrder
     const sortedNavigationItems = navigationItems(workspaceSlug, projectId).sort(
-      (a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)
+      (a, b) => (a.sortOrder || 0) - (b.sortOrder || 0),
     );
 
     return sortedNavigationItems;
@@ -165,9 +166,11 @@ export const ProjectNavigation = observer(function ProjectNavigation(props: TPro
   const isActive = useCallback(
     (item: TNavigationItem) => {
       // work item condition
-      const workItemCondition = workItemId && workItem && !workItem?.is_epic && workItem?.project_id === projectId;
+      const workItemCondition =
+        workItemId && workItem && !workItem?.is_epic && workItem?.project_id === projectId;
       // epic condition
-      const epicCondition = workItemId && workItem && workItem?.is_epic && workItem?.project_id === projectId;
+      const epicCondition =
+        workItemId && workItem && workItem?.is_epic && workItem?.project_id === projectId;
       // is active
       const isWorkItemActive = item.key === "work_items" && workItemCondition;
       const isEpicActive = item.key === "epics" && epicCondition;
@@ -176,7 +179,7 @@ export const ProjectNavigation = observer(function ProjectNavigation(props: TPro
       // return
       return isWorkItemActive || isEpicActive || isPathnameActive;
     },
-    [pathname, workItem, workItemId, projectId]
+    [pathname, workItem, workItemId, projectId],
   );
 
   if (!project) return null;
@@ -186,7 +189,12 @@ export const ProjectNavigation = observer(function ProjectNavigation(props: TPro
       {navigationItemsMemo.map((item) => {
         if (!item.shouldRender) return;
 
-        const hasAccess = allowPermissions(item.access, EUserPermissionsLevel.PROJECT, workspaceSlug, project.id);
+        const hasAccess = allowPermissions(
+          item.access,
+          EUserPermissionsLevel.PROJECT,
+          workspaceSlug,
+          project.id,
+        );
         if (!hasAccess) return null;
 
         const shouldShowCount = item.key === "intake" && (project.intake_count ?? 0) > 0;
@@ -201,7 +209,9 @@ export const ProjectNavigation = observer(function ProjectNavigation(props: TPro
                   />
                   <span className="text-11 font-medium">{t(item.i18n_key)}</span>
                 </div>
-                {shouldShowCount && <span className="text-11 font-medium text-tertiary">{project.intake_count}</span>}
+                {shouldShowCount && (
+                  <span className="text-11 font-medium text-tertiary">{project.intake_count}</span>
+                )}
               </div>
             </SidebarNavItem>
           </Link>
@@ -211,13 +221,16 @@ export const ProjectNavigation = observer(function ProjectNavigation(props: TPro
         [EUserPermissions.ADMIN, EUserPermissions.MEMBER],
         EUserPermissionsLevel.PROJECT,
         workspaceSlug,
-        project.id
+        project.id,
       ) && (
-        <Link href={`/${workspaceSlug}/settings/projects/${project.id}/`} onClick={handleProjectClick}>
+        <Link
+          href={`/${workspaceSlug}/settings/projects/${project.id}/`}
+          onClick={handleProjectClick}
+        >
           <SidebarNavItem isActive={pathname.includes(`/settings/projects/${project.id}`)}>
             <div className="flex items-center gap-1.5 py-[1px]">
               <SettingsOutline className="size-4 shrink-0" />
-              <span className="text-11 font-medium">Cài đặt dự án</span>
+              <span className="text-11 font-medium">{t("project_settings_label")}</span>
             </div>
           </SidebarNavItem>
         </Link>

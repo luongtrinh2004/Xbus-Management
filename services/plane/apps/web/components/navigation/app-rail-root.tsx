@@ -5,6 +5,7 @@
  */
 
 "use client";
+import { useTranslation } from "@plane/i18n";
 import { observer } from "mobx-react";
 import { useParams, usePathname } from "next/navigation";
 import { SettingsOutline } from "@makeplane/propel/icons";
@@ -25,6 +26,7 @@ import { useAppRailVisibility } from "@/lib/app-rail/context";
 import { AppSidebarItemsRoot } from "./items-root";
 
 export const AppRailRoot = observer(() => {
+  const { t } = useTranslation();
   // router
   const { workspaceSlug, projectId } = useParams();
   const pathname = usePathname();
@@ -57,7 +59,7 @@ export const AppRailRoot = observer(() => {
               <div className="mx-2 border-t border-strong" />
               <AppSidebarItem
                 item={{
-                  label: "Cài đặt",
+                  label: t("settings"),
                   icon: <SettingsOutline className="size-5" />,
                   href: `/${workspaceSlug}/settings`,
                   isActive: isWorkspaceSettingsPath,
@@ -70,18 +72,20 @@ export const AppRailRoot = observer(() => {
         <ContextMenuContent>
           <ContextMenuItem
             onClick={() => updateDisplayMode("icon_only")}
-            label={"Chỉ biểu tượng"}
+            label={t("xbus_navigation.icons_only")}
             selected={preferences.displayMode === "icon_only"}
           />
           <ContextMenuItem
             onClick={() => updateDisplayMode("icon_with_label")}
-            label={"Biểu tượng và tên"}
+            label={t("xbus_navigation.icons_and_labels")}
             selected={preferences.displayMode === "icon_with_label"}
           />
           <ContextMenuSeparator />
           <ContextMenuItem
             onClick={toggleAppRail}
-            label={isCollapsed ? "Ghim thanh ứng dụng" : "Bỏ ghim thanh ứng dụng"}
+            label={
+              isCollapsed ? t("xbus_navigation.pin_app_rail") : t("xbus_navigation.unpin_app_rail")
+            }
           />
         </ContextMenuContent>
       </ContextMenu>

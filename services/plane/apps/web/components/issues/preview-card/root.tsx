@@ -6,6 +6,7 @@
 
 import { getStateDisplayName } from "@plane/utils";
 
+import { useTranslation } from "@plane/i18n";
 import { observer } from "mobx-react";
 // plane imports
 import { PriorityIcon, StateGroupIcon } from "@plane/blocks/icons";
@@ -25,10 +26,14 @@ type Props = {
     id?: string;
     name?: string;
   };
-  workItem: Pick<TIssue, "id" | "name" | "sequence_id" | "priority" | "start_date" | "target_date" | "type_id">;
+  workItem: Pick<
+    TIssue,
+    "id" | "name" | "sequence_id" | "priority" | "start_date" | "target_date" | "type_id"
+  >;
 };
 
 export const WorkItemPreviewCard = observer(function WorkItemPreviewCard(props: Props) {
+  useTranslation(); // Recompute display labels when the interface language changes.
   const { projectId, stateDetails, workItem } = props;
   // store hooks
   const { getProjectIdentifierById } = useProject();

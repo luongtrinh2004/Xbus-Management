@@ -6,6 +6,7 @@
 
 import { getStateDisplayName } from "@plane/utils";
 
+import { useTranslation } from "@plane/i18n";
 import { observer } from "mobx-react";
 // icons
 // plane imports
@@ -22,6 +23,7 @@ type Props = {
 };
 
 export const AppliedStateFilters = observer(function AppliedStateFilters(props: Props) {
+  useTranslation(); // Recompute display labels when the interface language changes.
   const { handleRemove, states, values, editable } = props;
 
   return (

@@ -5,6 +5,7 @@
  */
 
 import type { MutableRefObject } from "react";
+import { useTranslation } from "@plane/i18n";
 import { observer } from "mobx-react";
 import type {
   GroupByColumnTypes,
@@ -42,7 +43,7 @@ export interface IKanBan {
   getGroupIssueCount: (
     groupId: string | undefined,
     subGroupId: string | undefined,
-    isSubGroupCumulative: boolean
+    isSubGroupCumulative: boolean,
   ) => number | undefined;
   displayProperties: IIssueDisplayProperties | undefined;
   sub_group_by: TIssueGroupByOptions | undefined;
@@ -52,13 +53,18 @@ export interface IKanBan {
   dropErrorMessage?: string | undefined;
   sub_group_id?: string;
   sub_group_index?: number;
-  updateIssue: ((projectId: string | null, issueId: string, data: Partial<TIssue>) => Promise<void>) | undefined;
+  updateIssue:
+    | ((projectId: string | null, issueId: string, data: Partial<TIssue>) => Promise<void>)
+    | undefined;
   quickActions: TRenderQuickActions;
   collapsedGroups: TIssueKanbanFilters;
   handleCollapsedGroups: (toggle: "group_by" | "sub_group_by", value: string) => void;
   loadMoreIssues: (groupId?: string, subGroupId?: string) => void;
   enableQuickIssueCreate?: boolean;
-  quickAddCallback?: (projectId: string | null | undefined, data: TIssue) => Promise<TIssue | undefined>;
+  quickAddCallback?: (
+    projectId: string | null | undefined,
+    data: TIssue,
+  ) => Promise<TIssue | undefined>;
   disableIssueCreation?: boolean;
   addIssuesToView?: (issueIds: string[]) => Promise<TIssue>;
   canEditProperties: (projectId: string | undefined) => boolean;
@@ -70,6 +76,7 @@ export interface IKanBan {
 }
 
 export const KanBan = observer(function KanBan(props: IKanBan) {
+  useTranslation(); // Recompute display labels when the interface language changes.
   const {
     issuesMap,
     groupedIssueIds,
@@ -115,7 +122,9 @@ export const KanBan = observer(function KanBan(props: IKanBan) {
 
   if (!list) return null;
 
-  const visibilityGroupBy = (_list: IGroupByColumn): { showGroup: boolean; showIssues: boolean } => {
+  const visibilityGroupBy = (
+    _list: IGroupByColumn,
+  ): { showGroup: boolean; showIssues: boolean } => {
     if (sub_group_by) {
       const groupVisibility = {
         showGroup: true,
@@ -131,7 +140,8 @@ export const KanBan = observer(function KanBan(props: IKanBan) {
         showIssues: true,
       };
       if (!showEmptyGroup) {
-        if ((getGroupIssueCount(_list.id, undefined, false) ?? 0) > 0) groupVisibility.showGroup = true;
+        if ((getGroupIssueCount(_list.id, undefined, false) ?? 0) > 0)
+          groupVisibility.showGroup = true;
         else groupVisibility.showGroup = false;
       }
       if (collapsedGroups?.group_by.includes(_list.id)) groupVisibility.showIssues = false;

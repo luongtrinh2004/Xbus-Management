@@ -29,7 +29,13 @@ type Props = {
  * Displays items that don't fit in the visible area, with action icons
  * Shows "Eye" icon for user-hidden items, "Set as default" icon for all items
  */
-export function TabNavigationOverflowMenu({ overflowItems, isActive, tabPreferences, onToggleDefault, onShow }: Props) {
+export function TabNavigationOverflowMenu({
+  overflowItems,
+  isActive,
+  tabPreferences,
+  onToggleDefault,
+  onShow,
+}: Props) {
   const { t } = useTranslation();
 
   return (
@@ -69,12 +75,18 @@ export function TabNavigationOverflowMenu({ overflowItems, isActive, tabPreferen
                         onShow(item.key);
                       }}
                       className="invisible rounded-sm p-1 text-tertiary transition-colors group-hover/menu-item:visible hover:text-primary"
-                      title={"Hiển thị"}
+                      title={t("xbus_navigation.show_tab")}
                     >
                       <PinOutline className="size-3" />
                     </button>
                   )}
-                  <Tooltip label={isDefault ? "Bỏ thiết lập mặc định" : "Đặt làm mặc định"}>
+                  <Tooltip
+                    label={
+                      isDefault
+                        ? t("xbus_navigation.unset_default")
+                        : t("xbus_navigation.set_default")
+                    }
+                  >
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -85,9 +97,13 @@ export function TabNavigationOverflowMenu({ overflowItems, isActive, tabPreferen
                         "invisible rounded-sm p-1 text-tertiary transition-colors group-hover/menu-item:visible hover:text-primary",
                         {
                           visible: isDefault,
-                        }
+                        },
                       )}
-                      title={isDefault ? "Bỏ thiết lập mặc định" : "Đặt làm mặc định"}
+                      title={
+                        isDefault
+                          ? t("xbus_navigation.unset_default")
+                          : t("xbus_navigation.set_default")
+                      }
                     >
                       <DefaultTabOutline className="size-3" />
                     </button>

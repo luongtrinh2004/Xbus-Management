@@ -4,6 +4,8 @@
  * See the LICENSE file for details.
  */
 
+import { getDisplayLanguage } from "./display-language";
+
 const DEFAULT_STATE_NAMES: Record<string, { original: string; translated: string }> = {
   backlog: { original: "Backlog", translated: "Chờ lên kế hoạch" },
   unstarted: { original: "Todo", translated: "Cần làm" },
@@ -19,5 +21,11 @@ export function getStateDisplayName(state: DisplayState & { name: string }): str
 export function getStateDisplayName(state: DisplayState | null | undefined): string | undefined;
 export function getStateDisplayName(state: DisplayState | null | undefined): string | undefined {
   const defaultName = state?.group ? DEFAULT_STATE_NAMES[state.group] : undefined;
-  return defaultName && state?.name === defaultName.original ? defaultName.translated : (state?.name ?? undefined);
+  if (
+    defaultName &&
+    (state?.name === defaultName.original || state?.name === defaultName.translated)
+  ) {
+    return getDisplayLanguage() === "vi-VN" ? defaultName.translated : defaultName.original;
+  }
+  return state?.name ?? undefined;
 }

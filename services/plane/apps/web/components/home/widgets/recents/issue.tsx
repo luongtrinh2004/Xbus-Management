@@ -4,6 +4,7 @@
  * See the LICENSE file for details.
  */
 
+import { useTranslation } from "@plane/i18n";
 import { observer } from "mobx-react";
 // plane types
 import { PriorityIcon, StateGroupIcon } from "@plane/blocks/icons";
@@ -28,6 +29,7 @@ type BlockProps = {
   workspaceSlug: string;
 };
 export const RecentIssue = observer(function RecentIssue(props: BlockProps) {
+  useTranslation(); // Recompute display labels when the interface language changes.
   const { activity, ref, workspaceSlug } = props;
   // hooks
   const { getStateById } = useProjectState();

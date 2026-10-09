@@ -8,6 +8,7 @@ import { getStateDisplayName } from "@plane/utils";
 
 import React, { useMemo, useState } from "react";
 import { sortBy } from "lodash-es";
+import { useTranslation } from "@plane/i18n";
 import { observer } from "mobx-react";
 import { EIconSize } from "@plane/constants";
 import { StateGroupIcon } from "@plane/blocks/icons";
@@ -26,6 +27,7 @@ type Props = {
 };
 
 export const FilterState = observer(function FilterState(props: Props) {
+  const { currentLocale } = useTranslation();
   const { appliedFilters, handleUpdate, searchQuery, states } = props;
 
   const [itemsToRender, setItemsToRender] = useState(5);
@@ -34,11 +36,13 @@ export const FilterState = observer(function FilterState(props: Props) {
   const appliedFiltersCount = appliedFilters?.length ?? 0;
 
   const sortedOptions = useMemo(() => {
-    const filteredOptions = (states ?? []).filter((s) => s.name.toLowerCase().includes(searchQuery.toLowerCase()));
+    const filteredOptions = (states ?? []).filter((s) =>
+      getStateDisplayName(s).toLowerCase().includes(searchQuery.toLowerCase()),
+    );
 
     return sortBy(filteredOptions, [(s) => !(appliedFilters ?? []).includes(s.id)]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchQuery]);
+  }, [searchQuery, states, appliedFilters, currentLocale]);
 
   const handleViewToggle = () => {
     if (!sortedOptions) return;

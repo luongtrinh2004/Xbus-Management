@@ -7,6 +7,7 @@
 import { useEffect, useRef } from "react";
 import { combine } from "@atlaskit/pragmatic-drag-and-drop/combine";
 import { autoScrollForElements } from "@atlaskit/pragmatic-drag-and-drop-auto-scroll/element";
+import { useTranslation } from "@plane/i18n";
 import { observer } from "mobx-react";
 // plane constants
 import { ALL_ISSUES } from "@plane/constants";
@@ -41,13 +42,18 @@ export interface IList {
   issuesMap: TIssueMap;
   group_by: TIssueGroupByOptions | null;
   orderBy: TIssueOrderByOptions | undefined;
-  updateIssue: ((projectId: string | null, issueId: string, data: Partial<TIssue>) => Promise<void>) | undefined;
+  updateIssue:
+    | ((projectId: string | null, issueId: string, data: Partial<TIssue>) => Promise<void>)
+    | undefined;
   quickActions: TRenderQuickActions;
   displayProperties: IIssueDisplayProperties | undefined;
   enableIssueQuickAdd: boolean;
   showEmptyGroup?: boolean;
   canEditProperties: (projectId: string | undefined) => boolean;
-  quickAddCallback?: (projectId: string | null | undefined, data: TIssue) => Promise<TIssue | undefined>;
+  quickAddCallback?: (
+    projectId: string | null | undefined,
+    data: TIssue,
+  ) => Promise<TIssue | undefined>;
   disableIssueCreation?: boolean;
   handleOnDrop: (source: GroupDropLocation, destination: GroupDropLocation) => Promise<void>;
   addIssuesToView?: (issueIds: string[]) => Promise<TIssue>;
@@ -59,6 +65,7 @@ export interface IList {
 }
 
 export const List = observer(function List(props: IList) {
+  useTranslation(); // Recompute display labels when the interface language changes.
   const {
     groupedIssueIds,
     issuesMap,
@@ -103,13 +110,14 @@ export const List = observer(function List(props: IList) {
     return combine(
       autoScrollForElements({
         element,
-      })
+      }),
     );
   }, [containerRef]);
 
   if (!groups) return null;
 
-  const getGroupIndex = (groupId: string | undefined) => groups.findIndex(({ id }) => id === groupId);
+  const getGroupIndex = (groupId: string | undefined) =>
+    groups.findIndex(({ id }) => id === groupId);
 
   const is_list = group_by === null ? true : false;
 

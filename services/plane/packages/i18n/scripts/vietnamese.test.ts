@@ -3,6 +3,7 @@ import { readFile, readdir } from "node:fs/promises";
 import { createRequire } from "node:module";
 import test from "node:test";
 import { renderFormattedDate, renderFormattedPayloadDate } from "../../utils/src/datetime";
+import { setDisplayLanguage } from "../../utils/src/display-language";
 import { getStateDisplayName } from "../../utils/src/state-display";
 
 const require = createRequire(import.meta.url);
@@ -131,6 +132,42 @@ test("Vietnamese display dates do not change dates submitted to the API", () => 
   assert.equal(renderFormattedDate(null), undefined);
 });
 
+test("Vietnamese-created state labels switch to English without modifying stored names", () => {
+  const started = { id: "custom-started", name: "Đang thực hiện", group: "started" };
+  const completed = { id: "custom-completed", name: "Hoàn thành", group: "completed" };
+  const snapshots = [JSON.stringify(started), JSON.stringify(completed)];
+  try {
+    setDisplayLanguage("en");
+    assert.equal(getStateDisplayName(started), "In Progress");
+    assert.equal(getStateDisplayName(completed), "Done");
+    assert.equal(getStateDisplayName({ name: "Đang kiểm tra", group: "started" }), "Đang kiểm tra");
+    assert.equal(getStateDisplayName({ name: "Hoàn thành", group: "started" }), "Hoàn thành");
+    setDisplayLanguage("vi-VN");
+    assert.equal(getStateDisplayName(started), "Đang thực hiện");
+    assert.equal(getStateDisplayName(completed), "Hoàn thành");
+    assert.deepEqual([JSON.stringify(started), JSON.stringify(completed)], snapshots);
+  } finally {
+    setDisplayLanguage("vi-VN");
+  }
+});
+
+test("display helpers follow English/Vietnamese while preserving user data and API payloads", () => {
+  const date = new Date(2026, 9, 6);
+  const state = { name: "In Progress", group: "started" };
+  setDisplayLanguage("en");
+  assert.equal(getStateDisplayName(state), "In Progress");
+  assert.equal(getStateDisplayName({ name: "Review", group: "started" }), "Review");
+  assert.equal(renderFormattedDate(date), "Oct 06, 2026");
+  assert.equal(renderFormattedDate(date, "MMM"), "Oct");
+  assert.equal(renderFormattedPayloadDate(date), "2026-10-06");
+  setDisplayLanguage("vi-VN");
+  assert.equal(getStateDisplayName(state), "Đang thực hiện");
+  assert.equal(state.name, "In Progress");
+  assert.equal(renderFormattedDate(date), "06/10/2026");
+  assert.equal(renderFormattedDate(date, "MMM"), "thg 10");
+  assert.equal(renderFormattedPayloadDate(date), "2026-10-06");
+});
+
 test("embedded XBus restores and switches English/Vietnamese without losing catalogs", async () => {
   process.env.VITE_XBUS_EMBEDDED = "true";
   const storage = new Map([["userLanguage", "en"]]);
@@ -151,8 +188,14 @@ test("embedded XBus restores and switches English/Vietnamese without losing cata
   const { setLanguage } = await import("../src/core/set-language");
   const { SUPPORTED_LANGUAGES } = await import("../src/constants/language");
   await initPromise;
+  i18nInstance.on("languageChanged", setDisplayLanguage);
+  setDisplayLanguage(i18nInstance.language);
   assert.equal(i18nInstance.language, "en");
   assert.equal(i18nInstance.t("sidebar.work_items"), "Work items");
+  assert.equal(i18nInstance.t("sidebar.projects"), "Projects");
+  assert.equal(i18nInstance.t("show_more"), "Show more");
+  assert.equal(i18nInstance.t("project_settings_label"), "Project settings");
+  assert.equal(getStateDisplayName({ name: "Todo", group: "unstarted" }), "Todo");
   await setLanguage("vi-VN");
   assert.equal(i18nInstance.language, "vi-VN");
   assert.equal(document.documentElement.lang, "vi-VN");
@@ -162,6 +205,9 @@ test("embedded XBus restores and switches English/Vietnamese without losing cata
     { label: "Tiếng Việt", value: "vi-VN" },
   ]);
   assert.equal(i18nInstance.t("sidebar.work_items"), "Công việc");
+  assert.equal(i18nInstance.t("show_more"), "Xem thêm");
+  assert.equal(i18nInstance.t("project_settings_label"), "Cài đặt dự án");
+  assert.equal(getStateDisplayName({ name: "Todo", group: "unstarted" }), "Cần làm");
   await setLanguage("en");
   assert.equal(i18nInstance.language, "en");
   assert.equal(document.documentElement.lang, "en");

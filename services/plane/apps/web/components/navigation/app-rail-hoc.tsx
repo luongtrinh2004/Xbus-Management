@@ -6,6 +6,7 @@
 
 // hoc/withDockItems.tsx
 import React from "react";
+import { useTranslation } from "@plane/i18n";
 import { observer } from "mobx-react";
 import { useParams } from "next/navigation";
 import { Projects } from "@makeplane/propel/icons";
@@ -16,14 +17,19 @@ type WithDockItemsProps = {
   dockItems: (AppSidebarItemData & { shouldRender: boolean })[];
 };
 
-export function withDockItems<P extends WithDockItemsProps>(WrappedComponent: React.ComponentType<P>) {
-  const ComponentWithDockItems = observer(function ComponentWithDockItems(props: Omit<P, keyof WithDockItemsProps>) {
+export function withDockItems<P extends WithDockItemsProps>(
+  WrappedComponent: React.ComponentType<P>,
+) {
+  const ComponentWithDockItems = observer(function ComponentWithDockItems(
+    props: Omit<P, keyof WithDockItemsProps>,
+  ) {
+    const { t } = useTranslation();
     const { workspaceSlug } = useParams();
     const { isProjectsPath, isNotificationsPath } = useWorkspacePaths();
 
     const dockItems: (AppSidebarItemData & { shouldRender: boolean })[] = [
       {
-        label: "Dự án",
+        label: t("sidebar.projects"),
         icon: <Projects className="size-5" />,
         href: `/${workspaceSlug}/`,
         isActive: isProjectsPath && !isNotificationsPath,

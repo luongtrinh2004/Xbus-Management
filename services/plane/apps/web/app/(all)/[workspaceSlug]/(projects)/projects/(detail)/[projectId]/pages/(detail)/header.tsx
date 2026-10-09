@@ -58,7 +58,11 @@ export const PageDetailsHeader = observer(function PageDetailsHeader() {
         label: getPageName(_page.name),
         content: (
           <div className="flex items-center justify-between gap-2">
-            <SwitcherLabel logo_props={_page.logo_props} name={getPageName(_page.name)} LabelIcon={PagesOutline} />
+            <SwitcherLabel
+              logo_props={_page.logo_props}
+              name={getPageName(_page.name)}
+              LabelIcon={PagesOutline}
+            />
             <PageAccessIcon {..._page} />
           </div>
         ),
@@ -81,7 +85,7 @@ export const PageDetailsHeader = observer(function PageDetailsHeader() {
             <Breadcrumbs.Item
               component={
                 <BreadcrumbLink
-                  label={"Trang"}
+                  label={t("sidebar.pages")}
                   href={`/${workspaceSlug}/projects/${projectId}/pages/`}
                   icon={<PagesOutline className="h-4 w-4 text-tertiary" />}
                 />
@@ -97,7 +101,9 @@ export const PageDetailsHeader = observer(function PageDetailsHeader() {
                     router.push(`/${workspaceSlug}/projects/${projectId}/pages/${value}`);
                   }}
                   label={getPageName(page?.name)}
-                  icon={<SwitcherIcon logo_props={page.logo_props} LabelIcon={PagesOutline} size={16} />}
+                  icon={
+                    <SwitcherIcon logo_props={page.logo_props} LabelIcon={PagesOutline} size={16} />
+                  }
                   placeholder={t("pages")}
                   searchPlaceholder={t("common.search.label")}
                   emptyMessage={t("common.search.no_matches_found")}

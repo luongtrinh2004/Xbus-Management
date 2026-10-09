@@ -1,4 +1,15 @@
 {
+  "xbus_navigation": {
+    "unset_default": "Unset default",
+    "set_default": "Set as default",
+    "hide_tab": "Hide in More menu",
+    "show_tab": "Show",
+    "icons_only": "Icons only",
+    "icons_and_labels": "Icons and labels",
+    "pin_app_rail": "Pin app rail",
+    "unpin_app_rail": "Unpin app rail",
+    "unpin": "Unpin"
+  },
   "command_k": {
     "empty_state": {
       "search": {

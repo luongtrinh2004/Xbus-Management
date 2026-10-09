@@ -5,6 +5,7 @@
  */
 
 import { isEmpty } from "lodash-es";
+import { useTranslation } from "@plane/i18n";
 import { observer } from "mobx-react";
 // plane helpers
 import { EUserPermissions, EUserPermissionsLevel } from "@plane/constants";
@@ -19,6 +20,7 @@ import { useFavorite } from "@/hooks/store/use-favorite";
 import { useUserPermissions } from "@/hooks/store/user";
 
 export const AppSidebar = observer(function AppSidebar() {
+  const { t } = useTranslation();
   // store hooks
   const { allowPermissions } = useUserPermissions();
   const { groupedFavorites } = useFavorite();
@@ -26,13 +28,13 @@ export const AppSidebar = observer(function AppSidebar() {
   // derived values
   const canPerformWorkspaceMemberActions = allowPermissions(
     [EUserPermissions.ADMIN, EUserPermissions.MEMBER],
-    EUserPermissionsLevel.WORKSPACE
+    EUserPermissionsLevel.WORKSPACE,
   );
 
   const isFavoriteEmpty = isEmpty(groupedFavorites);
 
   return (
-    <SidebarWrapper title={"Dự án"} quickActions={<SidebarQuickActions />}>
+    <SidebarWrapper title={t("sidebar.projects")} quickActions={<SidebarQuickActions />}>
       <SidebarMenuItems />
       {/* Favorites Menu */}
       {canPerformWorkspaceMemberActions && !isFavoriteEmpty && <SidebarFavoritesMenu />}

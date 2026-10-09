@@ -56,7 +56,9 @@ export function TabNavigationVisibleItem({
                 onToggleDefault(item.key);
               }}
               icon={<Icon icon={DefaultTabOutline} />}
-              label={isDefault ? "Bỏ thiết lập mặc định" : "Đặt làm mặc định"}
+              label={
+                isDefault ? t("xbus_navigation.unset_default") : t("xbus_navigation.set_default")
+              }
             />
             <ContextMenuItem
               onClick={(e) => {
@@ -64,7 +66,7 @@ export function TabNavigationVisibleItem({
                 onHide(item.key);
               }}
               icon={<Icon icon={UnpinOutline} />}
-              label={"Ẩn trong menu Xem thêm"}
+              label={t("xbus_navigation.hide_tab")}
             />
           </ContextMenuContent>
         </ContextMenu>

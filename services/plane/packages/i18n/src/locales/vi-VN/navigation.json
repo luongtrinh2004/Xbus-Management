@@ -1,4 +1,15 @@
 {
+  "xbus_navigation": {
+    "unset_default": "Bỏ thiết lập mặc định",
+    "set_default": "Đặt làm mặc định",
+    "hide_tab": "Ẩn trong menu Xem thêm",
+    "show_tab": "Hiển thị",
+    "icons_only": "Chỉ biểu tượng",
+    "icons_and_labels": "Biểu tượng và tên",
+    "pin_app_rail": "Ghim thanh ứng dụng",
+    "unpin_app_rail": "Bỏ ghim thanh ứng dụng",
+    "unpin": "Bỏ ghim"
+  },
   "command_k": {
     "empty_state": {
       "search": {

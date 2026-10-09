@@ -30,10 +30,8 @@ import { SidebarLanguageMenu } from "./sidebar-language-menu";
 
 export const SidebarMenuItems = observer(function SidebarMenuItems() {
   // routers
-  const { setValue: toggleWorkspaceMenu, storedValue: isWorkspaceMenuOpen } = useLocalStorage<boolean>(
-    "is_workspace_menu_open",
-    true
-  );
+  const { setValue: toggleWorkspaceMenu, storedValue: isWorkspaceMenuOpen } =
+    useLocalStorage<boolean>("is_workspace_menu_open", true);
 
   // store hooks
   const { isExtendedSidebarOpened, toggleExtendedSidebar } = useAppTheme();
@@ -60,13 +58,19 @@ export const SidebarMenuItems = observer(function SidebarMenuItems() {
         sort_order: personalPreferences.items.stickies.sort_order,
       });
     }
-    if (personalPreferences.items.your_work?.enabled && WORKSPACE_SIDEBAR_STATIC_NAVIGATION_ITEMS["your-work"]) {
+    if (
+      personalPreferences.items.your_work?.enabled &&
+      WORKSPACE_SIDEBAR_STATIC_NAVIGATION_ITEMS["your-work"]
+    ) {
       personalItems.push({
         ...WORKSPACE_SIDEBAR_STATIC_NAVIGATION_ITEMS["your-work"],
         sort_order: personalPreferences.items.your_work.sort_order,
       });
     }
-    if (personalPreferences.items.drafts?.enabled && WORKSPACE_SIDEBAR_STATIC_NAVIGATION_ITEMS["drafts"]) {
+    if (
+      personalPreferences.items.drafts?.enabled &&
+      WORKSPACE_SIDEBAR_STATIC_NAVIGATION_ITEMS["drafts"]
+    ) {
       personalItems.push({
         ...WORKSPACE_SIDEBAR_STATIC_NAVIGATION_ITEMS["drafts"],
         sort_order: personalPreferences.items.drafts.sort_order,
@@ -90,7 +94,7 @@ export const SidebarMenuItems = observer(function SidebarMenuItems() {
           sort_order: preference ? preference.sort_order : 0,
         };
       }).sort((a, b) => a.sort_order - b.sort_order),
-    [workspacePreferences]
+    [workspacePreferences],
   );
 
   return (
@@ -106,7 +110,9 @@ export const SidebarMenuItems = observer(function SidebarMenuItems() {
         open={!!isWorkspaceMenuOpen}
         onOpenChange={toggleListDisclosure}
         trigger={
-          <span className="text-13 font-semibold whitespace-nowrap text-placeholder">{t("common.workspace")}</span>
+          <span className="text-13 font-semibold whitespace-nowrap text-placeholder">
+            {t("common.workspace")}
+          </span>
         }
       >
         <div className="flex flex-col gap-0.5">
@@ -128,11 +134,11 @@ export const SidebarMenuItems = observer(function SidebarMenuItems() {
               aria-label={t(
                 isExtendedSidebarOpened
                   ? "aria_labels.app_sidebar.close_extended_sidebar"
-                  : "aria_labels.app_sidebar.open_extended_sidebar"
+                  : "aria_labels.app_sidebar.open_extended_sidebar",
               )}
             >
               <MoreHorizontalOutline className="size-4 flex-shrink-0" />
-              <span>{isExtendedSidebarOpened ? "Ẩn" : "Xem thêm"}</span>
+              <span>{isExtendedSidebarOpened ? t("show_less") : t("show_more")}</span>
             </button>
           </SidebarNavItem>
         </div>

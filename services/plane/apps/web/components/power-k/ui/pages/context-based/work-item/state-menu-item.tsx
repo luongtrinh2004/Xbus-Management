@@ -6,6 +6,7 @@
 
 import { getStateDisplayName } from "@plane/utils";
 
+import { useTranslation } from "@plane/i18n";
 import { observer } from "mobx-react";
 import { StateGroupIcon } from "@plane/blocks/icons";
 import type { IState } from "@plane/types";
@@ -21,8 +22,9 @@ export type TPowerKProjectStatesMenuItemsProps = {
 };
 
 export const PowerKProjectStatesMenuItems = observer(function PowerKProjectStatesMenuItems(
-  props: TPowerKProjectStatesMenuItemsProps
+  props: TPowerKProjectStatesMenuItemsProps,
 ) {
+  useTranslation(); // Recompute display labels when the interface language changes.
   const { handleSelect, selectedStateId, states } = props;
 
   return (
@@ -30,7 +32,13 @@ export const PowerKProjectStatesMenuItems = observer(function PowerKProjectState
       {states.map((state) => (
         <PowerKModalCommandItem
           key={state.id}
-          iconNode={<StateGroupIcon stateGroup={state.group} color={state.color} className="size-3.5 shrink-0" />}
+          iconNode={
+            <StateGroupIcon
+              stateGroup={state.group}
+              color={state.color}
+              className="size-3.5 shrink-0"
+            />
+          }
           label={getStateDisplayName(state)}
           isSelected={state.id === selectedStateId}
           onSelect={() => handleSelect(state.id)}

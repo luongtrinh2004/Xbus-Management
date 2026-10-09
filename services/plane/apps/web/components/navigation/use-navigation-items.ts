@@ -5,6 +5,7 @@
  */
 
 import { useMemo, useCallback } from "react";
+import { useTranslation } from "@plane/i18n";
 // plane imports
 import { EUserPermissions, EUserPermissionsLevel } from "@plane/constants";
 import {
@@ -26,7 +27,7 @@ type UseNavigationItemsProps = {
     access: EUserPermissions[] | EUserProjectRoles[],
     level: EUserPermissionsLevel,
     workspaceSlug: string,
-    projectId: string
+    projectId: string,
   ) => boolean;
 };
 
@@ -36,6 +37,7 @@ export const useNavigationItems = ({
   project,
   allowPermissions,
 }: UseNavigationItemsProps): TNavigationItem[] => {
+  const { t } = useTranslation();
   // Base navigation items
   const baseNavigation = useCallback(
     // oxlint-disable-next-line no-shadow
@@ -43,7 +45,7 @@ export const useNavigationItems = ({
       {
         i18n_key: "sidebar.work_items",
         key: "work_items",
-        name: "Công việc",
+        name: t("sidebar.work_items"),
         href: `/${workspaceSlug}/projects/${projectId}/issues`,
         icon: WorkItemsOutline,
         access: [EUserPermissions.ADMIN, EUserPermissions.MEMBER, EUserPermissions.GUEST],
@@ -53,7 +55,7 @@ export const useNavigationItems = ({
       {
         i18n_key: "sidebar.cycles",
         key: "cycles",
-        name: "Chu kỳ",
+        name: t("sidebar.cycles"),
         href: `/${workspaceSlug}/projects/${projectId}/cycles`,
         icon: CyclesOutline,
         access: [EUserPermissions.ADMIN, EUserPermissions.MEMBER],
@@ -63,7 +65,7 @@ export const useNavigationItems = ({
       {
         i18n_key: "sidebar.modules",
         key: "modules",
-        name: "Nhóm công việc",
+        name: t("sidebar.modules"),
         href: `/${workspaceSlug}/projects/${projectId}/modules`,
         icon: ModuleOutline,
         access: [EUserPermissions.ADMIN, EUserPermissions.MEMBER],
@@ -73,7 +75,7 @@ export const useNavigationItems = ({
       {
         i18n_key: "sidebar.views",
         key: "views",
-        name: "Chế độ xem",
+        name: t("sidebar.views"),
         href: `/${workspaceSlug}/projects/${projectId}/views`,
         icon: ViewsOutline,
         access: [EUserPermissions.ADMIN, EUserPermissions.MEMBER, EUserPermissions.GUEST],
@@ -83,7 +85,7 @@ export const useNavigationItems = ({
       {
         i18n_key: "sidebar.pages",
         key: "pages",
-        name: "Trang",
+        name: t("sidebar.pages"),
         href: `/${workspaceSlug}/projects/${projectId}/pages`,
         icon: PagesOutline,
         access: [EUserPermissions.ADMIN, EUserPermissions.MEMBER, EUserPermissions.GUEST],
@@ -93,7 +95,7 @@ export const useNavigationItems = ({
       {
         i18n_key: "sidebar.intake",
         key: "intake",
-        name: "Tiếp nhận",
+        name: t("sidebar.intake"),
         href: `/${workspaceSlug}/projects/${projectId}/intake`,
         icon: IntakeOutline,
         access: [EUserPermissions.ADMIN, EUserPermissions.MEMBER, EUserPermissions.GUEST],
@@ -101,7 +103,7 @@ export const useNavigationItems = ({
         sortOrder: 6,
       },
     ],
-    [project]
+    [project, t],
   );
 
   // Combine, filter, and sort navigation items
@@ -111,7 +113,12 @@ export const useNavigationItems = ({
     // Filter by permissions and shouldRender
     const filteredItems = navItems.filter((item) => {
       if (!item.shouldRender) return false;
-      const hasAccess = allowPermissions(item.access, EUserPermissionsLevel.PROJECT, workspaceSlug, project?.id ?? "");
+      const hasAccess = allowPermissions(
+        item.access,
+        EUserPermissionsLevel.PROJECT,
+        workspaceSlug,
+        project?.id ?? "",
+      );
       return hasAccess;
     });
 
