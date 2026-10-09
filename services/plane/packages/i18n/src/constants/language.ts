@@ -34,7 +34,9 @@ const ALL_SUPPORTED_LANGUAGES: ILanguageOption[] = [
 
 export const SUPPORTED_LANGUAGES =
   process.env.VITE_XBUS_EMBEDDED === "true"
-    ? ALL_SUPPORTED_LANGUAGES.filter((language) => language.value === "vi-VN")
+    ? ALL_SUPPORTED_LANGUAGES.filter(
+        (language) => language.value === "en" || language.value === "vi-VN",
+      )
     : ALL_SUPPORTED_LANGUAGES;
 
 export const LANGUAGE_STORAGE_KEY = "userLanguage";

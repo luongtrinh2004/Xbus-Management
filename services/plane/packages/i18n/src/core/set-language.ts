@@ -5,12 +5,11 @@
  */
 
 import { initPromise, i18nInstance } from "./instance";
-import { LANGUAGE_STORAGE_KEY } from "../constants/language";
+import { LANGUAGE_STORAGE_KEY, SUPPORTED_LANGUAGES } from "../constants/language";
 import type { TLanguage } from "../types";
 
 export async function setLanguage(lng: TLanguage): Promise<void> {
-  // XBus uses one Vietnamese interface, including profiles created before localization.
-  if (process.env.VITE_XBUS_EMBEDDED === "true") lng = "vi-VN";
+  if (!SUPPORTED_LANGUAGES.some((language) => language.value === lng)) return;
   await initPromise;
   await i18nInstance.changeLanguage(lng);
   if (typeof window !== "undefined") {

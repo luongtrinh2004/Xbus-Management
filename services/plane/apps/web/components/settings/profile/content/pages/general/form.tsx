@@ -52,7 +52,9 @@ type Props = {
   profile: TUserProfile;
 };
 
-export const GeneralProfileSettingsForm = observer(function GeneralProfileSettingsForm(props: Props) {
+export const GeneralProfileSettingsForm = observer(function GeneralProfileSettingsForm(
+  props: Props,
+) {
   const { user, profile } = props;
   // states
   const [isLoading, setIsLoading] = useState(false);
@@ -60,7 +62,7 @@ export const GeneralProfileSettingsForm = observer(function GeneralProfileSettin
   const [deactivateAccountModal, setDeactivateAccountModal] = useState(false);
   const [isChangeEmailModalOpen, setIsChangeEmailModalOpen] = useState(false);
   // language support
-  const { t } = useTranslation();
+  const { t, currentLocale } = useTranslation();
   // form info
   const {
     handleSubmit,
@@ -78,7 +80,8 @@ export const GeneralProfileSettingsForm = observer(function GeneralProfileSettin
       display_name: user.display_name || "",
       email: user.email || "",
       role: profile.role || "Quản lý sản phẩm/dự án",
-      language: process.env.VITE_XBUS_EMBEDDED === "true" ? "vi-VN" : profile.language || "vi-VN",
+      language:
+        process.env.VITE_XBUS_EMBEDDED === "true" ? currentLocale : profile.language || "vi-VN",
       user_timezone: user.user_timezone || "Asia/Kolkata",
     },
   });
@@ -128,11 +131,15 @@ export const GeneralProfileSettingsForm = observer(function GeneralProfileSettin
     };
 
     try {
-      const coverImagePayload = await handleCoverImageChange(user.cover_image_url, formData.cover_image_url, {
-        entityIdentifier: "",
-        entityType: EFileAssetType.USER_COVER,
-        isUserAsset: true,
-      });
+      const coverImagePayload = await handleCoverImageChange(
+        user.cover_image_url,
+        formData.cover_image_url,
+        {
+          entityIdentifier: "",
+          entityType: EFileAssetType.USER_COVER,
+          isUserAsset: true,
+        },
+      );
 
       if (coverImagePayload) {
         Object.assign(userPayload, coverImagePayload);
@@ -168,7 +175,7 @@ export const GeneralProfileSettingsForm = observer(function GeneralProfileSettin
           throw rejectedResult.reason ?? new Error("Không thể cập nhật hồ sơ");
         }
         const values = results.map(
-          (result) => (result as PromiseFulfilledResult<IUser | TUserProfile | undefined>).value
+          (result) => (result as PromiseFulfilledResult<IUser | TUserProfile | undefined>).value,
         );
         if (values.some((v) => v === undefined)) {
           throw new Error("Không thể cập nhật hồ sơ");
@@ -192,8 +199,14 @@ export const GeneralProfileSettingsForm = observer(function GeneralProfileSettin
 
   return (
     <>
-      <DeactivateAccountModal isOpen={deactivateAccountModal} onClose={() => setDeactivateAccountModal(false)} />
-      <ChangeEmailModal isOpen={isChangeEmailModalOpen} onClose={() => setIsChangeEmailModalOpen(false)} />
+      <DeactivateAccountModal
+        isOpen={deactivateAccountModal}
+        onClose={() => setDeactivateAccountModal(false)}
+      />
+      <ChangeEmailModal
+        isOpen={isChangeEmailModalOpen}
+        onClose={() => setIsChangeEmailModalOpen(false)}
+      />
       <Controller
         control={control}
         name="avatar_url"
@@ -214,7 +227,11 @@ export const GeneralProfileSettingsForm = observer(function GeneralProfileSettin
       <form onSubmit={handleSubmit(onSubmit)} className="w-full">
         <div className="flex w-full flex-col gap-7">
           <div className="relative h-44 w-full">
-            <CoverImage src={userCover} className="h-44 w-full rounded-lg" alt={currentUser?.first_name ?? "Ảnh bìa"} />
+            <CoverImage
+              src={userCover}
+              className="h-44 w-full rounded-lg"
+              alt={currentUser?.first_name ?? "Ảnh bìa"}
+            />
             <div className="absolute -bottom-6 left-6 flex items-end justify-between">
               <div className="flex gap-3">
                 <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-surface-2">
@@ -295,7 +312,9 @@ export const GeneralProfileSettingsForm = observer(function GeneralProfileSettin
                     </Field>
                   )}
                 />
-                {errors.first_name && <span className="text-11 text-danger-primary">{errors.first_name.message}</span>}
+                {errors.first_name && (
+                  <span className="text-11 text-danger-primary">{errors.first_name.message}</span>
+                )}
               </div>
               <div className="flex flex-col gap-1">
                 <h4 className="text-13 font-medium text-secondary">{t("last_name")}</h4>
@@ -324,7 +343,9 @@ export const GeneralProfileSettingsForm = observer(function GeneralProfileSettin
                     </Field>
                   )}
                 />
-                {errors.last_name && <span className="text-11 text-danger-primary">{errors.last_name.message}</span>}
+                {errors.last_name && (
+                  <span className="text-11 text-danger-primary">{errors.last_name.message}</span>
+                )}
               </div>
               <div className="flex flex-col gap-1">
                 <h4 className="text-13 font-medium text-secondary">
@@ -357,7 +378,9 @@ export const GeneralProfileSettingsForm = observer(function GeneralProfileSettin
                   )}
                 />
                 {errors?.display_name && (
-                  <span className="text-11 text-danger-primary">{errors?.display_name?.message}</span>
+                  <span className="text-11 text-danger-primary">
+                    {errors?.display_name?.message}
+                  </span>
                 )}
               </div>
               <div className="flex flex-col gap-1">

@@ -29,7 +29,7 @@ export const ProfileSettingsLanguageAndTimezonePreferencesList = observer(
     } = useUser();
     const { updateUserProfile } = useUserProfile();
     // translation
-    const { t } = useTranslation();
+    const { t, currentLocale } = useTranslation();
 
     const handleTimezoneChange = async (value: string) => {
       try {
@@ -75,15 +75,22 @@ export const ProfileSettingsLanguageAndTimezonePreferencesList = observer(
       value: item.value,
       label: item.label,
     }));
-    const currentLanguage = process.env.VITE_XBUS_EMBEDDED === "true" ? "vi-VN" : profile?.language || "vi-VN";
-    const selectedLanguageOption = languageOptions.find((option) => option.value === currentLanguage) ?? null;
+    const currentLanguage =
+      process.env.VITE_XBUS_EMBEDDED === "true" ? currentLocale : profile?.language || "vi-VN";
+    const selectedLanguageOption =
+      languageOptions.find((option) => option.value === currentLanguage) ?? null;
 
     return (
       <div className="flex flex-col gap-y-1">
         <SettingsControlItem
           title={t("timezone")}
           description={t("timezone_setting")}
-          control={<TimezoneSelect value={user?.user_timezone || "Asia/Kolkata"} onChange={handleTimezoneChange} />}
+          control={
+            <TimezoneSelect
+              value={user?.user_timezone || "Asia/Kolkata"}
+              onChange={handleTimezoneChange}
+            />
+          }
         />
         <SettingsControlItem
           title={t("language")}
@@ -111,10 +118,11 @@ export const ProfileSettingsLanguageAndTimezonePreferencesList = observer(
         <StartOfWeekPreference
           option={{
             title: "Ngày đầu tuần",
-            description: "Thiết lập này thay đổi ngày bắt đầu tuần trên tất cả lịch trong ứng dụng.",
+            description:
+              "Thiết lập này thay đổi ngày bắt đầu tuần trên tất cả lịch trong ứng dụng.",
           }}
         />
       </div>
     );
-  }
+  },
 );

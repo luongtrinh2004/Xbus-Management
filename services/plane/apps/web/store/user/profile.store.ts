@@ -111,7 +111,7 @@ export class ProfileStore implements IUserProfileStore {
         this.isLoading = false;
         this.data = userProfile;
       });
-      if (userProfile.language) {
+      if (userProfile.language && process.env.VITE_XBUS_EMBEDDED !== "true") {
         void setLanguage(userProfile.language as TLanguage);
       }
       return userProfile;

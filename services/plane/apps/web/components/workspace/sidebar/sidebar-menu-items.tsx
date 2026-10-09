@@ -26,6 +26,7 @@ import {
   useWorkspaceNavigationPreferences,
 } from "@/hooks/use-navigation-preferences";
 import { SidebarItemBase } from "./sidebar-item";
+import { SidebarLanguageMenu } from "./sidebar-language-menu";
 
 export const SidebarMenuItems = observer(function SidebarMenuItems() {
   // routers
@@ -117,6 +118,7 @@ export const SidebarMenuItems = observer(function SidebarMenuItems() {
             // oxlint-disable-next-line react/no-array-index-key
             <SidebarItemBase key={`dynamic_${_index}`} item={item} />
           ))}
+          {process.env.VITE_XBUS_EMBEDDED === "true" && <SidebarLanguageMenu />}
           <SidebarNavItem>
             <button
               type="button"

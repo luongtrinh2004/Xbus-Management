@@ -6,7 +6,8 @@
 
 import { useCallback } from "react";
 import { useTranslation as useI18nextTranslation } from "react-i18next";
-import { SUPPORTED_LANGUAGES, LANGUAGE_STORAGE_KEY } from "../constants/language";
+import { SUPPORTED_LANGUAGES } from "../constants/language";
+import { setLanguage } from "../core/set-language";
 import type { TLanguage, ILanguageOption } from "../types";
 
 export type TTranslationStore = {
@@ -30,7 +31,7 @@ function coerceToString(key: string, value: unknown): string {
     console.warn(
       `[i18n] Translation for key "${key}" is not a string (got ${
         value === null ? "null" : typeof value
-      }). This is likely a missing key or a namespace-node lookup. Returning the key as fallback.`
+      }). This is likely a missing key or a namespace-node lookup. Returning the key as fallback.`,
     );
   }
   return key;
@@ -42,21 +43,15 @@ export function useTranslation(): TTranslationStore {
   // async loads per component, causing a re-render cascade.
   const { t, i18n } = useI18nextTranslation();
 
-  const changeLanguage = useCallback(
-    (lng: TLanguage) => {
-      void (async () => {
-        try {
-          await i18n.changeLanguage(lng);
-          if (typeof window === "undefined") return;
-          localStorage.setItem(LANGUAGE_STORAGE_KEY, lng);
-          document.documentElement.lang = lng;
-        } catch (err) {
-          console.error("Failed to change language:", err);
-        }
-      })();
-    },
-    [i18n]
-  );
+  const changeLanguage = useCallback((lng: TLanguage) => {
+    void (async () => {
+      try {
+        await setLanguage(lng);
+      } catch (err) {
+        console.error("Failed to change language:", err);
+      }
+    })();
+  }, []);
 
   return {
     t: (key: string, params?: Record<string, unknown>) =>

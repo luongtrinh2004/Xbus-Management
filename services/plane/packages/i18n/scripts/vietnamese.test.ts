@@ -19,7 +19,7 @@ async function loadCatalogs() {
         readFile(new URL(`vi-VN/${file}`, locales), "utf8"),
       ]);
       return { file, en: flatten(JSON.parse(english)), vi: flatten(JSON.parse(vietnamese)) };
-    })
+    }),
   );
 }
 
@@ -29,15 +29,18 @@ function flatten(value: Locale, prefix = ""): Record<string, string> {
     Object.entries(value).flatMap(([key, item]) => {
       const path = prefix ? `${prefix}.${key}` : key;
       return typeof item === "string" ? [[path, item]] : Object.entries(flatten(item, path));
-    })
+    }),
   );
 }
 function argumentsIn(message: string, locale: string): string[] {
   const names = new Set<string>();
-  function visit(elements: { type: number; value?: string; options?: Record<string, { value: unknown[] }> }[]) {
+  function visit(
+    elements: { type: number; value?: string; options?: Record<string, { value: unknown[] }> }[],
+  ) {
     for (const element of elements) {
       if ([1, 2, 3, 4, 5, 6].includes(element.type) && element.value) names.add(element.value);
-      for (const option of Object.values(element.options ?? {})) visit(option.value as typeof elements);
+      for (const option of Object.values(element.options ?? {}))
+        visit(option.value as typeof elements);
     }
   }
   visit(new IntlMessageFormat(message, locale).getAst());
@@ -54,7 +57,7 @@ test("Vietnamese covers every namespace and preserves ICU values", async () => {
       assert.deepEqual(
         actual,
         expected.filter((name) => name !== "plural"),
-        `${file}: ${key}`
+        `${file}: ${key}`,
       );
       assert.ok(vi[key].trim() || !message.trim(), `${file}: ${key} must not be blank`);
     }
@@ -103,7 +106,10 @@ test("English retained in the Vietnamese catalog is limited to technical names a
         /^(https?:\/\/|api:\/\/)/.test(value) ||
         /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ||
         /^[a-z]+\.[a-z]{2,}$/.test(value);
-      assert.ok(allowed.has(value) || example, `${file}: ${key} still contains untranslated English: ${value}`);
+      assert.ok(
+        allowed.has(value) || example,
+        `${file}: ${key} still contains untranslated English: ${value}`,
+      );
     }
   }
 });
@@ -125,7 +131,7 @@ test("Vietnamese display dates do not change dates submitted to the API", () => 
   assert.equal(renderFormattedDate(null), undefined);
 });
 
-test("embedded XBus ignores an old English preference and an English profile", async () => {
+test("embedded XBus restores and switches English/Vietnamese without losing catalogs", async () => {
   process.env.VITE_XBUS_EMBEDDED = "true";
   const storage = new Map([["userLanguage", "en"]]);
   Object.assign(globalThis, {
@@ -145,11 +151,28 @@ test("embedded XBus ignores an old English preference and an English profile", a
   const { setLanguage } = await import("../src/core/set-language");
   const { SUPPORTED_LANGUAGES } = await import("../src/constants/language");
   await initPromise;
-  assert.equal(i18nInstance.language, "vi-VN");
-  assert.equal(i18nInstance.t("sidebar.work_items"), "Công việc");
-  await setLanguage("en");
+  assert.equal(i18nInstance.language, "en");
+  assert.equal(i18nInstance.t("sidebar.work_items"), "Work items");
+  await setLanguage("vi-VN");
   assert.equal(i18nInstance.language, "vi-VN");
   assert.equal(document.documentElement.lang, "vi-VN");
   assert.equal(storage.get("userLanguage"), "vi-VN");
-  assert.deepEqual(SUPPORTED_LANGUAGES, [{ label: "Tiếng Việt", value: "vi-VN" }]);
+  assert.deepEqual(SUPPORTED_LANGUAGES, [
+    { label: "English", value: "en" },
+    { label: "Tiếng Việt", value: "vi-VN" },
+  ]);
+  assert.equal(i18nInstance.t("sidebar.work_items"), "Công việc");
+  await setLanguage("en");
+  assert.equal(i18nInstance.language, "en");
+  assert.equal(document.documentElement.lang, "en");
+  assert.equal(storage.get("userLanguage"), "en");
+  assert.equal(i18nInstance.t("sidebar.work_items"), "Work items");
+  await setLanguage("fr");
+  assert.equal(i18nInstance.language, "en");
+  window.localStorage.setItem = () => {
+    throw new Error("Storage blocked");
+  };
+  await setLanguage("vi-VN");
+  assert.equal(i18nInstance.language, "vi-VN");
+  assert.equal(document.documentElement.lang, "vi-VN");
 });
