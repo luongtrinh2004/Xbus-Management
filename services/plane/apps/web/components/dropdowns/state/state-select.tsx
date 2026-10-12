@@ -13,11 +13,18 @@ import { useParams } from "next/navigation";
 // plane imports
 import { StateSelect as StateSelectBlock } from "@plane/blocks/property-select";
 import type { StateOption } from "@plane/blocks/property-select";
-import type { SelectPaginationParams, SelectTooltip, SelectTooltipOverride, SelectVariant } from "@plane/blocks/select";
+import type {
+  SelectPaginationParams,
+  SelectTooltip,
+  SelectTooltipOverride,
+  SelectVariant,
+} from "@plane/blocks/select";
 import { useTranslation } from "@plane/i18n";
 import type { IState, TPaginatedResponse } from "@plane/types";
 // hooks
 import { useProjectState } from "@/hooks/store/use-project-state";
+import { setToast } from "@plane/blocks/toast";
+import { getStateChangeError } from "./change-error";
 
 type StateSelectWebProps = {
   /** Project whose states are offered. */
@@ -102,7 +109,7 @@ export const StateSelect = observer(function StateSelect(props: StateSelectWebPr
         .map(toOption);
       return { results, next_page_results: false };
     },
-    [workspaceSlug, projectId, getProjectStateIds, fetchProjectStates, getStateById]
+    [workspaceSlug, projectId, getProjectStateIds, fetchProjectStates, getStateById],
   );
 
   // Resolved in the observer render (not in a memo) so MobX re-renders when the state loads.
@@ -113,7 +120,17 @@ export const StateSelect = observer(function StateSelect(props: StateSelectWebPr
     <StateSelectBlock
       getValues={getValues}
       value={selected}
-      onChange={onChange}
+      onChange={async (stateId) => {
+        try {
+          await onChange(stateId);
+        } catch (error) {
+          setToast({
+            type: "error",
+            title: t("error"),
+            message: getStateChangeError(error, t("error")),
+          });
+        }
+      }}
       variant={variant}
       disabled={disabled}
       placeholder={placeholder ?? t("state")}

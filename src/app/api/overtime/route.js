@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import { readOvertime, mutateOvertimeStorage } from "@/libs/overtimeRepository";
 import {
   isOtManager,
+  canViewOt,
+  otPersonOption,
   mutateOvertime,
   overtimeView,
   parseOtFilters,
@@ -18,9 +20,7 @@ export async function GET(req) {
     const params = new URL(req.url).searchParams;
     if (params.has("id")) {
       const record = state.requests.find(
-        (item) =>
-          item.id === params.get("id") &&
-          (isOtManager(actor) || item.userId === actor.id),
+        (item) => item.id === params.get("id") && canViewOt(item, actor),
       );
       if (!record) throw new OvertimeError("Không tìm thấy đơn OT", 404);
       const names = new Map(users.map((user) => [user.id, user.name]));
@@ -50,11 +50,14 @@ export async function GET(req) {
       filters,
       config: state.config,
       actor: { id: actor.id, name: actor.name, role: actor.role },
-      users: (isOtManager(actor) ? users : [actor]).map((user) => ({
-        id: user.id,
-        name: user.name,
-        status: user.status,
-      })),
+      users: users
+        .filter(
+          (user) =>
+            isOtManager(actor) ||
+            user.status === "able" ||
+            user.id === actor.id,
+        )
+        .map(otPersonOption),
     });
   } catch (error) {
     return overtimeFailure(error);

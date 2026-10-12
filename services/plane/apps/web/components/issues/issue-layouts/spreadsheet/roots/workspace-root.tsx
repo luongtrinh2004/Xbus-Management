@@ -7,7 +7,12 @@
 import React, { useCallback } from "react";
 import { observer } from "mobx-react";
 // plane constants
-import { ALL_ISSUES, EIssueFilterType, EUserPermissions, EUserPermissionsLevel } from "@plane/constants";
+import {
+  ALL_ISSUES,
+  EIssueFilterType,
+  EUserPermissions,
+  EUserPermissionsLevel,
+} from "@plane/constants";
 import type { IIssueDisplayFilterOptions } from "@plane/types";
 import { EIssuesStoreType, EIssueLayoutTypes } from "@plane/types";
 // components
@@ -62,10 +67,10 @@ export const WorkspaceSpreadsheetRoot = observer(function WorkspaceSpreadsheetRo
         [EUserPermissions.ADMIN, EUserPermissions.MEMBER],
         EUserPermissionsLevel.PROJECT,
         workspaceSlug.toString(),
-        projectId
+        projectId,
       );
     },
-    [allowPermissions, workspaceSlug]
+    [allowPermissions, workspaceSlug],
   );
 
   // Display filters handler
@@ -78,10 +83,10 @@ export const WorkspaceSpreadsheetRoot = observer(function WorkspaceSpreadsheetRo
         undefined,
         EIssueFilterType.DISPLAY_FILTERS,
         { ...updatedDisplayFilter },
-        globalViewId.toString()
+        globalViewId.toString(),
       );
     },
-    [updateFilters, workspaceSlug, globalViewId]
+    [updateFilters, workspaceSlug, globalViewId],
   );
 
   // Quick actions renderer
@@ -99,11 +104,15 @@ export const WorkspaceSpreadsheetRoot = observer(function WorkspaceSpreadsheetRo
         placements={placement}
       />
     ),
-    [canEditProperties, removeIssue, updateIssue, archiveIssue]
+    [canEditProperties, removeIssue, updateIssue, archiveIssue],
   );
 
   // Loading state
-  if ((isLoading && issuesLoading && getIssueLoader() === "init-loader") || !globalViewId || !groupedIssueIds) {
+  if (
+    (isLoading && issuesLoading && getIssueLoader() === "init-loader") ||
+    !globalViewId ||
+    !groupedIssueIds
+  ) {
     return <SpreadsheetLayoutLoader />;
   }
 

@@ -127,6 +127,7 @@ export const IssuesHeader = observer(function IssuesHeader() {
         {canUserCreateIssue && (
           <Button
             variant="primary"
+            data-xbus-add-work-item={process.env.VITE_XBUS_EMBEDDED === "true" ? "true" : undefined}
             size="md"
             stretch="auto"
             type="button"

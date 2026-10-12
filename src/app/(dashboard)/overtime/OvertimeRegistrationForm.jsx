@@ -19,6 +19,8 @@ import {
   Typography,
 } from "@mui/material";
 
+import OvertimePersonPicker, { OvertimePerson } from "./OvertimePersonPicker";
+
 const currentDate = () =>
   new Date(Date.now() + 7 * 3600000).toISOString().slice(0, 10);
 const timeToMinutes = (value) =>
@@ -100,7 +102,7 @@ export default function OvertimeRegistrationForm({
     if (start != null && end != null && minutes <= 0)
       next.time =
         "Khoảng giờ phải lớn hơn thời gian nghỉ; giờ bắt đầu và kết thúc phải khác nhau.";
-    if (!form.reason.trim()) next.reason = "Vui lòng nhập lý do làm thêm giờ.";
+    if (!form.reason.trim()) next.reason = "Vui lòng nhập mục đích OT.";
     if (record?.status === "APPROVED" && !form.note.trim())
       next.note = "Vui lòng nhập lý do điều chỉnh đơn đã duyệt.";
     if (
@@ -176,29 +178,60 @@ export default function OvertimeRegistrationForm({
                   <Typography variant="h6">Thông tin đơn</Typography>
                   {error && <Alert severity="error">{error}</Alert>}
                   {manager && action === "create" && (
-                    <TextField
-                      {...inputProps}
+                    <OvertimePersonPicker
                       required
-                      select
-                      label="Nhân viên"
+                      disabled={busy}
+                      label="Nhân sự đăng ký"
+                      users={users.filter((user) => user.status === "able")}
                       value={form.userId || actor.id}
-                      onChange={(event) => change("userId", event.target.value)}
+                      onChange={(value) => change("userId", value)}
                       error={!!errors.userId}
                       helperText={errors.userId}
-                    >
-                      {users
-                        .filter((user) => user.status === "able")
-                        .map((user) => (
-                          <MenuItem key={user.id} value={user.id}>
-                            {user.name}
-                          </MenuItem>
-                        ))}
-                    </TextField>
+                    />
+                  )}
+                  {action === "create" && (
+                    <>
+                      {!manager && (
+                        <OvertimePerson
+                          person={
+                            users.find((user) => user.id === actor.id) || actor
+                          }
+                        />
+                      )}
+                      <OvertimePersonPicker
+                        multiple
+                        disabled={busy}
+                        label="Nhân sự cùng OT"
+                        users={users.filter(
+                          (user) =>
+                            user.status === "able" &&
+                            user.id !==
+                              (manager ? form.userId || actor.id : actor.id),
+                        )}
+                        value={form.participantIds || []}
+                        onChange={(value) => change("participantIds", value)}
+                        helperText="Chọn thêm người làm cùng. Một đơn dùng chung ngày, giờ, mục đích và báo cáo OT."
+                      />
+                    </>
                   )}
                   {action === "edit" && manager && (
                     <Typography variant="body2" color="text.secondary">
                       Nhân viên: {record.userName}
                     </Typography>
+                  )}
+                  {action === "edit" && record.participants?.length > 1 && (
+                    <Stack spacing={1}>
+                      <Typography variant="subtitle2">
+                        Nhân sự trong đơn OT
+                      </Typography>
+                      {record.participants.map((person) => (
+                        <OvertimePerson key={person.id} person={person} />
+                      ))}
+                      <Typography variant="caption" color="text.secondary">
+                        Điều chỉnh ngày, giờ và mục đích áp dụng cho tất cả nhân
+                        sự trong đơn.
+                      </Typography>
+                    </Stack>
                   )}
                   <TextField
                     {...inputProps}
@@ -293,8 +326,8 @@ export default function OvertimeRegistrationForm({
                   <TextField
                     {...inputProps}
                     required
-                    label="Lý do làm thêm giờ"
-                    placeholder="Nhập lý do"
+                    label="Mục đích OT"
+                    placeholder="Nhập mục đích OT"
                     multiline
                     minRows={4}
                     value={form.reason}

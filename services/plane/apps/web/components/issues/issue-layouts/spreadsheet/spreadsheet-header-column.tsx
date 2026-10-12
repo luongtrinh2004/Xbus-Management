@@ -22,7 +22,13 @@ interface Props {
   isEpic?: boolean;
 }
 export const SpreadsheetHeaderColumn = observer(function SpreadsheetHeaderColumn(props: Props) {
-  const { displayProperties, displayFilters, property, handleDisplayFilterUpdate, isEpic = false } = props;
+  const {
+    displayProperties,
+    displayFilters,
+    property,
+    handleDisplayFilterUpdate,
+    isEpic = false,
+  } = props;
 
   //hooks
   const tableHeaderCellRef = useRef<HTMLTableCellElement | null>(null);

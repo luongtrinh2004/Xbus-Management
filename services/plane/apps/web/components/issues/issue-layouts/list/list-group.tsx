@@ -4,6 +4,7 @@
  * See the LICENSE file for details.
  */
 
+import { useListTable } from "./table-context";
 import type { MutableRefObject } from "react";
 import { useEffect, useRef, useState } from "react";
 import { combine } from "@atlaskit/pragmatic-drag-and-drop/combine";
@@ -54,13 +55,17 @@ interface Props {
   group_by: TIssueGroupByOptions | null;
   orderBy: TIssueOrderByOptions | undefined;
   getGroupIndex: (groupId: string | undefined) => number;
-  updateIssue: ((projectId: string | null, issueId: string, data: Partial<TIssue>) => Promise<void>) | undefined;
+  updateIssue:
+    | ((projectId: string | null, issueId: string, data: Partial<TIssue>) => Promise<void>)
+    | undefined;
   quickActions: TRenderQuickActions;
   displayProperties: IIssueDisplayProperties | undefined;
   enableIssueQuickAdd: boolean;
   canEditProperties: (projectId: string | undefined) => boolean;
   containerRef: MutableRefObject<HTMLDivElement | null>;
-  quickAddCallback?: ((projectId: string | null | undefined, data: TIssue) => Promise<TIssue | undefined>) | undefined;
+  quickAddCallback?:
+    | ((projectId: string | null | undefined, data: TIssue) => Promise<TIssue | undefined>)
+    | undefined;
   handleOnDrop: (source: GroupDropLocation, destination: GroupDropLocation) => Promise<void>;
   disableIssueCreation?: boolean;
   addIssuesToView?: (issueIds: string[]) => Promise<TIssue>;
@@ -100,8 +105,11 @@ export const ListGroup = observer(function ListGroup(props: Props) {
     isEpic = false,
   } = props;
 
+  const columns = useListTable();
   const [isDraggingOverColumn, setIsDraggingOverColumn] = useState(false);
-  const [dragColumnOrientation, setDragColumnOrientation] = useState<"justify-start" | "justify-end">("justify-start");
+  const [dragColumnOrientation, setDragColumnOrientation] = useState<
+    "justify-start" | "justify-end"
+  >("justify-start");
   const isExpanded = !collapsedGroups?.group_by.includes(group.id);
   const groupRef = useRef<HTMLDivElement | null>(null);
   const { t } = useTranslation();
@@ -113,15 +121,24 @@ export const ListGroup = observer(function ListGroup(props: Props) {
 
   const [intersectionElement, setIntersectionElement] = useState<HTMLDivElement | null>(null);
 
-  const { workflowDisabledSource, isWorkflowDropDisabled, handleWorkFlowState, getIsWorkflowWorkItemCreationDisabled } =
-    useWorkFlowFDragNDrop(group_by);
+  const {
+    workflowDisabledSource,
+    isWorkflowDropDisabled,
+    handleWorkFlowState,
+    getIsWorkflowWorkItemCreationDisabled,
+  } = useWorkFlowFDragNDrop(group_by);
   const isWorkflowIssueCreationDisabled = getIsWorkflowWorkItemCreationDisabled(group.id);
 
   const groupIssueCount = getGroupIssueCount(group.id, undefined, false) ?? 0;
   const nextPageResults = getPaginationData(group.id, undefined)?.nextPageResults;
   const isPaginating = !!getIssueLoader(group.id);
 
-  useIntersectionObserver(containerRef, isPaginating ? null : intersectionElement, loadMoreIssues, `100% 0% 100% 0%`);
+  useIntersectionObserver(
+    containerRef,
+    isPaginating ? null : intersectionElement,
+    loadMoreIssues,
+    `100% 0% 100% 0%`,
+  );
 
   const shouldLoadMore =
     nextPageResults === undefined && groupIssueCount !== undefined && groupIssueIds
@@ -229,13 +246,16 @@ export const ListGroup = observer(function ListGroup(props: Props) {
 
           handleOnDrop(source, destination);
 
-          highlightIssueOnDrop(getIssueBlockId(source.id, destination?.groupId), orderBy !== "sort_order");
+          highlightIssueOnDrop(
+            getIssueBlockId(source.id, destination?.groupId),
+            orderBy !== "sort_order",
+          );
 
           if (!isExpanded) {
             handleCollapsedGroups(group.id);
           }
         },
-      })
+      }),
     );
   }, [
     // oxlint-disable-next-line eslint-plugin-react-hooks/exhaustive-deps
@@ -249,7 +269,8 @@ export const ListGroup = observer(function ListGroup(props: Props) {
   ]);
 
   const isDragAllowed = group_by ? DRAG_ALLOWED_GROUPS.includes(group_by) : true;
-  const canOverlayBeVisible = isWorkflowDropDisabled || orderBy !== "sort_order" || !!group.isDropDisabled;
+  const canOverlayBeVisible =
+    isWorkflowDropDisabled || orderBy !== "sort_order" || !!group.isDropDisabled;
   const isDropDisabled = isWorkflowDropDisabled || !!group.isDropDisabled;
 
   const isGroupByCreatedBy = group_by === "created_by";
@@ -259,14 +280,19 @@ export const ListGroup = observer(function ListGroup(props: Props) {
     <div
       ref={groupRef}
       className={cn(`relative flex flex-shrink-0 flex-col`, {
+        "asana-list-section": !!columns,
         "border-accent-strong": isDraggingOverColumn,
         "border-danger-subtle": isDraggingOverColumn && isDropDisabled,
       })}
     >
       <Row
-        className={cn("w-full flex-shrink-0 border-b border-subtle bg-layer-1 py-1 pr-3 hover:bg-layer-1-hover", {
-          "sticky top-0 z-[2]": isExpanded && groupIssueCount > 0,
-        })}
+        className={cn(
+          "w-full flex-shrink-0 border-b border-subtle bg-layer-1 py-1 pr-3 hover:bg-layer-1-hover",
+          {
+            "sticky top-0 z-[2]": !columns && isExpanded && groupIssueCount > 0,
+            "asana-list-section-header": !!columns,
+          },
+        )}
       >
         <HeaderGroupByCard
           groupID={group.id}
@@ -277,12 +303,16 @@ export const ListGroup = observer(function ListGroup(props: Props) {
           issuePayload={group.payload}
           canEditProperties={canEditProperties}
           disableIssueCreation={
-            disableIssueCreation || isGroupByCreatedBy || isCompletedCycle || isWorkflowIssueCreationDisabled
+            disableIssueCreation ||
+            isGroupByCreatedBy ||
+            isCompletedCycle ||
+            isWorkflowIssueCreationDisabled
           }
           addIssuesToView={addIssuesToView}
           selectionHelpers={selectionHelpers}
           handleCollapsedGroups={handleCollapsedGroups}
           isEpic={isEpic}
+          isExpanded={isExpanded}
         />
       </Row>
       {shouldExpand && (

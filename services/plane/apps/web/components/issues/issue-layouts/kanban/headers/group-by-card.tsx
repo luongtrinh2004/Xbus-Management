@@ -5,13 +5,19 @@
  */
 
 import React from "react";
+import { useProjectState } from "@/hooks/store/use-project-state";
 import { observer } from "mobx-react";
 import { useParams } from "next/navigation";
 // lucide icons
 import { Circle } from "lucide-react";
 import { AddOutline, ArrowCollapseOutline, FullScreenOutline } from "@makeplane/propel/icons";
 import { setToast } from "@plane/blocks/toast";
-import type { TIssue, ISearchIssueResponse, TIssueKanbanFilters, TIssueGroupByOptions } from "@plane/types";
+import type {
+  TIssue,
+  ISearchIssueResponse,
+  TIssueKanbanFilters,
+  TIssueGroupByOptions,
+} from "@plane/types";
 import { useTranslation } from "@plane/i18n";
 // ui
 import { Menu, MenuContent, MenuItem, MenuTrigger } from "@makeplane/propel/components/menu";
@@ -38,6 +44,17 @@ interface IHeaderGroupByCard {
 }
 
 export const HeaderGroupByCard = observer(function HeaderGroupByCard(props: IHeaderGroupByCard) {
+  const { getStateById } = useProjectState();
+  const state =
+    process.env.VITE_XBUS_EMBEDDED === "true" && props.group_by === "state"
+      ? getStateById(props.column_id)
+      : undefined;
+  const stateColor =
+    state?.group === "backlog"
+      ? "#6b7280"
+      : state?.group === "unstarted"
+        ? "#111827"
+        : state?.color;
   const {
     sub_group_by,
     column_id,
@@ -53,7 +70,9 @@ export const HeaderGroupByCard = observer(function HeaderGroupByCard(props: IHea
   } = props;
   // plane hooks
   const { t } = useTranslation();
-  const verticalAlignPosition = sub_group_by ? false : collapsedGroups?.group_by.includes(column_id);
+  const verticalAlignPosition = sub_group_by
+    ? false
+    : collapsedGroups?.group_by.includes(column_id);
   // states
   const [isOpen, setIsOpen] = React.useState(false);
   const [openExistingIssueListModal, setOpenExistingIssueListModal] = React.useState(false);
@@ -63,7 +82,9 @@ export const HeaderGroupByCard = observer(function HeaderGroupByCard(props: IHea
   const { workspaceSlug, projectId, moduleId, cycleId } = useParams();
 
   const renderExistingIssueModal = moduleId || cycleId;
-  const ExistingIssuesListModalPayload = moduleId ? { module: moduleId.toString() } : { cycle: true };
+  const ExistingIssuesListModalPayload = moduleId
+    ? { module: moduleId.toString() }
+    : { cycle: true };
 
   const handleAddIssuesToView = async (data: ISearchIssueResponse[]) => {
     if (!workspaceSlug || !projectId) return;
@@ -90,7 +111,11 @@ export const HeaderGroupByCard = observer(function HeaderGroupByCard(props: IHea
   return (
     <>
       {isEpic ? (
-        <CreateUpdateEpicModal isOpen={isOpen} onClose={() => setIsOpen(false)} data={issuePayload} />
+        <CreateUpdateEpicModal
+          isOpen={isOpen}
+          onClose={() => setIsOpen(false)}
+          data={issuePayload}
+        />
       ) : (
         <CreateUpdateIssueModal
           isOpen={isOpen}
@@ -121,10 +146,13 @@ export const HeaderGroupByCard = observer(function HeaderGroupByCard(props: IHea
 
         <div
           className={`relative flex gap-1 ${
-            verticalAlignPosition ? `flex-col items-center` : `w-full flex-row items-baseline overflow-hidden`
+            verticalAlignPosition
+              ? `flex-col items-center`
+              : `w-full flex-row items-baseline overflow-hidden`
           }`}
         >
           <div
+            style={stateColor ? { color: stateColor } : undefined}
             className={`line-clamp-1 inline-block truncate overflow-hidden font-medium text-primary ${
               verticalAlignPosition ? `max-h-[400px] vertical-lr` : ``
             }`}
@@ -143,7 +171,11 @@ export const HeaderGroupByCard = observer(function HeaderGroupByCard(props: IHea
             className="flex h-[20px] w-[20px] flex-shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-sm bg-layer-transparent transition-all hover:bg-layer-transparent-hover"
             onClick={() => handleCollapsedGroups("group_by", column_id)}
           >
-            {verticalAlignPosition ? <FullScreenOutline width={14} /> : <ArrowCollapseOutline width={14} />}
+            {verticalAlignPosition ? (
+              <FullScreenOutline width={14} />
+            ) : (
+              <ArrowCollapseOutline width={14} />
+            )}
           </button>
         )}
 

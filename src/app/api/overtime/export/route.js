@@ -16,31 +16,36 @@ export async function GET(req) {
     const filters = parseOtFilters(new URL(req.url).searchParams);
     const view = overtimeView(await readOvertime(), actor, users, filters);
     const workbook = XLSX.utils.book_new();
-    const rows = view.entries.map((item) => ({
-      "Nhân viên": item.userName,
-      "Ngày OT": localDate(item.startTime),
-      "Loại OT": OT_TYPES[item.otType],
-      "Bắt đầu": new Date(item.startTime).toLocaleString("vi-VN", {
-        timeZone: "Asia/Ho_Chi_Minh",
-      }),
-      "Kết thúc": new Date(item.endTime).toLocaleString("vi-VN", {
-        timeZone: "Asia/Ho_Chi_Minh",
-      }),
-      "Phút đăng ký": item.registeredMinutes,
-      "Phút nghỉ": item.breakMinutes,
-      "Phút thực tế": item.actualMinutes ?? "",
-      "Phút xác nhận": item.confirmedMinutes ?? "",
-      "Phút đăng ký trong kỳ": item.periodRegisteredMinutes,
-      "Phút xác nhận trong kỳ": item.periodConfirmedMinutes,
-      "Trạng thái": OT_STATUSES[item.status],
-      "Lý do": item.reason,
-      "Báo cáo": item.workReport,
-      "Ghi chú": item.reportNote,
-      "Lý do từ chối": item.rejectionReason,
-      "Người duyệt": item.approvedByName,
-      "Người xác nhận": item.confirmedByName,
-      "Ngày tạo": item.createdAt,
-    }));
+    const rows = view.entries.flatMap((item) =>
+      item.countedParticipantIds.map((id) => ({
+        "Nhân viên":
+          item.participants.find((person) => person.id === id)?.name ||
+          item.userName,
+        "Người đăng ký": item.createdByName,
+        "Ngày OT": localDate(item.startTime),
+        "Loại OT": OT_TYPES[item.otType],
+        "Bắt đầu": new Date(item.startTime).toLocaleString("vi-VN", {
+          timeZone: "Asia/Ho_Chi_Minh",
+        }),
+        "Kết thúc": new Date(item.endTime).toLocaleString("vi-VN", {
+          timeZone: "Asia/Ho_Chi_Minh",
+        }),
+        "Phút đăng ký": item.registeredMinutes,
+        "Phút nghỉ": item.breakMinutes,
+        "Phút thực tế": item.actualMinutes ?? "",
+        "Phút xác nhận": item.confirmedMinutes ?? "",
+        "Phút đăng ký trong kỳ": item.periodRegisteredMinutes,
+        "Phút xác nhận trong kỳ": item.periodConfirmedMinutes,
+        "Trạng thái": OT_STATUSES[item.status],
+        "Mục đích OT": item.reason,
+        "Báo cáo": item.workReport,
+        "Ghi chú": item.reportNote,
+        "Lý do từ chối": item.rejectionReason,
+        "Người duyệt": item.approvedByName,
+        "Người xác nhận": item.confirmedByName,
+        "Ngày tạo": item.createdAt,
+      })),
+    );
     XLSX.utils.book_append_sheet(
       workbook,
       XLSX.utils.json_to_sheet(

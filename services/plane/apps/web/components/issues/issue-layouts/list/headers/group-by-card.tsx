@@ -7,7 +7,8 @@
 import { useState } from "react";
 import { observer } from "mobx-react";
 import { useParams } from "next/navigation";
-import { CircleDashed } from "lucide-react";
+import { useListTable } from "../table-context";
+import { ChevronDown, CircleDashed } from "lucide-react";
 import { AddOutline } from "@makeplane/propel/icons";
 // types
 import { setToast } from "@plane/blocks/toast";
@@ -22,6 +23,7 @@ import { MultipleSelectGroupAction } from "@/components/core/multiple-select";
 import { CreateUpdateIssueModal } from "@/components/issues/issue-modal/modal";
 import { CreateUpdateEpicModal } from "@/components/epic-modal";
 // constants
+import { useProjectState } from "@/hooks/store/use-project-state";
 import { useIssueStoreType } from "@/hooks/use-issue-layout-store";
 import type { TSelectionHelper } from "@/hooks/use-multiple-select";
 
@@ -38,9 +40,15 @@ interface IHeaderGroupByCard {
   selectionHelpers: TSelectionHelper;
   handleCollapsedGroups: (value: string) => void;
   isEpic?: boolean;
+  isExpanded?: boolean;
 }
 
 export const HeaderGroupByCard = observer(function HeaderGroupByCard(props: IHeaderGroupByCard) {
+  const columns = useListTable();
+  const { getStateById } = useProjectState();
+  const state = columns && props.groupBy === "state" ? getStateById(props.groupID) : undefined;
+  const stateColor =
+    state?.group === "backlog" ? "#6b7280" : state?.group === "unstarted" ? "#111827" : state?.color;
   const {
     groupID,
     icon,
@@ -64,10 +72,13 @@ export const HeaderGroupByCard = observer(function HeaderGroupByCard(props: IHea
   const storeType = useIssueStoreType();
   // derived values
   const renderExistingIssueModal = moduleId || cycleId;
-  const existingIssuesListModalPayload = moduleId ? { module: moduleId.toString() } : { cycle: true };
+  const existingIssuesListModalPayload = moduleId
+    ? { module: moduleId.toString() }
+    : { cycle: true };
   const isGroupSelectionEmpty = selectionHelpers.isGroupSelected(groupID) === "empty";
   // auth
-  const canSelectIssues = canEditProperties(projectId?.toString()) && !selectionHelpers.isSelectionDisabled;
+  const canSelectIssues =
+    canEditProperties(projectId?.toString()) && !selectionHelpers.isSelectionDisabled;
 
   const handleAddIssuesToView = async (data: ISearchIssueResponse[]) => {
     if (!workspaceSlug || !projectId) return;
@@ -101,7 +112,7 @@ export const HeaderGroupByCard = observer(function HeaderGroupByCard(props: IHea
                 "pointer-events-none size-3.5 opacity-0 !outline-none group-hover/list-header:pointer-events-auto group-hover/list-header:opacity-100",
                 {
                   "pointer-events-auto opacity-100": !isGroupSelectionEmpty,
-                }
+                },
               )}
               groupID={groupID}
               selectionHelpers={selectionHelpers}
@@ -110,7 +121,18 @@ export const HeaderGroupByCard = observer(function HeaderGroupByCard(props: IHea
           </div>
         )}
         <div className="grid flex-shrink-0 place-items-center overflow-hidden">
-          {icon ?? <CircleDashed className="size-3.5" strokeWidth={2} />}
+          {columns ? (
+            <button
+              type="button"
+              aria-label={title}
+              aria-expanded={props.isExpanded}
+              onClick={() => handleCollapsedGroups(groupID)}
+            >
+              <ChevronDown className={cn("size-3.5", { "-rotate-90": !props.isExpanded })} />
+            </button>
+          ) : (
+            (icon ?? <CircleDashed className="size-3.5" strokeWidth={2} />)
+          )}
         </div>
 
         {/* eslint-disable-next-line jsx_a11y/click-events-have-key-events eslint-disable-next-line jsx_a11y/no-static-element-interactions */}
@@ -118,7 +140,12 @@ export const HeaderGroupByCard = observer(function HeaderGroupByCard(props: IHea
           className="relative flex w-full cursor-pointer flex-row items-center gap-1 overflow-hidden"
           onClick={() => handleCollapsedGroups(groupID)}
         >
-          <div className="line-clamp-1 inline-block truncate font-medium text-primary">{title}</div>
+          <div
+            className="line-clamp-1 inline-block truncate font-medium text-primary"
+            style={stateColor ? { color: stateColor } : undefined}
+          >
+            {title}
+          </div>
           <div className="pl-2 text-13 font-medium text-tertiary">{count || 0}</div>
           <div className="px-2.5"></div>
         </div>
@@ -166,7 +193,11 @@ export const HeaderGroupByCard = observer(function HeaderGroupByCard(props: IHea
           ))}
 
         {isEpic ? (
-          <CreateUpdateEpicModal isOpen={isOpen} onClose={() => setIsOpen(false)} data={issuePayload} />
+          <CreateUpdateEpicModal
+            isOpen={isOpen}
+            onClose={() => setIsOpen(false)}
+            data={issuePayload}
+          />
         ) : (
           <CreateUpdateIssueModal
             isOpen={isOpen}

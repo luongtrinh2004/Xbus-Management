@@ -4,13 +4,20 @@
  * See the LICENSE file for details.
  */
 
+import { useListTable } from "../list/table-context";
 import type { SyntheticEvent } from "react";
 import { useCallback, useMemo } from "react";
 import { xor } from "lodash-es";
 import { observer } from "mobx-react";
 import { useParams } from "next/navigation";
 // icons
-import { AttachOutline, DueDateOutline, LinkOutline, StartDateOutline, ViewsOutline } from "@makeplane/propel/icons";
+import {
+  AttachOutline,
+  DueDateOutline,
+  LinkOutline,
+  StartDateOutline,
+  ViewsOutline,
+} from "@makeplane/propel/icons";
 // i18n
 import { useTranslation } from "@plane/i18n";
 import { Tooltip } from "@makeplane/propel/components/tooltip";
@@ -48,7 +55,9 @@ import { WithDisplayPropertiesHOC } from "./with-display-properties-HOC";
 
 export interface IIssueProperties {
   issue: TIssue;
-  updateIssue: ((projectId: string | null, issueId: string, data: Partial<TIssue>) => Promise<void>) | undefined;
+  updateIssue:
+    | ((projectId: string | null, issueId: string, data: Partial<TIssue>) => Promise<void>)
+    | undefined;
   displayProperties: IIssueDisplayProperties | undefined;
   isReadOnly: boolean;
   className: string;
@@ -58,6 +67,7 @@ export interface IIssueProperties {
 
 export const IssueProperties = observer(function IssueProperties(props: IIssueProperties) {
   const { issue, updateIssue, displayProperties, isReadOnly, className, isEpic = false } = props;
+  const tableColumns = useListTable();
   // i18n
   const { t } = useTranslation();
   // store hooks
@@ -88,11 +98,23 @@ export const IssueProperties = observer(function IssueProperties(props: IIssuePr
     () => ({
       addModulesToIssue: async (moduleIds: string[]) => {
         if (!workspaceSlug || !issue.project_id || !issue.id) return;
-        await changeModulesInIssue?.(workspaceSlug.toString(), issue.project_id, issue.id, moduleIds, []);
+        await changeModulesInIssue?.(
+          workspaceSlug.toString(),
+          issue.project_id,
+          issue.id,
+          moduleIds,
+          [],
+        );
       },
       removeModulesFromIssue: async (moduleIds: string[]) => {
         if (!workspaceSlug || !issue.project_id || !issue.id) return;
-        await changeModulesInIssue?.(workspaceSlug.toString(), issue.project_id, issue.id, [], moduleIds);
+        await changeModulesInIssue?.(
+          workspaceSlug.toString(),
+          issue.project_id,
+          issue.id,
+          [],
+          moduleIds,
+        );
       },
       addIssueToCycle: async (cycleId: string) => {
         if (!workspaceSlug || !issue.project_id || !issue.id) return;
@@ -103,7 +125,7 @@ export const IssueProperties = observer(function IssueProperties(props: IIssuePr
         await removeCycleFromIssue?.(workspaceSlug.toString(), issue.project_id, issue.id);
       },
     }),
-    [workspaceSlug, issue, changeModulesInIssue, addCycleToIssue, removeCycleFromIssue]
+    [workspaceSlug, issue, changeModulesInIssue, addCycleToIssue, removeCycleFromIssue],
   );
 
   const handleState = async (stateId: string) => {
@@ -135,7 +157,7 @@ export const IssueProperties = observer(function IssueProperties(props: IIssuePr
       if (modulesToAdd.length > 0) issueOperations.addModulesToIssue(modulesToAdd);
       if (modulesToRemove.length > 0) issueOperations.removeModulesFromIssue(modulesToRemove);
     },
-    [issueOperations, issue]
+    [issueOperations, issue],
   );
 
   const handleCycle = useCallback(
@@ -144,17 +166,21 @@ export const IssueProperties = observer(function IssueProperties(props: IIssuePr
       if (cycleId) issueOperations.addIssueToCycle?.(cycleId);
       else issueOperations.removeIssueFromCycle?.();
     },
-    [issue, issueOperations]
+    [issue, issueOperations],
   );
 
   const handleStartDate = async (date: Date | null) => {
     if (updateIssue)
-      await updateIssue(issue.project_id, issue.id, { start_date: date ? renderFormattedPayloadDate(date) : null });
+      await updateIssue(issue.project_id, issue.id, {
+        start_date: date ? renderFormattedPayloadDate(date) : null,
+      });
   };
 
   const handleTargetDate = async (date: Date | null) => {
     if (updateIssue)
-      await updateIssue(issue.project_id, issue.id, { target_date: date ? renderFormattedPayloadDate(date) : null });
+      await updateIssue(issue.project_id, issue.id, {
+        target_date: date ? renderFormattedPayloadDate(date) : null,
+      });
   };
 
   const handleDateRangeUpdate = async (range: DateRangeValue) => {
@@ -185,7 +211,11 @@ export const IssueProperties = observer(function IssueProperties(props: IIssuePr
 
   // date range is enabled only when both dates are available and both dates are enabled
   const isDateRangeEnabled: boolean = Boolean(
-    issue.start_date && issue.target_date && displayProperties.start_date && displayProperties.due_date
+    !tableColumns &&
+    issue.start_date &&
+    issue.target_date &&
+    displayProperties.start_date &&
+    displayProperties.due_date,
   );
 
   const defaultLabelOptions =
@@ -204,7 +234,10 @@ export const IssueProperties = observer(function IssueProperties(props: IIssuePr
   };
 
   return (
-    <div className={className}>
+    <div
+      className={cn(className, { "asana-list-properties": !!tableColumns })}
+      data-priority={issue.priority}
+    >
       {/* basic properties */}
       {/* state */}
       <WithDisplayPropertiesHOC displayProperties={displayProperties} displayPropertyKey="state">
@@ -253,7 +286,10 @@ export const IssueProperties = observer(function IssueProperties(props: IIssuePr
             clearable
             mergeDates
             className={cn({
-              "text-danger-primary": shouldHighlightIssueDueDate(issue.target_date, stateDetails?.group),
+              "text-danger-primary": shouldHighlightIssueDueDate(
+                issue.target_date,
+                stateDetails?.group,
+              ),
             })}
             disabled={isReadOnly}
             showTooltip
@@ -303,7 +339,10 @@ export const IssueProperties = observer(function IssueProperties(props: IIssuePr
             placeholder={t("common.order_by.due_date")}
             icon={<DueDateOutline />}
             className={cn({
-              "text-danger-primary": shouldHighlightIssueDueDate(issue.target_date, stateDetails?.group),
+              "text-danger-primary": shouldHighlightIssueDueDate(
+                issue.target_date,
+                stateDetails?.group,
+              ),
             })}
             clearable
             disabled={isReadOnly}
@@ -337,9 +376,16 @@ export const IssueProperties = observer(function IssueProperties(props: IIssuePr
           <>
             {/* modules */}
             {projectDetails?.module_view && (
-              <WithDisplayPropertiesHOC displayProperties={displayProperties} displayPropertyKey="modules">
+              <WithDisplayPropertiesHOC
+                displayProperties={displayProperties}
+                displayPropertyKey="modules"
+              >
                 {/* oxlint-disable-next-line jsx_a11y/click-events-have-key-events oxlint-disable-next-line jsx_a11y/no-static-element-interactions */}
-                <div className="h-5" onFocus={handleEventPropagation} onClick={handleEventPropagation}>
+                <div
+                  className="h-5"
+                  onFocus={handleEventPropagation}
+                  onClick={handleEventPropagation}
+                >
                   <ModuleSelect
                     multiple
                     projectId={issue?.project_id ?? undefined}
@@ -355,9 +401,16 @@ export const IssueProperties = observer(function IssueProperties(props: IIssuePr
 
             {/* cycles */}
             {projectDetails?.cycle_view && (
-              <WithDisplayPropertiesHOC displayProperties={displayProperties} displayPropertyKey="cycle">
+              <WithDisplayPropertiesHOC
+                displayProperties={displayProperties}
+                displayPropertyKey="cycle"
+              >
                 {/* oxlint-disable-next-line jsx_a11y/click-events-have-key-events oxlint-disable-next-line jsx_a11y/no-static-element-interactions */}
-                <div className="h-5" onFocus={handleEventPropagation} onClick={handleEventPropagation}>
+                <div
+                  className="h-5"
+                  onFocus={handleEventPropagation}
+                  onClick={handleEventPropagation}
+                >
                   <CycleSelect
                     projectId={issue?.project_id ?? undefined}
                     value={issue?.cycle_id}
@@ -375,7 +428,10 @@ export const IssueProperties = observer(function IssueProperties(props: IIssuePr
 
       {/* estimates */}
       {projectId && areEstimateEnabledByProjectId(projectId?.toString()) && (
-        <WithDisplayPropertiesHOC displayProperties={displayProperties} displayPropertyKey="estimate">
+        <WithDisplayPropertiesHOC
+          displayProperties={displayProperties}
+          displayPropertyKey="estimate"
+        >
           {/* oxlint-disable-next-line jsx_a11y/click-events-have-key-events oxlint-disable-next-line jsx_a11y/no-static-element-interactions */}
           <div className="h-5" onFocus={handleEventPropagation} onClick={handleEventPropagation}>
             <EstimateSelect
@@ -411,7 +467,7 @@ export const IssueProperties = observer(function IssueProperties(props: IIssuePr
                 "flex h-5 flex-shrink-0 items-center justify-center gap-2 overflow-hidden rounded-sm border-[0.5px] border-strong px-2.5 py-1",
                 {
                   "cursor-pointer hover:bg-layer-1": subIssueCount,
-                }
+                },
               )}
             >
               <ViewsOutline className="h-3 w-3 flex-shrink-0" />
@@ -425,9 +481,14 @@ export const IssueProperties = observer(function IssueProperties(props: IIssuePr
       <WithDisplayPropertiesHOC
         displayProperties={displayProperties}
         displayPropertyKey="attachment_count"
-        shouldRenderProperty={(properties) => !!properties.attachment_count && !!issue.attachment_count}
+        shouldRenderProperty={(properties) =>
+          !!properties.attachment_count && !!issue.attachment_count
+        }
       >
-        <Tooltip label={`${t("common.attachments")}: ${issue.attachment_count}`} disabled={isMobile}>
+        <Tooltip
+          label={`${t("common.attachments")}: ${issue.attachment_count}`}
+          disabled={isMobile}
+        >
           {/* oxlint-disable-next-line jsx_a11y/click-events-have-key-events oxlint-disable-next-line jsx_a11y/no-static-element-interactions */}
           <div
             className="flex h-5 flex-shrink-0 items-center justify-center gap-2 overflow-hidden rounded-sm border-[0.5px] border-strong px-2.5 py-1"

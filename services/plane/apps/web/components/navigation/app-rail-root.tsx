@@ -40,6 +40,7 @@ export const AppRailRoot = observer(() => {
 
   return (
     <div
+      data-focus-navigation=""
       className="z-[26] h-full flex-shrink-0 bg-canvas transition-all duration-300 ease-in-out"
       style={{
         width: railWidth,

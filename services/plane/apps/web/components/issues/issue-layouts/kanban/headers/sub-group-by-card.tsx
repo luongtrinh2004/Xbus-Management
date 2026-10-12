@@ -5,6 +5,7 @@
  */
 
 import React from "react";
+import { useProjectState } from "@/hooks/store/use-project-state";
 import { observer } from "mobx-react";
 import { Circle } from "lucide-react";
 import { ChevronDownOutline, ChevronUpOutline } from "@makeplane/propel/icons";
@@ -21,7 +22,20 @@ interface IHeaderSubGroupByCard {
   handleCollapsedGroups: (toggle: "group_by" | "sub_group_by", value: string) => void;
 }
 
-export const HeaderSubGroupByCard = observer(function HeaderSubGroupByCard(props: IHeaderSubGroupByCard) {
+export const HeaderSubGroupByCard = observer(function HeaderSubGroupByCard(
+  props: IHeaderSubGroupByCard,
+) {
+  const { getStateById } = useProjectState();
+  const state =
+    process.env.VITE_XBUS_EMBEDDED === "true" && props.sub_group_by === "state"
+      ? getStateById(props.column_id)
+      : undefined;
+  const stateColor =
+    state?.group === "backlog"
+      ? "#6b7280"
+      : state?.group === "unstarted"
+        ? "#111827"
+        : state?.color;
   const { icon, title, count, column_id, collapsedGroups, handleCollapsedGroups } = props;
   return (
     // oxlint-disable-next-line jsx_a11y/click-events-have-key-events oxlint-disable-next-line jsx_a11y/no-static-element-interactions
@@ -42,7 +56,12 @@ export const HeaderSubGroupByCard = observer(function HeaderSubGroupByCard(props
       </div>
 
       <div className="flex flex-shrink-0 items-center gap-1 text-13">
-        <div className="line-clamp-1 text-primary">{title}</div>
+        <div
+          className="line-clamp-1 text-primary"
+          style={stateColor ? { color: stateColor } : undefined}
+        >
+          {title}
+        </div>
         <div className="pl-2 text-13 font-medium text-tertiary">{count || 0}</div>
       </div>
     </div>

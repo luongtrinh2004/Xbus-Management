@@ -26,7 +26,13 @@ export const SpreadsheetPriorityColumn = observer(function SpreadsheetPriorityCo
       <PrioritySelect
         testId="spreadsheet-priority-select"
         value={issue.priority}
-        onChange={(data) => onChange(issue, { priority: data }, { changed_property: "priority", change_details: data })}
+        onChange={(data) =>
+          onChange(
+            issue,
+            { priority: data },
+            { changed_property: "priority", change_details: data },
+          )
+        }
         disabled={disabled}
         onClose={onClose}
         // `.clickable` is what the table's keyboard navigation clicks on Enter / Space in a focused cell.

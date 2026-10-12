@@ -1,0 +1,134 @@
+/* The embedded workspace list uses a shared column grid for headings and cells. */
+.asana-list-column-header {
+  @apply sticky top-0 z-[4] flex items-center border-b border-subtle bg-surface-1 text-tertiary;
+  height: 38px;
+  font-size: 12px;
+}
+.asana-list-name-heading {
+  flex: 1 1 380px;
+  min-width: 380px;
+  padding-inline: 24px;
+}
+.asana-list-property-headings,
+.asana-list .asana-list-properties {
+  display: grid !important;
+  grid-template-columns: var(--list-property-tracks);
+  width: var(--list-property-width);
+  gap: 0 !important;
+  flex: none !important;
+}
+.asana-list-property-headings > div {
+  @apply border-l border-subtle;
+  height: 38px;
+  display: block;
+  line-height: 38px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-inline: 10px;
+}
+.asana-list-column-header > div:last-child { width: 40px; flex: none; }
+.asana-list .asana-list-section { margin-bottom: 16px; }
+.asana-list .asana-list-section-header {
+  @apply bg-surface-1 border-subtle;
+  min-height: 48px;
+  padding-inline: 22px 12px;
+}
+.asana-list-section-header .group\/list-header { padding-block: 8px; }
+.asana-list-section-header .font-medium { font-weight: 600; }
+.asana-list .asana-list-row {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center;
+  gap: 0 !important;
+  min-height: 36px;
+  padding: 0 !important;
+}
+.asana-list .asana-list-row:hover { @apply bg-layer-1; }
+.asana-list .asana-list-name-cell {
+  flex: 1 1 380px;
+  min-width: 380px;
+  width: auto;
+  padding-inline: 24px 12px;
+  min-height: 36px;
+  align-items: center;
+}
+.asana-list-name-cell > .block { display: none; }
+.asana-list .asana-list-property-area { gap: 0; }
+.asana-list .asana-list-property-area > div:last-child:not(.asana-list-properties) {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+}
+.asana-list-cell {
+  @apply border-l border-subtle;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  min-height: 36px;
+  padding-inline: 9px;
+  overflow: hidden;
+}
+.asana-list-cell > div { max-width: 100%; }
+.asana-list-cell button {
+  max-width: 100%;
+  border-color: transparent !important;
+  box-shadow: none;
+  border-radius: 4px;
+}
+.asana-list-cell button:hover { @apply bg-layer-1; }
+.asana-list-properties[data-priority="urgent"] [data-column="priority"] button { background: #ff7f73 !important; color: #341b18 !important; }
+.asana-list-properties[data-priority="high"] [data-column="priority"] button { background: #ffad56 !important; color: #3c240d !important; }
+.asana-list-properties[data-priority="medium"] [data-column="priority"] button { background: #ffe34d !important; color: #3e3400 !important; }
+.asana-list-properties[data-priority="low"] [data-column="priority"] button { background: #a5d9ac !important; color: #173c1c !important; }
+.asana-list-completion { color: #9b9b9b; stroke-width: 1.4; }
+.asana-list-row-completed .asana-list-completion { color: #36a96a; }
+.asana-list-row-completed .asana-list-name-cell p { @apply text-tertiary; }
+.asana-list-section .sticky.bottom-0 { position: static; }
+.asana-list-section .sticky.bottom-0 > div { border-top: 0; }
+.asana-list-section .sticky.bottom-0 [class*="cursor-pointer"] {
+  padding-block: 9px;
+  padding-left: 48px;
+  color: #777;
+  font-weight: 400;
+}
+[data-xbus-add-work-item="true"] {
+  background: #007bdb !important;
+  border-color: #007bdb !important;
+  color: #fff !important;
+}
+[data-xbus-add-work-item="true"]:hover { background: #0069bf !important; border-color: #0069bf !important; }
+[data-xbus-add-work-item="true"]:focus-visible { outline: 2px solid #72bfff; outline-offset: 2px; }
+
+/* Separate board sections, matching the Asana reference. */
+.asana-board {
+  @apply bg-surface-1;
+  align-items: flex-start;
+  gap: 16px !important;
+  padding-top: 16px !important;
+  padding-bottom: 24px !important;
+}
+.asana-board .asana-board-column { gap: 10px; }
+.asana-board .asana-board-heading {
+  @apply bg-layer-1;
+  border-radius: 8px;
+  padding: 8px 12px;
+  min-height: 48px;
+}
+.asana-board .asana-board-column > div:not(.asana-board-heading) {
+  height: auto !important;
+  min-height: 0 !important;
+}
+.asana-board .asana-board-body {
+  @apply bg-layer-1;
+  height: auto;
+  min-height: 60px;
+  padding: 10px;
+  border-radius: 8px;
+}
+.asana-board .asana-board-body > .sticky.bottom-0 {
+  position: static;
+  background: transparent;
+  margin-top: 8px;
+}

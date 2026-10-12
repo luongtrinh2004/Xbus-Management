@@ -16,7 +16,9 @@ type Props = {
   issue: TIssue;
 };
 
-export const SpreadsheetCreatedOnColumn = observer(function SpreadsheetCreatedOnColumn(props: Props) {
+export const SpreadsheetCreatedOnColumn = observer(function SpreadsheetCreatedOnColumn(
+  props: Props,
+) {
   const { issue } = props;
 
   return (

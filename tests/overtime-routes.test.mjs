@@ -262,3 +262,76 @@ test("OT statistics are restricted to current managers and include all personnel
     await rm(dir, { recursive: true, force: true });
   }
 });
+
+test("group API persists one request, gives participants read access and exports individual totals", async () => {
+  const dir = await mkdtemp(path.join(os.tmpdir(), "ot-group-api-"));
+  process.env.OVERTIME_JSON_PATH = path.join(dir, "state.json");
+  process.env.DATA_SOURCE = "json";
+  repo.__resetDataRepository({
+    users: users.map((user) => ({
+      ...user,
+      code: `NV-${user.id}`,
+      avatarUrl: `/avatars/${user.id}.png`,
+    })),
+  });
+  try {
+    globalThis.__WORK_TEST_TOKEN = { id: "u1" };
+    const list = await (await GET(req())).json();
+    assert.ok(
+      list.users.some(
+        (user) => user.id === "u2" && user.code === "NV-u2" && user.avatarUrl,
+      ),
+    );
+    const response = await POST(
+      req({
+        date,
+        start: "18:00",
+        end: "20:00",
+        reason: "Làm cùng nhóm",
+        participantIds: ["u2"],
+      }),
+    );
+    assert.equal(response.status, 201);
+    const record = await response.json();
+    assert.equal((await readOvertime()).requests.length, 1);
+    globalThis.__WORK_TEST_TOKEN = { id: "u2" };
+    assert.equal((await GET(req(null, `?id=${record.id}`))).status, 200);
+    const mine = await (
+      await GET(
+        req(
+          null,
+          `?year=${date.slice(0, 4)}&month=${date.slice(5, 7)}&scope=mine`,
+        ),
+      )
+    ).json();
+    assert.equal(mine.total, 1);
+    assert.equal(mine.entries[0].participants.length, 2);
+    assert.equal(mine.summary.registeredMinutes, 120);
+    assert.equal(
+      (await PATCH(req({ action: "cancel", id: record.id, version: 1 })))
+        .status,
+      404,
+    );
+    globalThis.__WORK_TEST_TOKEN = { id: "admin" };
+    const exported = await exportOt(
+      req(
+        null,
+        `?year=${date.slice(0, 4)}&month=${date.slice(5, 7)}&scope=all`,
+      ),
+    );
+    const workbook = XLSX.read(Buffer.from(await exported.arrayBuffer()), {
+      type: "buffer",
+    });
+    const rows = XLSX.utils.sheet_to_json(workbook.Sheets["Danh sách OT"]);
+    assert.deepEqual(rows.map((row) => row["Nhân viên"]).sort(), [
+      "An",
+      "Bình",
+    ]);
+    assert.equal(
+      rows.reduce((sum, row) => sum + row["Phút đăng ký"], 0),
+      240,
+    );
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});

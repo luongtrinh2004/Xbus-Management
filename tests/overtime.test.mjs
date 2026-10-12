@@ -461,3 +461,123 @@ test("assistant can approve and confirm employee OT, but cannot change configura
     1,
   );
 });
+
+test("a group is one request, validates every participant and counts each person's hours", () => {
+  const state = emptyOvertimeState();
+  const record = act(state, user, {
+    ...input,
+    participantIds: [other.id, other.id, user.id],
+    approveImmediately: true,
+  });
+  assert.equal(state.requests.length, 1);
+  assert.deepEqual(record.participantIds, [user.id, other.id]);
+  assert.equal(record.status, "PENDING");
+  assert.equal(record.createdBy, user.id);
+  assert.throws(() => act(state, other, input), /trùng/);
+  assert.throws(
+    () => act(state, other, action(record, "cancel")),
+    /Không tìm thấy/,
+  );
+  act(state, admin, action(record, "approve"));
+  act(
+    state,
+    user,
+    action(record, "report", {
+      actualMinutes: 100,
+      workReport: "Cùng hoàn thành",
+    }),
+    new Date("2026-10-10T05:00:00Z"),
+  );
+  act(state, admin, action(record, "confirm", { confirmedMinutes: 100 }));
+  const filters = parseOtFilters(
+    new URLSearchParams("year=2026&month=10&scope=all"),
+  );
+  const all = overtimeView(state, admin, users, filters);
+  assert.equal(all.entries.length, 1);
+  assert.equal(all.summary.COMPLETED, 1);
+  assert.equal(all.summary.registeredMinutes, 240);
+  assert.equal(all.summary.confirmedMinutes, 200);
+  assert.equal(all.employees.length, 2);
+  const mine = overtimeView(state, other, users, { ...filters, scope: "mine" });
+  assert.equal(mine.entries.length, 1);
+  assert.equal(mine.summary.confirmedMinutes, 100);
+  assert.deepEqual(
+    mine.employees.map((person) => person.userId),
+    [other.id],
+  );
+  assert.equal(
+    overtimeView(state, admin, users, { ...filters, userId: other.id }).summary
+      .registeredMinutes,
+    120,
+  );
+});
+
+test("group creation and edits reject participant overlap and limits without partial storage writes", async () => {
+  const dir = await mkdtemp(path.join(os.tmpdir(), "ot-group-"));
+  const previousPath = process.env.OVERTIME_JSON_PATH;
+  process.env.OVERTIME_JSON_PATH = path.join(dir, "state.json");
+  const write = (body) =>
+    mutateOvertimeJson((state) => ({ state, result: act(state, user, body) }));
+  try {
+    await mutateOvertimeJson((state) => ({
+      state,
+      result: act(state, other, input),
+    }));
+    await assert.rejects(
+      write({ ...input, participantIds: [other.id] }),
+      /trùng/,
+    );
+    assert.equal((await readOvertimeJson()).requests.length, 1);
+    const group = await write({
+      ...input,
+      start: "20:00",
+      end: "21:00",
+      participantIds: [other.id],
+    });
+    await assert.rejects(
+      write(
+        action(group, "edit", {
+          ...input,
+          start: "19:00",
+          end: "21:00",
+          action: "edit",
+        }),
+      ),
+      /trùng/,
+    );
+    assert.equal(
+      (await readOvertimeJson()).requests.find((item) => item.id === group.id)
+        .startTime,
+      group.startTime,
+    );
+    assert.throws(
+      () =>
+        act(emptyOvertimeState(), user, {
+          ...input,
+          participantIds: ["unknown"],
+        }),
+      /không tồn tại/,
+    );
+    assert.throws(
+      () => act(emptyOvertimeState(), user, { ...input, participantIds: "u2" }),
+      /không hợp lệ/,
+    );
+    const capped = emptyOvertimeState();
+    capped.config.maxDailyMinutes = 180;
+    act(capped, other, input);
+    assert.throws(
+      () =>
+        act(capped, user, {
+          ...input,
+          start: "20:00",
+          end: "22:00",
+          participantIds: [other.id],
+        }),
+      /giới hạn/,
+    );
+  } finally {
+    if (previousPath === undefined) delete process.env.OVERTIME_JSON_PATH;
+    else process.env.OVERTIME_JSON_PATH = previousPath;
+    await rm(dir, { recursive: true, force: true });
+  }
+});

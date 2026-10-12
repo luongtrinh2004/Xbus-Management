@@ -5,6 +5,8 @@
  * See the LICENSE file for details.
  */
 
+import { i18nInstance } from "@plane/i18n";
+
 import type { CSSProperties } from "react";
 import { extractInstruction } from "@atlaskit/pragmatic-drag-and-drop-hitbox/tree-item";
 import { clone, isNil, pull, uniq, concat } from "lodash-es";
@@ -128,7 +130,7 @@ export const getGroupByColumns = ({
     return [
       {
         id: "All Issues",
-        name: `Tất cả ${isEpic ? "Epics" : "work items"}`,
+        name: `${i18nInstance.t("common.all")} ${i18nInstance.t(isEpic ? "common.epics" : "sidebar.work_items")}`,
         payload: {},
         icon: undefined,
       },

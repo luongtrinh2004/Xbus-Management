@@ -23,15 +23,17 @@ export const CycleSpreadsheetLayout = observer(function CycleSpreadsheetLayout()
   const { allowPermissions } = useUserPermissions();
   // auth
   const isCompletedCycle =
-    cycleId && currentProjectCompletedCycleIds ? currentProjectCompletedCycleIds.includes(cycleId.toString()) : false;
+    cycleId && currentProjectCompletedCycleIds
+      ? currentProjectCompletedCycleIds.includes(cycleId.toString())
+      : false;
   const isEditingAllowed = allowPermissions(
     [EUserPermissions.ADMIN, EUserPermissions.MEMBER],
-    EUserPermissionsLevel.PROJECT
+    EUserPermissionsLevel.PROJECT,
   );
 
   const canEditIssueProperties = useCallback(
     () => !isCompletedCycle && isEditingAllowed,
-    [isCompletedCycle, isEditingAllowed]
+    [isCompletedCycle, isEditingAllowed],
   );
 
   if (!cycleId) return null;

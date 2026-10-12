@@ -4,6 +4,7 @@
  * See the LICENSE file for details.
  */
 
+import { useTranslation } from "@plane/i18n";
 import { observer } from "mobx-react";
 // types
 import type { TIssue } from "@plane/types";
@@ -18,6 +19,7 @@ type Props = {
 };
 
 export const SpreadsheetEstimateColumn = observer(function SpreadsheetEstimateColumn(props: Props) {
+  const { t } = useTranslation();
   const { issue, onChange, disabled, onClose } = props;
 
   return (
@@ -25,9 +27,13 @@ export const SpreadsheetEstimateColumn = observer(function SpreadsheetEstimateCo
       <EstimateSelect
         value={issue.estimate_point || undefined}
         onChange={(data) =>
-          onChange(issue, { estimate_point: data }, { changed_property: "estimate_point", change_details: data })
+          onChange(
+            issue,
+            { estimate_point: data },
+            { changed_property: "estimate_point", change_details: data },
+          )
         }
-        placeholder={"Ước tính"}
+        placeholder={t("common.estimate")}
         projectId={issue.project_id ?? undefined}
         disabled={disabled}
         onClose={onClose}

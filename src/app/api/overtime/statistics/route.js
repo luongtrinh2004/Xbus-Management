@@ -3,6 +3,7 @@ import { overtimeContext, overtimeFailure } from "@/libs/overtimeApi";
 import { readOvertime } from "@/libs/overtimeRepository";
 import {
   isOtManager,
+  otPersonOption,
   OvertimeError,
   overtimeView,
   parseOtFilters,
@@ -50,10 +51,7 @@ export async function GET(req) {
       months: view.months,
       types: view.types,
       filters,
-      users: users.map((user) => ({
-        id: user.id,
-        name: user.name || user.email || "Nhân sự chưa đặt tên",
-      })),
+      users: users.map(otPersonOption),
       totalRequests: view.entries.length,
     });
   } catch (error) {

@@ -5,6 +5,7 @@
  */
 
 import { useCallback } from "react";
+import { useTranslation } from "@plane/i18n";
 import { observer } from "mobx-react";
 import { useParams } from "next/navigation";
 // types
@@ -21,6 +22,7 @@ type Props = {
 };
 
 export const SpreadsheetCycleColumn = observer(function SpreadsheetCycleColumn(props: Props) {
+  const { t } = useTranslation();
   const { issue, disabled, onClose } = props;
   // router
   const { workspaceSlug } = useParams();
@@ -32,10 +34,11 @@ export const SpreadsheetCycleColumn = observer(function SpreadsheetCycleColumn(p
   const handleCycle = useCallback(
     async (cycleId: string | null) => {
       if (!workspaceSlug || !issue || !issue.project_id || issue.cycle_id === cycleId) return;
-      if (cycleId) await addCycleToIssue(workspaceSlug.toString(), issue.project_id, cycleId, issue.id);
+      if (cycleId)
+        await addCycleToIssue(workspaceSlug.toString(), issue.project_id, cycleId, issue.id);
       else await removeCycleFromIssue(workspaceSlug.toString(), issue.project_id, issue.id);
     },
-    [workspaceSlug, issue, addCycleToIssue, removeCycleFromIssue]
+    [workspaceSlug, issue, addCycleToIssue, removeCycleFromIssue],
   );
 
   return (
@@ -45,7 +48,7 @@ export const SpreadsheetCycleColumn = observer(function SpreadsheetCycleColumn(p
         value={issue.cycle_id}
         onChange={handleCycle}
         disabled={disabled}
-        placeholder={"Chọn chu kỳ"}
+        placeholder={t("xbus_workflow.select_cycle")}
         // `.clickable` is what the table's keyboard navigation clicks on Enter / Space in a focused cell.
         className="clickable"
         variant="table-cell"

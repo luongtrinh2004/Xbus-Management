@@ -5,6 +5,7 @@
  */
 
 import React from "react";
+import { useTranslation } from "@plane/i18n";
 import { observer } from "mobx-react";
 // types
 import type { TIssue } from "@plane/types";
@@ -19,6 +20,7 @@ type Props = {
 };
 
 export const SpreadsheetAssigneeColumn = observer(function SpreadsheetAssigneeColumn(props: Props) {
+  const { t } = useTranslation();
   const { issue, onChange, disabled, onClose } = props;
 
   return (
@@ -32,13 +34,13 @@ export const SpreadsheetAssigneeColumn = observer(function SpreadsheetAssigneeCo
             {
               changed_property: "assignees",
               change_details: data,
-            }
+            },
           );
         }}
         projectId={issue?.project_id ?? undefined}
         disabled={disabled}
         multiple
-        placeholder={"Người phụ trách"}
+        placeholder={t("common.assignees")}
         // `.clickable` is what the table's keyboard navigation clicks on Enter / Space in a focused cell.
         className="clickable"
         variant="table-cell"

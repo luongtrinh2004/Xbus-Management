@@ -29,7 +29,9 @@ type Props = {
   issueIds: string[];
   isEstimateEnabled: boolean;
   quickActions: TRenderQuickActions;
-  updateIssue: ((projectId: string | null, issueId: string, data: Partial<TIssue>) => Promise<void>) | undefined;
+  updateIssue:
+    | ((projectId: string | null, issueId: string, data: Partial<TIssue>) => Promise<void>)
+    | undefined;
   canEditProperties: (projectId: string | undefined) => boolean;
   portalElement: React.MutableRefObject<HTMLDivElement | null>;
   containerRef: MutableRefObject<HTMLTableElement | null>;
@@ -61,7 +63,9 @@ export const SpreadsheetTable = observer(function SpreadsheetTable(props: Props)
 
   // states
   const isScrolled = useRef(false);
-  const [intersectionElement, setIntersectionElement] = useState<HTMLTableSectionElement | null>(null);
+  const [intersectionElement, setIntersectionElement] = useState<HTMLTableSectionElement | null>(
+    null,
+  );
 
   const {
     issues: { getIssueLoader },
@@ -76,7 +80,9 @@ export const SpreadsheetTable = observer(function SpreadsheetTable(props: Props)
 
     //The shadow styles are added this way to avoid re-render of all the rows of table, which could be costly
     if (scrollLeft > 0 !== isScrolled.current) {
-      const firstColumns = containerRef.current.querySelectorAll("table tr td:first-child, th:first-child");
+      const firstColumns = containerRef.current.querySelectorAll(
+        "table tr td:first-child, th:first-child",
+      );
 
       for (let i = 0; i < firstColumns.length; i++) {
         const shadow = i === 0 ? headerShadow : columnShadow;
@@ -102,13 +108,21 @@ export const SpreadsheetTable = observer(function SpreadsheetTable(props: Props)
 
   const isPaginating = !!getIssueLoader();
 
-  useIntersectionObserver(containerRef, isPaginating ? null : intersectionElement, loadMoreIssues, `100% 0% 100% 0%`);
+  useIntersectionObserver(
+    containerRef,
+    isPaginating ? null : intersectionElement,
+    loadMoreIssues,
+    `100% 0% 100% 0%`,
+  );
 
   const handleKeyBoardNavigation = useTableKeyboardNavigation();
 
   const ignoreFieldsForCounting: (keyof IIssueDisplayProperties)[] = ["key"];
   if (!isEstimateEnabled) ignoreFieldsForCounting.push("estimate");
-  const displayPropertiesCount = getDisplayPropertiesCount(displayProperties, ignoreFieldsForCounting);
+  const displayPropertiesCount = getDisplayPropertiesCount(
+    displayProperties,
+    ignoreFieldsForCounting,
+  );
 
   return (
     <table className="w-full overflow-y-auto bg-surface-1" onKeyDown={handleKeyBoardNavigation}>

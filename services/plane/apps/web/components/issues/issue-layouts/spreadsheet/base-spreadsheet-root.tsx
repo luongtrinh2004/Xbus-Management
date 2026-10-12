@@ -9,7 +9,12 @@ import { useCallback, useEffect } from "react";
 import { observer } from "mobx-react";
 import { useParams } from "next/navigation";
 // plane imports
-import { ALL_ISSUES, EIssueFilterType, EUserPermissions, EUserPermissionsLevel } from "@plane/constants";
+import {
+  ALL_ISSUES,
+  EIssueFilterType,
+  EUserPermissions,
+  EUserPermissionsLevel,
+} from "@plane/constants";
 import type { EIssuesStoreType, IIssueDisplayFilterOptions } from "@plane/types";
 import { EIssueLayoutTypes } from "@plane/types";
 // hooks
@@ -39,8 +44,16 @@ interface IBaseSpreadsheetRoot {
   isEpic?: boolean;
 }
 
-export const BaseSpreadsheetRoot = observer(function BaseSpreadsheetRoot(props: IBaseSpreadsheetRoot) {
-  const { QuickActions, canEditPropertiesBasedOnProject, isCompletedCycle = false, viewId, isEpic = false } = props;
+export const BaseSpreadsheetRoot = observer(function BaseSpreadsheetRoot(
+  props: IBaseSpreadsheetRoot,
+) {
+  const {
+    QuickActions,
+    canEditPropertiesBasedOnProject,
+    isCompletedCycle = false,
+    viewId,
+    isEpic = false,
+  } = props;
   // router
   const { projectId } = useParams();
   // store hooks
@@ -63,7 +76,7 @@ export const BaseSpreadsheetRoot = observer(function BaseSpreadsheetRoot(props: 
   // user role validation
   const isEditingAllowed = allowPermissions(
     [EUserPermissions.ADMIN, EUserPermissions.MEMBER],
-    EUserPermissionsLevel.PROJECT
+    EUserPermissionsLevel.PROJECT,
   );
 
   useEffect(() => {
@@ -73,11 +86,13 @@ export const BaseSpreadsheetRoot = observer(function BaseSpreadsheetRoot(props: 
   const canEditProperties = useCallback(
     (projectId: string | undefined) => {
       const isEditingAllowedBasedOnProject =
-        canEditPropertiesBasedOnProject && projectId ? canEditPropertiesBasedOnProject(projectId) : isEditingAllowed;
+        canEditPropertiesBasedOnProject && projectId
+          ? canEditPropertiesBasedOnProject(projectId)
+          : isEditingAllowed;
 
       return enableInlineEditing && isEditingAllowedBasedOnProject;
     },
-    [canEditPropertiesBasedOnProject, enableInlineEditing, isEditingAllowed]
+    [canEditPropertiesBasedOnProject, enableInlineEditing, isEditingAllowed],
   );
 
   const issueIds = issues.groupedIssueIds?.[ALL_ISSUES] ?? [];
@@ -89,7 +104,7 @@ export const BaseSpreadsheetRoot = observer(function BaseSpreadsheetRoot(props: 
         ...updatedDisplayFilter,
       });
     },
-    [projectId, updateFilters]
+    [projectId, updateFilters],
   );
 
   const renderQuickActions: TRenderQuickActions = useCallback(
@@ -100,7 +115,9 @@ export const BaseSpreadsheetRoot = observer(function BaseSpreadsheetRoot(props: 
         issue={issue}
         handleDelete={async () => removeIssue(issue.project_id, issue.id)}
         handleUpdate={async (data) => updateIssue && updateIssue(issue.project_id, issue.id, data)}
-        handleRemoveFromView={async () => removeIssueFromView && removeIssueFromView(issue.project_id, issue.id)}
+        handleRemoveFromView={async () =>
+          removeIssueFromView && removeIssueFromView(issue.project_id, issue.id)
+        }
         handleArchive={async () => archiveIssue && archiveIssue(issue.project_id, issue.id)}
         handleRestore={async () => restoreIssue && restoreIssue(issue.project_id, issue.id)}
         portalElement={portalElement}
@@ -108,7 +125,15 @@ export const BaseSpreadsheetRoot = observer(function BaseSpreadsheetRoot(props: 
         placements={placement}
       />
     ),
-    [isCompletedCycle, canEditProperties, removeIssue, updateIssue, removeIssueFromView, archiveIssue, restoreIssue]
+    [
+      isCompletedCycle,
+      canEditProperties,
+      removeIssue,
+      updateIssue,
+      removeIssueFromView,
+      archiveIssue,
+      restoreIssue,
+    ],
   );
 
   if (!Array.isArray(issueIds)) return null;

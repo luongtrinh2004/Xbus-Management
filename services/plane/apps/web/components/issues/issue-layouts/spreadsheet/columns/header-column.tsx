@@ -18,7 +18,11 @@ import { SPREADSHEET_PROPERTY_DETAILS } from "@plane/constants";
 // i18n
 import { useTranslation } from "@plane/i18n";
 // types
-import type { IIssueDisplayFilterOptions, IIssueDisplayProperties, TIssueOrderByOptions } from "@plane/types";
+import type {
+  IIssueDisplayFilterOptions,
+  IIssueDisplayProperties,
+  TIssueOrderByOptions,
+} from "@plane/types";
 import { Row } from "@plane/blocks/layout";
 import useLocalStorage from "@/hooks/use-local-storage";
 import { SpreadSheetPropertyIcon } from "../../utils";
@@ -37,12 +41,10 @@ export function HeaderColumn(props: Props) {
   const { t } = useTranslation();
   const { storedValue: selectedMenuItem, setValue: setSelectedMenuItem } = useLocalStorage(
     "spreadsheetViewSorting",
-    ""
+    "",
   );
-  const { storedValue: activeSortingProperty, setValue: setActiveSortingProperty } = useLocalStorage(
-    "spreadsheetViewActiveSortingProperty",
-    ""
-  );
+  const { storedValue: activeSortingProperty, setValue: setActiveSortingProperty } =
+    useLocalStorage("spreadsheetViewActiveSortingProperty", "");
   const propertyDetails = SPREADSHEET_PROPERTY_DETAILS[property];
 
   const handleOrderBy = (order: TIssueOrderByOptions, itemKey: string) => {
@@ -68,7 +70,12 @@ export function HeaderColumn(props: Props) {
           <button type="button" tabIndex={-1} className="clickable w-full">
             <Row className="flex w-full cursor-pointer items-center justify-between gap-1.5 py-2 text-13 text-secondary hover:text-primary">
               <div className="flex items-center gap-1.5">
-                {<SpreadSheetPropertyIcon iconKey={propertyDetails.icon} className="h-4 w-4 text-placeholder" />}
+                {
+                  <SpreadSheetPropertyIcon
+                    iconKey={propertyDetails.icon}
+                    className="h-4 w-4 text-placeholder"
+                  />
+                }
                 {property === "sub_issue_count" && isEpic
                   ? t("issue.label", { count: 2 })
                   : t(propertyDetails.i18n_title)}

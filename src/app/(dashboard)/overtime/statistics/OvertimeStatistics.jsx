@@ -21,6 +21,8 @@ import OvertimePageHeader from "../OvertimePageHeader";
 import Chart from "@/libs/ApexCharts";
 import tableStyles from "@core/styles/table.module.css";
 
+import OvertimePersonPicker from "../OvertimePersonPicker";
+
 const currentYear = () =>
   new Date(Date.now() + 7 * 3600000).getUTCFullYear().toString();
 const duration = (minutes) =>
@@ -184,20 +186,13 @@ export default function OvertimeStatistics() {
                 </MenuItem>
               ))}
             </Field>
-            <Field
+            <OvertimePersonPicker
+              users={data?.users || []}
               label="Nhân viên"
-              select
               value={filters.userId}
-              SelectProps={{ displayEmpty: true }}
-              onChange={(event) => change("userId", event.target.value)}
-            >
-              <MenuItem value="">Toàn bộ nhân sự</MenuItem>
-              {data?.users.map((user) => (
-                <MenuItem key={user.id} value={user.id}>
-                  {user.name}
-                </MenuItem>
-              ))}
-            </Field>
+              onChange={(value) => change("userId", value)}
+              placeholder="Toàn bộ nhân sự — tìm tên / mã"
+            />
             <Field
               label="Từ ngày"
               type="date"

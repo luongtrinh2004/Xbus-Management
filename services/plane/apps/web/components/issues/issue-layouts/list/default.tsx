@@ -34,6 +34,10 @@ import { useBulkOperationStatus } from "@/hooks/use-bulk-operation-status";
 // utils
 import type { GroupDropLocation } from "../utils";
 import { getGroupByColumns, isWorkspaceLevel, isSubGrouped } from "../utils";
+import { useProject } from "@/hooks/store/use-project";
+import { useProjectEstimates } from "@/hooks/store/estimates";
+import { getListColumns } from "./columns";
+import { ListTableContext } from "./table-context";
 import { ListGroup } from "./list-group";
 import type { TRenderQuickActions } from "./list-view-types";
 
@@ -65,7 +69,9 @@ export interface IList {
 }
 
 export const List = observer(function List(props: IList) {
-  useTranslation(); // Recompute display labels when the interface language changes.
+  const { t } = useTranslation();
+  const { currentProjectDetails } = useProject();
+  const { areEstimateEnabledByProjectId } = useProjectEstimates();
   const {
     groupedIssueIds,
     issuesMap,
@@ -88,6 +94,24 @@ export const List = observer(function List(props: IList) {
     isEpic = false,
   } = props;
 
+  const columns =
+    process.env.VITE_XBUS_EMBEDDED === "true"
+      ? getListColumns(displayProperties, {
+          modules: currentProjectDetails ? !!currentProjectDetails.module_view : true,
+          cycle: currentProjectDetails ? !!currentProjectDetails.cycle_view : true,
+          estimate:
+            !!currentProjectDetails && areEstimateEnabledByProjectId(currentProjectDetails.id),
+          isEpic,
+        })
+      : null;
+  const propertyTracks = columns?.map(({ width }) => `${width}px`).join(" ") || "";
+  const tableStyle = columns
+    ? ({
+        "--list-property-tracks": propertyTracks,
+        "--list-property-width": `${columns.reduce((total, column) => total + column.width, 0)}px`,
+        minWidth: 420 + columns.reduce((total, column) => total + column.width, 0),
+      } as React.CSSProperties)
+    : undefined;
   const storeType = useIssueStoreType();
   // plane web hooks
   const isBulkOperationsEnabled = useBulkOperationStatus();
@@ -137,54 +161,71 @@ export const List = observer(function List(props: IList) {
     entities = orderedGroups;
   }
   return (
-    <div className="relative flex size-full flex-col">
-      {groups && (
-        <MultipleSelectGroup
-          containerRef={containerRef}
-          entities={entities}
-          disabled={!isBulkOperationsEnabled || isEpic}
-        >
-          {(helpers) => (
-            <>
-              <div
-                ref={containerRef}
-                className="vertical-scrollbar relative scrollbar-lg size-full overflow-auto bg-surface-1"
-              >
-                {groups.map((group: IGroupByColumn) => (
-                  <ListGroup
-                    key={group.id}
-                    groupIssueIds={groupedIssueIds?.[group.id]}
-                    issuesMap={issuesMap}
-                    group_by={group_by}
-                    group={group}
-                    updateIssue={updateIssue}
-                    quickActions={quickActions}
-                    orderBy={orderBy}
-                    getGroupIndex={getGroupIndex}
-                    handleOnDrop={handleOnDrop}
-                    displayProperties={displayProperties}
-                    enableIssueQuickAdd={enableIssueQuickAdd}
-                    showEmptyGroup={showEmptyGroup}
-                    canEditProperties={canEditProperties}
-                    quickAddCallback={quickAddCallback}
-                    disableIssueCreation={disableIssueCreation}
-                    addIssuesToView={addIssuesToView}
-                    isCompletedCycle={isCompletedCycle}
-                    loadMoreIssues={loadMoreIssues}
-                    containerRef={containerRef}
-                    selectionHelpers={helpers}
-                    handleCollapsedGroups={handleCollapsedGroups}
-                    collapsedGroups={collapsedGroups}
-                    isEpic={isEpic}
-                  />
-                ))}
-              </div>
+    <ListTableContext.Provider value={columns}>
+      <div className="relative flex size-full flex-col">
+        {groups && (
+          <MultipleSelectGroup
+            containerRef={containerRef}
+            entities={entities}
+            disabled={!isBulkOperationsEnabled || isEpic}
+          >
+            {(helpers) => (
+              <>
+                <div
+                  ref={containerRef}
+                  className={`vertical-scrollbar relative scrollbar-lg size-full overflow-auto bg-surface-1 ${columns ? "asana-list" : ""}`}
+                >
+                  <div style={tableStyle}>
+                    {columns && (
+                      <div className="asana-list-column-header">
+                        <div className="asana-list-name-heading">{t("common.name")}</div>
+                        <div className="asana-list-property-headings">
+                          {columns.map((column) => (
+                            <div key={column.key} role="columnheader">
+                              {t(column.label)}
+                            </div>
+                          ))}
+                        </div>
+                        <div aria-hidden="true" />
+                      </div>
+                    )}
+                    {groups.map((group: IGroupByColumn) => (
+                      <ListGroup
+                        key={group.id}
+                        groupIssueIds={groupedIssueIds?.[group.id]}
+                        issuesMap={issuesMap}
+                        group_by={group_by}
+                        group={group}
+                        updateIssue={updateIssue}
+                        quickActions={quickActions}
+                        orderBy={orderBy}
+                        getGroupIndex={getGroupIndex}
+                        handleOnDrop={handleOnDrop}
+                        displayProperties={displayProperties}
+                        enableIssueQuickAdd={enableIssueQuickAdd}
+                        showEmptyGroup={showEmptyGroup}
+                        canEditProperties={canEditProperties}
+                        quickAddCallback={quickAddCallback}
+                        disableIssueCreation={disableIssueCreation}
+                        addIssuesToView={addIssuesToView}
+                        isCompletedCycle={isCompletedCycle}
+                        loadMoreIssues={loadMoreIssues}
+                        containerRef={containerRef}
+                        selectionHelpers={helpers}
+                        handleCollapsedGroups={handleCollapsedGroups}
+                        collapsedGroups={collapsedGroups}
+                        isEpic={isEpic}
+                      />
+                    ))}
+                  </div>
+                </div>
 
-              <IssueBulkOperationsRoot selectionHelpers={helpers} />
-            </>
-          )}
-        </MultipleSelectGroup>
-      )}
-    </div>
+                <IssueBulkOperationsRoot selectionHelpers={helpers} />
+              </>
+            )}
+          </MultipleSelectGroup>
+        )}
+      </div>
+    </ListTableContext.Provider>
   );
 });

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "react-toastify";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   flexRender,
@@ -9,6 +10,8 @@ import {
 } from "@tanstack/react-table";
 import {
   Alert,
+  Avatar,
+  Tooltip,
   Box,
   Button,
   Card,
@@ -32,6 +35,8 @@ import TablePaginationComponent from "@components/TablePaginationComponent";
 import Link from "next/link";
 import OvertimePageHeader from "./OvertimePageHeader";
 import OvertimeRegistrationForm from "./OvertimeRegistrationForm";
+import OvertimePersonPicker, { OvertimePerson } from "./OvertimePersonPicker";
+import { resolveAvatar } from "@/utils/getDefaultAvatar";
 import tableStyles from "@core/styles/table.module.css";
 
 const statuses = {
@@ -49,7 +54,7 @@ const types = {
 };
 const colors = {
   PENDING: "warning",
-  APPROVED: "info",
+  APPROVED: "success",
   REJECTED: "error",
   WAITING_CONFIRMATION: "primary",
   COMPLETED: "success",
@@ -72,13 +77,18 @@ const dateTime = (value) =>
 const hours = (minutes) =>
   minutes == null
     ? "—"
-    : `${Math.floor(minutes / 60)}h ${String(minutes % 60).padStart(2, "0")}p`;
+    : minutes % 60 === 0
+      ? `${Math.floor(minutes / 60)} tiếng`
+      : minutes < 60
+        ? `${minutes} phút`
+        : `${Math.floor(minutes / 60)} tiếng ${minutes % 60} phút`;
 const newForm = () => ({
   date: today(),
   start: "18:00",
   end: "20:00",
   reason: "",
   userId: "",
+  participantIds: [],
   approveImmediately: false,
   note: "",
 });
@@ -111,7 +121,6 @@ export default function OvertimeClient() {
   const [form, setForm] = useState(newForm);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const params = new URLSearchParams({
     ...filters,
     scope,
@@ -177,7 +186,6 @@ export default function OvertimeClient() {
     if (busy || !dialog) return;
     setBusy(true);
     setError("");
-    setSuccess("");
     try {
       const action = dialog.action;
       const payload =
@@ -201,11 +209,24 @@ export default function OvertimeClient() {
       });
       setDialog(null);
       setPage(1);
-      setSuccess("Đã lưu thay đổi OT.");
+      const messages = {
+        create: "Đã tạo đơn OT.",
+        edit: "Đã cập nhật đơn OT.",
+        approve: "Đã duyệt đơn OT.",
+        reject: "Đã từ chối đơn OT.",
+        cancel: "Đã hủy đơn OT.",
+        report: "Đã gửi báo cáo OT.",
+        confirm: "Đã xác nhận giờ OT thực tế.",
+        return: "Đã yêu cầu cập nhật báo cáo OT.",
+        settings: "Đã cập nhật cấu hình OT.",
+      };
+      toast.success(messages[action] || "Đã cập nhật đơn OT.", {
+        position: "top-right",
+      });
       await queryClient.invalidateQueries({ queryKey: ["overtime"] });
       await queryClient.invalidateQueries({ queryKey: ["overtime-detail"] });
     } catch (err) {
-      setError(err.message);
+      toast.error(err.message, { position: "top-right" });
       if (selected)
         await queryClient.invalidateQueries({ queryKey: ["overtime"] });
     } finally {
@@ -232,7 +253,7 @@ export default function OvertimeClient() {
       link.remove();
       URL.revokeObjectURL(url);
     } catch (err) {
-      setError(err.message);
+      toast.error(err.message, { position: "top-right" });
     } finally {
       setBusy(false);
     }
@@ -243,18 +264,26 @@ export default function OvertimeClient() {
       [
         "edit",
         "Sửa đơn",
-        record.status === "PENDING" || (admin && record.status === "APPROVED"),
+        (admin || record.userId === data?.actor.id) &&
+          (record.status === "PENDING" ||
+            (admin && record.status === "APPROVED")),
       ],
       [
         "cancel",
         "Hủy đơn",
-        record.status === "PENDING" ||
+        ((admin || record.userId === data?.actor.id) &&
+          record.status === "PENDING") ||
           (admin &&
             ["APPROVED", "WAITING_CONFIRMATION"].includes(record.status)),
       ],
       ["approve", "Duyệt đơn", admin && record.status === "PENDING"],
       ["reject", "Từ chối", admin && record.status === "PENDING"],
-      ["report", "Báo cáo công việc", record.status === "APPROVED"],
+      [
+        "report",
+        "Báo cáo công việc",
+        (admin || record.userId === data?.actor.id) &&
+          record.status === "APPROVED",
+      ],
       [
         "confirm",
         "Xác nhận giờ thực tế",
@@ -272,12 +301,91 @@ export default function OvertimeClient() {
       id: "index",
       cell: ({ row }) => (page - 1) * limit + row.index + 1,
     },
-    { header: "Nhân viên", accessorKey: "userName" },
+    {
+      header: "Nhân viên",
+      accessorKey: "createdByName",
+      cell: ({ row }) => {
+        const people = (
+          row.original.participants || [
+            { id: row.original.userId, name: row.original.userName },
+          ]
+        ).filter((person) => person.id !== row.original.createdBy);
+        const creator =
+          row.original.creator ||
+          data?.users.find((person) => person.id === row.original.createdBy);
+        const creatorName =
+          creator?.name || row.original.createdByName || row.original.userName;
+        return (
+          <Stack spacing={1} sx={{ py: 0.5, minWidth: 220 }}>
+            <Stack direction="row" spacing={1} alignItems="center">
+              <Avatar
+                src={resolveAvatar(creator)}
+                alt={creatorName}
+                sx={{ width: 28, height: 28 }}
+              />
+              <Typography
+                variant="body1"
+                fontWeight={600}
+                noWrap
+                title={creatorName}
+              >
+                {creatorName}
+              </Typography>
+            </Stack>
+            {people.length > 0 && (
+              <Stack direction="row" spacing={0.5} alignItems="center">
+                {people.slice(0, 5).map((person) => (
+                  <Tooltip
+                    key={person.id}
+                    title={`${person.name}${person.code ? ` · ${person.code}` : ""}`}
+                  >
+                    <Avatar
+                      src={person.avatarUrl || undefined}
+                      alt={person.name}
+                      sx={{
+                        width: 22,
+                        height: 22,
+                        cursor: "default",
+                        border: "1px solid",
+                        borderColor: "divider",
+                      }}
+                    >
+                      {person.name?.charAt(0)}
+                    </Avatar>
+                  </Tooltip>
+                ))}
+                {people.length > 5 && (
+                  <Tooltip
+                    title={people
+                      .slice(5)
+                      .map((person) => person.name)
+                      .join(", ")}
+                  >
+                    <Typography
+                      component="span"
+                      sx={{ px: 1, cursor: "default" }}
+                    >
+                      …
+                    </Typography>
+                  </Tooltip>
+                )}
+              </Stack>
+            )}
+          </Stack>
+        );
+      },
+    },
+    {
+      header: "Số lượng nhân sự",
+      id: "participantCount",
+      accessorFn: (record) => record.participants?.length || 1,
+      meta: { align: "center" },
+    },
     {
       header: "Ngày làm thêm",
       accessorKey: "startTime",
       cell: ({ row }) => (
-        <Box sx={{ width: 220 }}>
+        <Box sx={{ width: 200 }}>
           <Typography variant="body2">
             {new Date(row.original.startTime).toLocaleDateString("vi-VN", {
               timeZone: "Asia/Ho_Chi_Minh",
@@ -337,11 +445,42 @@ export default function OvertimeClient() {
     {
       header: "Người phê duyệt",
       accessorKey: "approvedByName",
-      cell: ({ row }) =>
-        row.original.approvedByName || row.original.rejectedByName || "",
+      cell: ({ row }) => {
+        const person =
+          row.original.approver ||
+          data?.users.find(
+            (person) =>
+              person.id ===
+                (row.original.rejectedBy || row.original.approvedBy) ||
+              person.name ===
+                (row.original.rejectedByName || row.original.approvedByName),
+          );
+        const name =
+          person?.name ||
+          row.original.approvedByName ||
+          row.original.rejectedByName;
+        return name ? (
+          <Stack direction="row" spacing={1} alignItems="center">
+            <Avatar
+              src={resolveAvatar(person)}
+              alt={name}
+              sx={{ width: 28, height: 28 }}
+            >
+              {name.charAt(0)}
+            </Avatar>
+            <Typography variant="body2" noWrap>
+              {name}
+            </Typography>
+          </Stack>
+        ) : (
+          <Typography variant="body2" color="text.disabled">
+            —
+          </Typography>
+        );
+      },
     },
     {
-      header: "Lý do",
+      header: "Mục đích OT",
       accessorKey: "reason",
       cell: ({ getValue }) => (
         <Typography
@@ -483,11 +622,7 @@ export default function OvertimeClient() {
           </>
         }
       />
-      {success && (
-        <Alert severity="success" onClose={() => setSuccess("")}>
-          {success}
-        </Alert>
-      )}
+
       {loadError && <Alert severity="error">{loadError.message}</Alert>}
       {error && !dialog && (
         <Alert severity="error" onClose={() => setError("")}>
@@ -590,20 +725,13 @@ export default function OvertimeClient() {
             onChange={(event) => changeFilter("to", event.target.value)}
           />
           {admin && scope === "all" && (
-            <Field
+            <OvertimePersonPicker
+              users={data.users}
               label="Nhân viên"
-              select
               value={filters.userId}
-              SelectProps={{ displayEmpty: true }}
-              onChange={(event) => changeFilter("userId", event.target.value)}
-            >
-              <MenuItem value="">Tất cả</MenuItem>
-              {data.users.map((user) => (
-                <MenuItem key={user.id} value={user.id}>
-                  {user.name}
-                </MenuItem>
-              ))}
-            </Field>
+              onChange={(value) => changeFilter("userId", value)}
+              placeholder="Tất cả — tìm tên / mã nhân sự"
+            />
           )}
         </Box>
       )}
@@ -629,7 +757,7 @@ export default function OvertimeClient() {
               sx={{
                 overflowX: "auto",
                 opacity: isFetching ? 0.6 : 1,
-                "& td, & th": { px: 3, py: 2.5 },
+                "& td, & th": { px: 2.5, py: 2, verticalAlign: "middle" },
                 "& th": { textTransform: "none", fontWeight: 500 },
                 "& tbody tr:hover": { bgcolor: "action.hover" },
               }}
@@ -639,7 +767,12 @@ export default function OvertimeClient() {
                   {table.getHeaderGroups().map((group) => (
                     <tr key={group.id}>
                       {group.headers.map((header) => (
-                        <th key={header.id}>
+                        <th
+                          key={header.id}
+                          style={{
+                            textAlign: header.column.columnDef.meta?.align,
+                          }}
+                        >
                           {flexRender(
                             header.column.columnDef.header,
                             header.getContext(),
@@ -653,7 +786,12 @@ export default function OvertimeClient() {
                   {table.getRowModel().rows.map((row) => (
                     <tr key={row.id}>
                       {row.getVisibleCells().map((cell) => (
-                        <td key={cell.id}>
+                        <td
+                          key={cell.id}
+                          style={{
+                            textAlign: cell.column.columnDef.meta?.align,
+                          }}
+                        >
                           {flexRender(
                             cell.column.columnDef.cell,
                             cell.getContext(),
@@ -740,6 +878,16 @@ export default function OvertimeClient() {
           <DialogContent>
             <Stack spacing={3} sx={{ pt: 1 }}>
               {error && <Alert severity="error">{error}</Alert>}
+              {selected?.participants?.length > 1 && (
+                <Stack spacing={1}>
+                  <Typography variant="subtitle2">
+                    Nhân sự cùng OT ({selected.participants.length})
+                  </Typography>
+                  {selected.participants.map((person) => (
+                    <OvertimePerson key={person.id} person={person} />
+                  ))}
+                </Stack>
+              )}
               {selected && (
                 <Typography color="text.secondary">
                   {selected.userName} · {dateOnly(selected.startTime)} ·{" "}
@@ -842,7 +990,7 @@ export default function OvertimeClient() {
               {dialog?.action === "approve" && (
                 <>
                   <Typography sx={{ whiteSpace: "pre-wrap" }}>
-                    Lý do: {selected.reason}
+                    Mục đích OT: {selected.reason}
                   </Typography>
                   <Alert severity="info">
                     Xác nhận duyệt đơn đăng ký làm thêm này?
@@ -937,7 +1085,7 @@ export default function OvertimeClient() {
                         label={statuses[detail.record.status]}
                       />
                       <Typography sx={{ whiteSpace: "pre-wrap" }}>
-                        Lý do: {detail.record.reason}
+                        Mục đích OT: {detail.record.reason}
                       </Typography>
                       <Typography>
                         Giờ đăng ký: {hours(detail.record.registeredMinutes)} ·

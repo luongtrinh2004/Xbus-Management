@@ -5,6 +5,7 @@
  */
 
 import React from "react";
+import { useTranslation } from "@plane/i18n";
 import { observer } from "mobx-react";
 // types
 import type { TIssue } from "@plane/types";
@@ -21,6 +22,7 @@ type Props = {
 };
 
 export const SpreadsheetLabelColumn = observer(function SpreadsheetLabelColumn(props: Props) {
+  const { t } = useTranslation();
   const { issue, onChange, disabled, onClose } = props;
   // hooks
   const { labelMap } = useLabel();
@@ -37,13 +39,15 @@ export const SpreadsheetLabelColumn = observer(function SpreadsheetLabelColumn(p
         projectId={issue.project_id ?? null}
         value={issue.label_ids || []}
         defaultOptions={defaultLabelOptions}
-        onChange={(data) => onChange(issue, { label_ids: data }, { changed_property: "labels", change_details: data })}
+        onChange={(data) =>
+          onChange(issue, { label_ids: data }, { changed_property: "labels", change_details: data })
+        }
         className="h-full w-full"
         buttonClassName="px-page-x w-full h-full group-[.selected-issue-row]:bg-accent-primary/5 group-[.selected-issue-row]:hover:bg-accent-primary/10 rounded-none"
         hideDropdownArrow
         maxRender={1}
         disabled={disabled}
-        placeholderText={"Chọn nhãn"}
+        placeholderText={t("xbus_workflow.select_labels")}
         onClose={onClose}
         noLabelBorder
         fullWidth

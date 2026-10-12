@@ -4,6 +4,7 @@
  * See the LICENSE file for details.
  */
 
+import { useTranslation } from "@plane/i18n";
 import { observer } from "mobx-react";
 import { useParams } from "next/navigation";
 // constants
@@ -29,6 +30,7 @@ interface Props {
 }
 
 export const SpreadsheetHeader = observer(function SpreadsheetHeader(props: Props) {
+  const { t } = useTranslation();
   const {
     displayProperties,
     displayFilters,
@@ -42,9 +44,11 @@ export const SpreadsheetHeader = observer(function SpreadsheetHeader(props: Prop
   // router
   const { projectId } = useParams();
   // derived values
-  const isGroupSelectionEmpty = selectionHelpers.isGroupSelected(SPREADSHEET_SELECT_GROUP) === "empty";
+  const isGroupSelectionEmpty =
+    selectionHelpers.isGroupSelected(SPREADSHEET_SELECT_GROUP) === "empty";
   // auth
-  const canSelectIssues = canEditProperties(projectId?.toString()) && !selectionHelpers.isSelectionDisabled;
+  const canSelectIssues =
+    canEditProperties(projectId?.toString()) && !selectionHelpers.isSelectionDisabled;
 
   return (
     <thead className="sticky top-0 left-0 z-[12] border-b-[0.5px] border-subtle">
@@ -64,14 +68,16 @@ export const SpreadsheetHeader = observer(function SpreadsheetHeader(props: Prop
                       "pointer-events-none size-3.5 opacity-0 !outline-none group-hover/list-header:pointer-events-auto group-hover/list-header:opacity-100",
                       {
                         "pointer-events-auto opacity-100": !isGroupSelectionEmpty,
-                      }
+                      },
                     )}
                     groupID={SPREADSHEET_SELECT_GROUP}
                     selectionHelpers={selectionHelpers}
                   />
                 </div>
               )}
-              <span className="text-13 font-medium">{`${isEpic ? "Epics" : "Công việc"}`}</span>
+              <span className="text-13 font-medium">
+                {t(isEpic ? "common.epics" : "sidebar.work_items")}
+              </span>
             </div>
           </div>
         </th>

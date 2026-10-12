@@ -46,7 +46,7 @@ export const SpreadsheetDueDateColumn = observer(function SpreadsheetDueDateColu
             {
               changed_property: "target_date",
               change_details: targetDate,
-            }
+            },
           );
         }}
         disabled={disabled}
@@ -55,7 +55,10 @@ export const SpreadsheetDueDateColumn = observer(function SpreadsheetDueDateColu
         clearable
         // `.clickable` is what the table's keyboard navigation clicks on Enter / Space in a focused cell.
         className={cn("clickable h-full", {
-          "text-danger-primary": shouldHighlightIssueDueDate(issue.target_date, stateDetails?.group),
+          "text-danger-primary": shouldHighlightIssueDueDate(
+            issue.target_date,
+            stateDetails?.group,
+          ),
         })}
         weekStartsOn={userProfile?.start_of_the_week}
         onClose={onClose}

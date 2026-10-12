@@ -6,6 +6,7 @@
 
 import { useCallback } from "react";
 import { xor } from "lodash-es";
+import { useTranslation } from "@plane/i18n";
 import { observer } from "mobx-react";
 import { useParams } from "next/navigation";
 // types
@@ -22,6 +23,7 @@ type Props = {
 };
 
 export const SpreadsheetModuleColumn = observer(function SpreadsheetModuleColumn(props: Props) {
+  const { t } = useTranslation();
   const { issue, disabled, onClose } = props;
   // router
   const { workspaceSlug } = useParams();
@@ -41,9 +43,15 @@ export const SpreadsheetModuleColumn = observer(function SpreadsheetModuleColumn
         if (issue.module_ids.includes(moduleId)) modulesToRemove.push(moduleId);
         else modulesToAdd.push(moduleId);
       }
-      changeModulesInIssue(workspaceSlug.toString(), issue.project_id, issue.id, modulesToAdd, modulesToRemove);
+      changeModulesInIssue(
+        workspaceSlug.toString(),
+        issue.project_id,
+        issue.id,
+        modulesToAdd,
+        modulesToRemove,
+      );
     },
-    [workspaceSlug, issue, changeModulesInIssue]
+    [workspaceSlug, issue, changeModulesInIssue],
   );
 
   return (
@@ -54,7 +62,7 @@ export const SpreadsheetModuleColumn = observer(function SpreadsheetModuleColumn
         value={issue?.module_ids ?? []}
         onChange={handleModule}
         disabled={disabled}
-        placeholder={"Chọn nhóm công việc"}
+        placeholder={t("xbus_workflow.select_module")}
         // `.clickable` is what the table's keyboard navigation clicks on Enter / Space in a focused cell.
         className="clickable"
         variant="table-cell"

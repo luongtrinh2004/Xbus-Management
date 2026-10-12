@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { resolveAvatar } from "../utils/getDefaultAvatar.js";
 
 export const OT_STATUSES = {
   PENDING: "Chờ duyệt",
@@ -159,11 +160,23 @@ export function normalizeOtRequest(input, config, now = new Date()) {
 }
 const effective = (record) =>
   !["REJECTED", "CANCELLED"].includes(record.status);
+export const otParticipantIds = (record) => [
+  ...new Set([record.userId, ...(record.participantIds || [])]),
+];
+export const canViewOt = (record, actor) =>
+  isOtManager(actor) || otParticipantIds(record).includes(actor.id);
+export const otPersonOption = (user) => ({
+  id: user.id,
+  name: user.name || user.email || "Nhân sự chưa đặt tên",
+  code: user.code || "",
+  avatarUrl: resolveAvatar(user),
+  status: user.status,
+});
 export function validateOtSchedule(candidate, requests, config) {
   const others = requests.filter(
     (item) =>
       item.id !== candidate.id &&
-      item.userId === candidate.userId &&
+      otParticipantIds(item).includes(candidate.userId) &&
       effective(item),
   );
   if (
@@ -225,10 +238,26 @@ export function mutateOvertime(state, actor, input, users, now = new Date()) {
     const userId = admin ? input.userId || actor.id : actor.id;
     if (!users.some((user) => user.id === userId && user.status === "able"))
       fail("Nhân viên không hoạt động hoặc không tồn tại");
+    if (
+      input.participantIds !== undefined &&
+      (!Array.isArray(input.participantIds) ||
+        input.participantIds.some((id) => typeof id !== "string" || !id))
+    )
+      fail("Danh sách nhân sự cùng OT không hợp lệ");
+    const participantIds = [
+      ...new Set([userId, ...(input.participantIds || [])]),
+    ];
+    if (
+      participantIds.some(
+        (id) => !users.some((user) => user.id === id && user.status === "able"),
+      )
+    )
+      fail("Nhân sự cùng OT không hoạt động hoặc không tồn tại");
     const record = {
       ...normalizeOtRequest(input, state.config, now),
       id: randomUUID(),
       userId,
+      participantIds,
       actualMinutes: null,
       confirmedMinutes: null,
       workReport: "",
@@ -249,7 +278,12 @@ export function mutateOvertime(state, actor, input, users, now = new Date()) {
       record.approvedBy = actor.id;
       record.approvedAt = stamp;
     }
-    validateOtSchedule(record, state.requests, state.config);
+    for (const id of participantIds)
+      validateOtSchedule(
+        { ...record, userId: id },
+        state.requests,
+        state.config,
+      );
     state.requests.push(record);
     audit("create", null, { ...record });
     return record;
@@ -287,7 +321,12 @@ export function mutateOvertime(state, actor, input, users, now = new Date()) {
           now,
         ),
       );
-      validateOtSchedule(record, state.requests, state.config);
+      for (const id of otParticipantIds(record))
+        validateOtSchedule(
+          { ...record, userId: id },
+          state.requests,
+          state.config,
+        );
       break;
     case "cancel":
       allowed(
@@ -412,18 +451,19 @@ export function overtimeView(state, actor, users, filters) {
   const names = new Map(
     users.map((user) => [user.id, user.name || user.email]),
   );
-  const visible = state.requests.filter(
-    (item) => isOtManager(actor) || item.userId === actor.id,
-  );
+  const visible = state.requests.filter((item) => canViewOt(item, actor));
   const entries = visible
     .filter(
       (item) =>
-        (filters.scope !== "mine" || item.userId === actor.id) &&
-        (!filters.userId || item.userId === filters.userId) &&
+        (filters.scope !== "mine" ||
+          otParticipantIds(item).includes(actor.id)) &&
+        (!filters.userId || otParticipantIds(item).includes(filters.userId)) &&
         (!filters.status || item.status === filters.status) &&
         (!filters.type || item.otType === filters.type) &&
         (!filters.search ||
-          `${names.get(item.userId) || ""} ${item.reason} ${item.workReport}`
+          `${otParticipantIds(item)
+            .map((id) => names.get(id) || "")
+            .join(" ")} ${item.reason} ${item.workReport}`
             .toLowerCase()
             .includes(filters.search)),
     )
@@ -434,9 +474,30 @@ export function overtimeView(state, actor, users, filters) {
       return {
         ...item,
         userName: names.get(item.userId) || "Nhân sự đã nghỉ",
+        participants: otParticipantIds(item).map((id) => {
+          const user = users.find((user) => user.id === id);
+          return user
+            ? otPersonOption(user)
+            : { id, name: "Nhân sự đã nghỉ", code: "", avatarUrl: "" };
+        }),
+        countedParticipantIds: otParticipantIds(item).filter(
+          (id) =>
+            (isOtManager(actor) || id === actor.id) &&
+            (!filters.userId || id === filters.userId),
+        ),
+        approver: (() => {
+          const person = users.find(
+            (user) => user.id === (item.rejectedBy || item.approvedBy),
+          );
+          return person ? otPersonOption(person) : null;
+        })(),
         approvedByName: names.get(item.approvedBy) || "",
         rejectedByName: names.get(item.rejectedBy) || "",
         confirmedByName: names.get(item.confirmedBy) || "",
+        creator: (() => {
+          const person = users.find((user) => user.id === item.createdBy);
+          return person ? otPersonOption(person) : null;
+        })(),
         createdByName: names.get(item.createdBy) || "",
         days,
         periodRegisteredMinutes: days.reduce(
@@ -470,31 +531,33 @@ export function overtimeView(state, actor, users, filters) {
   for (const item of entries) {
     summary[item.status]++;
     if (!effective(item)) continue;
-    summary.registeredMinutes += item.periodRegisteredMinutes;
-    summary.confirmedMinutes += item.periodConfirmedMinutes;
-    const employee = employees.get(item.userId) || {
-      userId: item.userId,
-      name: item.userName,
-      registeredMinutes: 0,
-      confirmedMinutes: 0,
-      completed: 0,
-    };
-    employee.registeredMinutes += item.periodRegisteredMinutes;
-    employee.confirmedMinutes += item.periodConfirmedMinutes;
-    employee.completed += Number(item.status === "COMPLETED");
-    employees.set(item.userId, employee);
-    types[item.otType] += item.periodRegisteredMinutes;
-    for (const day of item.days) {
-      const key = day.date.slice(0, 7);
-      const monthly = months.get(key) || {
-        month: key,
+    for (const participantId of item.countedParticipantIds) {
+      summary.registeredMinutes += item.periodRegisteredMinutes;
+      summary.confirmedMinutes += item.periodConfirmedMinutes;
+      const employee = employees.get(participantId) || {
+        userId: participantId,
+        name: names.get(participantId) || "Nhân sự đã nghỉ",
         registeredMinutes: 0,
         confirmedMinutes: 0,
+        completed: 0,
       };
-      monthly.registeredMinutes += day.registeredMinutes;
-      monthly.confirmedMinutes +=
-        item.status === "COMPLETED" ? day.confirmedMinutes : 0;
-      months.set(key, monthly);
+      employee.registeredMinutes += item.periodRegisteredMinutes;
+      employee.confirmedMinutes += item.periodConfirmedMinutes;
+      employee.completed += Number(item.status === "COMPLETED");
+      employees.set(participantId, employee);
+      types[item.otType] += item.periodRegisteredMinutes;
+      for (const day of item.days) {
+        const key = day.date.slice(0, 7);
+        const monthly = months.get(key) || {
+          month: key,
+          registeredMinutes: 0,
+          confirmedMinutes: 0,
+        };
+        monthly.registeredMinutes += day.registeredMinutes;
+        monthly.confirmedMinutes +=
+          item.status === "COMPLETED" ? day.confirmedMinutes : 0;
+        months.set(key, monthly);
+      }
     }
   }
   return {

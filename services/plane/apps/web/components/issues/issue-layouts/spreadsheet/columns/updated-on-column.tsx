@@ -16,7 +16,9 @@ type Props = {
   issue: TIssue;
 };
 
-export const SpreadsheetUpdatedOnColumn = observer(function SpreadsheetUpdatedOnColumn(props: Props) {
+export const SpreadsheetUpdatedOnColumn = observer(function SpreadsheetUpdatedOnColumn(
+  props: Props,
+) {
   const { issue } = props;
 
   return (

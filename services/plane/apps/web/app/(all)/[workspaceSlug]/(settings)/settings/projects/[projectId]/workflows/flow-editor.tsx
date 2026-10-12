@@ -1,9 +1,15 @@
+import { useTranslation } from "@plane/i18n";
 import { useState } from "react";
 import { Button } from "@makeplane/propel/components/button";
 import { Select } from "@plane/blocks/select";
 
 type Option = { id: string; name: string };
-export type FlowDraft = { source: string; target: string; roles: string[]; originalTarget?: string };
+export type FlowDraft = {
+  source: string;
+  target: string;
+  roles: string[];
+  originalTarget?: string;
+};
 
 export function FlowEditor({
   draft,
@@ -18,6 +24,7 @@ export function FlowEditor({
   onClose: () => void;
   onSave: (value: FlowDraft) => Promise<boolean>;
 }) {
+  const { t } = useTranslation();
   const [value, setValue] = useState(draft);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -42,51 +49,69 @@ export function FlowEditor({
       >
         <div className="flex items-center justify-between border-b border-subtle p-5">
           <h2 id="flow-editor-title" className="text-h5-medium">
-            {draft.originalTarget ? "Chỉnh sửa luồng" : "Thêm luồng chuyển bước"}
+            {draft.originalTarget
+              ? t("xbus_workflow.edit_transition")
+              : t("xbus_workflow.add_transition")}
           </h2>
-          <Button variant="secondary" size="sm" stretch="auto" label="Đóng" disabled={busy} onClick={onClose} />
+          <Button
+            variant="secondary"
+            size="sm"
+            stretch="auto"
+            label={t("xbus_workflow.close")}
+            disabled={busy}
+            onClick={onClose}
+          />
         </div>
         <div className="flex-1 space-y-5 overflow-y-auto p-5 text-body-sm-regular">
           <div>
-            <p className="mb-2 text-secondary">Từ trạng thái</p>
+            <p className="mb-2 text-secondary">{t("xbus_workflow.source")}</p>
             <p className="font-medium">{source?.name}</p>
           </div>
           <div>
-            <p className="mb-2 text-secondary">Chuyển đến</p>
+            <p className="mb-2 text-secondary">{t("xbus_workflow.move_to")}</p>
             <Select<Option>
               getValues={() => destinations}
               getOptionValue={(option) => option.id}
               getOptionLabel={(option) => option.name}
               value={destinations.find((option) => option.id === value.target) ?? null}
               onChange={(id) => setValue({ ...value, target: id ?? "" })}
-              placeholder="Chọn trạng thái đích"
+              placeholder={t("xbus_workflow.choose_target")}
               disabled={busy}
             >
-              <Select.Trigger<Option> variant="select-ghost-md" aria-label="Trạng thái đích">
-                <span>{destinations.find((option) => option.id === value.target)?.name ?? "Chọn trạng thái đích"}</span>
+              <Select.Trigger<Option>
+                variant="select-ghost-md"
+                aria-label={t("xbus_workflow.target")}
+              >
+                <span>
+                  {destinations.find((option) => option.id === value.target)?.name ??
+                    t("xbus_workflow.choose_target")}
+                </span>
               </Select.Trigger>
             </Select>
           </div>
           <fieldset className="space-y-3">
-            <legend className="mb-3 text-secondary">Ai được chuyển bước?</legend>
+            <legend className="mb-3 text-secondary">{t("xbus_workflow.who_can_move")}</legend>
             <label className="flex items-center gap-2">
               <input
                 type="checkbox"
                 disabled={busy}
                 checked={all}
                 onChange={(event) =>
-                  setValue({ ...value, roles: event.target.checked ? ["admin", "member"] : ["admin"] })
+                  setValue({
+                    ...value,
+                    roles: event.target.checked ? ["admin", "member"] : ["admin"],
+                  })
                 }
               />
-              Tất cả thành viên dự án
+              {t("xbus_workflow.all_project_members")}
             </label>
             {!all && (
               <>
                 <div className="space-y-2 rounded-lg border border-subtle p-3">
                   {Object.entries({
                     admin: "Admin",
-                    assignee: "Người được giao việc",
-                    reviewer: "Người nghiệm thu (qua Duyệt/Trả lại)",
+                    assignee: t("xbus_workflow.assigned_user"),
+                    reviewer: t("xbus_workflow.reviewer_action"),
                   }).map(([role, label]) => (
                     <label key={role} className="flex items-center gap-2">
                       <input
@@ -99,7 +124,7 @@ export function FlowEditor({
                     </label>
                   ))}
                 </div>
-                <p className="text-secondary">Hoặc chọn thành viên cụ thể</p>
+                <p className="text-secondary">{t("xbus_workflow.specific_member")}</p>
                 <div className="space-y-2 rounded-lg border border-subtle p-3">
                   {members.map((member) => (
                     <label key={member.id} className="flex items-center gap-2">
@@ -117,7 +142,7 @@ export function FlowEditor({
             )}
           </fieldset>
           <p className="text-caption-sm-regular text-secondary">
-            Nếu công việc yêu cầu nghiệm thu, quyền chuyển bước không thay thế việc duyệt kết quả.
+            {t("xbus_workflow.approval_hint")}
           </p>
           {error && (
             <p role="alert" className="text-danger-primary">
@@ -126,12 +151,19 @@ export function FlowEditor({
           )}
         </div>
         <div className="flex justify-end gap-2 border-t border-subtle p-5">
-          <Button variant="secondary" size="md" stretch="auto" label="Hủy" disabled={busy} onClick={onClose} />
+          <Button
+            variant="secondary"
+            size="md"
+            stretch="auto"
+            label={t("xbus_workflow.cancel")}
+            disabled={busy}
+            onClick={onClose}
+          />
           <Button
             variant="primary"
             size="md"
             stretch="auto"
-            label="Lưu luồng"
+            label={t("xbus_workflow.save_transition")}
             loading={busy}
             disabled={busy || !value.target || value.roles.length === 0}
             onClick={() => {
@@ -140,7 +172,7 @@ export function FlowEditor({
               void onSave(value)
                 .then((saved) => {
                   if (saved) onClose();
-                  else setError("Không lưu được luồng. Kiểm tra thông báo trên trang Workflow.");
+                  else setError(t("xbus_workflow.transition_save_failed"));
                   return saved;
                 })
                 .finally(() => setBusy(false));

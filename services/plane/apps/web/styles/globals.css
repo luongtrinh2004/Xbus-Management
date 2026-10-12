@@ -2,6 +2,8 @@
 @import "@plane/editor/styles";
 @import "./power-k.css";
 @import "./emoji.css";
+@import "./asana-list.css";
+@import "./embedded-focus.css";
 @plugin "@tailwindcss/typography";
 
 :root,
