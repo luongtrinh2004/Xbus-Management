@@ -1,4 +1,1358 @@
 {
   "menuImageUrl": "",
-  "invitations": []
+  "invitations": [
+    {
+      "id": "tea_1791828231108",
+      "type": "afternoon-tea",
+      "title": "Mời trà chiều",
+      "scheduledAt": "2026-10-13T14:00",
+      "note": "ss",
+      "createdBy": "usr_024",
+      "createdAt": "2026-10-12T18:03:51.108Z",
+      "registrations": [],
+      "menus": [
+        {
+          "id": "menu_1791828245429",
+          "shop": "mixue",
+          "imageUrl": "/api/media/afternoon-tea/2026-10-13/mixue/menu-1791828245419.jpeg",
+          "checksum": "ab627c65389e1d9ec0e4cd8a3fe91639254e0f15ac2122e93b772043ae068996",
+          "catalogId": "menu_catalog_1791823408170",
+          "uploadedBy": "usr_024",
+          "uploadedAt": "2026-10-12T18:04:05.429Z"
+        }
+      ],
+      "orders": [
+        {
+          "userId": "usr_024",
+          "shop": "mixue",
+          "menuItemId": "menu_item_1791823408170_0",
+          "drink": "Sữa tươi trân châu đường đen",
+          "size": "",
+          "price": 25000,
+          "updatedAt": "2026-10-12T18:16:10.074Z"
+        }
+      ],
+      "ordersLocked": true,
+      "ordersLockedAt": "2026-10-12T18:18:14.239Z",
+      "ordersLockedBy": "usr_admin_001"
+    }
+  ],
+  "menuCatalog": [
+    {
+      "id": "menu_catalog_1791822297246",
+      "checksum": "9698a547db3b95f7a65cb738e97111490ab3adf13720ddef3bac45f6dfd62c9c",
+      "imageUrl": "/api/media/afternoon-tea/2026-10-12/lebocha/menu-1791822140195.jpeg",
+      "items": [
+        {
+          "id": "menu_item_1791822297246_0",
+          "name": "Trà Chanh",
+          "category": "TRÀ TRÁI CÂY",
+          "variants": [
+            {
+              "size": "L",
+              "price": 10000
+            },
+            {
+              "size": "XL",
+              "price": 15000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_1",
+          "name": "Trà Tắc",
+          "category": "TRÀ TRÁI CÂY",
+          "variants": [
+            {
+              "size": "L",
+              "price": 10000
+            },
+            {
+              "size": "XL",
+              "price": 15000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_2",
+          "name": "Chanh Thái Xanh",
+          "category": "TRÀ TRÁI CÂY",
+          "variants": [
+            {
+              "size": "L",
+              "price": 10000
+            },
+            {
+              "size": "XL",
+              "price": 15000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_3",
+          "name": "Trà Dâu",
+          "category": "TRÀ TRÁI CÂY",
+          "variants": [
+            {
+              "size": "L",
+              "price": 15000
+            },
+            {
+              "size": "XL",
+              "price": 20000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_4",
+          "name": "Trà Chanh Leo",
+          "category": "TRÀ TRÁI CÂY",
+          "variants": [
+            {
+              "size": "L",
+              "price": 15000
+            },
+            {
+              "size": "XL",
+              "price": 20000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_5",
+          "name": "Trà Quýt",
+          "category": "TRÀ TRÁI CÂY",
+          "variants": [
+            {
+              "size": "L",
+              "price": 15000
+            },
+            {
+              "size": "XL",
+              "price": 20000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_6",
+          "name": "Trà Xoài Quýt",
+          "category": "TRÀ TRÁI CÂY",
+          "variants": [
+            {
+              "size": "L",
+              "price": 20000
+            },
+            {
+              "size": "XL",
+              "price": 25000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_7",
+          "name": "Trà Xoài Chanh Leo",
+          "category": "TRÀ TRÁI CÂY",
+          "variants": [
+            {
+              "size": "L",
+              "price": 20000
+            },
+            {
+              "size": "XL",
+              "price": 25000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_8",
+          "name": "Trà Lựu Ruby",
+          "category": "TRÀ TRÁI CÂY",
+          "variants": [
+            {
+              "size": "L",
+              "price": 22000
+            },
+            {
+              "size": "XL",
+              "price": 28000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_9",
+          "name": "Trà Ổi Hồng Đào/ Ổi Dâu",
+          "category": "TRÀ TRÁI CÂY",
+          "variants": [
+            {
+              "size": "L",
+              "price": 22000
+            },
+            {
+              "size": "XL",
+              "price": 28000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_10",
+          "name": "Trà Tắc Ổi Hồng",
+          "category": "TRÀ TRÁI CÂY",
+          "variants": [
+            {
+              "size": "L",
+              "price": 22000
+            },
+            {
+              "size": "XL",
+              "price": 28000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_11",
+          "name": "Thái Đỏ/ Thái Xanh Kem Mây",
+          "category": "TRÀ KEM",
+          "variants": [
+            {
+              "size": "L",
+              "price": 20000
+            },
+            {
+              "size": "XL",
+              "price": 25000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_12",
+          "name": "Trà Xoài Kem",
+          "category": "TRÀ KEM",
+          "variants": [
+            {
+              "size": "L",
+              "price": 25000
+            },
+            {
+              "size": "XL",
+              "price": 30000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_13",
+          "name": "Trà Lựu Kem",
+          "category": "TRÀ KEM",
+          "variants": [
+            {
+              "size": "L",
+              "price": 25000
+            },
+            {
+              "size": "XL",
+              "price": 30000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_14",
+          "name": "Lục Trà Kem",
+          "category": "TRÀ KEM",
+          "variants": [
+            {
+              "size": "L",
+              "price": 25000
+            },
+            {
+              "size": "XL",
+              "price": 30000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_15",
+          "name": "Thanh Trà Kem",
+          "category": "TRÀ KEM",
+          "variants": [
+            {
+              "size": "L",
+              "price": 25000
+            },
+            {
+              "size": "XL",
+              "price": 30000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_16",
+          "name": "Nhài Sữa Kem Mây",
+          "category": "TRÀ KEM",
+          "variants": [
+            {
+              "size": "L",
+              "price": 25000
+            },
+            {
+              "size": "XL",
+              "price": 30000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_17",
+          "name": "Trà Sữa Kem Mây",
+          "category": "TRÀ KEM",
+          "variants": [
+            {
+              "size": "L",
+              "price": 25000
+            },
+            {
+              "size": "XL",
+              "price": 30000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_18",
+          "name": "Trà Sen Kem Mây",
+          "category": "TRÀ KEM",
+          "variants": [
+            {
+              "size": "L",
+              "price": 25000
+            },
+            {
+              "size": "XL",
+              "price": 30000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_19",
+          "name": "Nhài Sữa Kem Dẻ Cười",
+          "category": "TRÀ KEM",
+          "variants": [
+            {
+              "size": "L",
+              "price": 25000
+            },
+            {
+              "size": "XL",
+              "price": 30000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_20",
+          "name": "Ổi Hồng Kem Matcha",
+          "category": "TRÀ KEM",
+          "variants": [
+            {
+              "size": "L",
+              "price": 30000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_21",
+          "name": "Ổi Hồng Kem Mây",
+          "category": "TRÀ KEM",
+          "variants": [
+            {
+              "size": "L",
+              "price": 30000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_22",
+          "name": "Trà Sữa Trân Châu Đường Đen",
+          "category": "TRÀ SỮA",
+          "variants": [
+            {
+              "size": "L",
+              "price": 20000
+            },
+            {
+              "size": "XL",
+              "price": 25000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_23",
+          "name": "Sữa Tươi Trân Châu Đường Đen",
+          "category": "TRÀ SỮA",
+          "variants": [
+            {
+              "size": "L",
+              "price": 20000
+            },
+            {
+              "size": "XL",
+              "price": 25000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_24",
+          "name": "Sữa Tươi Kem Trứng Trân Châu Đường Đen",
+          "category": "TRÀ SỮA",
+          "variants": [
+            {
+              "size": "L",
+              "price": 25000
+            },
+            {
+              "size": "XL",
+              "price": 30000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_25",
+          "name": "Trà Sữa Ba Phê",
+          "category": "TRÀ SỮA",
+          "variants": [
+            {
+              "size": "L",
+              "price": 20000
+            },
+            {
+              "size": "XL",
+              "price": 25000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_26",
+          "name": "Trà Sữa Dâu Tây / Xoài",
+          "category": "TRÀ SỮA",
+          "variants": [
+            {
+              "size": "L",
+              "price": 20000
+            },
+            {
+              "size": "XL",
+              "price": 25000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_27",
+          "name": "Trà Sữa Khoai Môn",
+          "category": "TRÀ SỮA",
+          "variants": [
+            {
+              "size": "L",
+              "price": 25000
+            },
+            {
+              "size": "XL",
+              "price": 30000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_28",
+          "name": "Trà Sữa Kem Trứng Jerry",
+          "category": "TRÀ SỮA",
+          "variants": [
+            {
+              "size": "L",
+              "price": 20000
+            },
+            {
+              "size": "XL",
+              "price": 25000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_29",
+          "name": "Nhài Sữa Ba “Vibe”",
+          "category": "TRÀ SỮA",
+          "variants": [
+            {
+              "size": "L",
+              "price": 20000
+            },
+            {
+              "size": "XL",
+              "price": 25000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_30",
+          "name": "Trà Sữa Phô Mai",
+          "category": "TRÀ SỮA",
+          "variants": [
+            {
+              "size": "L",
+              "price": 30000
+            },
+            {
+              "size": "XL",
+              "price": 35000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_31",
+          "name": "Trà Sữa Siêu Phô Mai",
+          "category": "TRÀ SỮA",
+          "variants": [
+            {
+              "size": "L",
+              "price": 30000
+            },
+            {
+              "size": "XL",
+              "price": 35000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_32",
+          "name": "Matcha/ Cacao Latte",
+          "category": "MATCHA CACAO",
+          "variants": [
+            {
+              "size": "L",
+              "price": 20000
+            },
+            {
+              "size": "XL",
+              "price": 25000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_33",
+          "name": "Matcha Cold Whisk",
+          "category": "MATCHA CACAO",
+          "variants": [
+            {
+              "size": "L",
+              "price": 25000
+            },
+            {
+              "size": "XL",
+              "price": 32000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_34",
+          "name": "Matcha Uji Latte",
+          "category": "MATCHA CACAO",
+          "variants": [
+            {
+              "size": "L",
+              "price": 25000
+            },
+            {
+              "size": "XL",
+              "price": 30000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_35",
+          "name": "Matcha Uji Cold Whisk",
+          "category": "MATCHA CACAO",
+          "variants": [
+            {
+              "size": "L",
+              "price": 30000
+            },
+            {
+              "size": "XL",
+              "price": 37000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_36",
+          "name": "Matcha Khoai Môn",
+          "category": "MATCHA CACAO",
+          "variants": [
+            {
+              "size": "L",
+              "price": 25000
+            },
+            {
+              "size": "XL",
+              "price": 30000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_37",
+          "name": "Matcha Xoài / Dâu",
+          "category": "MATCHA CACAO",
+          "variants": [
+            {
+              "size": "L",
+              "price": 25000
+            },
+            {
+              "size": "XL",
+              "price": 30000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_38",
+          "name": "Matcha/ Cacao Kem Mây",
+          "category": "MATCHA CACAO",
+          "variants": [
+            {
+              "size": "L",
+              "price": 25000
+            },
+            {
+              "size": "XL",
+              "price": 30000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_39",
+          "name": "Matcha Oreo/ Cacao Oreo",
+          "category": "MATCHA CACAO",
+          "variants": [
+            {
+              "size": "L",
+              "price": 25000
+            },
+            {
+              "size": "XL",
+              "price": 30000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_40",
+          "name": "CaCao Mint ( Cacao Bạc Hà)",
+          "category": "MATCHA CACAO",
+          "variants": [
+            {
+              "size": "L",
+              "price": 25000
+            },
+            {
+              "size": "XL",
+              "price": 30000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_41",
+          "name": "Sen Dừa Lạnh",
+          "category": "NƯỚC DỪA",
+          "variants": [
+            {
+              "size": "L",
+              "price": 30000
+            },
+            {
+              "size": "XL",
+              "price": 35000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_42",
+          "name": "Sen Dừa Kem Matcha",
+          "category": "NƯỚC DỪA",
+          "variants": [
+            {
+              "size": "L",
+              "price": 35000
+            },
+            {
+              "size": "XL",
+              "price": 42000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_43",
+          "name": "Dừa Mát Siêu Topping",
+          "category": "NƯỚC DỪA",
+          "variants": [
+            {
+              "size": "L",
+              "price": 30000
+            },
+            {
+              "size": "XL",
+              "price": 40000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_44",
+          "name": "Dừa Matcha",
+          "category": "NƯỚC DỪA",
+          "variants": [
+            {
+              "size": "L",
+              "price": 25000
+            },
+            {
+              "size": "XL",
+              "price": 35000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_45",
+          "name": "Dừa Dẻ Cười",
+          "category": "NƯỚC DỪA",
+          "variants": [
+            {
+              "size": "L",
+              "price": 25000
+            },
+            {
+              "size": "XL",
+              "price": 35000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_46",
+          "name": "Bơ Già Dừa Non",
+          "category": "ĐẶC BIỆT",
+          "variants": [
+            {
+              "size": "L",
+              "price": 28000
+            },
+            {
+              "size": "XL",
+              "price": 40000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_47",
+          "name": "Sữa Đậu Nành Sương Sáo",
+          "category": "ĐẶC BIỆT",
+          "variants": [
+            {
+              "size": "L",
+              "price": 15000
+            },
+            {
+              "size": "XL",
+              "price": 20000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_48",
+          "name": "Khoai Môn Latte",
+          "category": "ĐẶC BIỆT",
+          "variants": [
+            {
+              "size": "L",
+              "price": 25000
+            },
+            {
+              "size": "XL",
+              "price": 30000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_49",
+          "name": "Lục Trà",
+          "category": "TRÀ",
+          "variants": [
+            {
+              "size": "L",
+              "price": 8000
+            },
+            {
+              "size": "XL",
+              "price": 15000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_50",
+          "name": "Thanh Trà",
+          "category": "TRÀ",
+          "variants": [
+            {
+              "size": "L",
+              "price": 8000
+            },
+            {
+              "size": "XL",
+              "price": 15000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_51",
+          "name": "Trân châu phô mai",
+          "category": "TOPPING",
+          "variants": [
+            {
+              "size": "Mặc định",
+              "price": 1000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_52",
+          "name": "Trân châu đường đen",
+          "category": "TOPPING",
+          "variants": [
+            {
+              "size": "Mặc định",
+              "price": 3000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_53",
+          "name": "Ngọc trai đen",
+          "category": "TOPPING",
+          "variants": [
+            {
+              "size": "Mặc định",
+              "price": 5000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_54",
+          "name": "Kem Trứng Jerry",
+          "category": "TOPPING",
+          "variants": [
+            {
+              "size": "Mặc định",
+              "price": 5000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_55",
+          "name": "Pudding Phô Mai",
+          "category": "TOPPING",
+          "variants": [
+            {
+              "size": "Mặc định",
+              "price": 5000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_56",
+          "name": "Thạch dừa",
+          "category": "TOPPING",
+          "variants": [
+            {
+              "size": "Mặc định",
+              "price": 5000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_57",
+          "name": "Hạt nổ củ năng",
+          "category": "TOPPING",
+          "variants": [
+            {
+              "size": "Mặc định",
+              "price": 5000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_58",
+          "name": "Thạch lá nếp",
+          "category": "TOPPING",
+          "variants": [
+            {
+              "size": "Mặc định",
+              "price": 5000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_59",
+          "name": "Đậm Matcha (+2gr)",
+          "category": "TOPPING",
+          "variants": [
+            {
+              "size": "Mặc định",
+              "price": 5000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_60",
+          "name": "Kem Mây",
+          "category": "TOPPING",
+          "variants": [
+            {
+              "size": "Mặc định",
+              "price": 7000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_61",
+          "name": "Kem Dẻ Cười",
+          "category": "TOPPING",
+          "variants": [
+            {
+              "size": "Mặc định",
+              "price": 7000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_62",
+          "name": "Kem Matcha",
+          "category": "TOPPING",
+          "variants": [
+            {
+              "size": "Mặc định",
+              "price": 7000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_63",
+          "name": "Sốt Khoai Môn Tươi",
+          "category": "TOPPING",
+          "variants": [
+            {
+              "size": "Mặc định",
+              "price": 7000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791822297246_64",
+          "name": "Hạt Sen",
+          "category": "TOPPING",
+          "variants": [
+            {
+              "size": "Mặc định",
+              "price": 7000
+            }
+          ]
+        }
+      ],
+      "status": "approved",
+      "createdAt": "2026-10-12T16:24:57.246Z",
+      "updatedAt": "2026-10-12T16:29:32.960Z"
+    },
+    {
+      "id": "menu_catalog_1791823408170",
+      "checksum": "ab627c65389e1d9ec0e4cd8a3fe91639254e0f15ac2122e93b772043ae068996",
+      "imageUrl": "/api/media/afternoon-tea/2026-10-12/mixue/menu-1791823393949.jpeg",
+      "items": [
+        {
+          "id": "menu_item_1791823408170_0",
+          "name": "Sữa tươi trân châu đường đen",
+          "category": "",
+          "variants": [
+            {
+              "size": "Mặc định",
+              "price": 25000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791823408170_1",
+          "name": "Trà ôlong Kiwi",
+          "category": "",
+          "variants": [
+            {
+              "size": "Mặc định",
+              "price": 20000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791823408170_2",
+          "name": "Super sundae trân châu đường đen",
+          "category": "",
+          "variants": [
+            {
+              "size": "Mặc định",
+              "price": 25000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791823408170_3",
+          "name": "Trà mâm xôi",
+          "category": "",
+          "variants": [
+            {
+              "size": "L",
+              "price": 22000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791823408170_4",
+          "name": "Trà đào bốn mùa",
+          "category": "",
+          "variants": [
+            {
+              "size": "L",
+              "price": 22000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791823408170_5",
+          "name": "Trà sữa 3Q",
+          "category": "",
+          "variants": [
+            {
+              "size": "M",
+              "price": 25000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791823408170_6",
+          "name": "Super sundae Xoài",
+          "category": "",
+          "variants": [
+            {
+              "size": "Mặc định",
+              "price": 25000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791823408170_7",
+          "name": "Sữa thạch Kiwi Kiwi",
+          "category": "",
+          "variants": [
+            {
+              "size": "M",
+              "price": 22000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791823408170_8",
+          "name": "Nước chanh tươi lạnh",
+          "category": "",
+          "variants": [
+            {
+              "size": "L",
+              "price": 15000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791823408170_9",
+          "name": "Trà sữa trân châu đường đen",
+          "category": "",
+          "variants": [
+            {
+              "size": "M",
+              "price": 25000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791823408170_10",
+          "name": "Kem ốc quế (Nguyên vị, socola, mix)",
+          "category": "Dòng kem / Ice Cream Series",
+          "variants": [
+            {
+              "size": "Mặc định",
+              "price": 10000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791823408170_11",
+          "name": "Super sundae dâu tây",
+          "category": "Dòng kem / Ice Cream Series",
+          "variants": [
+            {
+              "size": "Mặc định",
+              "price": 25000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791823408170_12",
+          "name": "Super sundae socola",
+          "category": "Dòng kem / Ice Cream Series",
+          "variants": [
+            {
+              "size": "Mặc định",
+              "price": 25000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791823408170_13",
+          "name": "Super sundae mâm xôi",
+          "category": "Dòng kem / Ice Cream Series",
+          "variants": [
+            {
+              "size": "Mặc định",
+              "price": 25000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791823408170_14",
+          "name": "Sữa kem lắc đào",
+          "category": "Dòng kem / Ice Cream Series",
+          "variants": [
+            {
+              "size": "Mặc định",
+              "price": 25000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791823408170_15",
+          "name": "Sữa kem lắc dâu tây",
+          "category": "Dòng kem / Ice Cream Series",
+          "variants": [
+            {
+              "size": "Mặc định",
+              "price": 25000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791823408170_16",
+          "name": "Super sundae lô hội",
+          "category": "Dòng kem / Ice Cream Series",
+          "variants": [
+            {
+              "size": "Mặc định",
+              "price": 25000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791823408170_17",
+          "name": "Sữa kem lắc mâm xôi",
+          "category": "Dòng kem / Ice Cream Series",
+          "variants": [
+            {
+              "size": "Mặc định",
+              "price": 25000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791823408170_18",
+          "name": "Sữa thạch dâu tây",
+          "category": "Dòng kem / Ice Cream Series",
+          "variants": [
+            {
+              "size": "M",
+              "price": 22000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791823408170_19",
+          "name": "Trà đào bigsize",
+          "category": "Trà hoa quả / Fruit Tea Series",
+          "variants": [
+            {
+              "size": "L",
+              "price": 22000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791823408170_20",
+          "name": "Dương chi cam lộ",
+          "category": "Trà hoa quả / Fruit Tea Series",
+          "variants": [
+            {
+              "size": "M",
+              "price": 30000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791823408170_21",
+          "name": "Trà chanh lô hội",
+          "category": "Trà hoa quả / Fruit Tea Series",
+          "variants": [
+            {
+              "size": "L",
+              "price": 17000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791823408170_22",
+          "name": "Hồng trà mật ong",
+          "category": "Trà hoa quả / Fruit Tea Series",
+          "variants": [
+            {
+              "size": "L",
+              "price": 15000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791823408170_23",
+          "name": "Trà đào tứ kỳ xuân",
+          "category": "Trà hoa quả / Fruit Tea Series",
+          "variants": [
+            {
+              "size": "M",
+              "price": 20000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791823408170_24",
+          "name": "Hồng trà chanh",
+          "category": "Trà hoa quả / Fruit Tea Series",
+          "variants": [
+            {
+              "size": "L",
+              "price": 15000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791823408170_25",
+          "name": "Trà ô long bốn mùa",
+          "category": "Trà hoa quả / Fruit Tea Series",
+          "variants": [
+            {
+              "size": "L",
+              "price": 15000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791823408170_26",
+          "name": "Trà sữa Bá vương",
+          "category": "Trà sữa / Milk Tea Series",
+          "variants": [
+            {
+              "size": "L",
+              "price": 30000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791823408170_27",
+          "name": "Trà sữa socola",
+          "category": "Trà sữa / Milk Tea Series",
+          "variants": [
+            {
+              "size": "M",
+              "price": 25000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791823408170_28",
+          "name": "Trà sữa tươi bí đao",
+          "category": "Trà sữa / Milk Tea Series",
+          "variants": [
+            {
+              "size": "M",
+              "price": 25000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791823408170_29",
+          "name": "Trà sữa nướng",
+          "category": "Trà sữa / Milk Tea Series",
+          "variants": [
+            {
+              "size": "M",
+              "price": 25000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791823408170_30",
+          "name": "Trà sữa 2J",
+          "category": "Trà sữa / Milk Tea Series",
+          "variants": [
+            {
+              "size": "M",
+              "price": 25000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791823408170_31",
+          "name": "Trà sữa thạch dừa",
+          "category": "Trà sữa / Milk Tea Series",
+          "variants": [
+            {
+              "size": "M",
+              "price": 25000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791823408170_32",
+          "name": "Trà sữa trân châu",
+          "category": "Trà sữa / Milk Tea Series",
+          "variants": [
+            {
+              "size": "M",
+              "price": 25000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791823408170_33",
+          "name": "Trà kem (Hồng trà/Ôlong)",
+          "category": "Trà kem / Cream Tea Series",
+          "variants": [
+            {
+              "size": "M",
+              "price": 25000
+            }
+          ]
+        },
+        {
+          "id": "menu_item_1791823408170_34",
+          "name": "Trà kem mâm xôi",
+          "category": "Trà kem / Cream Tea Series",
+          "variants": [
+            {
+              "size": "M",
+              "price": 25000
+            }
+          ]
+        }
+      ],
+      "status": "approved",
+      "createdAt": "2026-10-12T16:43:28.170Z",
+      "updatedAt": "2026-10-12T17:44:52.746Z"
+    }
+  ]
 }

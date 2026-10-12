@@ -1,13 +1,19 @@
 import { NextResponse } from "next/server";
 import path from "path";
 import { mkdir, writeFile } from "fs/promises";
+import { createHash } from "crypto";
 import { getToken } from "next-auth/jwt";
 import {
   getAfternoonTea,
   getUsers,
   saveAfternoonTea,
 } from "@/libs/dataRepository";
+import { publishAfternoonTeaEvent } from "@/libs/afternoonTeaRealtime";
 import { toVietnamDateKey } from "@/libs/dateTime";
+import {
+  extractMenuItemsWithGemini,
+  optimizeMenuImageForGemini,
+} from "@/libs/geminiMenu";
 
 const secret = process.env.NEXTAUTH_SECRET;
 const imageTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
@@ -24,6 +30,7 @@ export async function POST(req) {
     const token = await getToken({ req, secret });
     const form = await req.formData();
     const invitationId = String(form.get("invitationId") || "");
+    const menuId = String(form.get("menuId") || "");
     const shop = String(form.get("shop") || "").trim();
     const file = form.get("image");
     const data = await getAfternoonTea();
@@ -65,18 +72,44 @@ export async function POST(req) {
     }
 
     invitation.menus = invitation.menus || [];
-    if (invitation.menus.length >= 3) {
+    const existingMenu = menuId
+      ? invitation.menus.find((item) => item.id === menuId)
+      : null;
+    if (menuId && !existingMenu) {
+      return NextResponse.json(
+        { error: "Không tìm thấy menu" },
+        { status: 404 },
+      );
+    }
+    if (
+      (invitation.menus || []).some(
+        (menu) =>
+          menu.id !== existingMenu?.id &&
+          menu.shop?.trim().toLocaleLowerCase("vi-VN") ===
+            shop.toLocaleLowerCase("vi-VN"),
+      )
+    ) {
+      return NextResponse.json(
+        { error: "Tên quán này đã tồn tại trong lời mời" },
+        { status: 400 },
+      );
+    }
+    if (!existingMenu && invitation.menus.length >= 3) {
       return NextResponse.json(
         { error: "Mỗi lời mời chỉ hỗ trợ tối đa 3 quán" },
         { status: 400 },
       );
     }
 
-    const scheduledDate = invitation.scheduledAt
-      ? new Date(invitation.scheduledAt)
-      : new Date();
-    const dateFolder = toVietnamDateKey(scheduledDate);
+    const scheduledDateKey = String(invitation.scheduledAt || "").slice(0, 10);
+    const dateFolder = toVietnamDateKey(scheduledDateKey || new Date());
     const shopFolder = safeSegment(shop);
+    const fileBuffer = Buffer.from(await file.arrayBuffer());
+    const checksum = createHash("sha256").update(fileBuffer).digest("hex");
+    data.menuCatalog = data.menuCatalog || [];
+    const existingCatalog = data.menuCatalog.find(
+      (catalog) => catalog.checksum === checksum,
+    );
     const fileName = `menu-${Date.now()}.${file.type.split("/")[1]}`;
     const relativeDir = path.posix.join(
       "/api/media/afternoon-tea",
@@ -91,26 +124,66 @@ export async function POST(req) {
       dateFolder,
       shopFolder,
     );
-    await mkdir(outputDir, { recursive: true });
-    await writeFile(
-      path.join(outputDir, fileName),
-      Buffer.from(await file.arrayBuffer()),
-    );
+    let catalog = existingCatalog;
+    let imageUrl;
+    if (!catalog) {
+      await mkdir(outputDir, { recursive: true });
+      await writeFile(path.join(outputDir, fileName), fileBuffer);
+      imageUrl = `${relativeDir}/${fileName}`;
+      const aiImage = await optimizeMenuImageForGemini({
+        buffer: fileBuffer,
+        mimeType: file.type,
+      });
+      const items = await extractMenuItemsWithGemini(aiImage);
+      catalog = {
+        id: `menu_catalog_${Date.now()}`,
+        checksum,
+        imageUrl,
+        items,
+        status: "pending_review",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      data.menuCatalog.push(catalog);
+    } else {
+      // Catalog có thể được tái sử dụng, nhưng ảnh vật lý cũ có thể đã bị
+      // xóa hoặc không còn cùng đường dẫn. Luôn lưu lại file vừa chọn.
+      await mkdir(outputDir, { recursive: true });
+      await writeFile(path.join(outputDir, fileName), fileBuffer);
+      imageUrl = `${relativeDir}/${fileName}`;
+    }
 
-    invitation.menus.push({
-      id: `menu_${Date.now()}`,
+    const nextMenu = {
+      id: existingMenu?.id || `menu_${Date.now()}`,
       shop,
-      imageUrl: `${relativeDir}/${fileName}`,
+      imageUrl,
+      checksum,
+      catalogId: catalog.id,
       uploadedBy: token.id,
       uploadedAt: new Date().toISOString(),
-    });
+    };
+    if (existingMenu) Object.assign(existingMenu, nextMenu);
+    else invitation.menus.push(nextMenu);
     await saveAfternoonTea(data);
-    return NextResponse.json({ invitation });
+    publishAfternoonTeaEvent({ type: "data" });
+    return NextResponse.json({
+      invitation,
+      menu: nextMenu,
+      catalog: { ...catalog, reused: Boolean(existingCatalog) },
+    });
   } catch (error) {
     console.error("[AfternoonTea Menu]", error);
+    const isGeminiBusy =
+      /high demand|overload|unavailable|quota|rate limit/i.test(
+        error?.message || "",
+      );
     return NextResponse.json(
-      { error: "Không thể tải ảnh menu" },
-      { status: 500 },
+      {
+        error: isGeminiBusy
+          ? "Gemini đang quá tải. Hệ thống đã tự thử lại; vui lòng thử lại sau ít phút."
+          : error?.message || "Không thể tải ảnh menu",
+      },
+      { status: isGeminiBusy ? 503 : 500 },
     );
   }
 }

@@ -64,6 +64,7 @@
     "react-toastify": "10.0.6",
     "react-use": "^17.6.1",
     "server-only": "0.0.1",
+    "sharp": "^0.35.4",
     "tailwindcss-logical": "3.0.1",
     "unzipper": "^0.12.5",
     "xlsx": "^0.18.5",

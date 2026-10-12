@@ -1,7 +1,7 @@
 "use client";
 
 import ZoomableMenuImage from "./components/ZoomableMenuImage";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { useSession } from "next-auth/react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -19,7 +19,9 @@ import TableCell from "@mui/material/TableCell";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Avatar from "@mui/material/Avatar";
+import Autocomplete from "@mui/material/Autocomplete";
 import CircularProgress from "@mui/material/CircularProgress";
+import LinearProgress from "@mui/material/LinearProgress";
 import MenuItem from "@mui/material/MenuItem";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -47,6 +49,7 @@ import {
 
 const FOOD_CATEGORIES = ["Hoa quả", "Đồ chiên rán", "Khác"];
 const FOOD_UNITS = ["hộp", "cái", "suất"];
+const COMMON_DRINK_SIZES = ["S", "M", "L", "XL", "XXL"];
 const vietnamDateKey = (value = new Date()) => toVietnamDateKey(value);
 
 export default function AfternoonTeaPage() {
@@ -62,8 +65,32 @@ export default function AfternoonTeaPage() {
   const [loading, setLoading] = useState(true);
   const [shop, setShop] = useState("");
   const [menuFile, setMenuFile] = useState(null);
+  const [reviewingMenu, setReviewingMenu] = useState(null);
+  const [menuReviewDrafts, setMenuReviewDrafts] = useState({});
+  const [reviewImageFile, setReviewImageFile] = useState(null);
+  const [replacingReviewImage, setReplacingReviewImage] = useState(false);
+  const [uploadingMenu, setUploadingMenu] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadStage, setUploadStage] = useState("");
+  const [remoteEditors, setRemoteEditors] = useState({});
+  const [remoteOrderPreviews, setRemoteOrderPreviews] = useState({});
+  const [remotePageVisitors, setRemotePageVisitors] = useState({});
+  const [activeOrderField, setActiveOrderField] = useState(null);
+  const liveSyncInFlight = useRef(false);
+  const realtimeClientId = useRef(
+    `tea_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+  );
+  const realtimeChannel = useRef(null);
+  const orderAutoSaveTimers = useRef(new Map());
+  const remoteEditorTimers = useRef(new Map());
+  const pageVisitorTimers = useRef(new Map());
   const [orderDrafts, setOrderDrafts] = useState({});
   const [editingOrders, setEditingOrders] = useState({});
+  const [orderFilters, setOrderFilters] = useState({
+    name: "",
+    drink: "",
+    size: "",
+  });
   const [menuModalOpen, setMenuModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState({
@@ -100,15 +127,121 @@ export default function AfternoonTeaPage() {
   const formatInvitationTime = (value) =>
     value ? formatVietnamDateTime(value) : "";
 
-  const load = () =>
-    fetch("/api/afternoon-tea")
-      .then((res) => res.json())
-      .then(setData)
-      .finally(() => setLoading(false));
+  const load = async () => {
+    if (liveSyncInFlight.current) return;
+    liveSyncInFlight.current = true;
+    try {
+      const response = await fetch("/api/afternoon-tea", {
+        cache: "no-store",
+      });
+      if (!response.ok) return;
+      setData(await response.json());
+    } catch {
+      // Lần đồng bộ kế tiếp sẽ thử lại; không làm gián đoạn thao tác đang nhập.
+    } finally {
+      liveSyncInFlight.current = false;
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     load();
-  }, []);
+    const events = new EventSource("/api/afternoon-tea/events");
+    const receiveRealtimeEvent = (event) => {
+      if (event.type === "data") {
+        load();
+        return;
+      }
+      if (
+        event.type !== "activity" ||
+        event.clientId === realtimeClientId.current ||
+        event.userId === session?.user?.id
+      )
+        return;
+      if (event.field === "page") {
+        const presenceKey = `${event.invitationId}:${event.userId}`;
+        setRemotePageVisitors((previous) => ({
+          ...previous,
+          [presenceKey]: event,
+        }));
+        const previousTimer = pageVisitorTimers.current.get(presenceKey);
+        if (previousTimer) window.clearTimeout(previousTimer);
+        pageVisitorTimers.current.set(
+          presenceKey,
+          window.setTimeout(() => {
+            setRemotePageVisitors((previous) => {
+              const next = { ...previous };
+              delete next[presenceKey];
+              return next;
+            });
+            pageVisitorTimers.current.delete(presenceKey);
+          }, 25_000),
+        );
+        return;
+      }
+      const key = `${event.invitationId}:${event.userId}:${event.field}`;
+      const orderKey = `${event.invitationId}:${event.userId}`;
+      setRemoteEditors((previous) => ({ ...previous, [key]: event }));
+      if (event.order) {
+        setRemoteOrderPreviews((previous) => ({
+          ...previous,
+          [orderKey]: { ...previous[orderKey], ...event.order },
+        }));
+      }
+      const previousTimer = remoteEditorTimers.current.get(key);
+      if (previousTimer) window.clearTimeout(previousTimer);
+      remoteEditorTimers.current.set(
+        key,
+        window.setTimeout(() => {
+          setRemoteEditors((previous) => {
+            const next = { ...previous };
+            delete next[key];
+            return next;
+          });
+          setRemoteOrderPreviews((previous) => {
+            const next = { ...previous };
+            delete next[orderKey];
+            return next;
+          });
+          remoteEditorTimers.current.delete(key);
+        }, 2200),
+      );
+    };
+    events.onmessage = (message) => {
+      try {
+        receiveRealtimeEvent(JSON.parse(message.data));
+      } catch {
+        // Bỏ qua gói sự kiện không hợp lệ và tiếp tục nhận sự kiện tiếp theo.
+      }
+    };
+    const channel =
+      typeof BroadcastChannel === "undefined"
+        ? null
+        : new BroadcastChannel("afternoon-tea-live");
+    realtimeChannel.current = channel;
+    if (channel)
+      channel.onmessage = (message) => receiveRealtimeEvent(message.data);
+    const refreshLiveData = () => {
+      if (document.visibilityState === "visible") load();
+    };
+    const intervalId = window.setInterval(refreshLiveData, 10_000);
+    document.addEventListener("visibilitychange", refreshLiveData);
+    return () => {
+      window.clearInterval(intervalId);
+      events.close();
+      channel?.close();
+      if (realtimeChannel.current === channel) realtimeChannel.current = null;
+      document.removeEventListener("visibilitychange", refreshLiveData);
+      orderAutoSaveTimers.current.forEach((timer) =>
+        window.clearTimeout(timer),
+      );
+      orderAutoSaveTimers.current.clear();
+      remoteEditorTimers.current.forEach((timer) => window.clearTimeout(timer));
+      remoteEditorTimers.current.clear();
+      pageVisitorTimers.current.forEach((timer) => window.clearTimeout(timer));
+      pageVisitorTimers.current.clear();
+    };
+  }, [session?.user?.id]);
 
   const create = async (type = "afternoon-tea", payload = form) => {
     await fetch("/api/afternoon-tea", {
@@ -130,7 +263,12 @@ export default function AfternoonTeaPage() {
     load();
   };
 
-  const saveOrder = async (invitationId, userId, order) => {
+  const saveOrder = async (
+    invitationId,
+    userId,
+    order,
+    { silent = false, keepDraft = false } = {},
+  ) => {
     const res = await fetch("/api/afternoon-tea", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -138,39 +276,245 @@ export default function AfternoonTeaPage() {
     });
     const result = await res.json();
     if (res.ok) {
-      setOrderDrafts((prev) => {
-        const next = { ...prev };
-        delete next[`${invitationId}:${userId}`];
-        return next;
-      });
-      setEditingOrders((prev) => ({
-        ...prev,
-        [`${invitationId}:${userId}`]: false,
-      }));
-      toast.success("Đã lưu món đã chọn");
+      if (!keepDraft) {
+        setOrderDrafts((prev) => {
+          const next = { ...prev };
+          delete next[`${invitationId}:${userId}`];
+          return next;
+        });
+        setEditingOrders((prev) => ({
+          ...prev,
+          [`${invitationId}:${userId}`]: false,
+        }));
+      }
+      if (!silent) toast.success("Đã lưu món đã chọn");
       load();
-    } else {
+    } else if (!silent) {
       toast.error(result.error || "Không thể lưu món đã chọn");
     }
   };
 
+  const updateOrderDraft = (invitationId, userId, key, order, field) => {
+    setOrderDrafts((previous) => ({ ...previous, [key]: order }));
+    setEditingOrders((previous) => ({ ...previous, [key]: true }));
+    signalOrderActivity(invitationId, userId, field, order);
+    const previousTimer = orderAutoSaveTimers.current.get(key);
+    if (previousTimer) window.clearTimeout(previousTimer);
+    orderAutoSaveTimers.current.set(
+      key,
+      window.setTimeout(() => {
+        orderAutoSaveTimers.current.delete(key);
+        saveOrder(invitationId, userId, order, {
+          silent: true,
+          keepDraft: true,
+        });
+      }, 800),
+    );
+  };
+
+  const signalOrderActivity = (invitationId, userId, field, order) => {
+    const activity = {
+      type: "activity",
+      invitationId,
+      userId,
+      field,
+      order,
+      clientId: realtimeClientId.current,
+    };
+    realtimeChannel.current?.postMessage(activity);
+    fetch("/api/afternoon-tea/activity", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(activity),
+    }).catch(() => {});
+  };
+
+  const signalPagePresence = (invitationId) => {
+    if (!invitationId || !session?.user?.id) return;
+    const activity = {
+      type: "activity",
+      invitationId,
+      userId: session.user.id,
+      field: "page",
+      clientId: realtimeClientId.current,
+    };
+    realtimeChannel.current?.postMessage(activity);
+    fetch("/api/afternoon-tea/activity", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(activity),
+    }).catch(() => {});
+  };
+
+  const isRemoteEditing = (invitationId, userId, field) =>
+    remoteEditors[`${invitationId}:${userId}:${field}`] || null;
+
+  const focusOrderField = (invitationId, userId, key, field, order) => {
+    setActiveOrderField({ key, field });
+    signalOrderActivity(invitationId, userId, field, order);
+  };
+
+  const remoteEditingSx = (activity, isOwnField) =>
+    activity
+      ? {
+          "& .MuiOutlinedInput-notchedOutline": {
+            borderColor: "info.main !important",
+            borderWidth: 2,
+          },
+          "& .MuiInputBase-root": {
+            animation: "afternoonTeaRemotePulse 1.1s ease-in-out infinite",
+            boxShadow: "0 0 0 3px rgba(0, 176, 255, 0.16)",
+          },
+          "@keyframes afternoonTeaRemotePulse": {
+            "0%, 100%": { boxShadow: "0 0 0 3px rgba(0, 176, 255, 0.12)" },
+            "50%": { boxShadow: "0 0 0 6px rgba(0, 176, 255, 0.04)" },
+          },
+        }
+      : isOwnField
+        ? {
+            "& .MuiOutlinedInput-notchedOutline": {
+              borderColor: "primary.main !important",
+              borderWidth: 2,
+            },
+            "& .MuiInputBase-root": {
+              boxShadow: "0 0 0 3px rgba(115, 103, 240, 0.12)",
+            },
+          }
+        : undefined;
+
   const uploadMenu = async (invitation) => {
     if (!shop.trim() || !menuFile) return;
-    const body = new FormData();
-    body.append("invitationId", invitation.id);
-    body.append("shop", shop.trim());
-    body.append("image", menuFile);
-    const response = await fetch("/api/afternoon-tea/menu", {
-      method: "POST",
-      body,
-    });
-    if (response.ok) {
-      setShop("");
-      setMenuFile(null);
-      toast.success("Đã tải lên ảnh menu thành công");
-      load();
-    } else {
+    setUploadingMenu(true);
+    setUploadProgress(10);
+    setUploadStage("Đang tải ảnh menu...");
+    const progressTimer = window.setInterval(() => {
+      setUploadProgress((current) => {
+        const next = Math.min(current + 5, 90);
+        if (next >= 65) setUploadStage("Gemini đang đọc món, size và giá...");
+        else if (next >= 35) setUploadStage("Đang kiểm tra menu đã lưu...");
+        return next;
+      });
+    }, 700);
+    try {
+      const body = new FormData();
+      body.append("invitationId", invitation.id);
+      body.append("shop", shop.trim());
+      body.append("image", menuFile);
+      const response = await fetch("/api/afternoon-tea/menu", {
+        method: "POST",
+        body,
+      });
+      const result = await response.json().catch(() => ({}));
+      window.clearInterval(progressTimer);
+      setUploadProgress(95);
+      setUploadStage("Đang lưu kết quả...");
+      if (response.ok) {
+        setShop("");
+        setMenuFile(null);
+        if (result.catalog?.reused && result.catalog?.status === "approved") {
+          toast.success("Đã dùng lại menu đã lưu trước đó");
+        } else {
+          toast.success("Gemini đã đọc menu. Hãy kiểm tra trước khi xác nhận.");
+          setMenuReviewDrafts({
+            [result.menu?.id]: {
+              shop: result.menu?.shop || shop,
+              items: result.catalog?.items || [],
+            },
+          });
+          setReviewingMenu(result.menu?.id || null);
+        }
+        load();
+      } else {
+        toast.error(result.error || "Không thể tải lên ảnh menu");
+      }
+    } catch {
       toast.error("Không thể tải lên ảnh menu");
+    } finally {
+      window.clearInterval(progressTimer);
+      setUploadProgress(100);
+      setUploadingMenu(false);
+    }
+  };
+
+  const openMenuReview = (menu) => {
+    const menus = activeInvitation?.menus || [];
+    setMenuReviewDrafts(
+      Object.fromEntries(
+        menus.map((item) => [
+          item.id,
+          { shop: item.shop || "", items: item.items || [] },
+        ]),
+      ),
+    );
+    setReviewImageFile(null);
+    setReviewingMenu(menu?.id || menus[0]?.id || null);
+  };
+
+  const setReviewItems = (updater) => {
+    setMenuReviewDrafts((previous) => {
+      const current = previous[reviewingMenu] || { shop: "", items: [] };
+      const items =
+        typeof updater === "function" ? updater(current.items || []) : updater;
+      return {
+        ...previous,
+        [reviewingMenu]: { ...current, items },
+      };
+    });
+  };
+
+  const saveMenuReview = async () => {
+    if (!activeInvitation || !reviewingMenu) return;
+    const draft = menuReviewDrafts[reviewingMenu];
+    if (!draft) return;
+    const response = await fetch("/api/afternoon-tea", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        invitationId: activeInvitation.id,
+        action: "updateMenu",
+        menuId: reviewingMenu,
+        order: { shop: draft.shop },
+        menuItems: draft.items,
+      }),
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) return toast.error(result.error || "Không thể lưu menu");
+    toast.success("Đã xác nhận và lưu danh sách món");
+    load();
+  };
+
+  const replaceReviewMenuImage = async (selectedFile = reviewImageFile) => {
+    if (!activeInvitation || !reviewingMenu || !selectedFile) return;
+    const draft = menuReviewDrafts[reviewingMenu];
+    if (!draft?.shop.trim()) return toast.error("Nhập tên quán trước");
+    setReplacingReviewImage(true);
+    try {
+      const body = new FormData();
+      body.append("invitationId", activeInvitation.id);
+      body.append("menuId", reviewingMenu);
+      body.append("shop", draft.shop.trim());
+      body.append("image", selectedFile);
+      const response = await fetch("/api/afternoon-tea/menu", {
+        method: "POST",
+        body,
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok)
+        return toast.error(result.error || "Không thể thay ảnh menu");
+      setMenuReviewDrafts((previous) => ({
+        ...previous,
+        [reviewingMenu]: {
+          shop: result.menu?.shop || draft.shop,
+          items: result.catalog?.items || [],
+        },
+      }));
+      setReviewImageFile(null);
+      toast.success("Đã đọc ảnh mới. Hãy kiểm tra lại món trước khi lưu.");
+      load();
+    } catch {
+      toast.error("Không thể đọc ảnh menu mới");
+    } finally {
+      setReplacingReviewImage(false);
     }
   };
 
@@ -335,10 +679,13 @@ export default function AfternoonTeaPage() {
   };
 
   const activeInvitation = data.invitations?.[0];
+  const reviewItems = menuReviewDrafts[reviewingMenu]?.items || [];
+  const reviewShop = menuReviewDrafts[reviewingMenu]?.shop || "";
   const todayKey = vietnamDateKey();
   const todayInvitation = data.invitations?.find(
     (item) => item.scheduledAt && vietnamDateKey(item.scheduledAt) === todayKey,
   );
+  const isOrdersLocked = Boolean(activeInvitation?.ordersLocked);
   const isOrderClosed = Boolean(
     activeInvitation?.scheduledAt &&
       vietnamDateKey(activeInvitation.scheduledAt) !== todayKey &&
@@ -346,6 +693,37 @@ export default function AfternoonTeaPage() {
   );
 
   const canManageMenu = Boolean(activeInvitation?.canManage);
+
+  const setOrdersLock = async (locked) => {
+    if (!activeInvitation) return;
+    const response = await fetch("/api/afternoon-tea", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        invitationId: activeInvitation.id,
+        action: "lockOrders",
+        order: { locked },
+      }),
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) return toast.error(result.error || "Không thể chốt món");
+    toast.success(
+      locked
+        ? "Đã chốt món. Người dùng thường không thể chỉnh sửa thêm."
+        : "Đã mở chốt món. Mọi người có thể chỉnh sửa lại.",
+    );
+    load();
+  };
+
+  useEffect(() => {
+    if (!activeInvitation?.id || !session?.user?.id) return undefined;
+    signalPagePresence(activeInvitation.id);
+    const heartbeatId = window.setInterval(
+      () => signalPagePresence(activeInvitation.id),
+      10_000,
+    );
+    return () => window.clearInterval(heartbeatId);
+  }, [activeInvitation?.id, session?.user?.id]);
 
   // Tính danh sách quán có đơn hàng hoặc menu
   const availableShops = useMemo(() => {
@@ -464,6 +842,20 @@ export default function AfternoonTeaPage() {
                         Xem menu ({activeInvitation.menus.length} quán)
                       </Button>
                     ) : null}
+                    {activeInvitation.canManage &&
+                    activeInvitation.menus?.length ? (
+                      <Button
+                        size="small"
+                        variant="tonal"
+                        color="secondary"
+                        startIcon={<i className="tabler-edit" />}
+                        onClick={() =>
+                          openMenuReview(activeInvitation.menus[0])
+                        }
+                      >
+                        Kiểm tra menu
+                      </Button>
+                    ) : null}
                     {activeInvitation.canManage && (
                       <>
                         <Button
@@ -523,15 +915,28 @@ export default function AfternoonTeaPage() {
                     Bấm vào quán để xem menu:
                   </Typography>
                   {activeInvitation.menus.map((m) => (
-                    <Chip
-                      key={m.id}
-                      icon={<i className="tabler-building-store" />}
-                      label={m.shop}
-                      variant="tonal"
-                      color="primary"
-                      onClick={() => setViewingShopId(m.id)}
-                      clickable
-                    />
+                    <Box key={m.id} sx={{ display: "flex", gap: 0.5 }}>
+                      <Chip
+                        icon={<i className="tabler-building-store" />}
+                        label={`${m.shop}${m.menuStatus === "pending_review" ? " · Chờ duyệt" : ""}`}
+                        variant="tonal"
+                        color={
+                          m.menuStatus === "approved" ? "primary" : "warning"
+                        }
+                        onClick={() => setViewingShopId(m.id)}
+                        clickable
+                      />
+                      {canManageMenu && (
+                        <Tooltip title="Kiểm tra tất cả menu">
+                          <IconButton
+                            size="small"
+                            onClick={() => openMenuReview(m)}
+                          >
+                            <i className="tabler-edit" />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                    </Box>
                   ))}
                 </Box>
               ) : (
@@ -541,53 +946,81 @@ export default function AfternoonTeaPage() {
               )}
 
               {canManageMenu && activeInvitation.menus?.length < 3 && (
-                <Box
-                  sx={{
-                    mt: 3,
-                    pt: 3,
-                    borderTop: "1px dashed",
-                    borderColor: "divider",
-                    display: "flex",
-                    gap: 2,
-                    flexWrap: "wrap",
-                    alignItems: "center",
-                  }}
-                >
-                  <TextField
-                    size="small"
-                    label="Tên quán mới"
-                    placeholder="Ví dụ: TocoToco, Mixue, Phúc Long..."
-                    value={shop}
-                    onChange={(event) => setShop(event.target.value)}
-                    sx={{ minWidth: { xs: "100%", sm: 260 }, flex: 1 }}
-                  />
-                  <Button
-                    component="label"
-                    variant="tonal"
-                    color="secondary"
-                    size="medium"
-                    startIcon={<i className="tabler-upload" />}
+                <>
+                  <Box
+                    sx={{
+                      mt: 3,
+                      pt: 3,
+                      borderTop: "1px dashed",
+                      borderColor: "divider",
+                      display: "flex",
+                      gap: 2,
+                      flexWrap: "wrap",
+                      alignItems: "center",
+                    }}
                   >
-                    {menuFile ? menuFile.name : "Chọn ảnh menu"}
-                    <input
-                      hidden
-                      type="file"
-                      accept="image/jpeg,image/png,image/webp"
-                      onChange={(event) =>
-                        setMenuFile(event.target.files?.[0] || null)
-                      }
+                    <TextField
+                      size="small"
+                      label="Tên quán mới"
+                      placeholder="Ví dụ: TocoToco, Mixue, Phúc Long..."
+                      value={shop}
+                      onChange={(event) => setShop(event.target.value)}
+                      sx={{ minWidth: { xs: "100%", sm: 260 }, flex: 1 }}
                     />
-                  </Button>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    disabled={!shop.trim() || !menuFile}
-                    onClick={() => uploadMenu(activeInvitation)}
-                    startIcon={<i className="tabler-device-floppy" />}
-                  >
-                    Lưu menu
-                  </Button>
-                </Box>
+                    <Button
+                      component="label"
+                      variant="tonal"
+                      color="secondary"
+                      size="medium"
+                      startIcon={<i className="tabler-upload" />}
+                    >
+                      {menuFile ? menuFile.name : "Chọn ảnh menu"}
+                      <input
+                        hidden
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        onChange={(event) =>
+                          setMenuFile(event.target.files?.[0] || null)
+                        }
+                      />
+                    </Button>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      disabled={!shop.trim() || !menuFile || uploadingMenu}
+                      onClick={() => uploadMenu(activeInvitation)}
+                      startIcon={<i className="tabler-device-floppy" />}
+                    >
+                      {uploadingMenu ? "Đang đọc menu..." : "Lưu menu"}
+                    </Button>
+                  </Box>
+                  {uploadingMenu && (
+                    <Box sx={{ mt: 2, width: "100%" }}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          mb: 0.75,
+                        }}
+                      >
+                        <Typography variant="body2" color="text.secondary">
+                          {uploadStage}
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          fontWeight={700}
+                          color="primary.main"
+                        >
+                          {uploadProgress}%
+                        </Typography>
+                      </Box>
+                      <LinearProgress
+                        variant="determinate"
+                        value={uploadProgress}
+                      />
+                    </Box>
+                  )}
+                </>
               )}
             </CardContent>
           </Card>
@@ -645,7 +1078,11 @@ export default function AfternoonTeaPage() {
                 <Box
                   sx={{ display: "flex", gap: 2, justifyContent: "flex-end" }}
                 >
-                  <Button variant="contained" color="primary" onClick={create}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => create()}
+                  >
                     Tạo lời mời
                   </Button>
                 </Box>
@@ -728,6 +1165,7 @@ export default function AfternoonTeaPage() {
               }}
             >
               <CardHeader
+                sx={{ "& .MuiCardHeader-action": { display: "none" } }}
                 title={
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                     <Avatar
@@ -762,6 +1200,34 @@ export default function AfternoonTeaPage() {
                         variant="tonal"
                         label={`${(activeInvitation.orders || []).filter((o) => o.drink?.trim()).length} người đã chọn món`}
                       />
+
+                      {isAdmin && (
+                        <Button
+                          size="small"
+                          variant="contained"
+                          color={isOrdersLocked ? "success" : "warning"}
+                          startIcon={
+                            <i
+                              className={
+                                isOrdersLocked
+                                  ? "tabler-lock"
+                                  : "tabler-lock-open"
+                              }
+                            />
+                          }
+                          onClick={() =>
+                            setConfirmation({
+                              title: "Chốt danh sách món",
+                              message: isOrdersLocked
+                                ? "Mở chốt để tất cả người dùng có thể đặt hoặc sửa món trở lại?"
+                                : "Sau khi chốt, người dùng thường sẽ không thể sửa quán, món, size hoặc ghi chú. Admin và Trợ lý vẫn có thể chỉnh sửa.",
+                              action: () => setOrdersLock(!isOrdersLocked),
+                            })
+                          }
+                        >
+                          {isOrdersLocked ? "Mở chốt món" : "Chốt món"}
+                        </Button>
+                      )}
 
                       {/* Nút Xuất PDF chia theo từng quán (Tải trực tiếp không qua máy in) */}
                       <Button
@@ -878,14 +1344,129 @@ export default function AfternoonTeaPage() {
               <CardContent sx={{ p: 0 }}>
                 {activeInvitation ? (
                   <Box>
-                    {isOrderClosed && (
+                    {(isOrderClosed || isOrdersLocked) && (
                       <Box sx={{ px: 5, py: 1.5, bgcolor: "action.hover" }}>
                         <Typography variant="body2" color="text.secondary">
-                          Đã hết ngày đặt trà chiều. Danh sách chỉ còn ở chế độ
-                          xem.
+                          {isOrdersLocked
+                            ? "Danh sách món đã được chốt. Người dùng thường chỉ còn chế độ xem."
+                            : "Đã hết ngày đặt trà chiều. Danh sách chỉ còn ở chế độ xem."}
                         </Typography>
                       </Box>
                     )}
+                    <Box
+                      sx={{
+                        px: 3,
+                        py: 2,
+                        display: "flex",
+                        gap: 1.5,
+                        flexWrap: "wrap",
+                        borderBottom: "1px solid",
+                        borderColor: "divider",
+                      }}
+                    >
+                      <TextField
+                        size="small"
+                        label="Lọc theo tên"
+                        value={orderFilters.name}
+                        onChange={(event) =>
+                          setOrderFilters((current) => ({
+                            ...current,
+                            name: event.target.value,
+                          }))
+                        }
+                        sx={{ minWidth: 190 }}
+                      />
+                      <TextField
+                        size="small"
+                        label="Lọc theo món"
+                        value={orderFilters.drink}
+                        onChange={(event) =>
+                          setOrderFilters((current) => ({
+                            ...current,
+                            drink: event.target.value,
+                          }))
+                        }
+                        sx={{ minWidth: 210 }}
+                      />
+                      <TextField
+                        size="small"
+                        label="Lọc theo size"
+                        select
+                        value={orderFilters.size}
+                        onChange={(event) =>
+                          setOrderFilters((current) => ({
+                            ...current,
+                            size: event.target.value,
+                          }))
+                        }
+                        sx={{ minWidth: 150 }}
+                      >
+                        <MenuItem value="">Tất cả size</MenuItem>
+                        {COMMON_DRINK_SIZES.map((size) => (
+                          <MenuItem key={size} value={size}>
+                            {size}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          gap: 1,
+                          alignItems: "center",
+                          flexWrap: "wrap",
+                          ml: { md: "auto" },
+                        }}
+                      >
+                        <Chip
+                          size="small"
+                          color="primary"
+                          variant="tonal"
+                          label={`${(activeInvitation.orders || []).filter((o) => o.drink?.trim()).length} người đã chọn món`}
+                        />
+                        {isAdmin && (
+                          <Button
+                            size="small"
+                            variant="contained"
+                            color={isOrdersLocked ? "success" : "warning"}
+                            startIcon={
+                              <i
+                                className={
+                                  isOrdersLocked
+                                    ? "tabler-lock"
+                                    : "tabler-lock-open"
+                                }
+                              />
+                            }
+                            onClick={() =>
+                              setConfirmation({
+                                title: "Chốt danh sách món",
+                                message: isOrdersLocked
+                                  ? "Mở chốt để tất cả người dùng có thể đặt hoặc sửa món trở lại?"
+                                  : "Sau khi chốt, người dùng thường sẽ không thể sửa quán, món, size hoặc ghi chú. Admin và Trợ lý vẫn có thể chỉnh sửa.",
+                                action: () => setOrdersLock(!isOrdersLocked),
+                              })
+                            }
+                          >
+                            {isOrdersLocked ? "Mở chốt món" : "Chốt món"}
+                          </Button>
+                        )}
+                        <Button
+                          size="small"
+                          variant="tonal"
+                          color="secondary"
+                          disabled={exportingPdf}
+                          startIcon={<i className="tabler-file-type-pdf" />}
+                          endIcon={<i className="tabler-chevron-down" />}
+                          onClick={(event) =>
+                            setPdfMenuAnchor(event.currentTarget)
+                          }
+                        >
+                          {exportingPdf
+                            ? "Đang tải PDF..."
+                            : "Tải PDF theo quán"}
+                        </Button>
+                      </Box>
+                    </Box>
                     <Box sx={{ overflowX: "auto" }}>
                       <Table size="small">
                         <TableHead>
@@ -894,12 +1475,12 @@ export default function AfternoonTeaPage() {
                               Nhân sự
                             </TableCell>
                             <TableCell sx={{ fontWeight: 600, py: 2 }}>
-                              Món chọn
+                              Quán
                             </TableCell>
                             <TableCell
-                              sx={{ fontWeight: 600, py: 2, width: 180 }}
+                              sx={{ fontWeight: 600, py: 2, minWidth: 320 }}
                             >
-                              Quán
+                              Món chọn
                             </TableCell>
                             <TableCell
                               sx={{ fontWeight: 600, py: 2, width: 120 }}
@@ -920,23 +1501,97 @@ export default function AfternoonTeaPage() {
                                   ? 1
                                   : a.name.localeCompare(b.name),
                             )
+                            .filter((user) => {
+                              const order = (
+                                activeInvitation.orders || []
+                              ).find((row) => row.userId === user.id);
+                              const includes = (value, filter) =>
+                                String(value || "")
+                                  .toLocaleLowerCase("vi-VN")
+                                  .includes(
+                                    String(filter || "").toLocaleLowerCase(
+                                      "vi-VN",
+                                    ),
+                                  );
+                              return (
+                                includes(user.name, orderFilters.name) &&
+                                includes(order?.drink, orderFilters.drink) &&
+                                includes(order?.size, orderFilters.size)
+                              );
+                            })
                             .map((user) => {
                               const order =
                                 (activeInvitation.orders || []).find(
                                   (row) => row.userId === user.id,
                                 ) || {};
                               const key = `${activeInvitation.id}:${user.id}`;
-                              const draft = orderDrafts[key] || order;
+                              const remotePreview = remoteOrderPreviews[key];
+                              const displayedOrder = remotePreview || order;
+                              const draft =
+                                orderDrafts[key] || remotePreview || order;
                               const canEditOrder =
                                 !isOrderClosed &&
+                                (!isOrdersLocked || isAdmin) &&
                                 (isAdmin ||
                                   user.id === session?.user?.id ||
                                   user.email === session?.user?.email);
                               const isEditing =
-                                editingOrders[key] || !order.drink;
+                                editingOrders[key] || !displayedOrder.drink;
                               const isCurrentUser =
                                 user.id === session?.user?.id;
-
+                              const approvedMenus = (
+                                activeInvitation.menus || []
+                              ).filter(
+                                (menu) => menu.menuStatus === "approved",
+                              );
+                              const selectedShop =
+                                draft.shop ||
+                                (approvedMenus.length === 1
+                                  ? approvedMenus[0].shop
+                                  : "");
+                              const selectedMenu = approvedMenus.find(
+                                (menu) => menu.shop === selectedShop,
+                              );
+                              const selectedItem = (
+                                selectedMenu?.items || []
+                              ).find((item) => item.id === draft.menuItemId);
+                              const availableSizes = [
+                                ...new Set([
+                                  ...(selectedItem?.variants || [])
+                                    .map((variant) => variant.size)
+                                    .filter(
+                                      (size) => size && size !== "Mặc định",
+                                    ),
+                                  ...COMMON_DRINK_SIZES,
+                                ]),
+                              ];
+                              const remoteEditing = {
+                                shop: isRemoteEditing(
+                                  activeInvitation.id,
+                                  user.id,
+                                  "shop",
+                                ),
+                                drink: isRemoteEditing(
+                                  activeInvitation.id,
+                                  user.id,
+                                  "drink",
+                                ),
+                                size: isRemoteEditing(
+                                  activeInvitation.id,
+                                  user.id,
+                                  "size",
+                                ),
+                                note: isRemoteEditing(
+                                  activeInvitation.id,
+                                  user.id,
+                                  "note",
+                                ),
+                              };
+                              const isRemoteUserOnPage = Boolean(
+                                remotePageVisitors[
+                                  `${activeInvitation.id}:${user.id}`
+                                ],
+                              );
                               return (
                                 <TableRow
                                   key={user.id}
@@ -945,6 +1600,7 @@ export default function AfternoonTeaPage() {
                                     bgcolor: isCurrentUser
                                       ? "rgba(115, 103, 240, 0.04)"
                                       : "inherit",
+                                    transition: "background-color 180ms ease",
                                   }}
                                 >
                                   <TableCell>
@@ -975,6 +1631,28 @@ export default function AfternoonTeaPage() {
                                           variant="body2"
                                           fontWeight={600}
                                           noWrap
+                                          sx={
+                                            isRemoteUserOnPage
+                                              ? {
+                                                  color: "info.main",
+                                                  animation:
+                                                    "afternoonTeaNamePulse 2.2s ease-in-out infinite",
+                                                  "@keyframes afternoonTeaNamePulse":
+                                                    {
+                                                      "0%, 100%": {
+                                                        opacity: 0.5,
+                                                        textShadow:
+                                                          "0 0 0 rgba(0, 176, 255, 0)",
+                                                      },
+                                                      "50%": {
+                                                        opacity: 1,
+                                                        textShadow:
+                                                          "0 0 9px rgba(0, 176, 255, 0.42)",
+                                                      },
+                                                    },
+                                                }
+                                              : undefined
+                                          }
                                         >
                                           {user.name}
                                         </Typography>
@@ -998,52 +1676,173 @@ export default function AfternoonTeaPage() {
                                     <>
                                       <TableCell>
                                         <TextField
-                                          size="small"
-                                          placeholder="Nhập tên món uống..."
-                                          value={draft.drink || ""}
-                                          onChange={(event) =>
-                                            setOrderDrafts((prev) => ({
-                                              ...prev,
-                                              [key]: {
-                                                ...draft,
-                                                drink: event.target.value,
-                                              },
-                                            }))
-                                          }
-                                          fullWidth
-                                        />
-                                      </TableCell>
-                                      <TableCell>
-                                        <TextField
                                           select
                                           size="small"
                                           placeholder="Chọn quán"
-                                          value={draft.shop || ""}
-                                          onChange={(event) =>
-                                            setOrderDrafts((prev) => ({
-                                              ...prev,
-                                              [key]: {
-                                                ...draft,
-                                                shop: event.target.value,
-                                              },
-                                            }))
+                                          value={selectedShop}
+                                          onFocus={() =>
+                                            focusOrderField(
+                                              activeInvitation.id,
+                                              user.id,
+                                              key,
+                                              "shop",
+                                              draft,
+                                            )
                                           }
+                                          onChange={(event) => {
+                                            const nextShop = event.target.value;
+                                            updateOrderDraft(
+                                              activeInvitation.id,
+                                              user.id,
+                                              key,
+                                              {
+                                                ...draft,
+                                                shop: nextShop,
+                                                drink: "",
+                                                menuItemId: "",
+                                                size: "",
+                                                price: 0,
+                                              },
+                                              "shop",
+                                            );
+                                          }}
+                                          sx={remoteEditingSx(
+                                            remoteEditing.shop,
+                                            activeOrderField?.key === key &&
+                                              activeOrderField.field === "shop",
+                                          )}
                                           fullWidth
                                         >
                                           <MenuItem value="">
                                             <em>Chưa chọn quán</em>
                                           </MenuItem>
-                                          {(activeInvitation.menus || []).map(
-                                            (menu) => (
-                                              <MenuItem
-                                                key={menu.id}
-                                                value={menu.shop}
-                                              >
-                                                {menu.shop}
-                                              </MenuItem>
-                                            ),
-                                          )}
+                                          {approvedMenus.map((menu) => (
+                                            <MenuItem
+                                              key={menu.id}
+                                              value={menu.shop}
+                                            >
+                                              {menu.shop}
+                                            </MenuItem>
+                                          ))}
                                         </TextField>
+                                      </TableCell>
+                                      <TableCell>
+                                        <Autocomplete
+                                          freeSolo
+                                          size="small"
+                                          clearOnBlur={false}
+                                          selectOnFocus
+                                          disabled={!selectedMenu}
+                                          onFocus={() =>
+                                            focusOrderField(
+                                              activeInvitation.id,
+                                              user.id,
+                                              key,
+                                              "drink",
+                                              draft,
+                                            )
+                                          }
+                                          options={selectedMenu?.items || []}
+                                          value={
+                                            selectedItem || draft.drink || null
+                                          }
+                                          getOptionLabel={(item) =>
+                                            typeof item === "string"
+                                              ? item
+                                              : item.name || ""
+                                          }
+                                          filterOptions={(options, state) =>
+                                            options
+                                              .filter((item) =>
+                                                item.name
+                                                  .toLocaleLowerCase("vi-VN")
+                                                  .includes(
+                                                    state.inputValue.toLocaleLowerCase(
+                                                      "vi-VN",
+                                                    ),
+                                                  ),
+                                              )
+                                              .slice(0, 5)
+                                          }
+                                          onChange={(_, item) => {
+                                            if (typeof item === "string") {
+                                              updateOrderDraft(
+                                                activeInvitation.id,
+                                                user.id,
+                                                key,
+                                                {
+                                                  ...draft,
+                                                  shop: selectedShop,
+                                                  menuItemId: "",
+                                                  drink: item,
+                                                  size: "",
+                                                  price: 0,
+                                                },
+                                                "drink",
+                                              );
+                                              return;
+                                            }
+                                            const variant =
+                                              item?.variants?.find(
+                                                (value) =>
+                                                  value.size !== "Mặc định",
+                                              ) || item?.variants?.[0];
+                                            updateOrderDraft(
+                                              activeInvitation.id,
+                                              user.id,
+                                              key,
+                                              {
+                                                ...draft,
+                                                shop: selectedShop,
+                                                menuItemId: item?.id || "",
+                                                drink: item?.name || "",
+                                                size:
+                                                  variant?.size === "Mặc định"
+                                                    ? ""
+                                                    : variant?.size || "",
+                                                price: variant?.price || 0,
+                                              },
+                                              "drink",
+                                            );
+                                          }}
+                                          onInputChange={(_, value, reason) => {
+                                            if (reason !== "input") return;
+                                            updateOrderDraft(
+                                              activeInvitation.id,
+                                              user.id,
+                                              key,
+                                              {
+                                                ...draft,
+                                                shop: selectedShop,
+                                                menuItemId: "",
+                                                drink: value,
+                                                size: "",
+                                                price: 0,
+                                              },
+                                              "drink",
+                                            );
+                                          }}
+                                          sx={{
+                                            minWidth: 320,
+                                            ...remoteEditingSx(
+                                              remoteEditing.drink,
+                                              activeOrderField?.key === key &&
+                                                activeOrderField.field ===
+                                                  "drink",
+                                            ),
+                                          }}
+                                          renderInput={(params) => (
+                                            <TextField
+                                              {...params}
+                                              size="small"
+                                              placeholder={
+                                                selectedMenu
+                                                  ? "Chọn hoặc nhập món..."
+                                                  : "Chọn quán trước"
+                                              }
+                                            />
+                                          )}
+                                        />
                                       </TableCell>
                                       <TableCell>
                                         <TextField
@@ -1051,27 +1850,56 @@ export default function AfternoonTeaPage() {
                                           fullWidth
                                           size="small"
                                           placeholder="Size"
+                                          disabled={!draft.drink}
                                           value={draft.size || ""}
-                                          onChange={(event) =>
-                                            setOrderDrafts((prev) => ({
-                                              ...prev,
-                                              [key]: {
+                                          onFocus={() =>
+                                            focusOrderField(
+                                              activeInvitation.id,
+                                              user.id,
+                                              key,
+                                              "size",
+                                              draft,
+                                            )
+                                          }
+                                          onChange={(event) => {
+                                            const variants =
+                                              selectedItem?.variants || [];
+                                            const variant =
+                                              variants.find(
+                                                (item) =>
+                                                  item.size ===
+                                                  event.target.value,
+                                              ) ||
+                                              variants.find(
+                                                (item) =>
+                                                  item.size === "Mặc định",
+                                              );
+                                            updateOrderDraft(
+                                              activeInvitation.id,
+                                              user.id,
+                                              key,
+                                              {
                                                 ...draft,
                                                 size: event.target.value,
+                                                price: variant?.price || 0,
                                               },
-                                            }))
-                                          }
+                                              "size",
+                                            );
+                                          }}
+                                          sx={remoteEditingSx(
+                                            remoteEditing.size,
+                                            activeOrderField?.key === key &&
+                                              activeOrderField.field === "size",
+                                          )}
                                         >
                                           <MenuItem value="">
-                                            <em>Mặc định</em>
+                                            <em>&nbsp;</em>
                                           </MenuItem>
-                                          {["S", "M", "L", "XL", "XXL"].map(
-                                            (size) => (
-                                              <MenuItem key={size} value={size}>
-                                                {size}
-                                              </MenuItem>
-                                            ),
-                                          )}
+                                          {availableSizes.map((size) => (
+                                            <MenuItem key={size} value={size}>
+                                              {size}
+                                            </MenuItem>
+                                          ))}
                                         </TextField>
                                       </TableCell>
                                       <TableCell>
@@ -1087,27 +1915,56 @@ export default function AfternoonTeaPage() {
                                             size="small"
                                             placeholder="Ghi chú (50% đường, ít đá...)"
                                             value={draft.note || ""}
-                                            onChange={(event) =>
-                                              setOrderDrafts((prev) => ({
-                                                ...prev,
-                                                [key]: {
+                                            onFocus={() =>
+                                              focusOrderField(
+                                                activeInvitation.id,
+                                                user.id,
+                                                key,
+                                                "note",
+                                                draft,
+                                              )
+                                            }
+                                            onChange={(event) => {
+                                              updateOrderDraft(
+                                                activeInvitation.id,
+                                                user.id,
+                                                key,
+                                                {
                                                   ...draft,
                                                   note: event.target.value,
                                                 },
-                                              }))
-                                            }
+                                                "note",
+                                              );
+                                            }}
+                                            sx={remoteEditingSx(
+                                              remoteEditing.note,
+                                              activeOrderField?.key === key &&
+                                                activeOrderField.field ===
+                                                  "note",
+                                            )}
                                           />
                                           <Button
                                             size="small"
                                             variant="contained"
                                             color="success"
-                                            onClick={() =>
+                                            onClick={() => {
+                                              const pendingTimer =
+                                                orderAutoSaveTimers.current.get(
+                                                  key,
+                                                );
+                                              if (pendingTimer)
+                                                window.clearTimeout(
+                                                  pendingTimer,
+                                                );
+                                              orderAutoSaveTimers.current.delete(
+                                                key,
+                                              );
                                               saveOrder(
                                                 activeInvitation.id,
                                                 user.id,
                                                 draft,
-                                              )
-                                            }
+                                              );
+                                            }}
                                           >
                                             Lưu
                                           </Button>
@@ -1117,26 +1974,27 @@ export default function AfternoonTeaPage() {
                                   ) : (
                                     <>
                                       <TableCell>
+                                        <Typography variant="body2">
+                                          {displayedOrder.shop || "—"}
+                                        </Typography>
+                                      </TableCell>
+                                      <TableCell>
                                         <Typography
                                           variant="body2"
                                           fontWeight={600}
                                           color={
-                                            order.drink
+                                            displayedOrder.drink
                                               ? "primary.main"
                                               : "text.secondary"
                                           }
                                         >
-                                          {order.drink || "Chưa chọn món"}
+                                          {displayedOrder.drink ||
+                                            "Chưa chọn món"}
                                         </Typography>
                                       </TableCell>
                                       <TableCell>
                                         <Typography variant="body2">
-                                          {order.shop || "—"}
-                                        </Typography>
-                                      </TableCell>
-                                      <TableCell>
-                                        <Typography variant="body2">
-                                          {order.size || "—"}
+                                          {displayedOrder.size || "—"}
                                         </Typography>
                                       </TableCell>
                                       <TableCell>
@@ -1149,23 +2007,24 @@ export default function AfternoonTeaPage() {
                                           }}
                                         >
                                           <Typography variant="body2">
-                                            {order.note || "—"}
+                                            {displayedOrder.note || "—"}
                                           </Typography>
-                                          {canEditOrder && order.drink && (
-                                            <Button
-                                              size="small"
-                                              variant="tonal"
-                                              color="primary"
-                                              onClick={() =>
-                                                setEditingOrders((prev) => ({
-                                                  ...prev,
-                                                  [key]: true,
-                                                }))
-                                              }
-                                            >
-                                              Sửa
-                                            </Button>
-                                          )}
+                                          {canEditOrder &&
+                                            displayedOrder.drink && (
+                                              <Button
+                                                size="small"
+                                                variant="tonal"
+                                                color="primary"
+                                                onClick={() =>
+                                                  setEditingOrders((prev) => ({
+                                                    ...prev,
+                                                    [key]: true,
+                                                  }))
+                                                }
+                                              >
+                                                Sửa
+                                              </Button>
+                                            )}
                                         </Box>
                                       </TableCell>
                                     </>
@@ -1555,6 +2414,251 @@ export default function AfternoonTeaPage() {
         )}
       </Grid>
 
+      <Dialog
+        open={Boolean(reviewingMenu)}
+        onClose={() => setReviewingMenu(null)}
+        fullWidth
+        maxWidth="xl"
+      >
+        <DialogTitle>
+          Kiểm tra menu các quán
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+            Mỗi quán là một tab. Bạn có thể đổi tên, thay ảnh và kiểm tra lại
+            món, size, giá của từng menu.
+          </Typography>
+        </DialogTitle>
+        <Tabs
+          value={reviewingMenu || false}
+          onChange={(_, value) => {
+            setReviewingMenu(value);
+            setReviewImageFile(null);
+          }}
+          variant="scrollable"
+          scrollButtons="auto"
+          sx={{ px: 3, borderBottom: "1px solid", borderColor: "divider" }}
+        >
+          {(activeInvitation?.menus || [])
+            .filter((menu) => menuReviewDrafts[menu.id])
+            .map((menu) => (
+              <Tab
+                key={menu.id}
+                value={menu.id}
+                label={menuReviewDrafts[menu.id]?.shop || menu.shop}
+              />
+            ))}
+          {!activeInvitation?.menus?.some(
+            (menu) => menu.id === reviewingMenu,
+          ) &&
+            reviewingMenu && <Tab value={reviewingMenu} label={reviewShop} />}
+        </Tabs>
+        <DialogContent sx={{ display: "grid", gap: 2, pt: "20px !important" }}>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", md: "minmax(0, 1fr) auto" },
+              gap: 2,
+              alignItems: "center",
+              p: 2,
+              border: "1px solid",
+              borderColor: "divider",
+              borderRadius: 1,
+            }}
+          >
+            <TextField
+              label="Tên quán"
+              value={reviewShop}
+              onChange={(event) =>
+                setMenuReviewDrafts((previous) => ({
+                  ...previous,
+                  [reviewingMenu]: {
+                    ...(previous[reviewingMenu] || { items: [] }),
+                    shop: event.target.value,
+                  },
+                }))
+              }
+              fullWidth
+            />
+            <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+              <Button component="label" size="small" variant="tonal">
+                {reviewImageFile ? reviewImageFile.name : "Chọn ảnh mới"}
+                <input
+                  hidden
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0] || null;
+                    setReviewImageFile(file);
+                    if (file) replaceReviewMenuImage(file);
+                  }}
+                />
+              </Button>
+              <Button
+                size="small"
+                variant="contained"
+                disabled={!reviewImageFile || replacingReviewImage}
+                onClick={replaceReviewMenuImage}
+              >
+                {replacingReviewImage ? "Đang đọc ảnh..." : "Đọc lại ảnh"}
+              </Button>
+            </Box>
+          </Box>
+          {reviewItems.map((item, itemIndex) => (
+            <Box
+              key={item.id || itemIndex}
+              sx={{
+                border: "1px solid",
+                borderColor: "divider",
+                borderRadius: 1,
+                p: 2,
+              }}
+            >
+              <Box
+                sx={{ display: "flex", gap: 1, alignItems: "center", mb: 1.5 }}
+              >
+                <TextField
+                  size="small"
+                  label="Tên món"
+                  value={item.name}
+                  onChange={(event) =>
+                    setReviewItems((items) =>
+                      items.map((row, index) =>
+                        index === itemIndex
+                          ? { ...row, name: event.target.value }
+                          : row,
+                      ),
+                    )
+                  }
+                  fullWidth
+                />
+                <IconButton
+                  color="error"
+                  onClick={() =>
+                    setReviewItems((items) =>
+                      items.filter((_, index) => index !== itemIndex),
+                    )
+                  }
+                >
+                  <i className="tabler-trash" />
+                </IconButton>
+              </Box>
+              {(item.variants || []).map((variant, variantIndex) => (
+                <Box
+                  key={`${item.id}-${variantIndex}`}
+                  sx={{ display: "flex", gap: 1, mb: 1 }}
+                >
+                  <TextField
+                    size="small"
+                    label="Size"
+                    value={variant.size}
+                    onChange={(event) =>
+                      setReviewItems((items) =>
+                        items.map((row, index) =>
+                          index !== itemIndex
+                            ? row
+                            : {
+                                ...row,
+                                variants: row.variants.map((value, position) =>
+                                  position === variantIndex
+                                    ? { ...value, size: event.target.value }
+                                    : value,
+                                ),
+                              },
+                        ),
+                      )
+                    }
+                    sx={{ flex: 1 }}
+                  />
+                  <TextField
+                    size="small"
+                    label="Giá (đ)"
+                    type="number"
+                    value={variant.price}
+                    onChange={(event) =>
+                      setReviewItems((items) =>
+                        items.map((row, index) =>
+                          index !== itemIndex
+                            ? row
+                            : {
+                                ...row,
+                                variants: row.variants.map((value, position) =>
+                                  position === variantIndex
+                                    ? { ...value, price: event.target.value }
+                                    : value,
+                                ),
+                              },
+                        ),
+                      )
+                    }
+                    sx={{ flex: 1 }}
+                  />
+                  <IconButton
+                    onClick={() =>
+                      setReviewItems((items) =>
+                        items.map((row, index) =>
+                          index === itemIndex
+                            ? {
+                                ...row,
+                                variants: row.variants.filter(
+                                  (_, position) => position !== variantIndex,
+                                ),
+                              }
+                            : row,
+                        ),
+                      )
+                    }
+                  >
+                    <i className="tabler-x" />
+                  </IconButton>
+                </Box>
+              ))}
+              <Button
+                size="small"
+                onClick={() =>
+                  setReviewItems((items) =>
+                    items.map((row, index) =>
+                      index === itemIndex
+                        ? {
+                            ...row,
+                            variants: [
+                              ...(row.variants || []),
+                              { size: "", price: 0 },
+                            ],
+                          }
+                        : row,
+                    ),
+                  )
+                }
+              >
+                + Thêm size
+              </Button>
+            </Box>
+          ))}
+          <Button
+            variant="tonal"
+            onClick={() =>
+              setReviewItems((items) => [
+                ...items,
+                {
+                  id: `menu_item_${Date.now()}`,
+                  name: "",
+                  variants: [{ size: "Mặc định", price: 0 }],
+                },
+              ])
+            }
+          >
+            + Thêm món
+          </Button>
+        </DialogContent>
+        <DialogActions>
+          <Button color="secondary" onClick={() => setReviewingMenu(null)}>
+            Hủy
+          </Button>
+          <Button variant="contained" onClick={saveMenuReview}>
+            Xác nhận lưu menu
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       {/* MODAL CHỈNH SỬA LỜI MỜI */}
       <Dialog
         open={Boolean(editingId)}
@@ -1706,7 +2810,11 @@ export default function AfternoonTeaPage() {
                       {menu.shop}
                     </Typography>
                   </Box>
-                  <ZoomableMenuImage key={`${viewingShopId}-${menu.id}-${menu.imageUrl}`} src={menu.imageUrl} alt={`Menu ${menu.shop}`} />
+                  <ZoomableMenuImage
+                    key={`${viewingShopId}-${menu.id}-${menu.imageUrl}`}
+                    src={menu.imageUrl}
+                    alt={`Menu ${menu.shop}`}
+                  />
                 </Box>
               ))}
             </Box>
@@ -1717,7 +2825,11 @@ export default function AfternoonTeaPage() {
               );
               if (!menu) return null;
               return (
-                <ZoomableMenuImage key={`${viewingShopId}-${menu.id}-${menu.imageUrl}`} src={menu.imageUrl} alt={`Menu ${menu.shop}`} />
+                <ZoomableMenuImage
+                  key={`${viewingShopId}-${menu.id}-${menu.imageUrl}`}
+                  src={menu.imageUrl}
+                  alt={`Menu ${menu.shop}`}
+                />
               );
             })()
           )}

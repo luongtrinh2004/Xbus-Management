@@ -1,13 +1,12 @@
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
-import path from "path";
-import { readdir, rm } from "fs/promises";
 import {
   getAfternoonTea,
   getUsers,
   saveAfternoonTea,
   saveUsers,
 } from "@/libs/dataRepository";
+import { publishAfternoonTeaEvent } from "@/libs/afternoonTeaRealtime";
 
 const secret = process.env.NEXTAUTH_SECRET;
 const vietnamDate = (value = new Date()) =>
@@ -33,10 +32,6 @@ const isInvitationClosed = (scheduledAt) => {
     `${invitation.year}-${invitation.month}-${invitation.day}` <
     `${today.year}-${today.month}-${today.day}`
   );
-};
-const menuDateFolder = (scheduledAt) => {
-  const date = vietnamDate(scheduledAt);
-  return `${date.year}-${date.month}-${date.day}`;
 };
 
 export async function GET(req) {
@@ -70,37 +65,20 @@ export async function GET(req) {
     data.invitations = activeInvitations;
     await saveAfternoonTea(data);
   }
-  const menuRoot = path.resolve(
-    process.cwd(),
-    "public",
-    "images",
-    "afternoon-tea",
-  );
-  const activeMenuDates = new Set(
-    activeInvitations.map((item) => menuDateFolder(item.scheduledAt)),
-  );
-  const folders = await readdir(menuRoot, { withFileTypes: true }).catch(
-    () => [],
-  );
-  await Promise.all(
-    folders
-      .filter(
-        (entry) =>
-          entry.isDirectory() &&
-          /^\d{4}-\d{2}-\d{2}$/.test(entry.name) &&
-          !activeMenuDates.has(entry.name),
-      )
-      .map((entry) => {
-        const target = path.resolve(menuRoot, entry.name);
-        return target.startsWith(`${menuRoot}${path.sep}`)
-          ? rm(target, { recursive: true, force: true })
-          : Promise.resolve();
-      }),
-  );
   return NextResponse.json({
     ...data,
     invitations: (data.invitations || []).map((invitation) => ({
       ...invitation,
+      menus: (invitation.menus || []).map((menu) => {
+        const catalog = (data.menuCatalog || []).find(
+          (item) => item.id === menu.catalogId,
+        );
+        return {
+          ...menu,
+          items: catalog?.items || [],
+          menuStatus: catalog?.status || "pending_review",
+        };
+      }),
       createdByName:
         users.find((user) => user.id === invitation.createdBy)?.name ||
         "Không xác định",
@@ -195,9 +173,77 @@ export async function PATCH(req) {
     order,
     foodItem,
     foodItemId,
+    menuId,
+    menuItems,
   } = body;
   const data = await getAfternoonTea();
-  if (action === "menu") {
+  if (action === "updateMenuItems" || action === "updateMenu") {
+    const invitation = data.invitations.find(
+      (item) => item.id === invitationId,
+    );
+    const menu = invitation?.menus?.find((item) => item.id === menuId);
+    const currentUser = (await getUsers()).find(
+      (user) =>
+        user.id === token?.id ||
+        user.email?.toLowerCase() === token?.email?.toLowerCase(),
+    );
+    if (!invitation || !menu)
+      return NextResponse.json(
+        { error: "Không tìm thấy menu" },
+        { status: 404 },
+      );
+    if (
+      !["admin", "assistant"].includes(token?.role) &&
+      invitation.createdBy !== token?.id &&
+      invitation.createdBy !== currentUser?.id
+    )
+      return NextResponse.json(
+        { error: "Bạn không có quyền chỉnh sửa menu này" },
+        { status: 403 },
+      );
+    data.menuCatalog = data.menuCatalog || [];
+    const catalog = data.menuCatalog.find((item) => item.id === menu.catalogId);
+    if (!catalog)
+      return NextResponse.json(
+        { error: "Không tìm thấy dữ liệu menu" },
+        { status: 404 },
+      );
+    const nextShop = String(order?.shop || menu.shop).trim();
+    if (!nextShop)
+      return NextResponse.json(
+        { error: "Tên quán không được để trống" },
+        { status: 400 },
+      );
+    const duplicatedShop = (invitation.menus || []).some(
+      (item) =>
+        item.id !== menu.id &&
+        item.shop?.trim().toLocaleLowerCase("vi-VN") ===
+          nextShop.toLocaleLowerCase("vi-VN"),
+    );
+    if (duplicatedShop)
+      return NextResponse.json(
+        { error: "Tên quán này đã tồn tại trong lời mời" },
+        { status: 400 },
+      );
+    const items = (Array.isArray(menuItems) ? menuItems : [])
+      .map((item, index) => ({
+        id: String(item?.id || `menu_item_${Date.now()}_${index}`),
+        name: String(item?.name || "").trim(),
+        category: String(item?.category || "").trim(),
+        variants: (Array.isArray(item?.variants) && item.variants.length
+          ? item.variants
+          : [{ size: "Mặc định", price: 0 }]
+        ).map((variant) => ({
+          size: String(variant?.size || "Mặc định").trim() || "Mặc định",
+          price: Math.max(0, Number(variant?.price) || 0),
+        })),
+      }))
+      .filter((item) => item.name);
+    menu.shop = nextShop;
+    catalog.items = items;
+    catalog.status = "approved";
+    catalog.updatedAt = new Date().toISOString();
+  } else if (action === "menu") {
     if (!["admin", "assistant"].includes(token?.role))
       return NextResponse.json(
         { error: "Chỉ Admin có quyền cập nhật menu" },
@@ -216,6 +262,15 @@ export async function PATCH(req) {
     if (isInvitationClosed(invitation.scheduledAt)) {
       return NextResponse.json(
         { error: "Đã hết ngày đặt trà chiều; không thể thay đổi món" },
+        { status: 409 },
+      );
+    }
+    if (
+      invitation.ordersLocked &&
+      !["admin", "assistant"].includes(token?.role)
+    ) {
+      return NextResponse.json(
+        { error: "Danh sách món đã được chốt; không thể thay đổi" },
         { status: 409 },
       );
     }
@@ -239,6 +294,28 @@ export async function PATCH(req) {
     };
     if (existing >= 0) invitation.orders[existing] = row;
     else invitation.orders.push(row);
+  } else if (action === "lockOrders") {
+    const invitation = data.invitations.find(
+      (item) => item.id === invitationId,
+    );
+    if (!invitation)
+      return NextResponse.json(
+        { error: "Không tìm thấy lời mời" },
+        { status: 404 },
+      );
+    if (!["admin", "assistant"].includes(token?.role))
+      return NextResponse.json(
+        { error: "Chỉ Admin hoặc Trợ lý được chốt món" },
+        { status: 403 },
+      );
+    invitation.ordersLocked = Boolean(order?.locked);
+    if (invitation.ordersLocked) {
+      invitation.ordersLockedAt = new Date().toISOString();
+      invitation.ordersLockedBy = token.id;
+    } else {
+      delete invitation.ordersLockedAt;
+      delete invitation.ordersLockedBy;
+    }
   } else if (action === "addFoodItem") {
     const invitation = data.invitations.find(
       (item) => item.id === invitationId,
@@ -361,5 +438,6 @@ export async function PATCH(req) {
     );
   }
   await saveAfternoonTea(data);
+  publishAfternoonTeaEvent({ type: "data" });
   return NextResponse.json(data);
 }
