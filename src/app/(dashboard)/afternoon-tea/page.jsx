@@ -425,7 +425,12 @@ export default function AfternoonTeaPage() {
         }
         load();
       } else {
-        toast.error(result.error || "Không thể tải lên ảnh menu");
+        toast.error(
+          result.error ||
+            (response.status === 504
+              ? "Máy chủ chờ đọc menu quá lâu. Hãy tải lại trang để kiểm tra menu trước khi thử lại."
+              : "Không thể tải lên ảnh menu"),
+        );
       }
     } catch {
       toast.error("Không thể tải lên ảnh menu");
@@ -500,7 +505,12 @@ export default function AfternoonTeaPage() {
       });
       const result = await response.json().catch(() => ({}));
       if (!response.ok)
-        return toast.error(result.error || "Không thể thay ảnh menu");
+        return toast.error(
+          result.error ||
+            (response.status === 504
+              ? "Máy chủ chờ đọc menu quá lâu. Hãy tải lại trang để kiểm tra menu trước khi thử lại."
+              : "Không thể thay ảnh menu"),
+        );
       setMenuReviewDrafts((previous) => ({
         ...previous,
         [reviewingMenu]: {
@@ -1516,7 +1526,13 @@ export default function AfternoonTeaPage() {
                               return (
                                 includes(user.name, orderFilters.name) &&
                                 includes(order?.drink, orderFilters.drink) &&
-                                includes(order?.size, orderFilters.size)
+                                (!orderFilters.size ||
+                                  String(order?.size || "")
+                                    .trim()
+                                    .toLocaleLowerCase("vi-VN") ===
+                                    orderFilters.size
+                                      .trim()
+                                      .toLocaleLowerCase("vi-VN"))
                               );
                             })
                             .map((user) => {

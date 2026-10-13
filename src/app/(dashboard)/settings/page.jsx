@@ -30,15 +30,33 @@ import CustomTextField from "@core/components/mui/TextField";
 import tableStyles from "@core/styles/table.module.css";
 import ConfirmDialog from "@components/ConfirmDialog";
 import VietnameseDateField from "@/components/VietnameseDateField";
-import { currentFundPeriod, fundCategories, periodKey } from "@/libs/fundRules";
+import {
+  currentFundPeriod,
+  defaultFundAmounts,
+  fundCategories,
+  periodKey,
+} from "@/libs/fundRules";
 
-const emptyForm = () => ({
+const emptyRule = () => ({
   id: "",
   categoryId: "category_official",
   amount: "",
   startPeriod: periodKey(currentFundPeriod()),
   endPeriod: periodKey(currentFundPeriod()),
   note: "",
+});
+const categoryOrder = [
+  "category_collaborator",
+  "category_intern",
+  "category_probation",
+  "category_official",
+];
+const emptyForm = () => ({
+  rules: categoryOrder.map((categoryId) => ({
+    ...emptyRule(),
+    categoryId,
+    amount: String(defaultFundAmounts[categoryId]),
+  })),
 });
 const money = (value) => `${Number(value || 0).toLocaleString("vi-VN")} đ`;
 
@@ -47,6 +65,7 @@ export default function SettingsPage() {
   const searchParams = useSearchParams();
   const [rules, setRules] = useState([]);
   const [history, setHistory] = useState([]);
+  const [batches, setBatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -74,7 +93,7 @@ export default function SettingsPage() {
   }, [searchParams]);
   const currentPeriod = periodKey(currentFundPeriod());
   const historyRules = [
-    ...rules.filter((rule) => rule.endPeriod < currentPeriod),
+    ...rules.filter((rule) => !rule.batchId && rule.endPeriod < currentPeriod),
     ...history,
   ].sort(
     (a, b) =>
@@ -100,6 +119,7 @@ export default function SettingsPage() {
       throw new Error(configData.error || "Không thể tải cấu hình quỹ");
     setRules(data.rules || []);
     setHistory(data.history || []);
+    setBatches(data.batches || []);
     setConfig(configData);
   };
   const saveConfig = async (body, successMessage) => {
@@ -172,8 +192,7 @@ export default function SettingsPage() {
   useEffect(() => {
     if (scheduleReminderCooldown <= 0) return undefined;
     const timer = window.setInterval(
-      () =>
-        setScheduleReminderCooldown((seconds) => Math.max(0, seconds - 1)),
+      () => setScheduleReminderCooldown((seconds) => Math.max(0, seconds - 1)),
       1000,
     );
     return () => window.clearInterval(timer);
@@ -184,20 +203,33 @@ export default function SettingsPage() {
       .catch((error) => toast.error(error.message))
       .finally(() => setLoading(false));
   }, [status]);
+  const updateFormRule = (index, field, value) =>
+    setForm((previous) => ({
+      ...previous,
+      rules: previous.rules.map((rule, i) =>
+        i === index ? { ...rule, [field]: value } : rule,
+      ),
+    }));
   const save = async () => {
     setSaving(true);
     try {
       const response = await fetch("/api/fund-settings", {
-        method: form.id ? "PATCH" : "POST",
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, amount: Number(form.amount) }),
+        body: JSON.stringify({
+          rules: form.rules.map((rule) => ({
+            ...rule,
+            amount: Number(rule.amount),
+          })),
+        }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error);
       setRules(data.rules || []);
       setHistory(data.history || []);
+      setBatches(data.batches || []);
       setForm(null);
-      toast.success(form.id ? "Đã cập nhật mức đóng" : "Đã thêm mức đóng");
+      toast.success("Đã lưu 4 mức đóng và ghi một lần lịch sử");
     } catch (error) {
       toast.error(error.message);
     } finally {
@@ -216,6 +248,7 @@ export default function SettingsPage() {
       if (!response.ok) throw new Error(data.error);
       setRules(data.rules || []);
       setHistory(data.history || []);
+      setBatches(data.batches || []);
       setDeleteTarget(null);
       toast.success("Đã xóa mức đóng");
     } catch (error) {
@@ -241,80 +274,138 @@ export default function SettingsPage() {
     );
   const settingsTable = (items, history = false) => (
     <TableContainer>
-      <Table className={tableStyles.table}>
+      <Table
+        className={tableStyles.table}
+        sx={{
+          tableLayout: "fixed",
+          minWidth: 960,
+          "& th, & td": {
+            width: `${100 / 6}%`,
+            whiteSpace: "normal",
+            overflowWrap: "anywhere",
+          },
+          "&&& th:nth-of-type(3), &&& td:nth-of-type(3)": {
+            paddingInlineEnd: "48px",
+          },
+          "&&& th:nth-of-type(4), &&& td:nth-of-type(4)": {
+            paddingInlineStart: "48px",
+          },
+        }}
+      >
         <TableHead>
           <TableRow>
             <TableCell>STT</TableCell>
             <TableCell>LOẠI NHÂN SỰ</TableCell>
-            <TableCell align="right">SỐ TIỀN</TableCell>
+            <TableCell align="right" style={{ textAlign: "right" }}>
+              SỐ TIỀN
+            </TableCell>
             <TableCell>THỜI GIAN</TableCell>
             <TableCell>GHI CHÚ</TableCell>
-            <TableCell align="center">
+            <TableCell align="center" style={{ textAlign: "center" }}>
               {history ? "TRẠNG THÁI" : "THAO TÁC"}
             </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {items.length ? (
-            items.map((rule, index) => (
-              <TableRow key={rule.id}>
-                <TableCell>{index + 1}</TableCell>
-                <TableCell>
-                  {fundCategories[rule.categoryId] || rule.categoryId}
-                </TableCell>
-                <TableCell align="right">
-                  <Typography fontWeight={600}>{money(rule.amount)}</Typography>
-                </TableCell>
-                <TableCell>
-                  {rule.startPeriod} → {rule.endPeriod}
-                </TableCell>
-                <TableCell>{rule.note || "—"}</TableCell>
-                <TableCell align="center">
-                  {history ? (
-                    <Box
-                      sx={{ display: "grid", justifyItems: "center", gap: 0.5 }}
-                    >
-                      <Chip
-                        size="small"
-                        color="secondary"
-                        variant="tonal"
-                        label={
-                          rule.historyAction === "updated"
-                            ? "Bản trước khi sửa"
-                            : rule.historyAction === "deleted"
-                              ? "Đã xóa"
-                              : "Đã hết hiệu lực"
-                        }
-                      />
-                      {rule.archivedAt && (
-                        <Typography variant="caption" color="text.secondary">
-                          {new Date(rule.archivedAt).toLocaleString("vi-VN")}
-                        </Typography>
-                      )}
-                    </Box>
-                  ) : (
-                    <>
-                      <IconButton
-                        color="primary"
-                        aria-label="Sửa mức đóng"
-                        onClick={() =>
-                          setForm({ ...rule, amount: String(rule.amount) })
-                        }
+            [...items]
+              .sort(
+                (a, b) =>
+                  categoryOrder.indexOf(a.categoryId) -
+                  categoryOrder.indexOf(b.categoryId),
+              )
+              .map((rule, index) => (
+                <TableRow key={rule.id}>
+                  <TableCell>{index + 1}</TableCell>
+                  <TableCell>
+                    {fundCategories[rule.categoryId] || rule.categoryId}
+                  </TableCell>
+                  <TableCell align="right" style={{ textAlign: "right" }}>
+                    <Typography fontWeight={600}>
+                      {money(rule.amount)}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    {rule.startPeriod} → {rule.endPeriod}
+                  </TableCell>
+                  <TableCell>{rule.note || "—"}</TableCell>
+                  <TableCell align="center" style={{ textAlign: "center" }}>
+                    {history ? (
+                      <Box
+                        sx={{
+                          display: "grid",
+                          justifyItems: "center",
+                          gap: 0.5,
+                        }}
                       >
-                        <i className="tabler-edit" />
-                      </IconButton>
-                      <IconButton
-                        color="error"
-                        aria-label="Xóa mức đóng"
-                        onClick={() => setDeleteTarget(rule)}
-                      >
-                        <i className="tabler-trash" />
-                      </IconButton>
-                    </>
-                  )}
-                </TableCell>
-              </TableRow>
-            ))
+                        <Chip
+                          size="small"
+                          color="secondary"
+                          variant="tonal"
+                          label={
+                            rule.historyAction === "saved"
+                              ? "Đã lưu"
+                              : rule.historyAction === "updated"
+                                ? "Bản trước khi sửa"
+                                : rule.historyAction === "deleted"
+                                  ? "Đã xóa"
+                                  : "Đã hết hiệu lực"
+                          }
+                        />
+                        {rule.archivedAt && (
+                          <Typography variant="caption" color="text.secondary">
+                            {new Date(rule.archivedAt).toLocaleString("vi-VN")}
+                          </Typography>
+                        )}
+                      </Box>
+                    ) : (
+                      <>
+                        <IconButton
+                          color="primary"
+                          aria-label="Sửa mức đóng"
+                          onClick={() =>
+                            setForm({
+                              rules: categoryOrder.map((categoryId) => {
+                                const existing =
+                                  categoryId === rule.categoryId
+                                    ? rule
+                                    : manageableRules.find(
+                                        (item) =>
+                                          item.categoryId === categoryId &&
+                                          (rule.batchId
+                                            ? item.batchId === rule.batchId
+                                            : true),
+                                      );
+                                return existing
+                                  ? {
+                                      ...existing,
+                                      amount: String(existing.amount),
+                                    }
+                                  : {
+                                      ...emptyRule(),
+                                      categoryId,
+                                      amount: String(
+                                        defaultFundAmounts[categoryId],
+                                      ),
+                                    };
+                              }),
+                            })
+                          }
+                        >
+                          <i className="tabler-edit" />
+                        </IconButton>
+                        <IconButton
+                          color="error"
+                          aria-label="Xóa mức đóng"
+                          onClick={() => setDeleteTarget(rule)}
+                        >
+                          <i className="tabler-trash" />
+                        </IconButton>
+                      </>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))
           ) : (
             <TableRow>
               <TableCell colSpan={6} align="center">
@@ -521,13 +612,54 @@ export default function SettingsPage() {
             </Box>
           </Card>
           <Card>
-            <CardHeader title="Thông báo Happy Hour / trà chiều" subheader="Gửi lời mời hôm nay kèm ảnh menu cho nhân sự đang hoạt động. Nút Đặt ngay dẫn đến trang Trà chiều." />
+            <CardHeader
+              title="Thông báo Happy Hour / trà chiều"
+              subheader="Gửi lời mời hôm nay kèm ảnh menu cho nhân sự đang hoạt động. Nút Đặt ngay dẫn đến trang Trà chiều."
+            />
             <Box sx={{ p: 4, pt: 0, display: "grid", gap: 3 }}>
-              <TeaNotificationSender disabled={saving} settings={config.teaReminder || {enabled:false,sendTime:"10:00"}} onChange={teaReminder => setConfig(value => ({...value,teaReminder}))} />
-              <CustomTextField label="Giờ gửi trong ngày diễn ra (giờ Việt Nam)" type="time" value={config.teaReminder?.sendTime || "10:00"} onChange={event => setConfig(value => ({...value,teaReminder:{...value.teaReminder,sendTime:event.target.value}}))} InputLabelProps={{shrink:true}} />
-              <Box sx={{display:"flex",gap:2,flexWrap:"wrap"}}>
-                <Button variant="contained" disabled={saving} onClick={() => saveConfig({action:"saveTeaReminder",excludedUserIds:config.teaReminder?.excludedUserIds || [],enabled:Boolean(config.teaReminder?.enabled),sendTime:config.teaReminder?.sendTime || "10:00"},"Đã lưu thông báo Happy Hour / trà chiều")}>Lưu cài đặt</Button>
-
+              <TeaNotificationSender
+                disabled={saving}
+                settings={
+                  config.teaReminder || { enabled: false, sendTime: "10:00" }
+                }
+                onChange={(teaReminder) =>
+                  setConfig((value) => ({ ...value, teaReminder }))
+                }
+              />
+              <CustomTextField
+                label="Giờ gửi trong ngày diễn ra (giờ Việt Nam)"
+                type="time"
+                value={config.teaReminder?.sendTime || "10:00"}
+                onChange={(event) =>
+                  setConfig((value) => ({
+                    ...value,
+                    teaReminder: {
+                      ...value.teaReminder,
+                      sendTime: event.target.value,
+                    },
+                  }))
+                }
+                InputLabelProps={{ shrink: true }}
+              />
+              <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
+                <Button
+                  variant="contained"
+                  disabled={saving}
+                  onClick={() =>
+                    saveConfig(
+                      {
+                        action: "saveTeaReminder",
+                        excludedUserIds:
+                          config.teaReminder?.excludedUserIds || [],
+                        enabled: Boolean(config.teaReminder?.enabled),
+                        sendTime: config.teaReminder?.sendTime || "10:00",
+                      },
+                      "Đã lưu thông báo Happy Hour / trà chiều",
+                    )
+                  }
+                >
+                  Lưu cài đặt
+                </Button>
               </Box>
             </Box>
           </Card>
@@ -539,7 +671,7 @@ export default function SettingsPage() {
           <Card sx={{ mb: 4 }}>
             <CardHeader
               title="Cài đặt quỹ phòng"
-              subheader="Quản lý mức đóng theo loại nhân sự và thời gian áp dụng. Các kỳ đã phát sinh không bị thay đổi."
+              subheader="Mỗi lần lưu gồm đủ 4 loại nhân sự và ghi một bản lịch sử. Mức mới ghi đè khoảng tháng trùng với cấu hình cũ."
               avatar={
                 <i className="tabler-settings" style={{ fontSize: 26 }} />
               }
@@ -549,7 +681,7 @@ export default function SettingsPage() {
                   startIcon={<i className="tabler-plus" />}
                   onClick={() => setForm(emptyForm())}
                 >
-                  Thêm mức đóng
+                  Thêm lần cài đặt
                 </Button>
               }
             />
@@ -558,10 +690,29 @@ export default function SettingsPage() {
           <Card sx={{ mt: 4 }}>
             <CardHeader
               title="Lịch sử mức đóng quỹ"
-              subheader="Các cấu hình đã hết hiệu lực, sắp xếp từ kỳ gần nhất. Lịch sử chỉ xem và không thể sửa hoặc xóa."
+              subheader="Mỗi lần lưu ghi đủ 4 loại nhân sự, mới nhất ở trên. Lịch sử chỉ xem."
               avatar={<i className="tabler-history" style={{ fontSize: 26 }} />}
             />
-            {settingsTable(historyRules, true)}
+            {[...batches].reverse().map((batch) => (
+              <Box
+                key={batch.id}
+                sx={{ borderTop: "1px solid", borderColor: "divider" }}
+              >
+                <Typography sx={{ p: 3 }} fontWeight={600}>
+                  {new Date(batch.savedAt).toLocaleString("vi-VN", {
+                    timeZone: "Asia/Ho_Chi_Minh",
+                  })}
+                </Typography>
+                {settingsTable(batch.rules, true)}
+              </Box>
+            ))}
+            {historyRules.length > 0 && (
+              <>
+                <Typography sx={{ p: 3 }}>Lịch sử cấu hình cũ</Typography>
+                {settingsTable(historyRules, true)}
+              </>
+            )}
+            {!batches.length && !historyRules.length && settingsTable([], true)}
           </Card>
         </>
       )}
@@ -772,82 +923,82 @@ export default function SettingsPage() {
         fullWidth
         maxWidth="sm"
       >
-        <DialogTitle>{form?.id ? "Sửa mức đóng" : "Thêm mức đóng"}</DialogTitle>
+        <DialogTitle>Cài đặt mức đóng cho 4 loại nhân sự</DialogTitle>
         <DialogContent sx={{ pt: "12px !important" }}>
           <Box sx={{ display: "grid", gap: 3 }}>
-            <CustomTextField
-              select
-              required
-              label="Loại nhân sự"
-              value={form?.categoryId || ""}
-              onChange={(event) =>
-                setForm((value) => ({
-                  ...value,
-                  categoryId: event.target.value,
-                }))
-              }
-            >
-              {Object.entries(fundCategories).map(([id, label]) => (
-                <MenuItem key={id} value={id}>
-                  {label}
-                </MenuItem>
-              ))}
-            </CustomTextField>
-            <CustomTextField
-              required
-              label="Số tiền (VNĐ)"
-              value={
-                form?.amount ? Number(form.amount).toLocaleString("vi-VN") : ""
-              }
-              inputProps={{ inputMode: "numeric" }}
-              onChange={(event) =>
-                setForm((value) => ({
-                  ...value,
-                  amount: event.target.value.replace(/\D/g, ""),
-                }))
-              }
-            />
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
-                gap: 2,
-              }}
-            >
-              <VietnameseDateField
-                required
-                type="month"
-                label="Áp dụng từ tháng"
-                value={form?.startPeriod || ""}
-                onChange={(event) =>
-                  setForm((value) => ({
-                    ...value,
-                    startPeriod: event.target.value,
-                  }))
-                }
-              />
-              <VietnameseDateField
-                required
-                type="month"
-                label="Đến hết tháng"
-                value={form?.endPeriod || ""}
-                onChange={(event) =>
-                  setForm((value) => ({
-                    ...value,
-                    endPeriod: event.target.value,
-                  }))
-                }
-              />
-            </Box>
-            <CustomTextField
-              multiline
-              minRows={3}
-              label="Ghi chú"
-              value={form?.note || ""}
-              onChange={(event) =>
-                setForm((value) => ({ ...value, note: event.target.value }))
-              }
-            />
+            {form?.rules.map((rule, ruleIndex) => (
+              <Box
+                key={rule.categoryId}
+                sx={{
+                  display: "grid",
+                  gap: 3,
+                  p: 3,
+                  border: "1px solid",
+                  borderColor: "divider",
+                  borderRadius: 1,
+                }}
+              >
+                <Typography fontWeight={600}>
+                  {fundCategories[rule.categoryId]}
+                </Typography>
+                <CustomTextField
+                  required
+                  label="Số tiền (VNĐ)"
+                  value={
+                    rule.amount
+                      ? Number(rule.amount).toLocaleString("vi-VN")
+                      : ""
+                  }
+                  inputProps={{ inputMode: "numeric" }}
+                  onChange={(event) =>
+                    updateFormRule(
+                      ruleIndex,
+                      "amount",
+                      event.target.value.replace(/\D/g, ""),
+                    )
+                  }
+                />
+                <Box
+                  sx={{
+                    display: "grid",
+                    gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+                    gap: 2,
+                  }}
+                >
+                  <VietnameseDateField
+                    required
+                    type="month"
+                    label="Áp dụng từ tháng"
+                    value={rule.startPeriod || ""}
+                    onChange={(event) =>
+                      updateFormRule(
+                        ruleIndex,
+                        "startPeriod",
+                        event.target.value,
+                      )
+                    }
+                  />
+                  <VietnameseDateField
+                    required
+                    type="month"
+                    label="Đến hết tháng"
+                    value={rule.endPeriod || ""}
+                    onChange={(event) =>
+                      updateFormRule(ruleIndex, "endPeriod", event.target.value)
+                    }
+                  />
+                </Box>
+                <CustomTextField
+                  multiline
+                  minRows={3}
+                  label="Ghi chú"
+                  value={rule.note || ""}
+                  onChange={(event) =>
+                    updateFormRule(ruleIndex, "note", event.target.value)
+                  }
+                />
+              </Box>
+            ))}
           </Box>
         </DialogContent>
         <DialogActions>

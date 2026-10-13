@@ -1,6 +1,4 @@
 import { NextResponse } from "next/server";
-import path from "path";
-import { mkdir, writeFile } from "fs/promises";
 import { createHash } from "crypto";
 import { getToken } from "next-auth/jwt";
 import {
@@ -9,7 +7,7 @@ import {
   saveAfternoonTea,
 } from "@/libs/dataRepository";
 import { publishAfternoonTeaEvent } from "@/libs/afternoonTeaRealtime";
-import { toVietnamDateKey } from "@/libs/dateTime";
+import { storeTeaMenuImage } from "@/libs/teaMenuStorage";
 import {
   extractMenuItemsWithGemini,
   optimizeMenuImageForGemini,
@@ -17,13 +15,6 @@ import {
 
 const secret = process.env.NEXTAUTH_SECRET;
 const imageTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
-const safeSegment = (value) =>
-  String(value || "khac")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-zA-Z0-9_-]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .toLowerCase() || "khac";
 
 export async function POST(req) {
   try {
@@ -101,35 +92,19 @@ export async function POST(req) {
       );
     }
 
-    const scheduledDateKey = String(invitation.scheduledAt || "").slice(0, 10);
-    const dateFolder = toVietnamDateKey(scheduledDateKey || new Date());
-    const shopFolder = safeSegment(shop);
     const fileBuffer = Buffer.from(await file.arrayBuffer());
     const checksum = createHash("sha256").update(fileBuffer).digest("hex");
     data.menuCatalog = data.menuCatalog || [];
     const existingCatalog = data.menuCatalog.find(
       (catalog) => catalog.checksum === checksum,
     );
-    const fileName = `menu-${Date.now()}.${file.type.split("/")[1]}`;
-    const relativeDir = path.posix.join(
-      "/api/media/afternoon-tea",
-      dateFolder,
-      shopFolder,
-    );
-    const outputDir = path.join(
-      process.cwd(),
-      "public",
-      "images",
-      "afternoon-tea",
-      dateFolder,
-      shopFolder,
-    );
+    const imageUrl = await storeTeaMenuImage({
+      buffer: fileBuffer,
+      mimeType: file.type,
+      checksum,
+    });
     let catalog = existingCatalog;
-    let imageUrl;
     if (!catalog) {
-      await mkdir(outputDir, { recursive: true });
-      await writeFile(path.join(outputDir, fileName), fileBuffer);
-      imageUrl = `${relativeDir}/${fileName}`;
       const aiImage = await optimizeMenuImageForGemini({
         buffer: fileBuffer,
         mimeType: file.type,
@@ -146,11 +121,14 @@ export async function POST(req) {
       };
       data.menuCatalog.push(catalog);
     } else {
-      // Catalog có thể được tái sử dụng, nhưng ảnh vật lý cũ có thể đã bị
-      // xóa hoặc không còn cùng đường dẫn. Luôn lưu lại file vừa chọn.
-      await mkdir(outputDir, { recursive: true });
-      await writeFile(path.join(outputDir, fileName), fileBuffer);
-      imageUrl = `${relativeDir}/${fileName}`;
+      // Reuploads migrate legacy catalog images to the shared checksum object.
+      catalog.imageUrl = imageUrl;
+      for (const entry of data.invitations || []) {
+        for (const menu of entry.menus || []) {
+          if (menu.checksum === checksum || menu.catalogId === catalog.id)
+            menu.imageUrl = imageUrl;
+        }
+      }
     }
 
     const nextMenu = {
@@ -173,6 +151,12 @@ export async function POST(req) {
     });
   } catch (error) {
     console.error("[AfternoonTea Menu]", error);
+    if (["TimeoutError", "AbortError"].includes(error?.name)) {
+      return NextResponse.json(
+        { error: "Gemini đọc menu quá lâu. Vui lòng thử lại sau ít phút." },
+        { status: 503 },
+      );
+    }
     const isGeminiBusy =
       /high demand|overload|unavailable|quota|rate limit/i.test(
         error?.message || "",

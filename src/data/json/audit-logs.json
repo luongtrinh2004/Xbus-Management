@@ -1,6 +1,17 @@
 {
   "auditLogs": [
     {
+      "id": "log_1791857963226_wgkc",
+      "adminId": "usr_admin_001",
+      "adminName": "Quản trị viên Hệ thống",
+      "adminEmail": "admin@phenikaa-x.com",
+      "action": "UPDATE_FUND_SETTINGS",
+      "targetType": "FUND",
+      "details": "Lưu cấu hình mức đóng quỹ cho đủ 4 loại nhân sự",
+      "ip": "127.0.0.1",
+      "timestamp": "2026-10-13T02:19:23.226Z"
+    },
+    {
       "id": "work_audit_1791182214137_76rszw",
       "adminId": "usr_admin_001",
       "adminName": "Quản trị viên Hệ thống",

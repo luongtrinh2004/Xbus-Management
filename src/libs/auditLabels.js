@@ -70,6 +70,8 @@ export const actionLabels = {
   CREATE_WORK_TASK: "Tạo công việc",
   UPDATE_WORK_TASK: "Cập nhật công việc",
   ARCHIVE_WORK_TASK: "Lưu trữ công việc",
+  RESTORE_WORK_TASK: "Khôi phục công việc",
+  DELETE_WORK_TASK: "Xóa công việc",
   COMMENT_WORK_TASK: "Bình luận công việc",
   UPDATE_WORK_COMMENT: "Cập nhật bình luận công việc",
   DELETE_WORK_COMMENT: "Xóa bình luận công việc",
@@ -134,4 +136,5 @@ export const targetLabels = {
   app_documents: "Dữ liệu ứng dụng",
 };
 
-export const actionLabel = action => actionLabels[action] || "Thao tác hệ thống khác";
+export const actionLabel = (action) =>
+  actionLabels[action] || "Thao tác hệ thống khác";

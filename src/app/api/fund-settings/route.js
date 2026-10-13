@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
+import { randomUUID } from "node:crypto";
+import { overrideContributionRules } from "@/libs/fundContributionOverrides";
 import {
   getSettings,
   saveSettings,
@@ -40,6 +42,7 @@ const rulesOf = (settings) => {
 const response = (settings) => ({
   rules: rulesOf(settings),
   history: settings.fundContributionRuleHistory || [],
+  batches: settings.fundContributionSaveHistory || [],
   minimumAmounts: defaultFundAmounts,
   voluntaryUserIds: settings.fundVoluntarySurplusUserIds || [],
 });
@@ -88,17 +91,63 @@ async function persist(req, operation) {
     const body = await req.json();
     const settings = await getSettings();
     const rules = rulesOf(settings);
-    const funds = await getFunds();
-    const users = await getUsers();
-    for (const fund of funds) snapshotFund(fund, users, settings);
-    // Changing contribution rules only needs to freeze the current roster/rates.
-    // Rewriting payments here can resurrect metadata for a deleted user and fail
-    // the users foreign key, while no financial transaction is being changed.
-    await saveFundSnapshots(funds);
     let updatedRules;
     let updatedHistory = settings.fundContributionRuleHistory || [];
+    let updatedBatches = settings.fundContributionSaveHistory || [];
     let details;
-    if (operation === "delete") {
+    if (operation !== "delete" && Array.isArray(body.rules)) {
+      if (
+        body.rules.length !== 4 ||
+        new Set(body.rules.map((rule) => rule.categoryId)).size !== 4 ||
+        body.rules.some(
+          (rule) => !Object.hasOwn(fundCategories, rule.categoryId),
+        )
+      )
+        throw new Error("Mỗi lần lưu cần đủ 4 loại nhân sự");
+      const ids = body.rules.filter((rule) => rule.id).map((rule) => rule.id);
+      if (new Set(ids).size !== ids.length)
+        throw new Error("Mức đóng bị trùng");
+      for (const item of body.rules) {
+        if (!item.id) continue;
+        const existing = rules.find((rule) => rule.id === item.id);
+        if (!existing || existing.categoryId !== item.categoryId)
+          throw new Error("Không tìm thấy mức đóng cần sửa");
+        if (existing.endPeriod < currentPeriodKey())
+          throw new Error("Mức đóng đã hết hiệu lực không thể sửa");
+      }
+      const batchId = `fund-save-${randomUUID()}`;
+      const savedAt = new Date().toISOString();
+      const remaining = rules.filter((rule) => !ids.includes(rule.id));
+      const savedRules = body.rules.map((item) => {
+        const existing = rules.find((rule) => rule.id === item.id);
+        return {
+          ...validateRule(
+            {
+              ...item,
+              id: item.id || `fund-rule-${randomUUID()}`,
+              createdAt: existing?.createdAt || savedAt,
+            },
+            [],
+          ),
+          batchId,
+        };
+      });
+      updatedRules = overrideContributionRules(remaining, savedRules);
+      updatedBatches = [
+        ...updatedBatches,
+        {
+          id: batchId,
+          savedAt,
+          savedBy: token.id,
+          savedByName: token.name || "",
+          rules: savedRules.map((rule) => ({
+            ...rule,
+            historyAction: "saved",
+          })),
+        },
+      ];
+      details = "Lưu cấu hình mức đóng quỹ cho đủ 4 loại nhân sự";
+    } else if (operation === "delete") {
       const existing = rules.find((rule) => rule.id === body.id);
       if (!existing) throw new Error("Không tìm thấy mức đóng cần xóa");
       if (existing.endPeriod < currentPeriodKey())
@@ -149,7 +198,13 @@ async function persist(req, operation) {
       fundContributionWindow: null,
       fundContributionRules: updatedRules,
       fundContributionRuleHistory: updatedHistory,
+      fundContributionSaveHistory: updatedBatches,
     };
+    // Validate the entire save before writing any fund snapshots.
+    const funds = await getFunds();
+    const users = await getUsers();
+    for (const fund of funds) snapshotFund(fund, users, settings);
+    await saveFundSnapshots(funds);
     await saveSettings(updated);
     await appendAuditLog({
       adminId: token.id,

@@ -4,6 +4,7 @@ import { getToken } from "next-auth/jwt";
 import { getAuditLogs, getUsers, getFunds } from "@/libs/dataRepository";
 import { toVietnamDateKey } from "@/libs/dateTime";
 import { resolveAvatar } from "@/utils/getDefaultAvatar";
+import { getPlaneActivityLogs } from "@/libs/planeActivity";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -30,7 +31,21 @@ export async function GET(req) {
 
     const users = await getUsers();
     const funds = await getFunds();
-    const rawLogs = await getAuditLogs();
+    let planeWarning = null;
+    const [xbusLogs, planeLogs] = await Promise.all([
+      getAuditLogs(),
+      getPlaneActivityLogs().catch((error) => {
+        console.error("[API AuditLogs] Plane:", error.message);
+        planeWarning =
+          "Chưa tải được lịch sử công việc từ Plane. Danh sách hiện chỉ có nhật ký XBus.";
+        return [];
+      }),
+    ]);
+    const rawLogs = [...xbusLogs, ...planeLogs].sort((a, b) =>
+      String(b.timestamp || b.createdAt).localeCompare(
+        String(a.timestamp || a.createdAt),
+      ),
+    );
 
     const allLogs = rawLogs.map((log) => {
       const legacyPayment =
@@ -155,7 +170,9 @@ export async function GET(req) {
       filteredLogs = filteredLogs.filter((log) => log.action === action);
     }
     if (targetType && targetType !== "all") {
-      filteredLogs = filteredLogs.filter((log) => log.targetType === targetType);
+      filteredLogs = filteredLogs.filter(
+        (log) => log.targetType === targetType,
+      );
     }
     if (search) {
       filteredLogs = filteredLogs.filter(
@@ -171,6 +188,7 @@ export async function GET(req) {
 
     if (exportAll) {
       return NextResponse.json({
+        warning: planeWarning,
         logs: filteredLogs,
         total: filteredLogs.length,
       });
@@ -181,6 +199,7 @@ export async function GET(req) {
     const paginatedLogs = filteredLogs.slice(skip, skip + limit);
 
     return NextResponse.json({
+      warning: planeWarning,
       logs: paginatedLogs,
       pagination: {
         currentPage: page,

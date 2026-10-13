@@ -14,24 +14,15 @@
   },
   "fundContributionRules": [
     {
-      "id": "legacy-category_official",
-      "categoryId": "category_official",
-      "amount": 150000,
-      "startPeriod": "2026-11",
-      "endPeriod": "2026-12",
-      "note": "",
-      "createdAt": "2026-09-17T01:33:03.723Z",
-      "updatedAt": "2026-09-17T01:33:03.723Z"
-    },
-    {
-      "id": "legacy-category_probation",
-      "categoryId": "category_probation",
-      "amount": 150000,
+      "id": "legacy-category_collaborator",
+      "categoryId": "category_collaborator",
+      "amount": 100000,
       "startPeriod": "2026-08",
       "endPeriod": "2026-11",
       "note": "",
-      "createdAt": null,
-      "updatedAt": null
+      "createdAt": "2026-10-13T02:19:23.212Z",
+      "updatedAt": "2026-10-13T02:19:23.213Z",
+      "batchId": "fund-save-df2be733-ea74-4597-aad8-a2c4de20ab1b"
     },
     {
       "id": "legacy-category_intern",
@@ -40,18 +31,31 @@
       "startPeriod": "2026-08",
       "endPeriod": "2026-11",
       "note": "",
-      "createdAt": null,
-      "updatedAt": null
+      "createdAt": "2026-10-13T02:19:23.212Z",
+      "updatedAt": "2026-10-13T02:19:23.213Z",
+      "batchId": "fund-save-df2be733-ea74-4597-aad8-a2c4de20ab1b"
     },
     {
-      "id": "legacy-category_collaborator",
-      "categoryId": "category_collaborator",
-      "amount": 100000,
+      "id": "legacy-category_probation",
+      "categoryId": "category_probation",
+      "amount": 150000,
       "startPeriod": "2026-08",
       "endPeriod": "2026-11",
       "note": "",
-      "createdAt": null,
-      "updatedAt": null
+      "createdAt": "2026-10-13T02:19:23.212Z",
+      "updatedAt": "2026-10-13T02:19:23.213Z",
+      "batchId": "fund-save-df2be733-ea74-4597-aad8-a2c4de20ab1b"
+    },
+    {
+      "id": "legacy-category_official",
+      "categoryId": "category_official",
+      "amount": 2000000,
+      "startPeriod": "2026-11",
+      "endPeriod": "2026-12",
+      "note": "",
+      "createdAt": "2026-09-17T01:33:03.723Z",
+      "updatedAt": "2026-10-13T02:19:23.213Z",
+      "batchId": "fund-save-df2be733-ea74-4597-aad8-a2c4de20ab1b"
     }
   ],
   "fundContributionWindow": null,
@@ -126,5 +130,63 @@
     "enabled": true,
     "daysBefore": 1,
     "sendTime": "14:00"
-  }
+  },
+  "fundContributionSaveHistory": [
+    {
+      "id": "fund-save-df2be733-ea74-4597-aad8-a2c4de20ab1b",
+      "savedAt": "2026-10-13T02:19:23.212Z",
+      "savedBy": "usr_admin_001",
+      "savedByName": "Quản trị viên Hệ thống",
+      "rules": [
+        {
+          "id": "legacy-category_collaborator",
+          "categoryId": "category_collaborator",
+          "amount": 100000,
+          "startPeriod": "2026-08",
+          "endPeriod": "2026-11",
+          "note": "",
+          "createdAt": "2026-10-13T02:19:23.212Z",
+          "updatedAt": "2026-10-13T02:19:23.213Z",
+          "batchId": "fund-save-df2be733-ea74-4597-aad8-a2c4de20ab1b",
+          "historyAction": "saved"
+        },
+        {
+          "id": "legacy-category_intern",
+          "categoryId": "category_intern",
+          "amount": 100000,
+          "startPeriod": "2026-08",
+          "endPeriod": "2026-11",
+          "note": "",
+          "createdAt": "2026-10-13T02:19:23.212Z",
+          "updatedAt": "2026-10-13T02:19:23.213Z",
+          "batchId": "fund-save-df2be733-ea74-4597-aad8-a2c4de20ab1b",
+          "historyAction": "saved"
+        },
+        {
+          "id": "legacy-category_probation",
+          "categoryId": "category_probation",
+          "amount": 150000,
+          "startPeriod": "2026-08",
+          "endPeriod": "2026-11",
+          "note": "",
+          "createdAt": "2026-10-13T02:19:23.212Z",
+          "updatedAt": "2026-10-13T02:19:23.213Z",
+          "batchId": "fund-save-df2be733-ea74-4597-aad8-a2c4de20ab1b",
+          "historyAction": "saved"
+        },
+        {
+          "id": "legacy-category_official",
+          "categoryId": "category_official",
+          "amount": 2000000,
+          "startPeriod": "2026-11",
+          "endPeriod": "2026-12",
+          "note": "",
+          "createdAt": "2026-09-17T01:33:03.723Z",
+          "updatedAt": "2026-10-13T02:19:23.213Z",
+          "batchId": "fund-save-df2be733-ea74-4597-aad8-a2c4de20ab1b",
+          "historyAction": "saved"
+        }
+      ]
+    }
+  ]
 }

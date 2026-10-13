@@ -24,7 +24,9 @@ export async function GET(_req, { params }) {
         !segment ||
         segment === "." ||
         segment === ".." ||
-        segment.includes("/") || segment.includes("\\") || segment.includes("\0"),
+        segment.includes("/") ||
+        segment.includes("\\") ||
+        segment.includes("\0"),
     )
   )
     return NextResponse.json(
@@ -48,10 +50,16 @@ export async function GET(_req, { params }) {
         { status: 415 },
       );
 
-    if (segments[0] === "avatars" && new URL(_req.url).searchParams.get("storage") === "minio") {
-      const stream = await getMinioClient().getObject(MINIO_BUCKET, segments.join("/"));
+    if (new URL(_req.url).searchParams.get("storage") === "minio") {
+      const stream = await getMinioClient().getObject(
+        MINIO_BUCKET,
+        segments.join("/"),
+      );
       return new NextResponse(Readable.toWeb(stream), {
-        headers: { "Content-Type": contentType, "Cache-Control": "no-store, max-age=0" },
+        headers: {
+          "Content-Type": contentType,
+          "Cache-Control": "no-store, max-age=0",
+        },
       });
     }
 

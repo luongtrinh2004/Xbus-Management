@@ -22,7 +22,6 @@ import {
   flexRender,
   getCoreRowModel,
   useReactTable,
-  getPaginationRowModel,
 } from "@tanstack/react-table";
 import { toast } from "react-toastify";
 import { useSession } from "next-auth/react";
@@ -443,7 +442,8 @@ const UserListTable = ({
     data: filteredData,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+    // The API already returns the requested page; render every returned row.
+    manualPagination: true,
   });
 
   return (

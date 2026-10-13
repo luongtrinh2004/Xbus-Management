@@ -92,12 +92,6 @@ const horizontalMenuData = [
         href: "/settings?section=qr",
         roles: ["assistant", "admin"],
       },
-      {
-        label: "Hàng đợi Bull Board",
-        href: "/bull-board",
-        icon: "tabler-cpu",
-        roles: ["admin"],
-      },
     ],
   },
 ];

@@ -1,4 +1,5 @@
 import sharp from "sharp";
+import { setTimeout as delay } from "node:timers/promises";
 
 const MENU_SCHEMA = {
   type: "OBJECT",
@@ -74,6 +75,8 @@ export async function extractMenuItemsWithGemini({ buffer, mimeType }) {
   const fallbackModel = process.env.GEMINI_FALLBACK_MODEL || "gemini-3.7-flash";
   const models = [...new Set([primaryModel, fallbackModel].filter(Boolean))];
   const retryCount = Math.max(0, Number(process.env.GEMINI_RETRY_COUNT || 2));
+  // One deadline covers all models, retries and response bodies.
+  const signal = AbortSignal.timeout(95_000);
   let lastError;
 
   for (const model of models) {
@@ -92,6 +95,7 @@ export async function extractMenuItemsWithGemini({ buffer, mimeType }) {
         `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`,
         {
           method: "POST",
+          signal,
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             contents: [
@@ -128,7 +132,10 @@ Chỉ trả dữ liệu đúng JSON theo schema đã cho; không thêm diễn gi
           }),
         },
       );
-      const result = await response.json().catch(() => ({}));
+      const result = await response.json().catch((error) => {
+        signal.throwIfAborted();
+        return {};
+      });
       if (response.ok) {
         const text = result?.candidates?.[0]?.content?.parts
           ?.map((part) => part.text || "")
@@ -142,11 +149,14 @@ Chỉ trả dữ liệu đúng JSON theo schema đã cho; không thêm diễn gi
       );
       const retryable = response.status === 429 || response.status === 503;
       if (!retryable || attempt === retryCount) break;
-      const retryAfter = Number(response.headers.get("retry-after"));
-      const delay = Number.isFinite(retryAfter)
-        ? retryAfter * 1000
-        : 1000 * 2 ** attempt;
-      await new Promise((resolve) => setTimeout(resolve, delay));
+      const retryAfterHeader = response.headers.get("retry-after");
+      const retryAfter =
+        retryAfterHeader === null ? NaN : Number(retryAfterHeader);
+      const retryDelay =
+        Number.isFinite(retryAfter) && retryAfter >= 0
+          ? retryAfter * 1000
+          : 1000 * 2 ** attempt;
+      await delay(retryDelay, undefined, { signal });
     }
   }
   throw lastError || new Error("Gemini không thể đọc menu");

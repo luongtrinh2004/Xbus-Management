@@ -104,6 +104,8 @@ export default function AuditLogsPage() {
         const response = await fetch(`/api/audit-logs?${params.toString()}`);
         const result = await response.json();
         if (!response.ok) throw new Error(result.error);
+        if (result.warning)
+          toast.warning(result.warning, { toastId: "plane-audit-unavailable" });
 
         setLogs(result.logs || []);
         setTotal(result.pagination?.total || 0);
@@ -167,6 +169,7 @@ export default function AuditLogsPage() {
       const res = await fetch(`/api/audit-logs?${params.toString()}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
+      if (data.warning) throw new Error(data.warning);
 
       const exportLogs = data.logs || [];
       if (!exportLogs.length) {
@@ -223,7 +226,8 @@ export default function AuditLogsPage() {
                 Lịch sử hoạt động
               </Typography>
               <Typography variant="caption" color="text.secondary">
-                Theo dõi đầy đủ thao tác quản trị và hoạt động của toàn thể nhân sự
+                Theo dõi đầy đủ thao tác quản trị và hoạt động của toàn thể nhân
+                sự
               </Typography>
             </Box>
           </Box>
@@ -294,12 +298,11 @@ export default function AuditLogsPage() {
               (option?.name || option) === (val?.name || val)
             }
             value={
-              actor
-                ? actorOptions.find((o) => o.name === actor) || actor
-                : null
+              actor ? actorOptions.find((o) => o.name === actor) || actor : null
             }
             onChange={(_, newValue) => {
-              const val = typeof newValue === "string" ? newValue : newValue?.name || "";
+              const val =
+                typeof newValue === "string" ? newValue : newValue?.name || "";
               setActor(val);
               setPage(1);
             }}
@@ -444,7 +447,9 @@ export default function AuditLogsPage() {
           />
 
           {/* Cụm nút Đặt lại & Đếm kết quả */}
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, ml: "auto" }}>
+          <Box
+            sx={{ display: "flex", alignItems: "center", gap: 1.5, ml: "auto" }}
+          >
             {isFiltered && (
               <Button
                 variant="tonal"
@@ -470,9 +475,17 @@ export default function AuditLogsPage() {
       <Divider />
 
       {loading ? (
-        <Box display="flex" justifyContent="center" alignItems="center" py={12} gap={2}>
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          py={12}
+          gap={2}
+        >
           <CircularProgress size={32} />
-          <Typography color="text.secondary">Đang tải lịch sử hoạt động...</Typography>
+          <Typography color="text.secondary">
+            Đang tải lịch sử hoạt động...
+          </Typography>
         </Box>
       ) : (
         <TableContainer>
@@ -492,12 +505,17 @@ export default function AuditLogsPage() {
                 logs.map((log) => (
                   <TableRow key={log.id} hover>
                     <TableCell sx={{ whiteSpace: "nowrap" }}>
-                      <Typography variant="body2" sx={{ fontWeight: 500, color: "text.primary" }}>
+                      <Typography
+                        variant="body2"
+                        sx={{ fontWeight: 500, color: "text.primary" }}
+                      >
                         {formatTime(log.timestamp || log.createdAt)}
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 2 }}
+                      >
                         <CustomAvatar
                           src={
                             log.actorAvatar ||
@@ -510,7 +528,11 @@ export default function AuditLogsPage() {
                           size={34}
                           alt={log.adminName}
                         />
-                        <Typography variant="body2" fontWeight={600} color="text.primary">
+                        <Typography
+                          variant="body2"
+                          fontWeight={600}
+                          color="text.primary"
+                        >
                           {log.adminName}
                         </Typography>
                       </Box>
@@ -538,7 +560,10 @@ export default function AuditLogsPage() {
                       />
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body2" sx={{ fontWeight: 500, color: "text.secondary" }}>
+                      <Typography
+                        variant="body2"
+                        sx={{ fontWeight: 500, color: "text.secondary" }}
+                      >
                         {targetLabels[log.targetType] || log.targetType || "—"}
                       </Typography>
                     </TableCell>
@@ -552,7 +577,10 @@ export default function AuditLogsPage() {
                             cursor: "pointer",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
-                            "&:hover": { color: "primary.main", textDecoration: "underline" },
+                            "&:hover": {
+                              color: "primary.main",
+                              textDecoration: "underline",
+                            },
                           }}
                         >
                           {log.details || "—"}
@@ -564,13 +592,27 @@ export default function AuditLogsPage() {
               ) : (
                 <TableRow>
                   <TableCell colSpan={6} align="center">
-                    <Box py={8} display="flex" flexDirection="column" alignItems="center" gap={1}>
-                      <i className="tabler-clipboard-x text-4xl text-secondary" style={{ opacity: 0.5 }} />
-                      <Typography variant="body1" fontWeight={600} color="text.secondary">
+                    <Box
+                      py={8}
+                      display="flex"
+                      flexDirection="column"
+                      alignItems="center"
+                      gap={1}
+                    >
+                      <i
+                        className="tabler-clipboard-x text-4xl text-secondary"
+                        style={{ opacity: 0.5 }}
+                      />
+                      <Typography
+                        variant="body1"
+                        fontWeight={600}
+                        color="text.secondary"
+                      >
                         Không tìm thấy hoạt động nào phù hợp
                       </Typography>
                       <Typography variant="caption" color="text.disabled">
-                        Hãy thử điều chỉnh hoặc xóa các điều kiện lọc thời gian, vai trò, hành động
+                        Hãy thử điều chỉnh hoặc xóa các điều kiện lọc thời gian,
+                        vai trò, hành động
                       </Typography>
                       {isFiltered && (
                         <Button
@@ -615,7 +657,13 @@ export default function AuditLogsPage() {
         <DialogContent dividers>
           {selectedLog && (
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
                 <Typography variant="caption" color="text.secondary">
                   Thời gian:
                 </Typography>
@@ -624,7 +672,13 @@ export default function AuditLogsPage() {
                 </Typography>
               </Box>
 
-              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
                 <Typography variant="caption" color="text.secondary">
                   Người thực hiện:
                 </Typography>
@@ -647,7 +701,13 @@ export default function AuditLogsPage() {
                 </Box>
               </Box>
 
-              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
                 <Typography variant="caption" color="text.secondary">
                   Vai trò:
                 </Typography>
@@ -665,7 +725,13 @@ export default function AuditLogsPage() {
                 />
               </Box>
 
-              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
                 <Typography variant="caption" color="text.secondary">
                   Hành động:
                 </Typography>
@@ -677,21 +743,38 @@ export default function AuditLogsPage() {
                 />
               </Box>
 
-              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
                 <Typography variant="caption" color="text.secondary">
                   Đối tượng tác động:
                 </Typography>
                 <Typography variant="body2" fontWeight={600}>
-                  {targetLabels[selectedLog.targetType] || selectedLog.targetType || "—"}
+                  {targetLabels[selectedLog.targetType] ||
+                    selectedLog.targetType ||
+                    "—"}
                 </Typography>
               </Box>
 
               {selectedLog.ip && (
-                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
                   <Typography variant="caption" color="text.secondary">
                     Địa chỉ IP:
                   </Typography>
-                  <Typography variant="caption" sx={{ fontFamily: "monospace" }}>
+                  <Typography
+                    variant="caption"
+                    sx={{ fontFamily: "monospace" }}
+                  >
                     {selectedLog.ip}
                   </Typography>
                 </Box>
@@ -700,7 +783,11 @@ export default function AuditLogsPage() {
               <Divider sx={{ my: 0.5 }} />
 
               <Box>
-                <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 0.75 }}>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ display: "block", mb: 0.75 }}
+                >
                   Nội dung chi tiết:
                 </Typography>
                 <Box
@@ -714,7 +801,14 @@ export default function AuditLogsPage() {
                     overflowY: "auto",
                   }}
                 >
-                  <Typography variant="body2" sx={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere", lineHeight: 1.6 }}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      whiteSpace: "pre-wrap",
+                      overflowWrap: "anywhere",
+                      lineHeight: 1.6,
+                    }}
+                  >
                     {selectedLog.details || "Không có chi tiết bổ sung"}
                   </Typography>
                 </Box>
@@ -723,7 +817,11 @@ export default function AuditLogsPage() {
           )}
         </DialogContent>
         <DialogActions>
-          <Button variant="tonal" color="secondary" onClick={() => setSelectedLog(null)}>
+          <Button
+            variant="tonal"
+            color="secondary"
+            onClick={() => setSelectedLog(null)}
+          >
             Đóng
           </Button>
         </DialogActions>
