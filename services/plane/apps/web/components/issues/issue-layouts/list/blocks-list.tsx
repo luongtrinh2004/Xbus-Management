@@ -11,6 +11,7 @@ import type { TIssue, IIssueDisplayProperties, TIssueMap, TGroupedIssues } from 
 import type { TSelectionHelper } from "@/hooks/use-multiple-select";
 // types
 import { IssueBlockRoot } from "./block-root";
+import { getRootListIssueIds } from "./root-issues";
 import type { TRenderQuickActions } from "./list-view-types";
 
 interface Props {
@@ -18,7 +19,9 @@ interface Props {
   issuesMap: TIssueMap;
   groupId: string;
   canEditProperties: (projectId: string | undefined) => boolean;
-  updateIssue: ((projectId: string | null, issueId: string, data: Partial<TIssue>) => Promise<void>) | undefined;
+  updateIssue:
+    | ((projectId: string | null, issueId: string, data: Partial<TIssue>) => Promise<void>)
+    | undefined;
   quickActions: TRenderQuickActions;
   displayProperties: IIssueDisplayProperties | undefined;
   containerRef: MutableRefObject<HTMLDivElement | null>;
@@ -44,11 +47,13 @@ export function IssueBlocksList(props: Props) {
     isEpic = false,
   } = props;
 
+  const rootIssueIds = getRootListIssueIds(issueIds || [], issuesMap);
+
   return (
     <div className="relative h-full w-full">
       {issueIds &&
         issueIds.length > 0 &&
-        issueIds.map((issueId: string, index: number) => (
+        rootIssueIds.map((issueId: string, index: number) => (
           <IssueBlockRoot
             key={issueId}
             issueId={issueId}
@@ -62,7 +67,7 @@ export function IssueBlocksList(props: Props) {
             containerRef={containerRef}
             selectionHelpers={selectionHelpers}
             groupId={groupId}
-            isLastChild={index === issueIds.length - 1}
+            isLastChild={index === rootIssueIds.length - 1}
             isDragAllowed={isDragAllowed}
             canDropOverIssue={canDropOverIssue}
             isEpic={isEpic}

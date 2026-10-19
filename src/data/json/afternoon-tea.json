@@ -2,39 +2,15 @@
   "menuImageUrl": "",
   "invitations": [
     {
-      "id": "tea_1791828231108",
+      "id": "tea_1792390933770",
       "type": "afternoon-tea",
       "title": "Mời trà chiều",
-      "scheduledAt": "2026-10-13T14:00",
-      "note": "ss",
-      "createdBy": "usr_024",
-      "createdAt": "2026-10-12T18:03:51.108Z",
+      "scheduledAt": "2026-10-19T14:00",
+      "note": "ssss",
+      "createdBy": "usr_admin_001",
+      "createdAt": "2026-10-19T06:22:13.771Z",
       "registrations": [],
-      "menus": [
-        {
-          "id": "menu_1791828245429",
-          "shop": "mixue",
-          "imageUrl": "/api/media/afternoon-tea/2026-10-13/mixue/menu-1791828245419.jpeg",
-          "checksum": "ab627c65389e1d9ec0e4cd8a3fe91639254e0f15ac2122e93b772043ae068996",
-          "catalogId": "menu_catalog_1791823408170",
-          "uploadedBy": "usr_024",
-          "uploadedAt": "2026-10-12T18:04:05.429Z"
-        }
-      ],
-      "orders": [
-        {
-          "userId": "usr_024",
-          "shop": "mixue",
-          "menuItemId": "menu_item_1791823408170_0",
-          "drink": "Sữa tươi trân châu đường đen",
-          "size": "",
-          "price": 25000,
-          "updatedAt": "2026-10-12T18:16:10.074Z"
-        }
-      ],
-      "ordersLocked": true,
-      "ordersLockedAt": "2026-10-12T18:18:14.239Z",
-      "ordersLockedBy": "usr_admin_001"
+      "menus": []
     }
   ],
   "menuCatalog": [

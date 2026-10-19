@@ -104,22 +104,33 @@ export async function POST(req) {
       checksum,
     });
     let catalog = existingCatalog;
-    if (!catalog) {
+    if (!catalog || catalog.status === "extraction_failed") {
       const aiImage = await optimizeMenuImageForGemini({
         buffer: fileBuffer,
         mimeType: file.type,
       });
-      const items = await extractMenuItemsWithGemini(aiImage);
+      let items = [];
+      let status = "pending_review";
+      try {
+        items = await extractMenuItemsWithGemini(aiImage);
+        if (!items.length) status = "extraction_failed";
+      } catch (error) {
+        // Image storage succeeded; extraction must not prevent manual ordering.
+        console.error("[AfternoonTea Menu Extraction]", error);
+        status = "extraction_failed";
+      }
+      const previousCatalog = catalog;
       catalog = {
-        id: `menu_catalog_${Date.now()}`,
+        id: previousCatalog?.id || `menu_catalog_${Date.now()}`,
         checksum,
         imageUrl,
         items,
-        status: "pending_review",
-        createdAt: new Date().toISOString(),
+        status,
+        createdAt: previousCatalog?.createdAt || new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      data.menuCatalog.push(catalog);
+      if (previousCatalog) Object.assign(previousCatalog, catalog);
+      else data.menuCatalog.push(catalog);
     } else {
       // Reuploads migrate legacy catalog images to the shared checksum object.
       catalog.imageUrl = imageUrl;
@@ -153,7 +164,7 @@ export async function POST(req) {
     console.error("[AfternoonTea Menu]", error);
     if (["TimeoutError", "AbortError"].includes(error?.name)) {
       return NextResponse.json(
-        { error: "Gemini đọc menu quá lâu. Vui lòng thử lại sau ít phút." },
+        { error: "Hệ thống đọc menu quá lâu. Vui lòng thử lại sau ít phút." },
         { status: 503 },
       );
     }
@@ -164,8 +175,8 @@ export async function POST(req) {
     return NextResponse.json(
       {
         error: isGeminiBusy
-          ? "Gemini đang quá tải. Hệ thống đã tự thử lại; vui lòng thử lại sau ít phút."
-          : error?.message || "Không thể tải ảnh menu",
+          ? "Hệ thống đang quá tải. Hệ thống đã tự thử lại; vui lòng thử lại sau ít phút."
+          : "Không thể tải ảnh menu. Vui lòng thử lại.",
       },
       { status: isGeminiBusy ? 503 : 500 },
     );

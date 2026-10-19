@@ -48,7 +48,11 @@ export const HeaderGroupByCard = observer(function HeaderGroupByCard(props: IHea
   const { getStateById } = useProjectState();
   const state = columns && props.groupBy === "state" ? getStateById(props.groupID) : undefined;
   const stateColor =
-    state?.group === "backlog" ? "#6b7280" : state?.group === "unstarted" ? "#111827" : state?.color;
+    state?.group === "backlog"
+      ? "#6b7280"
+      : state?.group === "unstarted"
+        ? "#111827"
+        : state?.color;
   const {
     groupID,
     icon,
@@ -141,12 +145,14 @@ export const HeaderGroupByCard = observer(function HeaderGroupByCard(props: IHea
           onClick={() => handleCollapsedGroups(groupID)}
         >
           <div
-            className="line-clamp-1 inline-block truncate font-medium text-primary"
+            className="line-clamp-1 inline-block truncate font-medium leading-5 text-primary"
             style={stateColor ? { color: stateColor } : undefined}
           >
             {title}
           </div>
-          <div className="pl-2 text-13 font-medium text-tertiary">{count || 0}</div>
+          <div className="flex shrink-0 items-center pl-2 text-13 font-medium leading-5 text-tertiary">
+            {count || 0}
+          </div>
           <div className="px-2.5"></div>
         </div>
 
@@ -183,12 +189,16 @@ export const HeaderGroupByCard = observer(function HeaderGroupByCard(props: IHea
             <button
               type="button"
               aria-label={t("common.add")}
-              className="flex h-5 w-5 flex-shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-xs transition-all hover:bg-layer-1"
+              className={cn(
+                "flex flex-shrink-0 cursor-pointer items-center justify-center gap-1 rounded-xs transition-all hover:bg-layer-1",
+                columns ? "h-7 px-2 text-13" : "h-5 w-5",
+              )}
               onClick={() => {
                 setIsOpen(true);
               }}
             >
               <AddOutline width={14} />
+              {columns && <span>{t("common.new_issue")}</span>}
             </button>
           ))}
 

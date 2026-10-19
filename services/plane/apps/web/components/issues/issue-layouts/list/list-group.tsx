@@ -358,6 +358,7 @@ export const ListGroup = observer(function ListGroup(props: Props) {
             ))}
 
           {enableIssueQuickAdd &&
+            !columns &&
             !disableIssueCreation &&
             !isGroupByCreatedBy &&
             !isCompletedCycle &&

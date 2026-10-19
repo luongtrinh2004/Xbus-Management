@@ -390,7 +390,7 @@ export default function AfternoonTeaPage() {
     const progressTimer = window.setInterval(() => {
       setUploadProgress((current) => {
         const next = Math.min(current + 5, 90);
-        if (next >= 65) setUploadStage("Gemini đang đọc món, size và giá...");
+        if (next >= 65) setUploadStage("Hệ thống đang đọc món, size và giá...");
         else if (next >= 35) setUploadStage("Đang kiểm tra menu đã lưu...");
         return next;
       });
@@ -411,10 +411,19 @@ export default function AfternoonTeaPage() {
       if (response.ok) {
         setShop("");
         setMenuFile(null);
-        if (result.catalog?.reused && result.catalog?.status === "approved") {
+        if (result.catalog?.status === "extraction_failed") {
+          toast.info(
+            "Đã tải ảnh menu. Hệ thống chưa đọc được danh sách món; bạn vẫn có thể xem ảnh, chọn quán, nhập món và chọn size.",
+          );
+        } else if (
+          result.catalog?.reused &&
+          result.catalog?.status === "approved"
+        ) {
           toast.success("Đã dùng lại menu đã lưu trước đó");
         } else {
-          toast.success("Gemini đã đọc menu. Hãy kiểm tra trước khi xác nhận.");
+          toast.success(
+            "Hệ thống đã đọc menu. Hãy kiểm tra trước khi xác nhận.",
+          );
           setMenuReviewDrafts({
             [result.menu?.id]: {
               shop: result.menu?.shop || shop,
@@ -519,7 +528,13 @@ export default function AfternoonTeaPage() {
         },
       }));
       setReviewImageFile(null);
-      toast.success("Đã đọc ảnh mới. Hãy kiểm tra lại món trước khi lưu.");
+      if (result.catalog?.status === "extraction_failed") {
+        toast.info(
+          "Đã thay ảnh menu. Hệ thống chưa đọc được danh sách món; bạn vẫn có thể xem ảnh, chọn quán, nhập món và chọn size.",
+        );
+      } else {
+        toast.success("Đã đọc ảnh mới. Hãy kiểm tra lại món trước khi lưu.");
+      }
       load();
     } catch {
       toast.error("Không thể đọc ảnh menu mới");
@@ -1227,7 +1242,15 @@ export default function AfternoonTeaPage() {
                           }
                           onClick={() =>
                             setConfirmation({
-                              title: "Chốt danh sách món",
+                              title: isOrdersLocked
+                                ? "Mở chốt danh sách món"
+                                : "Chốt danh sách món",
+                              confirmText: isOrdersLocked
+                                ? "Mở chốt món"
+                                : "Chốt món",
+                              confirmColor: isOrdersLocked
+                                ? "primary"
+                                : "warning",
                               message: isOrdersLocked
                                 ? "Mở chốt để tất cả người dùng có thể đặt hoặc sửa món trở lại?"
                                 : "Sau khi chốt, người dùng thường sẽ không thể sửa quán, món, size hoặc ghi chú. Admin và Trợ lý vẫn có thể chỉnh sửa.",
@@ -1449,7 +1472,15 @@ export default function AfternoonTeaPage() {
                             }
                             onClick={() =>
                               setConfirmation({
-                                title: "Chốt danh sách món",
+                                title: isOrdersLocked
+                                  ? "Mở chốt danh sách món"
+                                  : "Chốt danh sách món",
+                                confirmText: isOrdersLocked
+                                  ? "Mở chốt món"
+                                  : "Chốt món",
+                                confirmColor: isOrdersLocked
+                                  ? "primary"
+                                  : "warning",
                                 message: isOrdersLocked
                                   ? "Mở chốt để tất cả người dùng có thể đặt hoặc sửa món trở lại?"
                                   : "Sau khi chốt, người dùng thường sẽ không thể sửa quán, món, size hoặc ghi chú. Admin và Trợ lý vẫn có thể chỉnh sửa.",
@@ -1555,17 +1586,19 @@ export default function AfternoonTeaPage() {
                                 editingOrders[key] || !displayedOrder.drink;
                               const isCurrentUser =
                                 user.id === session?.user?.id;
-                              const approvedMenus = (
+                              const orderableMenus = (
                                 activeInvitation.menus || []
-                              ).filter(
-                                (menu) => menu.menuStatus === "approved",
+                              ).filter((menu) =>
+                                ["approved", "extraction_failed"].includes(
+                                  menu.menuStatus,
+                                ),
                               );
                               const selectedShop =
                                 draft.shop ||
-                                (approvedMenus.length === 1
-                                  ? approvedMenus[0].shop
+                                (orderableMenus.length === 1
+                                  ? orderableMenus[0].shop
                                   : "");
-                              const selectedMenu = approvedMenus.find(
+                              const selectedMenu = orderableMenus.find(
                                 (menu) => menu.shop === selectedShop,
                               );
                               const selectedItem = (
@@ -1732,7 +1765,7 @@ export default function AfternoonTeaPage() {
                                           <MenuItem value="">
                                             <em>Chưa chọn quán</em>
                                           </MenuItem>
-                                          {approvedMenus.map((menu) => (
+                                          {orderableMenus.map((menu) => (
                                             <MenuItem
                                               key={menu.id}
                                               value={menu.shop}
@@ -2436,8 +2469,15 @@ export default function AfternoonTeaPage() {
         fullWidth
         maxWidth="xl"
       >
-        <DialogTitle>
+        <DialogTitle sx={{ position: "relative", pr: 14 }}>
           Kiểm tra menu các quán
+          <IconButton
+            aria-label="Đóng kiểm tra menu"
+            onClick={() => setReviewingMenu(null)}
+            sx={{ position: "absolute", top: 12, right: 12 }}
+          >
+            <i className="tabler-x" />
+          </IconButton>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
             Mỗi quán là một tab. Bạn có thể đổi tên, thay ảnh và kiểm tra lại
             món, size, giá của từng menu.
@@ -2968,7 +3008,8 @@ export default function AfternoonTeaPage() {
         open={Boolean(confirmation)}
         title={confirmation?.title}
         message={confirmation?.message}
-        confirmText="Xóa"
+        confirmText={confirmation?.confirmText ?? "Xóa"}
+        confirmColor={confirmation?.confirmColor ?? "error"}
         onClose={() => setConfirmation(null)}
         onConfirm={async () => {
           const action = confirmation?.action;
