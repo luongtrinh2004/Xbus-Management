@@ -4,6 +4,7 @@
  * See the LICENSE file for details.
  */
 
+import { IssueCustomFields } from "@/components/issues/custom-fields/detail";
 import { observer } from "mobx-react";
 // i18n
 import { useTranslation } from "@plane/i18n";
@@ -229,6 +230,7 @@ export const PeekOverviewProperties = observer(function PeekOverviewProperties(p
         <SidebarPropertyListItem icon={LabelsOutline} label={t("common.labels")}>
           <IssueLabel workspaceSlug={workspaceSlug} projectId={projectId} issueId={issueId} disabled={disabled} />
         </SidebarPropertyListItem>
+        <IssueCustomFields workspaceSlug={workspaceSlug} projectId={projectId} issueId={issueId} disabled={disabled} />
       </div>
     </div>
   );

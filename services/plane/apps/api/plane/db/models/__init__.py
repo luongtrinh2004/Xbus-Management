@@ -47,7 +47,7 @@ from .issue import (
     IssueDescriptionVersion,
 )
 from .module import Module, ModuleIssue, ModuleLink, ModuleMember, ModuleUserProperties
-from .notification import EmailNotificationLog, Notification, UserNotificationPreference
+from .notification import EmailNotificationLog, IssueDueReminder, Notification, UserNotificationPreference
 from .page import Page, PageLabel, PageLog, ProjectPage, PageVersion
 from .project import (
     Project,
@@ -90,3 +90,5 @@ from .device import Device, DeviceSession
 from .sticky import Sticky
 
 from .description import Description, DescriptionVersion
+
+from .custom_field import IssueCustomField, IssueCustomFieldValue

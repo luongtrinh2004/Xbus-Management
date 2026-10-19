@@ -144,3 +144,98 @@ VITE_XBUS_EMBEDDED=true pnpm turbo run build --filter=web
 
 Các thành phần mới nên dùng `useTranslation` với khóa dịch trong
 `packages/i18n/src/locales`, thay vì viết thêm nhãn tiếng Anh trực tiếp.
+
+## Nhắc hạn công việc (Module 7 / F1005)
+
+Tác vụ `plane.bgtasks.issue_due_reminder_task.send_issue_due_reminders` được
+Celery Beat gọi mỗi giờ. Công việc còn mở được nhắc trong Inbox vào ngày trước
+hạn và một lần sau khi quá hạn. Ngày được tính theo `XBUS_WORK_TIME_ZONE`
+(mặc định `Asia/Ho_Chi_Minh`); phạm vi workspace lấy từ `XBUS_WORKSPACE_SLUG`
+(mặc định `xbus-office`). Lịch chạy dùng ngày lịch, không phải khoảng 24 giờ.
+Nếu worker ngừng chạy vào ngày trước hạn, hệ thống không gửi bù thông báo
+“sắp đến hạn” đã hết ý nghĩa; công việc quá hạn vẫn được nhận diện khi chạy lại.
+
+Chỉ assignee còn hoạt động và còn là thành viên hoạt động của cả workspace
+và project nhận nhắc hạn. Không gửi cho công việc nháp, tiếp nhận chưa xử lý,
+đã hoàn thành, hủy, lưu trữ hoặc xóa. Người theo dõi không tự nhận nhắc hạn.
+Mỗi người nhận có tối đa một thông báo cho từng hạn và loại nhắc. Đổi sang hạn
+mới cho phép nhận nhắc mới; đọc/lưu trữ/xóa mềm thông báo không tạo lại nhắc cũ.
+Đợt này bổ sung kênh trong ứng dụng; chưa bổ sung email/push nhắc hạn.
+
+Migration `0123_issue_due_reminder` chỉ thêm bảng ghi nhận nhắc hạn với ràng buộc
+unique; không sửa project, task, thành viên hay lịch sử. Bảng này độc lập với
+thông báo để xóa thông báo không làm gửi lại nhắc cũ.
+Cần chạy migration trước khi khởi động API/worker mới và khởi động lại Beat
+để nạp lịch. Không gọi tác vụ mới với schema cũ. Có thể rollback mã ứng dụng
+và giữ bảng bổ sung; chỉ gỡ bảng sau khi API/worker mới đã dừng sử dụng nó.
+Gỡ bảng sẽ mất lịch sử chống gửi trùng, nên cần giữ lại nếu dự định bật lại.
+
+Kiểm thử backend (môi trường cô lập theo hướng dẫn trong source Plane):
+
+```bash
+cd services/plane
+docker compose -p xbus-ba-tests -f docker-compose-test.yml run --rm api-tests \
+  pytest plane/tests/contract/bgtasks/test_issue_due_reminders.py \
+  plane/tests/unit/serializers/test_issue_date_range.py
+```
+
+## Custom field theo Project (Module 7 / F0601–F0603)
+
+Giữ cấu trúc Workspace → Project → Work item và các vai trò Plane. Custom
+field là model mở rộng trong database Plane, không tạo hệ công việc song song
+trong XBus. Model `IssueCustomField` gắn Project; `IssueCustomFieldValue` gắn
+Issue và trường tương ứng. Migration `0124_issue_custom_fields` chỉ thêm bảng
+và constraint, không sửa dữ liệu work item hiện có.
+
+Trong bảng List nhúng, nút `+` ở cuối hàng tiêu đề mở quản lý trường. Có thể tạo
+text, number, date, single-select, multi-select và people; trường đang hiển thị
+trở thành cột sửa trực tiếp. Chi tiết công việc cũng có phần trường tùy chỉnh.
+Số hỗ trợ số thường, phần trăm và tiền VND; giá trị lưu vẫn là số. Giá trị ngày
+lưu theo `YYYY-MM-DD`, không đổi ngày qua múi giờ khi hiển thị.
+
+Tên/màu/thứ tự/hiển thị lựa chọn có thể thay đổi mà giữ nguyên ID. Trường và
+lựa chọn bị ẩn vẫn giữ giá trị cũ. Không cho đổi kiểu trường hoặc loại bỏ ID
+lựa chọn đã tạo; muốn đổi kiểu cần tạo trường mới để tránh diễn giải sai dữ liệu.
+Admin/Member có thể quản lý trường và giá trị; Guest chỉ đọc theo phạm vi
+công việc được xem của Plane. API kiểm tra membership đang hoạt động ở cả
+workspace và project, không chỉ dựa vào guard trên UI.
+
+Các endpoint dùng phiên đăng nhập Plane hiện có, dưới:
+
+```text
+/api/workspaces/{slug}/projects/{project_id}/custom-fields/
+/api/workspaces/{slug}/projects/{project_id}/custom-fields/{field_id}/
+/api/workspaces/{slug}/projects/{project_id}/custom-field-values/?issues={id1},{id2}
+/api/workspaces/{slug}/projects/{project_id}/issues/{issue_id}/custom-field-values/
+```
+
+Danh sách trường hỗ trợ GET/POST, chi tiết hỗ trợ GET/PATCH. Giá trị một công
+việc hỗ trợ GET/PUT với payload `{"values":{"field_uuid":"value"}}`; PUT chỉ
+cập nhật các trường được gửi, `null` xóa giá trị. Cập nhật nhiều trường cùng
+request có transaction; nếu một giá trị không hợp lệ, không lưu phần còn lại.
+Thay đổi được ghi vào activity và thông báo trong ứng dụng cho assignee hoặc
+subscriber còn đủ quyền. Chưa bổ sung email riêng cho sự kiện custom field.
+
+List tải giá trị theo lô và chia request tối đa 100 work item (API giới hạn
+200). Store được dùng chung với chi tiết, tuần tự hóa sửa nhiều ô trên cùng
+công việc và bỏ qua kết quả refresh cũ sau khi lưu. Làm mới định kỳ 30 giây;
+chưa triển khai WebSocket cho custom field.
+
+Chưa bao gồm thư viện trường xuyên project, formula, mandatory, lọc/sắp xếp/
+nhóm theo custom field, trường trong form tạo task, CSV import/export.
+
+Kiểm thử:
+
+```bash
+cd services/plane
+pnpm --filter web test:custom-fields
+pnpm --filter @plane/i18n test:vi
+pnpm --filter web check:types
+VITE_XBUS_EMBEDDED=true pnpm turbo run build --filter=web
+```
+
+Backend: chạy `plane/tests/contract/app/test_issue_custom_fields.py` trong
+stack test cô lập theo hướng dẫn của Plane. Migration cần chạy trước API mới.
+Khi rollback mã ứng dụng, giữ bảng custom field để giữ giá trị đã nhập; gỡ
+migration `0124` sẽ xóa các bảng custom field nên chỉ thực hiện nếu đã có bản
+sao lưu và xác định rõ cách giữ/khôi phục dữ liệu đó.

@@ -335,9 +335,14 @@ CELERY_RESULT_SERIALIZER = "json"
 CELERY_ACCEPT_CONTENT = ["application/json"]
 
 
+# Calendar dates used by the XBus work module.
+XBUS_WORK_TIME_ZONE = os.environ.get("XBUS_WORK_TIME_ZONE", "Asia/Ho_Chi_Minh")
+XBUS_WORKSPACE_SLUG = os.environ.get("XBUS_WORKSPACE_SLUG", "xbus-office")
+
 CELERY_IMPORTS = (
     # scheduled tasks
     "plane.bgtasks.issue_automation_task",
+    "plane.bgtasks.issue_due_reminder_task",
     "plane.bgtasks.exporter_expired_task",
     "plane.bgtasks.file_asset_task",
     "plane.bgtasks.email_notification_task",

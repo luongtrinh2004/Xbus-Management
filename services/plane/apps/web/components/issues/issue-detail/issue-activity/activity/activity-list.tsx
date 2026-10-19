@@ -4,6 +4,7 @@
  * See the LICENSE file for details.
  */
 
+import { IssueCustomFieldActivity } from "@/components/issues/custom-fields/activity";
 import { observer } from "mobx-react";
 // helpers
 import { getValidKeysFromObject } from "@plane/utils";
@@ -52,6 +53,8 @@ export const IssueActivityItem = observer(function IssueActivityItem(props: TIss
 
   const activityField = getActivityById(activityId)?.field;
   switch (activityField) {
+    case "custom_field":
+      return <IssueCustomFieldActivity {...componentDefaultProps} />;
     case null: // default issue creation
       return <IssueDefaultActivity {...componentDefaultProps} />;
     case "state":

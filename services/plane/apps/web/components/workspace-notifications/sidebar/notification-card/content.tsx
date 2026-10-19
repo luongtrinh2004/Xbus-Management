@@ -7,6 +7,7 @@
 import type { ReactNode } from "react";
 // plane imports
 import type { TNotification } from "@plane/types";
+import { useTranslation } from "@plane/i18n";
 import {
   convertMinutesToHoursMinutesString,
   renderFormattedDate,
@@ -159,6 +160,7 @@ export function NotificationContent({
   projectId: string;
   renderCommentBox?: boolean;
 }) {
+  const { t } = useTranslation();
   const { data, triggered_by_details: triggeredBy } = notification;
   const notificationField = data?.issue_activity.field;
   const newValue = data?.issue_activity.new_value;
@@ -202,6 +204,23 @@ export function NotificationContent({
   // Determine if connector should be shown - prefer map value, fallback to function
   const showConnector =
     contentDetails?.showConnector !== undefined ? contentDetails.showConnector : shouldShowConnector(notificationField);
+
+  if (notificationField === "custom_field") {
+    return (
+      <>
+        {renderTriggerName()}
+        {t("custom_fields.changed", { name: newValue ?? "" })}
+      </>
+    );
+  }
+
+  if (notificationField === "due_soon" || notificationField === "overdue") {
+    return (
+      <span className="text-primary">
+        {t(`notification.due_reminder.${notificationField}`, { date: renderFormattedDate(newValue) })}
+      </span>
+    );
+  }
 
   return (
     <>

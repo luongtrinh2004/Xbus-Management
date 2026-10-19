@@ -1,4 +1,47 @@
 {
+  "custom_fields": {
+    "heading": "Custom fields",
+    "manage": "Manage custom fields",
+    "column": "Field",
+    "new": "New field",
+    "name": "Field name",
+    "type": "Field type",
+    "format": "Number format",
+    "options": "Options",
+    "color": "Option color",
+    "option_name": "Option name",
+    "move_up": "Move up",
+    "move_down": "Move down",
+    "visible": "Visible",
+    "add_option": "Add option",
+    "show_in_project": "Show in project",
+    "preserve_hint": "Hiding a field or option keeps its saved values. Field types cannot be changed.",
+    "close": "Close",
+    "save": "Save field",
+    "empty": "—",
+    "clear": "Clear",
+    "saving": "Saving…",
+    "autosave": "Changes are saved automatically",
+    "save_failed": "Could not save. Check the value and try again.",
+    "config_failed": "Could not save the field. Check its name and options.",
+    "load_failed": "Could not load custom fields. Refresh to retry.",
+    "changed": "updated field {name}",
+    "from": "from",
+    "to": "to",
+    "types": {
+      "text": "Text",
+      "number": "Number",
+      "date": "Date",
+      "single_select": "Single select",
+      "multi_select": "Multi select",
+      "people": "People"
+    },
+    "formats": {
+      "number": "Number",
+      "percent": "Percent",
+      "currency": "Currency (VND)"
+    }
+  },
   "show_more": "Show more",
   "project_settings_label": "Project settings",
   "cloud_maintenance_message": {

@@ -1,4 +1,47 @@
 {
+  "custom_fields": {
+    "heading": "Trường tùy chỉnh",
+    "manage": "Quản lý trường tùy chỉnh",
+    "column": "Trường",
+    "new": "Tạo trường",
+    "name": "Tên trường",
+    "type": "Kiểu trường",
+    "format": "Định dạng số",
+    "options": "Các lựa chọn",
+    "color": "Màu lựa chọn",
+    "option_name": "Tên lựa chọn",
+    "move_up": "Chuyển lên",
+    "move_down": "Chuyển xuống",
+    "visible": "Hiển thị",
+    "add_option": "Thêm lựa chọn",
+    "show_in_project": "Hiển thị trong dự án",
+    "preserve_hint": "Ẩn trường hoặc lựa chọn vẫn giữ giá trị đã lưu. Không thể đổi kiểu trường.",
+    "close": "Đóng",
+    "save": "Lưu trường",
+    "empty": "—",
+    "clear": "Xóa giá trị",
+    "saving": "Đang lưu…",
+    "autosave": "Thay đổi được lưu tự động",
+    "save_failed": "Không thể lưu. Kiểm tra giá trị rồi thử lại.",
+    "config_failed": "Không thể lưu trường. Kiểm tra tên và các lựa chọn.",
+    "load_failed": "Không thể tải trường tùy chỉnh. Làm mới để thử lại.",
+    "changed": "đã cập nhật trường {name}",
+    "from": "từ",
+    "to": "thành",
+    "types": {
+      "text": "Văn bản",
+      "number": "Số",
+      "date": "Ngày",
+      "single_select": "Chọn một",
+      "multi_select": "Chọn nhiều",
+      "people": "Nhân sự"
+    },
+    "formats": {
+      "number": "Số",
+      "percent": "Phần trăm",
+      "currency": "Tiền tệ (VND)"
+    }
+  },
   "show_more": "Xem thêm",
   "project_settings_label": "Cài đặt dự án",
   "cloud_maintenance_message": {

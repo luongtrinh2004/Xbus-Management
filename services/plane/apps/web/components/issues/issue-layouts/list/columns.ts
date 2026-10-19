@@ -1,8 +1,13 @@
 import type { IIssueDisplayProperties } from "@plane/types";
 
-export type ListColumn = { key: keyof IIssueDisplayProperties; label: string; width: number };
+export type ListColumn = {
+  key: keyof IIssueDisplayProperties | `custom:${string}`;
+  label: string;
+  width: number;
+  customFieldId?: string;
+};
 
-const COLUMNS: ListColumn[] = [
+const COLUMNS: (ListColumn & { key: keyof IIssueDisplayProperties })[] = [
   { key: "assignee", label: "common.assignees", width: 120 },
   { key: "due_date", label: "common.order_by.due_date", width: 150 },
   { key: "priority", label: "common.priority", width: 112 },
@@ -19,7 +24,7 @@ const COLUMNS: ListColumn[] = [
 
 export function getListColumns(
   properties: IIssueDisplayProperties | undefined,
-  capabilities: { modules: boolean; cycle: boolean; estimate: boolean; isEpic: boolean },
+  capabilities: { modules: boolean; cycle: boolean; estimate: boolean; isEpic: boolean }
 ): ListColumn[] {
   return COLUMNS.filter(({ key }) => {
     if (!properties?.[key]) return false;

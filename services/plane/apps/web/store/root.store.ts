@@ -5,6 +5,7 @@
  */
 
 import { enableStaticRendering } from "mobx-react";
+import { CustomFieldsStore } from "./custom-fields.store";
 // plane imports
 import { FALLBACK_LANGUAGE, setLanguage } from "@plane/i18n";
 import type { IWorkItemFilterStore } from "@plane/shared-state";
@@ -73,6 +74,7 @@ import type { IWorkspaceRootStore } from "./workspace";
 enableStaticRendering(typeof window === "undefined");
 
 export class CoreRootStore {
+  customFields: CustomFieldsStore;
   workspaceRoot: IWorkspaceRootStore;
   projectRoot: IProjectRootStore;
   memberRoot: IMemberRootStore;
@@ -122,6 +124,7 @@ export class CoreRootStore {
     this.issue = new IssueRootStore(this);
     this.state = new StateStore(this);
     this.label = new LabelStore(this);
+    this.customFields = new CustomFieldsStore();
     this.dashboard = new DashboardStore(this);
     this.multipleSelect = new MultipleSelectStore();
     this.projectInbox = new ProjectInboxStore(this);
@@ -157,6 +160,7 @@ export class CoreRootStore {
     this.issue = new IssueRootStore(this);
     this.state = new StateStore(this);
     this.label = new LabelStore(this);
+    this.customFields = new CustomFieldsStore();
     this.dashboard = new DashboardStore(this);
     this.projectInbox = new ProjectInboxStore(this);
     this.projectPages = new ProjectPageStore(this);

@@ -1,5 +1,9 @@
 {
   "notification": {
+    "due_reminder": {
+      "due_soon": "This work item is due tomorrow ({date}).",
+      "overdue": "This work item is overdue (due {date})."
+    },
     "label": "Inbox",
     "page_label": "{workspace} - Inbox",
     "options": {

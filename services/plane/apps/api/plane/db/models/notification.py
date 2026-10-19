@@ -2,6 +2,8 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # See the LICENSE file for details.
 
+import uuid
+
 # Django imports
 from django.conf import settings
 from django.db import models
@@ -147,3 +149,22 @@ class EmailNotificationLog(BaseModel):
         verbose_name_plural = "Email Notification Logs"
         db_table = "email_notification_logs"
         ordering = ("-created_at",)
+
+
+class IssueDueReminder(models.Model):
+    """Delivery ledger independent of a recipient deleting their notification."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    issue = models.ForeignKey("db.Issue", on_delete=models.CASCADE, related_name="due_reminders")
+    receiver = models.ForeignKey("db.User", on_delete=models.CASCADE, related_name="due_reminders")
+    target_date = models.DateField()
+    kind = models.CharField(max_length=16, choices=[("due_soon", "Due soon"), ("overdue", "Overdue")])
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "issue_due_reminders"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["issue", "receiver", "target_date", "kind"], name="unique_issue_due_reminder",
+            ),
+        ]

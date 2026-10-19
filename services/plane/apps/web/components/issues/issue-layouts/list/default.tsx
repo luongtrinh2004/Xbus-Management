@@ -4,7 +4,10 @@
  * See the LICENSE file for details.
  */
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useParams } from "next/navigation";
+import { useCustomFields } from "@/hooks/store/use-custom-fields";
+import { CustomFieldManager } from "@/components/issues/custom-fields/manager";
 import { combine } from "@atlaskit/pragmatic-drag-and-drop/combine";
 import { autoScrollForElements } from "@atlaskit/pragmatic-drag-and-drop-auto-scroll/element";
 import { useTranslation } from "@plane/i18n";
@@ -46,18 +49,13 @@ export interface IList {
   issuesMap: TIssueMap;
   group_by: TIssueGroupByOptions | null;
   orderBy: TIssueOrderByOptions | undefined;
-  updateIssue:
-    | ((projectId: string | null, issueId: string, data: Partial<TIssue>) => Promise<void>)
-    | undefined;
+  updateIssue: ((projectId: string | null, issueId: string, data: Partial<TIssue>) => Promise<void>) | undefined;
   quickActions: TRenderQuickActions;
   displayProperties: IIssueDisplayProperties | undefined;
   enableIssueQuickAdd: boolean;
   showEmptyGroup?: boolean;
   canEditProperties: (projectId: string | undefined) => boolean;
-  quickAddCallback?: (
-    projectId: string | null | undefined,
-    data: TIssue,
-  ) => Promise<TIssue | undefined>;
+  quickAddCallback?: (projectId: string | null | undefined, data: TIssue) => Promise<TIssue | undefined>;
   disableIssueCreation?: boolean;
   handleOnDrop: (source: GroupDropLocation, destination: GroupDropLocation) => Promise<void>;
   addIssuesToView?: (issueIds: string[]) => Promise<TIssue>;
@@ -94,15 +92,58 @@ export const List = observer(function List(props: IList) {
     isEpic = false,
   } = props;
 
+  const customFields = useCustomFields();
+  const { workspaceSlug, projectId } = useParams();
+  const slug = workspaceSlug?.toString();
+  const currentProjectId = projectId?.toString();
+  const [customFieldsError, setCustomFieldsError] = useState(false);
+  const issueIdsKey = Object.values(issuesMap)
+    .filter((issue) => issue.project_id === currentProjectId && !issue.tempId)
+    .map((issue) => issue.id)
+    .sort()
+    .join(",");
+  useEffect(() => {
+    if (!slug || !currentProjectId || isEpic) return;
+    let mounted = true;
+    const load = () =>
+      Promise.all([
+        customFields.loadFields(slug, currentProjectId),
+        customFields.loadValues(slug, currentProjectId, issueIdsKey.split(",").filter(Boolean), true),
+      ])
+        .then(() => {
+          if (mounted) setCustomFieldsError(false);
+        })
+        .catch(() => {
+          if (mounted) setCustomFieldsError(true);
+        });
+    void load();
+    const timer = setInterval(() => void load(), 30000);
+    return () => {
+      mounted = false;
+      clearInterval(timer);
+    };
+  }, [customFields, slug, currentProjectId, issueIdsKey, isEpic]);
   const columns =
     process.env.VITE_XBUS_EMBEDDED === "true"
-      ? getListColumns(displayProperties, {
-          modules: currentProjectDetails ? !!currentProjectDetails.module_view : true,
-          cycle: currentProjectDetails ? !!currentProjectDetails.cycle_view : true,
-          estimate:
-            !!currentProjectDetails && areEstimateEnabledByProjectId(currentProjectDetails.id),
-          isEpic,
-        })
+      ? [
+          ...getListColumns(displayProperties, {
+            modules: currentProjectDetails ? !!currentProjectDetails.module_view : true,
+            cycle: currentProjectDetails ? !!currentProjectDetails.cycle_view : true,
+            estimate: !!currentProjectDetails && areEstimateEnabledByProjectId(currentProjectDetails.id),
+            isEpic,
+          }),
+          ...(!isEpic && currentProjectId
+            ? customFields
+                .fields(currentProjectId)
+                .filter((field) => field.is_active)
+                .map((field) => ({
+                  key: `custom:${field.id}` as const,
+                  label: field.name,
+                  width: 160,
+                  customFieldId: field.id,
+                }))
+            : []),
+        ]
       : null;
   const propertyTracks = columns?.map(({ width }) => `${width}px`).join(" ") || "";
   const tableStyle = columns
@@ -134,14 +175,13 @@ export const List = observer(function List(props: IList) {
     return combine(
       autoScrollForElements({
         element,
-      }),
+      })
     );
   }, [containerRef]);
 
   if (!groups) return null;
 
-  const getGroupIndex = (groupId: string | undefined) =>
-    groups.findIndex(({ id }) => id === groupId);
+  const getGroupIndex = (groupId: string | undefined) => groups.findIndex(({ id }) => id === groupId);
 
   const is_list = group_by === null ? true : false;
 
@@ -163,6 +203,11 @@ export const List = observer(function List(props: IList) {
   return (
     <ListTableContext.Provider value={columns}>
       <div className="relative flex size-full flex-col">
+        {customFieldsError && (
+          <p role="alert" className="p-2 text-13 text-danger-primary">
+            {t("custom_fields.load_failed")}
+          </p>
+        )}
         {groups && (
           <MultipleSelectGroup
             containerRef={containerRef}
@@ -182,11 +227,20 @@ export const List = observer(function List(props: IList) {
                         <div className="asana-list-property-headings">
                           {columns.map((column) => (
                             <div key={column.key} role="columnheader">
-                              {t(column.label)}
+                              {"customFieldId" in column && column.customFieldId ? column.label : t(column.label)}
                             </div>
                           ))}
                         </div>
-                        <div aria-hidden="true" />
+                        <div>
+                          {slug && currentProjectId && !isEpic && canEditProperties(currentProjectId) && (
+                            <CustomFieldManager
+                              compact
+                              workspaceSlug={slug}
+                              projectId={currentProjectId}
+                              disabled={customFieldsError}
+                            />
+                          )}
+                        </div>
                       </div>
                     )}
                     {groups.map((group: IGroupByColumn) => (

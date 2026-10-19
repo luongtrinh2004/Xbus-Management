@@ -1,5 +1,9 @@
 {
   "notification": {
+    "due_reminder": {
+      "due_soon": "Công việc đến hạn vào ngày mai ({date}).",
+      "overdue": "Công việc đã quá hạn (hạn hoàn thành: {date})."
+    },
     "label": "Hộp thư đến",
     "page_label": "{workspace} - Hộp thư đến",
     "options": {
