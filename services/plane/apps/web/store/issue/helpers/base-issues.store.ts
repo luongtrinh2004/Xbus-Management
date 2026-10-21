@@ -29,6 +29,7 @@ import type {
 import { EIssueServiceType, EIssueLayoutTypes } from "@plane/types";
 // helpers
 import { convertToISODateString } from "@plane/utils";
+import { IssueCreatedWithFollowUpError } from "@/helpers/issue-submission";
 // plane web imports
 // services
 import { CycleService } from "@/services/cycle.service";
@@ -536,9 +537,15 @@ export abstract class BaseIssuesStore implements IBaseIssuesStore {
     // add Issue to Store
     this.addIssue(response, shouldUpdateList);
 
-    // If shouldUpdateList is true, call fetchParentStats
-    // oxlint-disable-next-line no-unused-expressions
-    shouldUpdateList && (await this.fetchParentStats(workspaceSlug, projectId));
+    // A failed statistics refresh must not turn a successful POST into a failed
+    // creation: retrying that POST would create a second work item.
+    if (shouldUpdateList) {
+      try {
+        await this.fetchParentStats(workspaceSlug, projectId);
+      } catch (error) {
+        console.error("Failed to refresh work item statistics after creation", error);
+      }
+    }
 
     return response;
   }
@@ -560,6 +567,12 @@ export abstract class BaseIssuesStore implements IBaseIssuesStore {
     shouldSync = true
   ) {
     // Store Before state of the issue
+    if (
+      shouldSync &&
+      ("start_date" in data || "target_date" in data) &&
+      !(await this.issueService.confirmIssueDateChange(workspaceSlug, projectId, issueId, data))
+    )
+      return;
     const issueBeforeUpdate = clone(this.rootIssueStore.issues.getIssueById(issueId));
     try {
       // Update the Respective Stores
@@ -646,26 +659,28 @@ export abstract class BaseIssuesStore implements IBaseIssuesStore {
   async issueQuickAdd(workspaceSlug: string, projectId: string, data: TIssue) {
     // Add issue to store with a temporary Id
     this.addIssue(data);
-    // call Create issue method
-    const response = await this.createIssue(workspaceSlug, projectId, data);
-    runInAction(() => {
-      this.removeIssueFromList(data.id);
-      this.rootIssueStore.issues.removeIssue(data.id);
-    });
-    const currentCycleId = data.cycle_id !== "" && data.cycle_id === "None" ? undefined : data.cycle_id;
-    const currentModuleIds =
-      data.module_ids && data.module_ids.length > 0 ? data.module_ids.filter((moduleId) => moduleId != "None") : [];
-    const promiseRequests = [];
-    if (currentCycleId) {
-      promiseRequests.push(this.addCycleToIssue(workspaceSlug, projectId, currentCycleId, response.id));
-    }
-    if (currentModuleIds.length > 0) {
-      promiseRequests.push(this.changeModulesInIssue(workspaceSlug, projectId, response.id, currentModuleIds, []));
-    }
-    if (promiseRequests && promiseRequests.length > 0) {
+    let response: TIssue | undefined;
+    try {
+      response = await this.createIssue(workspaceSlug, projectId, data);
+      const currentCycleId = data.cycle_id && data.cycle_id !== "None" ? data.cycle_id : undefined;
+      const currentModuleIds = data.module_ids?.filter((moduleId) => moduleId !== "None") ?? [];
+      const promiseRequests: Promise<unknown>[] = [];
+      if (currentCycleId)
+        promiseRequests.push(this.addCycleToIssue(workspaceSlug, projectId, currentCycleId, response.id));
+      if (currentModuleIds.length > 0)
+        promiseRequests.push(this.changeModulesInIssue(workspaceSlug, projectId, response.id, currentModuleIds, []));
       await Promise.all(promiseRequests);
+      return response;
+    } catch (error) {
+      if (response) throw new IssueCreatedWithFollowUpError(response, error);
+      throw error;
+    } finally {
+      // Remove optimistic rows on failure too; the input stays open for retry.
+      runInAction(() => {
+        this.removeIssueFromList(data.id);
+        this.rootIssueStore.issues.removeIssue(data.id);
+      });
     }
-    return response;
   }
 
   /**
@@ -759,6 +774,7 @@ export abstract class BaseIssuesStore implements IBaseIssuesStore {
     projectId?: string
   ) {
     if (!projectId) return;
+    if (!(await this.issueService.confirmIssueDatesChange(workspaceSlug, projectId, updates))) return;
     const issueDatesBeforeChange: { id: string; start_date?: string; target_date?: string }[] = [];
     try {
       const getIssueById = this.rootIssueStore.issues.getIssueById;

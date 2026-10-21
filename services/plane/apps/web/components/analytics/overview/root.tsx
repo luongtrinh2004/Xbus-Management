@@ -5,6 +5,7 @@
  */
 
 import React from "react";
+import { WorkspaceWorkload } from "../workload/root";
 import AnalyticsWrapper from "../analytics-wrapper";
 import TotalInsights from "../total-insights";
 import ActiveProjects from "./active-projects";
@@ -15,6 +16,7 @@ function Overview() {
     <AnalyticsWrapper i18nTitle="common.overview">
       <div className="flex flex-col gap-14">
         <TotalInsights analyticsType="overview" />
+        <WorkspaceWorkload />
         <div className="grid grid-cols-1 gap-14 md:grid-cols-5">
           <ProjectInsights />
           <ActiveProjects />

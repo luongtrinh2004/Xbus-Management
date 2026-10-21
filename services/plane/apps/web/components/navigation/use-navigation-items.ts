@@ -27,7 +27,7 @@ type UseNavigationItemsProps = {
     access: EUserPermissions[] | EUserProjectRoles[],
     level: EUserPermissionsLevel,
     workspaceSlug: string,
-    projectId: string,
+    projectId: string
   ) => boolean;
 };
 
@@ -42,6 +42,16 @@ export const useNavigationItems = ({
   const baseNavigation = useCallback(
     // oxlint-disable-next-line no-shadow
     (workspaceSlug: string, projectId: string): TNavigationItem[] => [
+      {
+        i18n_key: "project_overview.title",
+        key: "overview",
+        name: t("project_overview.title"),
+        href: `/${workspaceSlug}/projects/${projectId}/overview`,
+        icon: PagesOutline,
+        access: [EUserPermissions.ADMIN, EUserPermissions.MEMBER, EUserPermissions.GUEST],
+        shouldRender: true,
+        sortOrder: 0,
+      },
       {
         i18n_key: "sidebar.work_items",
         key: "work_items",
@@ -103,7 +113,7 @@ export const useNavigationItems = ({
         sortOrder: 6,
       },
     ],
-    [project, t],
+    [project, t]
   );
 
   // Combine, filter, and sort navigation items
@@ -113,12 +123,7 @@ export const useNavigationItems = ({
     // Filter by permissions and shouldRender
     const filteredItems = navItems.filter((item) => {
       if (!item.shouldRender) return false;
-      const hasAccess = allowPermissions(
-        item.access,
-        EUserPermissionsLevel.PROJECT,
-        workspaceSlug,
-        project?.id ?? "",
-      );
+      const hasAccess = allowPermissions(item.access, EUserPermissionsLevel.PROJECT, workspaceSlug, project?.id ?? "");
       return hasAccess;
     });
 

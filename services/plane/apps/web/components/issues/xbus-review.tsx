@@ -4,6 +4,7 @@
  * See the LICENSE file for details.
  */
 import { useEffect, useState } from "react";
+import { useTranslation } from "@plane/i18n";
 import { Button } from "@makeplane/propel/components/button";
 import { Select } from "@plane/blocks/select";
 import { useIssueDetail } from "@/hooks/store/use-issue-detail";
@@ -19,16 +20,21 @@ type ReviewData = {
   events: { id: number; actor: string; action: string; note: string; created_at: string }[];
 };
 
-const labels: Record<string, string> = {
-  disabled: "Chưa bật",
-  draft: "Chưa gửi kiểm tra",
-  pending: "Chờ nghiệm thu",
-  approved: "Đã duyệt",
-  rejected: "Cần bổ sung",
-  configure: "Chọn người nghiệm thu",
-  submit: "Gửi kiểm tra",
-  approve: "Duyệt hoàn thành",
-  reject: "Trả lại",
+const reviewErrorKeys: Record<string, string> = {
+  "Bạn không có quyền truy cập dự án.": "server_error_0",
+  "Không tìm thấy công việc.": "server_error_1",
+  "Hãy khôi phục công việc trước khi nghiệm thu.": "server_error_2",
+  "Nội dung tối đa 10.000 ký tự.": "server_error_3",
+  "Chỉ Admin được chọn người nghiệm thu.": "server_error_4",
+  "Hãy mở lại công việc trước khi cấu hình nghiệm thu.": "server_error_5",
+  "Người nghiệm thu phải là thành viên đang hoạt động của dự án.": "server_error_6",
+  "Chỉ người thực hiện hoặc Admin được gửi kiểm tra; cần người nghiệm thu đang hoạt động.": "server_error_7",
+  "Ghi kết quả và cách kiểm tra trước khi gửi.": "server_error_8",
+  "Hãy mở lại công việc trước khi gửi kiểm tra.": "server_error_9",
+  "Chỉ người nghiệm thu hoặc Admin được duyệt/trả lại công việc đang chờ kiểm tra.": "server_error_10",
+  "Ghi lý do duyệt hoặc nội dung cần bổ sung.": "server_error_11",
+  "Dự án cần có trạng thái Hoàn thành và Đang thực hiện.": "server_error_12",
+  "Hành động không hợp lệ.": "server_error_13",
 };
 
 export function XBusReview({
@@ -40,6 +46,8 @@ export function XBusReview({
   projectId: string;
   issueId: string;
 }) {
+  const { t, currentLocale } = useTranslation();
+  const label = (key: string) => t(`xbus_review.${key}`);
   const { fetchIssue } = useIssueDetail();
   const [data, setData] = useState<ReviewData | null>(null);
   const [reviewer, setReviewer] = useState("");
@@ -57,7 +65,7 @@ export function XBusReview({
     const load = () =>
       fetch(url, { credentials: "same-origin", signal: controller.signal })
         .then(async (response) => {
-          if (!response.ok) throw new Error("Không tải được thông tin nghiệm thu.");
+          if (!response.ok) throw new Error("load_error");
           return response.json() as Promise<ReviewData>;
         })
         .then((result) => {
@@ -69,8 +77,7 @@ export function XBusReview({
           return result;
         })
         .catch((reason: unknown) => {
-          if (!controller.signal.aborted)
-            setError(reason instanceof Error ? reason.message : "Không tải được thông tin nghiệm thu.");
+          if (!controller.signal.aborted) setError(reason instanceof Error ? reason.message : "load_error");
         });
     void load();
     const timer = setInterval(() => {
@@ -87,7 +94,7 @@ export function XBusReview({
     setError("");
     try {
       const tokenResponse = await fetch("/auth/get-csrf-token/", { credentials: "same-origin" });
-      if (!tokenResponse.ok) throw new Error("Không xác thực được phiên đăng nhập. Hãy kết nối lại module.");
+      if (!tokenResponse.ok) throw new Error("session_error");
       const { csrf_token: csrf } = await tokenResponse.json();
       const response = await fetch(url, {
         method: "POST",
@@ -100,31 +107,29 @@ export function XBusReview({
         const message =
           typeof result === "string"
             ? result
-            : (result.detail ??
-              result.error ??
-              (Array.isArray(result) ? result.join(" ") : "Không thực hiện được thao tác."));
-        throw new Error(message);
+            : (result.detail ?? result.error ?? (Array.isArray(result) ? result.join(" ") : label("action_error")));
+        throw new Error(reviewErrorKeys[String(message)] ?? "action_error");
       }
       setData(result as ReviewData);
       setReviewer((result as ReviewData).reviewer_id);
       setNote("");
       await fetchIssue(workspaceSlug, projectId, issueId);
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : "Không thực hiện được thao tác.");
+      setError(reason instanceof Error ? reason.message : "action_error");
     } finally {
       setBusy(false);
     }
   };
 
   return (
-    <section className="my-4 space-y-3 rounded-lg border border-subtle p-4" aria-label="Nghiệm thu công việc">
+    <section className="my-4 space-y-3 rounded-lg border border-subtle p-4" aria-label={label("aria_label")}>
       <div className="flex items-center justify-between">
-        <h3 className="font-semibold">Nghiệm thu</h3>
-        <span className="text-sm">{data ? (labels[data.status] ?? data.status) : "Đang tải…"}</span>
+        <h3 className="font-semibold">{label("title")}</h3>
+        <span className="text-sm">{data ? label(data.status) : label("loading")}</span>
       </div>
       {error && (
         <p role="alert" className="text-sm text-danger-primary">
-          {error}
+          {label(error in reviewErrorKeys ? reviewErrorKeys[error] : error)}
         </p>
       )}
       {data?.can_configure ? (
@@ -136,11 +141,11 @@ export function XBusReview({
             value={data.candidates.find((person) => person.id === reviewer) ?? null}
             disabled={busy}
             onChange={(value) => setReviewer(value ?? "")}
-            placeholder="Chọn người nghiệm thu"
+            placeholder={label("configure")}
             showSearch
           >
-            <Select.Trigger<ReviewPerson> variant="select-ghost-md" aria-label="Người nghiệm thu">
-              <span>{data.candidates.find((person) => person.id === reviewer)?.name ?? "Chọn người nghiệm thu"}</span>
+            <Select.Trigger<ReviewPerson> variant="select-ghost-md" aria-label={label("reviewer")}>
+              <span>{data.candidates.find((person) => person.id === reviewer)?.name ?? label("configure")}</span>
             </Select.Trigger>
           </Select>
           <Button
@@ -148,7 +153,7 @@ export function XBusReview({
             variant="secondary"
             size="md"
             stretch="auto"
-            label="Lưu người nghiệm thu"
+            label={label("save_reviewer")}
             disabled={busy || !reviewer || reviewer === data.reviewer_id}
             onClick={() => {
               void act("configure");
@@ -158,21 +163,17 @@ export function XBusReview({
       ) : (
         data?.reviewer_id && (
           <p className="text-sm">
-            Người nghiệm thu:{" "}
-            {data.candidates.find((person) => person.id === data.reviewer_id)?.name ?? "Thành viên không còn hoạt động"}
+            {label("reviewer")}:{" "}
+            {data.candidates.find((person) => person.id === data.reviewer_id)?.name ?? label("inactive_member")}
           </p>
         )
       )}
-      {data?.status === "disabled" && (
-        <p className="text-sm text-secondary">
-          Admin chọn người nghiệm thu để bật quy trình kiểm tra cho công việc này.
-        </p>
-      )}
+      {data?.status === "disabled" && <p className="text-sm text-secondary">{label("enable_hint")}</p>}
       {data && (data.can_submit || data.can_decide) && (
         <>
           <textarea
-            aria-label="Kết quả hoặc nhận xét nghiệm thu"
-            placeholder="Ghi kết quả, liên kết bàn giao và cách kiểm tra; hoặc lý do duyệt/trả lại."
+            aria-label={label("note_label")}
+            placeholder={label("note_placeholder")}
             className="text-sm w-full rounded border border-subtle bg-surface-1 p-2"
             rows={3}
             value={note}
@@ -188,7 +189,7 @@ export function XBusReview({
                 variant={action === "reject" ? "secondary" : "primary"}
                 size="md"
                 stretch="auto"
-                label={labels[action]}
+                label={label(action)}
                 disabled={busy || !note.trim()}
                 onClick={() => {
                   void act(action);
@@ -200,14 +201,18 @@ export function XBusReview({
       )}
       {data && data.events.length > 0 && (
         <details>
-          <summary className="text-sm cursor-pointer">Lịch sử nghiệm thu</summary>
+          <summary className="text-sm cursor-pointer">{label("history")}</summary>
           <ul className="mt-2 space-y-3">
             {data.events.map((event) => (
               <li key={event.id} className="text-sm">
                 <p className="font-medium">
-                  {event.actor} · {labels[event.action]} · {new Date(event.created_at).toLocaleString("vi-VN")}
+                  {event.actor} · {label(event.action)} · {new Date(event.created_at).toLocaleString(currentLocale)}
                 </p>
-                <p className="break-words whitespace-pre-wrap">{event.note}</p>
+                <p className="break-words whitespace-pre-wrap">
+                  {event.action === "configure" && event.note.startsWith("Người nghiệm thu: ")
+                    ? `${label("reviewer")}: ${event.note.slice("Người nghiệm thu: ".length)}`
+                    : event.note}
+                </p>
               </li>
             ))}
           </ul>

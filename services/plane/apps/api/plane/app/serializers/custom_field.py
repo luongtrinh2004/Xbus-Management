@@ -6,8 +6,84 @@ import math
 import re
 from datetime import date
 from uuid import UUID
+from crum import get_current_user
 from rest_framework import serializers
-from plane.db.models import IssueCustomField, ProjectMember, WorkspaceMember
+from rest_framework.exceptions import PermissionDenied
+from plane.db.models import IssueCustomField, IssueCustomFieldValue, Project, ProjectMember, WorkspaceMember
+
+
+def validate_project_custom_values(serializer, values, *, lock=False):
+    """Validate create/update values using the same contract as the cell editor."""
+    if not isinstance(values, dict) or len(values) > 100:
+        raise serializers.ValidationError("Expected up to 100 custom field values.")
+    try:
+        canonical = {str(UUID(key)): value for key, value in values.items()}
+        if len(canonical) != len(values):
+            raise ValueError
+    except (ValueError, TypeError, AttributeError):
+        raise serializers.ValidationError("Invalid or duplicate custom field ID.")
+    if not canonical:
+        return {}
+    project_id = serializer.context.get("project_id", getattr(serializer.instance, "project_id", None))
+    workspace_id = serializer.context.get("workspace_id", getattr(serializer.instance, "workspace_id", None))
+    projects = Project.objects.filter(pk=project_id, archived_at__isnull=True, workspace__deleted_at__isnull=True)
+    if workspace_id:
+        projects = projects.filter(workspace_id=workspace_id)
+    project = projects.first()
+    if not project:
+        raise serializers.ValidationError("Select an active project for custom fields.")
+    request = serializer.context.get("request")
+    actor = getattr(request, "user", None) or get_current_user()
+    if not actor or not actor.is_authenticated or not actor.is_active:
+        raise PermissionDenied()
+    workspace_member = WorkspaceMember.objects.filter(workspace=project.workspace, member=actor, is_active=True).first()
+    member = ProjectMember.objects.filter(project=project, member=actor, is_active=True).first()
+    if not workspace_member or not member or (member.role < 15 and workspace_member.role < 20):
+        raise PermissionDenied()
+    previous = serializer.context.get("custom_field_previous_values", {})
+    instance = serializer.instance
+    if instance and str(instance.project_id) == str(project_id):
+        stored = getattr(instance, "custom_field_values", None)
+        previous = stored if isinstance(stored, dict) else {
+            str(row.field_id): row.value for row in IssueCustomFieldValue.objects.filter(issue=instance)
+        }
+    fields = IssueCustomField.objects.filter(project=project, pk__in=canonical)
+    if lock:
+        fields = fields.select_for_update()
+    fields = list(fields)
+    if len(fields) != len(canonical):
+        raise serializers.ValidationError("Unknown custom field for this project.")
+    result = {}
+    for field in fields:
+        key = str(field.id)
+        if not field.is_active and (key not in previous or canonical[key] != previous[key]):
+            raise serializers.ValidationError({key: "This custom field is inactive."})
+        result[key] = validate_custom_value(field, canonical[key], previous.get(key))
+    return result
+
+
+def save_issue_custom_values(serializer, issue, values, *, creating=False):
+    values = validate_project_custom_values(serializer, values, lock=True)
+    for field_id, value in values.items():
+        previous = IssueCustomFieldValue.objects.filter(issue=issue, field_id=field_id).first()
+        old_value = previous.value if previous else None
+        if old_value == value:
+            continue
+        if value is None:
+            IssueCustomFieldValue.objects.filter(issue=issue, field_id=field_id).delete()
+        else:
+            IssueCustomFieldValue.objects.update_or_create(
+                issue=issue, field_id=field_id,
+                defaults={"project_id": issue.project_id, "value": value},
+            )
+        if not creating:
+            # Import after app initialization; the existing cell endpoint owns
+            # the activity/notification contract for custom field changes.
+            from plane.app.views.custom_field import record_change
+            request = serializer.context.get("request")
+            actor = getattr(request, "user", None) or get_current_user()
+            field = IssueCustomField.objects.get(pk=field_id)
+            record_change(issue, field, old_value, value, actor)
 
 
 class CustomFieldSerializer(serializers.ModelSerializer):

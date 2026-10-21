@@ -27,6 +27,8 @@ import type { IProfileIssuesFilter } from "./filter.store";
 export interface IProfileIssues extends IBaseIssuesStore {
   // observable
   currentView: TProfileViews;
+  showPersonalPlanning: boolean;
+  setShowPersonalPlanning: (value: boolean) => void;
   viewFlags: ViewFlags;
   // actions
   setViewId: (viewId: TProfileViews) => void;
@@ -63,6 +65,7 @@ export interface IProfileIssues extends IBaseIssuesStore {
 
 export class ProfileIssues extends BaseIssuesStore implements IProfileIssues {
   currentView: TProfileViews = "assigned";
+  showPersonalPlanning = true;
   // filter store
   issueFilterStore: IProfileIssuesFilter;
   // services
@@ -73,10 +76,12 @@ export class ProfileIssues extends BaseIssuesStore implements IProfileIssues {
     makeObservable(this, {
       // observable
       currentView: observable.ref,
+      showPersonalPlanning: observable.ref,
       // computed
       viewFlags: computed,
       // action
       setViewId: action.bound,
+      setShowPersonalPlanning: action.bound,
       fetchIssues: action,
       fetchNextIssues: action,
       fetchIssuesWithExistingPagination: action,
@@ -103,6 +108,10 @@ export class ProfileIssues extends BaseIssuesStore implements IProfileIssues {
 
   setViewId(viewId: TProfileViews) {
     this.currentView = viewId;
+  }
+
+  setShowPersonalPlanning(value: boolean) {
+    this.showPersonalPlanning = value;
   }
 
   fetchParentStats = () => {};

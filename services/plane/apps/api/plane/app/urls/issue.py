@@ -174,7 +174,7 @@ urlpatterns = [
     # Issue Subscribers
     path(
         "workspaces/<str:slug>/projects/<uuid:project_id>/issues/<uuid:issue_id>/issue-subscribers/",
-        IssueSubscriberViewSet.as_view({"get": "list", "post": "create"}),
+        IssueSubscriberViewSet.as_view({"get": "list", "post": "create", "put": "replace"}),
         name="project-issue-subscribers",
     ),
     path(

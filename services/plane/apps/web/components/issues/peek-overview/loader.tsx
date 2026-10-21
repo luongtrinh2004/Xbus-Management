@@ -1,3 +1,4 @@
+import { useTranslation } from "@plane/i18n";
 /**
  * Copyright (c) 2023-present Plane Software, Inc. and contributors
  * SPDX-License-Identifier: AGPL-3.0-only
@@ -15,6 +16,7 @@ type TIssuePeekOverviewLoader = {
 };
 
 export function IssuePeekOverviewLoader(props: TIssuePeekOverviewLoader) {
+  const { t } = useTranslation();
   const { removeRoutePeekId } = props;
   // hooks
   const { isMobile } = usePlatformOS();
@@ -23,7 +25,7 @@ export function IssuePeekOverviewLoader(props: TIssuePeekOverviewLoader) {
     <Loader className="h-screen w-full space-y-6 overflow-hidden p-5">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <Tooltip label={"Đóng chế độ xem lướt"} disabled={isMobile}>
+          <Tooltip label={t("work_item_ui.close_peek")} disabled={isMobile}>
             <button onClick={removeRoutePeekId}>
               <ArrowNarrowRightOutline className="h-4 w-4 text-tertiary hover:text-secondary" />
             </button>

@@ -16,6 +16,7 @@ import type {
 } from "@plane/types";
 // helpers
 import { getDistributionPathsPostUpdate } from "@plane/utils";
+import { IssueCreatedWithFollowUpError } from "@/helpers/issue-submission";
 import type { IBaseIssuesStore } from "../helpers/base-issues.store";
 import { BaseIssuesStore } from "../helpers/base-issues.store";
 //
@@ -237,14 +238,14 @@ export class ModuleIssues extends BaseIssuesStore implements IModuleIssues {
    * @returns
    */
   override createIssue = async (workspaceSlug: string, projectId: string, data: Partial<TIssue>, moduleId: string) => {
+    const response = await super.createIssue(workspaceSlug, projectId, data, moduleId, false);
     try {
-      const response = await super.createIssue(workspaceSlug, projectId, data, moduleId, false);
       const moduleIds = data.module_ids && data.module_ids.length > 1 ? data.module_ids : [moduleId];
       await this.addModulesToIssue(workspaceSlug, projectId, response.id, moduleIds);
 
       return response;
     } catch (error) {
-      throw error;
+      throw new IssueCreatedWithFollowUpError(response, error);
     }
   };
 
@@ -257,20 +258,12 @@ export class ModuleIssues extends BaseIssuesStore implements IModuleIssues {
    * @returns
    */
   quickAddIssue = async (workspaceSlug: string, projectId: string, data: TIssue, moduleId: string) => {
+    this.addIssue(data);
+    let response: TIssue | undefined;
     try {
-      // add temporary issue to store list
-      this.addIssue(data);
-
       // call overridden create issue
-      const response = await this.createIssue(workspaceSlug, projectId, data, moduleId);
-
-      // remove temp Issue from store list
-      runInAction(() => {
-        this.removeIssueFromList(data.id);
-        this.rootIssueStore.issues.removeIssue(data.id);
-      });
-
-      const currentCycleId = data.cycle_id !== "" && data.cycle_id === "None" ? undefined : data.cycle_id;
+      response = await this.createIssue(workspaceSlug, projectId, data, moduleId);
+      const currentCycleId = data.cycle_id && data.cycle_id !== "None" ? data.cycle_id : undefined;
 
       if (currentCycleId) {
         await this.addCycleToIssue(workspaceSlug, projectId, currentCycleId, response.id);
@@ -278,7 +271,13 @@ export class ModuleIssues extends BaseIssuesStore implements IModuleIssues {
 
       return response;
     } catch (error) {
+      if (response) throw new IssueCreatedWithFollowUpError(response, error);
       throw error;
+    } finally {
+      runInAction(() => {
+        this.removeIssueFromList(data.id);
+        this.rootIssueStore.issues.removeIssue(data.id);
+      });
     }
   };
 

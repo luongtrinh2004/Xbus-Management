@@ -47,6 +47,7 @@ export const useRelationOperations = (
             message: t("entity.update.success", { entity: entityName }),
           });
         } catch (_error) {
+          if (data.state_id !== undefined) throw _error;
           setToast({
             title: t("toast.error"),
             type: "error",

@@ -11,11 +11,13 @@ import Link from "next/link";
 import { CloseOutline, EditOutline } from "@makeplane/propel/icons";
 // Plane
 import { setToast } from "@plane/blocks/toast";
+import { useTranslation } from "@plane/i18n";
 import { Tooltip } from "@makeplane/propel/components/tooltip";
 import type { ISearchIssueResponse } from "@plane/types";
 import { cn, generateWorkItemLink } from "@plane/utils";
 // components
 import { ExistingIssuesListModal } from "@/components/core/modals/existing-issues-list-modal";
+import { getDependencyError } from "@/components/issues/dependencies/errors";
 // hooks
 import { useIssueDetail } from "@/hooks/store/use-issue-detail";
 import { useIssues } from "@/hooks/store/use-issues";
@@ -37,6 +39,7 @@ type TIssueRelationSelect = {
 
 export const IssueRelationSelect = observer(function IssueRelationSelect(props: TIssueRelationSelect) {
   const { className = "", workspaceSlug, projectId, issueId, relationKey, disabled = false } = props;
+  const { t } = useTranslation();
   // hooks
   const { getProjectById } = useProject();
   const {
@@ -88,6 +91,7 @@ export const IssueRelationSelect = observer(function IssueRelationSelect(props: 
         handleClose={() => toggleRelationModal(null, null)}
         searchParams={{ issue_relation: true, issue_id: issueId }}
         handleOnSubmit={onSubmit}
+        getSubmitErrorMessage={(error) => getDependencyError(error, t)}
         workspaceLevelToggle
       />
 

@@ -35,6 +35,7 @@ import { ProjectService } from "@/services/project";
 // components
 import { IssueIdentifier } from "@/components/issues/issue-detail/issue-identifier";
 import { IssueSearchModalEmptyState } from "./issue-search-modal-empty-state";
+import { getStateChangeError } from "@/components/dropdowns/state/change-error";
 
 type Props = {
   workspaceSlug: string | undefined;
@@ -47,6 +48,7 @@ type Props = {
   shouldHideIssue?: (issue: ISearchIssueResponse) => boolean;
   selectedWorkItemIds?: string[];
   workItemSearchServiceCallback?: (params: TProjectIssuesSearchParams) => Promise<ISearchIssueResponse[]>;
+  getSubmitErrorMessage?: (error: unknown) => string;
 };
 
 const projectService = new ProjectService();
@@ -65,6 +67,7 @@ export function ExistingIssuesListModal(props: Props) {
     shouldHideIssue,
     selectedWorkItemIds,
     workItemSearchServiceCallback,
+    getSubmitErrorMessage,
   } = props;
   // states
   const [isLoading, setIsLoading] = useState(false);
@@ -100,9 +103,18 @@ export function ExistingIssuesListModal(props: Props) {
 
     setIsSubmitting(true);
 
-    await handleOnSubmit(selectedIssues).finally(() => setIsSubmitting(false));
-
-    handleClose();
+    try {
+      await handleOnSubmit(selectedIssues);
+      handleClose();
+    } catch (error) {
+      setToast({
+        type: "error",
+        title: t("toast.error"),
+        message: getSubmitErrorMessage?.(error) ?? getStateChangeError(error, t("issue_dependencies.save_failed")),
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleSearch = () => {

@@ -1,0 +1,10 @@
+version: 1
+id: 49a5fb1c-01ac-428a-91bf-61889678c2ca
+name: Gemini
+slug: gemini
+protocol: http
+port: 4500
+scenarios:
+  - name: default
+    path: ./default.js
+    default: true

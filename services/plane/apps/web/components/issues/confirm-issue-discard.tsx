@@ -1,3 +1,4 @@
+import { useTranslation } from "@plane/i18n";
 /**
  * Copyright (c) 2023-present Plane Software, Inc. and contributors
  * SPDX-License-Identifier: AGPL-3.0-only
@@ -27,6 +28,7 @@ type Props = {
 };
 
 export function ConfirmIssueDiscard(props: Props) {
+  const { t } = useTranslation();
   const { isOpen, handleClose, onDiscard, onConfirm } = props;
 
   const [isLoading, setIsLoading] = useState(false);
@@ -56,23 +58,29 @@ export function ConfirmIssueDiscard(props: Props) {
         <DialogMain>
           <DialogHeader>
             <DialogHeading>
-              <DialogTitle>Lưu bản nháp này?</DialogTitle>
-              <DialogDescription>Bạn có thể lưu công việc vào Bản nháp để tiếp tục sau.</DialogDescription>
+              <DialogTitle>{t("work_item_ui.draft_title")}</DialogTitle>
+              <DialogDescription>{t("work_item_ui.draft_hint")}</DialogDescription>
             </DialogHeading>
           </DialogHeader>
         </DialogMain>
         <DialogActions>
           <DialogInfo>
-            <Button variant="secondary" size="sm" stretch="auto" onClick={onDiscard} label={"Hủy bỏ"} />
+            <Button
+              variant="secondary"
+              size="sm"
+              stretch="auto"
+              onClick={onDiscard}
+              label={t("work_item_ui.discard")}
+            />
           </DialogInfo>
-          <Button variant="secondary" size="sm" stretch="auto" onClick={onClose} label={"Hủy"} />
+          <Button variant="secondary" size="sm" stretch="auto" onClick={onClose} label={t("work_item_ui.cancel")} />
           <Button
             variant="primary"
             size="sm"
             stretch="auto"
             onClick={() => void handleDeletion()}
             loading={isLoading}
-            label={isLoading ? "Đang lưu" : "Lưu vào bản nháp"}
+            label={isLoading ? t("work_item_ui.saving") : t("work_item_ui.save_draft")}
           />
         </DialogActions>
       </DialogContent>

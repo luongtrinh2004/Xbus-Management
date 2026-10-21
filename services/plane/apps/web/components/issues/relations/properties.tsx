@@ -63,6 +63,8 @@ export const RelationIssueProperty = observer(function RelationIssueProperty(pro
   return (
     <div className="relative flex items-center gap-2">
       <StateSelect
+        issueId={issue.id}
+        issueServiceType={issueServiceType}
         value={issue.state_id}
         projectId={issue.project_id ?? undefined}
         onChange={handleStateChange}

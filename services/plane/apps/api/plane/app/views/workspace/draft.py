@@ -7,6 +7,7 @@ import json
 
 # Django imports
 from django.utils import timezone
+from django.db import transaction
 from django.core import serializers
 from django.core.serializers.json import DjangoJSONEncoder
 from django.contrib.postgres.aggregates import ArrayAgg
@@ -18,6 +19,9 @@ from django.views.decorators.gzip import gzip_page
 
 # Third Party imports
 from rest_framework import status
+from rest_framework.exceptions import PermissionDenied
+from rest_framework.serializers import UUIDField as InputUUIDField
+from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 
 # Module imports
@@ -35,6 +39,9 @@ from plane.db.models import (
     ModuleIssue,
     DraftIssueCycle,
     Workspace,
+    Project,
+    ProjectMember,
+    WorkspaceMember,
     FileAsset,
 )
 from .. import BaseViewSet
@@ -43,8 +50,40 @@ from plane.utils.issue_filters import issue_filters
 from plane.utils.host import base_host
 
 
+def queue_issue_activity_after_commit(**data):
+    transaction.on_commit(lambda: issue_activity.delay(**data), robust=True)
+
+
 class WorkspaceDraftIssueViewSet(BaseViewSet):
     model = DraftIssue
+
+    def project_access(self, request, slug, project_id, *, publish=False):
+        if not request.user.is_active:
+            raise PermissionDenied()
+        if not project_id:
+            return
+        project_id = InputUUIDField().run_validation(project_id)
+        project = get_object_or_404(
+            Project.objects,
+            pk=project_id,
+            workspace__slug=slug,
+            workspace__deleted_at__isnull=True,
+            archived_at__isnull=True,
+        )
+        member = ProjectMember.objects.filter(project=project, member=request.user, is_active=True).first()
+        if not member:
+            raise PermissionDenied()
+        if (
+            publish
+            and member.role < 15
+            and not WorkspaceMember.objects.filter(
+                workspace=project.workspace,
+                member=request.user,
+                is_active=True,
+                role=20,
+            ).exists()
+        ):
+            raise PermissionDenied()
 
     def get_queryset(self):
         return (
@@ -111,12 +150,14 @@ class WorkspaceDraftIssueViewSet(BaseViewSet):
     @allow_permission(allowed_roles=[ROLE.ADMIN, ROLE.MEMBER, ROLE.GUEST], level="WORKSPACE")
     def create(self, request, slug):
         workspace = Workspace.objects.get(slug=slug)
+        self.project_access(request, slug, request.data.get("project_id"))
 
         serializer = DraftIssueCreateSerializer(
             data=request.data,
             context={
                 "workspace_id": workspace.id,
                 "project_id": request.data.get("project_id", None),
+                "request": request,
             },
         )
         if serializer.is_valid():
@@ -146,6 +187,7 @@ class WorkspaceDraftIssueViewSet(BaseViewSet):
                     "updated_by",
                     "type_id",
                     "description_html",
+                    "custom_field_values",
                 )
                 .first()
             )
@@ -156,7 +198,7 @@ class WorkspaceDraftIssueViewSet(BaseViewSet):
     @allow_permission(
         allowed_roles=[ROLE.ADMIN, ROLE.MEMBER],
         creator=True,
-        model=Issue,
+        model=DraftIssue,
         level="WORKSPACE",
     )
     def partial_update(self, request, slug, pk):
@@ -166,6 +208,7 @@ class WorkspaceDraftIssueViewSet(BaseViewSet):
             return Response({"error": "Issue not found"}, status=status.HTTP_404_NOT_FOUND)
 
         project_id = request.data.get("project_id", issue.project_id)
+        self.project_access(request, slug, project_id)
 
         serializer = DraftIssueCreateSerializer(
             issue,
@@ -174,6 +217,7 @@ class WorkspaceDraftIssueViewSet(BaseViewSet):
             context={
                 "project_id": project_id,
                 "cycle_id": request.data.get("cycle_id", "not_provided"),
+                "request": request,
             },
         )
 
@@ -203,11 +247,17 @@ class WorkspaceDraftIssueViewSet(BaseViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @allow_permission(allowed_roles=[ROLE.ADMIN, ROLE.MEMBER], level="WORKSPACE")
+    @transaction.atomic
     def create_draft_to_issue(self, request, slug, draft_id):
         # Drafts are private to their creator; scope the lookup to the owner so a
         # workspace member cannot convert/steal/delete another user's draft
         # Mirrors retrieve/partial_update.
-        draft_issue = self.get_queryset().filter(pk=draft_id, created_by=request.user).first()
+        draft_issue = (
+            DraftIssue.objects.select_for_update(of=("self",))
+            .select_related("project")
+            .filter(pk=draft_id, workspace__slug=slug, created_by=request.user)
+            .first()
+        )
 
         if not draft_issue:
             return Response(
@@ -221,19 +271,25 @@ class WorkspaceDraftIssueViewSet(BaseViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        self.project_access(request, slug, draft_issue.project_id, publish=True)
+        payload = request.data.copy()
+        if "custom_field_values" not in payload and draft_issue.custom_field_values:
+            payload["custom_field_values"] = draft_issue.custom_field_values
         serializer = IssueCreateSerializer(
-            data=request.data,
+            data=payload,
             context={
                 "project_id": draft_issue.project_id,
                 "workspace_id": draft_issue.project.workspace_id,
                 "default_assignee_id": draft_issue.project.default_assignee_id,
+                "request": request,
+                "custom_field_previous_values": draft_issue.custom_field_values,
             },
         )
 
         if serializer.is_valid():
             serializer.save()
 
-            issue_activity.delay(
+            queue_issue_activity_after_commit(
                 type="issue.activity.created",
                 requested_data=json.dumps(self.request.data, cls=DjangoJSONEncoder),
                 actor_id=str(request.user.id),
@@ -255,7 +311,7 @@ class WorkspaceDraftIssueViewSet(BaseViewSet):
                     updated_by_id=draft_issue.updated_by_id,
                 )
                 # Capture Issue Activity
-                issue_activity.delay(
+                queue_issue_activity_after_commit(
                     type="cycle.activity.created",
                     requested_data=None,
                     actor_id=str(self.request.user.id),
@@ -290,7 +346,7 @@ class WorkspaceDraftIssueViewSet(BaseViewSet):
                 )
                 # Update the activity
                 _ = [
-                    issue_activity.delay(
+                    queue_issue_activity_after_commit(
                         type="module.activity.created",
                         requested_data=json.dumps({"module_id": str(module)}),
                         actor_id=str(request.user.id),

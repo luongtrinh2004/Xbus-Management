@@ -7,6 +7,7 @@
 import type { TIssuePriorities } from "../issues";
 
 export type TWorkspaceDraftIssue = {
+  custom_field_values?: Record<string, string | number | string[] | null>;
   id: string;
   name: string;
   sort_order: number;

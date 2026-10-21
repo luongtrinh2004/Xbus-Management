@@ -4,12 +4,14 @@
 
 # Django imports
 from django.utils import timezone
+from django.db import transaction
 
 # Third Party imports
 from rest_framework import serializers
 
 # Module imports
 from .base import BaseSerializer
+from .custom_field import validate_project_custom_values
 from plane.db.models import (
     User,
     Issue,
@@ -31,6 +33,11 @@ from plane.app.permissions import ROLE
 
 
 class DraftIssueCreateSerializer(BaseSerializer):
+    custom_field_values = serializers.DictField(required=False)
+
+    def validate_custom_field_values(self, value):
+        return validate_project_custom_values(self, value)
+
     # ids
     state_id = serializers.PrimaryKeyRelatedField(
         source="state", queryset=State.objects.all(), required=False, allow_null=True
@@ -139,7 +146,12 @@ class DraftIssueCreateSerializer(BaseSerializer):
 
         return attrs
 
+    @transaction.atomic
     def create(self, validated_data):
+        if "custom_field_values" in validated_data:
+            validated_data["custom_field_values"] = validate_project_custom_values(
+                self, validated_data["custom_field_values"], lock=True
+            )
         assignees = validated_data.pop("assignee_ids", None)
         labels = validated_data.pop("label_ids", None)
         modules = validated_data.pop("module_ids", None)
@@ -216,7 +228,12 @@ class DraftIssueCreateSerializer(BaseSerializer):
 
         return issue
 
+    @transaction.atomic
     def update(self, instance, validated_data):
+        if "custom_field_values" in validated_data:
+            validated_data["custom_field_values"] = validate_project_custom_values(
+                self, validated_data["custom_field_values"], lock=True
+            )
         assignees = validated_data.pop("assignee_ids", None)
         labels = validated_data.pop("label_ids", None)
         cycle_id = self.context.get("cycle_id", None)
@@ -330,6 +347,7 @@ class DraftIssueSerializer(BaseSerializer):
             "updated_by",
             "type_id",
             "description_html",
+            "custom_field_values",
         ]
         read_only_fields = fields
 

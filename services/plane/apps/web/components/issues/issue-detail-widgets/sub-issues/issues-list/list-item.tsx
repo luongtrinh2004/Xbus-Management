@@ -4,6 +4,8 @@
  * See the LICENSE file for details.
  */
 
+import { useRef } from "react";
+import { useSubIssueReorder } from "@/hooks/use-sub-issue-reorder";
 import { observer } from "mobx-react";
 import { useTranslation } from "@plane/i18n";
 import {
@@ -47,7 +49,7 @@ type Props = {
   handleIssueCrudState: (
     key: "create" | "existing" | "update" | "delete",
     issueId: string,
-    issue?: TIssue | null
+    issue?: TIssue | null,
   ) => void;
   subIssueOperations: TSubIssueOperations;
   issueId: string;
@@ -86,8 +88,24 @@ export const SubIssuesListItem = observer(function SubIssuesListItem(props: Prop
   const { isMobile } = usePlatformOS();
   const issue = getIssueById(issueId);
 
+  const rowRef = useRef<HTMLDivElement | null>(null);
+  const dropSide = useSubIssueReorder({
+    elementRef: rowRef,
+    workspaceSlug,
+    projectId: issue?.project_id,
+    parentId: parentIssueId,
+    issueId,
+    enabled:
+      canEdit &&
+      (!getSubIssueFilters(parentIssueId).displayFilters?.order_by ||
+        getSubIssueFilters(parentIssueId).displayFilters?.order_by === "sort_order") &&
+      issueServiceType === EIssueServiceType.ISSUES &&
+      !issue?.archived_at &&
+      !issue?.is_draft,
+  });
   // derived values
-  const projectDetail = (issue && issue.project_id && project.getProjectById(issue.project_id)) || undefined;
+  const projectDetail =
+    (issue && issue.project_id && project.getProjectById(issue.project_id)) || undefined;
 
   const subIssueHelpers = subIssueHelpersByIssueId(parentIssueId);
   const subIssueCount = issue?.sub_issues_count ?? 0;
@@ -97,7 +115,8 @@ export const SubIssuesListItem = observer(function SubIssuesListItem(props: Prop
   const displayProperties = subIssueFilters?.displayProperties ?? {};
 
   //
-  const handleIssuePeekOverview = (issue: TIssue) => handleRedirection(workspaceSlug, issue, isMobile);
+  const handleIssuePeekOverview = (issue: TIssue) =>
+    handleRedirection(workspaceSlug, issue, isMobile);
 
   if (!issue) return <></>;
 
@@ -122,7 +141,14 @@ export const SubIssuesListItem = observer(function SubIssuesListItem(props: Prop
       >
         {issue && (
           <div
-            className="group relative flex h-full min-h-11 w-full items-center py-1 pr-2 transition-all hover:bg-surface-2"
+            ref={rowRef}
+            className={cn(
+              "group relative flex h-full min-h-11 w-full items-center py-1 pr-2 transition-all hover:bg-surface-2",
+              {
+                "shadow-[inset_0_2px_0_var(--background-color-accent-primary)]": dropSide === "before",
+                "shadow-[inset_0_-2px_0_var(--background-color-accent-primary)]": dropSide === "after",
+              },
+            )}
             style={{ paddingLeft: `${spacingLeft}px` }}
           >
             <div className="flex size-5 flex-shrink-0 items-center justify-center">
@@ -159,7 +185,10 @@ export const SubIssuesListItem = observer(function SubIssuesListItem(props: Prop
             </div>
 
             <div className="flex w-full cursor-pointer items-center gap-3 truncate">
-              <WithDisplayPropertiesHOC displayProperties={displayProperties || {}} displayPropertyKey="key">
+              <WithDisplayPropertiesHOC
+                displayProperties={displayProperties || {}}
+                displayPropertyKey="key"
+              >
                 <div className="flex-shrink-0">
                   {projectDetail && (
                     <IssueIdentifier
@@ -248,7 +277,12 @@ export const SubIssuesListItem = observer(function SubIssuesListItem(props: Prop
                       }
                       onClick={() => {
                         if (issue.project_id)
-                          subIssueOperations.removeSubIssue(workspaceSlug, issue.project_id, parentIssueId, issue.id);
+                          subIssueOperations.removeSubIssue(
+                            workspaceSlug,
+                            issue.project_id,
+                            parentIssueId,
+                            issue.id,
+                          );
                       }}
                     />
                   )}

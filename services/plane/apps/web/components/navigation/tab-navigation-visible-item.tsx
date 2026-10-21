@@ -24,6 +24,7 @@ export type TTabNavigationVisibleItemProps = {
   tabPreferences: TTabPreferences;
   onToggleDefault: (tabKey: string) => void;
   onHide: (tabKey: string) => void;
+  onMove: (key: string, direction: -1 | 1) => void;
   itemRef?: (el: HTMLDivElement | null) => void;
 };
 
@@ -36,6 +37,7 @@ export function TabNavigationVisibleItem({
   tabPreferences,
   onToggleDefault,
   onHide,
+  onMove,
   itemRef,
 }: TTabNavigationVisibleItemProps) {
   const { t } = useTranslation();
@@ -56,9 +58,7 @@ export function TabNavigationVisibleItem({
                 onToggleDefault(item.key);
               }}
               icon={<Icon icon={DefaultTabOutline} />}
-              label={
-                isDefault ? t("xbus_navigation.unset_default") : t("xbus_navigation.set_default")
-              }
+              label={isDefault ? t("xbus_navigation.unset_default") : t("xbus_navigation.set_default")}
             />
             <ContextMenuItem
               onClick={(e) => {
@@ -67,6 +67,20 @@ export function TabNavigationVisibleItem({
               }}
               icon={<Icon icon={UnpinOutline} />}
               label={t("xbus_navigation.hide_tab")}
+            />
+            <ContextMenuItem
+              label={t("project_tab_preferences.move_left")}
+              onClick={(event) => {
+                event.stopPropagation();
+                onMove(item.key, -1);
+              }}
+            />
+            <ContextMenuItem
+              label={t("project_tab_preferences.move_right")}
+              onClick={(event) => {
+                event.stopPropagation();
+                onMove(item.key, 1);
+              }}
             />
           </ContextMenuContent>
         </ContextMenu>

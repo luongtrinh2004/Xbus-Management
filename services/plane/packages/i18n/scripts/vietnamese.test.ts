@@ -20,7 +20,7 @@ async function loadCatalogs() {
         readFile(new URL(`vi-VN/${file}`, locales), "utf8"),
       ]);
       return { file, en: flatten(JSON.parse(english)), vi: flatten(JSON.parse(vietnamese)) };
-    }),
+    })
   );
 }
 
@@ -30,18 +30,15 @@ function flatten(value: Locale, prefix = ""): Record<string, string> {
     Object.entries(value).flatMap(([key, item]) => {
       const path = prefix ? `${prefix}.${key}` : key;
       return typeof item === "string" ? [[path, item]] : Object.entries(flatten(item, path));
-    }),
+    })
   );
 }
 function argumentsIn(message: string, locale: string): string[] {
   const names = new Set<string>();
-  function visit(
-    elements: { type: number; value?: string; options?: Record<string, { value: unknown[] }> }[],
-  ) {
+  function visit(elements: { type: number; value?: string; options?: Record<string, { value: unknown[] }> }[]) {
     for (const element of elements) {
       if ([1, 2, 3, 4, 5, 6].includes(element.type) && element.value) names.add(element.value);
-      for (const option of Object.values(element.options ?? {}))
-        visit(option.value as typeof elements);
+      for (const option of Object.values(element.options ?? {})) visit(option.value as typeof elements);
     }
   }
   visit(new IntlMessageFormat(message, locale).getAst());
@@ -58,7 +55,7 @@ test("Vietnamese covers every namespace and preserves ICU values", async () => {
       assert.deepEqual(
         actual,
         expected.filter((name) => name !== "plural"),
-        `${file}: ${key}`,
+        `${file}: ${key}`
       );
       assert.ok(vi[key].trim() || !message.trim(), `${file}: ${key} must not be blank`);
     }
@@ -107,10 +104,7 @@ test("English retained in the Vietnamese catalog is limited to technical names a
         /^(https?:\/\/|api:\/\/)/.test(value) ||
         /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ||
         /^[a-z]+\.[a-z]{2,}$/.test(value);
-      assert.ok(
-        allowed.has(value) || example,
-        `${file}: ${key} still contains untranslated English: ${value}`,
-      );
+      assert.ok(allowed.has(value) || example, `${file}: ${key} still contains untranslated English: ${value}`);
     }
   }
 });
@@ -221,4 +215,22 @@ test("embedded XBus restores and switches English/Vietnamese without losing cata
   await setLanguage("vi-VN");
   assert.equal(i18nInstance.language, "vi-VN");
   assert.equal(document.documentElement.lang, "vi-VN");
+});
+
+test("acceptance labels switch language while review data remains unchanged", async () => {
+  const catalogs = await loadCatalogs();
+  const common = catalogs.find(({ file }) => file === "common.json")!;
+  assert.equal(common.en["xbus_review.title"], "Acceptance");
+  assert.equal(common.vi["xbus_review.title"], "Nghiệm thu");
+  assert.equal(common.en["xbus_review.approve"], "Approve completion");
+  assert.equal(common.vi["xbus_review.approve"], "Duyệt hoàn thành");
+  const source = await readFile(
+    new URL("../../../apps/web/components/issues/xbus-review.tsx", import.meta.url),
+    "utf8"
+  );
+  assert.ok(source.includes("t(`xbus_review.${key}`)"));
+  assert.ok(source.includes("{event.actor}"));
+  assert.ok(source.includes(": event.note}"));
+  assert.ok(source.includes("JSON.stringify({ action, reviewer_id: reviewer, note })"));
+  assert.ok(source.includes("toLocaleString(currentLocale)"));
 });

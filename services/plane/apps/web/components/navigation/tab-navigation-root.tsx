@@ -1,3 +1,4 @@
+import { normalizeTabOrder } from "./tab-order";
 /**
  * Copyright (c) 2023-present Plane Software, Inc. and contributors
  * SPDX-License-Identifier: AGPL-3.0-only
@@ -63,7 +64,7 @@ export const TabNavigationRoot = observer(function TabNavigationRoot(props: TTab
   } = useIssueDetail();
 
   // Tab preferences hook
-  const { tabPreferences, handleToggleDefaultTab, handleHideTab, handleShowTab } = useTabPreferences(
+  const { tabPreferences, handleToggleDefaultTab, handleHideTab, handleShowTab, handleMoveTab } = useTabPreferences(
     workspaceSlug,
     projectId
   );
@@ -107,10 +108,15 @@ export const TabNavigationRoot = observer(function TabNavigationRoot(props: TTab
   });
 
   // Filter and sort navigation items
-  const allNavigationItems = navigationItems
+  const baseNavigationItems = navigationItems
     .filter((item) => item.shouldRender)
     // oxlint-disable-next-line unicorn/no-array-sort
     .sort((a: TNavigationItem, b: TNavigationItem) => a.sortOrder - b.sortOrder);
+
+  const allNavigationItems = normalizeTabOrder(
+    tabPreferences.order ?? [],
+    baseNavigationItems.map((item) => item.key)
+  ).map((key) => baseNavigationItems.find((item) => item.key === key)!);
 
   // Split items into two categories:
   // 1. visibleNavigationItems: Items NOT user-hidden (may still overflow due to space)
@@ -209,6 +215,13 @@ export const TabNavigationRoot = observer(function TabNavigationRoot(props: TTab
                       tabPreferences={tabPreferences}
                       onToggleDefault={handleToggleDefaultTab}
                       onHide={handleHideTab}
+                      onMove={(key, direction) =>
+                        handleMoveTab(
+                          key,
+                          direction,
+                          allNavigationItems.map((entry) => entry.key)
+                        )
+                      }
                       itemRef={(el) => {
                         itemRefs.current[originalIndex] = el;
                       }}

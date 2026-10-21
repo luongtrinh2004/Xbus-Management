@@ -1,3 +1,4 @@
+import { IssueAIAssistant } from "@/components/issues/ai/assistant";
 // oxlint-disable no-shadow
 /**
  * Copyright (c) 2023-present Plane Software, Inc. and contributors
@@ -15,6 +16,7 @@ import type { TNameDescriptionLoader } from "@plane/types";
 import { DescriptionVersionsRoot } from "@/components/core/description-versions";
 import { DescriptionInput } from "@/components/editor/rich-text/description-input";
 import { XBusReview } from "@/components/issues/xbus-review";
+import { IssueCompletionButton } from "@/components/issues/completion/button";
 // hooks
 import { useIssueDetail } from "@/hooks/store/use-issue-detail";
 import { useMember } from "@/hooks/store/use-member";
@@ -94,7 +96,18 @@ export const PeekOverviewIssueDetails = observer(function PeekOverviewIssueDetai
         />
       )}
       <div className="flex items-center justify-between gap-2">
-        <IssueTypeSwitcher issueId={issueId} disabled={isArchived || disabled} />
+        <div className="flex items-center gap-2">
+          <IssueCompletionButton
+            issue={issue}
+            workspaceSlug={workspaceSlug}
+            disabled={isArchived || disabled}
+            showLabel
+            onChange={(stateId) =>
+              issueOperations.update(workspaceSlug, issue.project_id!, issue.id, { state_id: stateId })
+            }
+          />
+          <IssueTypeSwitcher issueId={issueId} disabled={isArchived || disabled} />
+        </div>
       </div>
       <IssueTitleInput
         workspaceSlug={workspaceSlug}
@@ -107,6 +120,18 @@ export const PeekOverviewIssueDetails = observer(function PeekOverviewIssueDetai
         value={issue.name}
       />
 
+      <IssueAIAssistant
+        key={`ai-${issue.id}`}
+        workspaceSlug={workspaceSlug}
+        projectId={issue.project_id}
+        issueId={issue.id}
+        name={issue.name}
+        disabled={disabled || isArchived}
+        onDescription={async (html) => {
+          await issueOperations.update(workspaceSlug, issue.project_id!, issue.id, { description_html: html });
+          editorRef.current?.setEditorValue(html, false);
+        }}
+      />
       <DescriptionInput
         issueSequenceId={issue.sequence_id}
         containerClassName="-ml-3 border-none"

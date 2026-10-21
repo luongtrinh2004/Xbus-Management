@@ -6,7 +6,7 @@
 from django.utils import timezone
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 
 # Third Party imports
 from rest_framework import serializers
@@ -17,6 +17,8 @@ from .user import UserLiteSerializer
 from .state import StateLiteSerializer
 from .project import ProjectLiteSerializer
 from .workspace import WorkspaceLiteSerializer
+from .custom_field import validate_project_custom_values, save_issue_custom_values
+from plane.utils.issue_visibility import eligible_issue_members
 from plane.db.models import (
     User,
     Issue,
@@ -41,6 +43,7 @@ from plane.db.models import (
     IssueVersion,
     IssueDescriptionVersion,
     ProjectMember,
+    Project,
     EstimatePoint,
 )
 from plane.utils.content_validator import (
@@ -77,9 +80,28 @@ class IssueProjectLiteSerializer(BaseSerializer):
         read_only_fields = fields
 
 
+def validate_issue_parent(instance, parent):
+    if not instance or not parent:
+        return
+    pending = parent.pk
+    visited = set()
+    while pending:
+        if pending == instance.pk or pending in visited:
+            raise serializers.ValidationError({"parent_id": "A work item cannot be its own ancestor."})
+        visited.add(pending)
+        pending = (
+            Issue.objects.filter(pk=pending, project_id=instance.project_id).values_list("parent_id", flat=True).first()
+        )
+
+
 ##TODO: Find a better way to write this serializer
 ## Find a better approach to save manytomany?
 class IssueCreateSerializer(BaseSerializer):
+    custom_field_values = serializers.DictField(required=False, write_only=True)
+
+    def validate_custom_field_values(self, value):
+        return validate_project_custom_values(self, value)
+
     # ids
     state_id = serializers.PrimaryKeyRelatedField(
         source="state", queryset=State.all_state_objects.all(), required=False, allow_null=True
@@ -119,6 +141,12 @@ class IssueCreateSerializer(BaseSerializer):
         data["assignee_ids"] = assignee_ids if assignee_ids else []
         label_ids = self.initial_data.get("label_ids")
         data["label_ids"] = label_ids if label_ids else []
+        if "custom_field_values" in self.initial_data:
+            from plane.db.models import IssueCustomFieldValue
+
+            data["custom_field_values"] = {
+                str(row.field_id): row.value for row in IssueCustomFieldValue.objects.filter(issue=instance)
+            }
         return data
 
     def validate(self, attrs):
@@ -130,8 +158,15 @@ class IssueCreateSerializer(BaseSerializer):
 
             review = Review.objects.filter(issue_id=self.instance.pk).first()
             target_state = attrs.get("state")
-            if review and target_state and target_state.group == "completed" and target_state.pk != self.instance.state_id:
-                raise serializers.ValidationError({"state": "Hãy duyệt công việc qua mục Nghiệm thu trước khi hoàn thành."})
+            if (
+                review
+                and target_state
+                and target_state.group == "completed"
+                and target_state.pk != self.instance.state_id
+            ):
+                raise serializers.ValidationError(
+                    {"state": "Hãy duyệt công việc qua mục Nghiệm thu trước khi hoàn thành."}
+                )
         allow_triage = self.context.get("allow_triage_state", False)
         state_manager = State.triage_objects if allow_triage else State.objects
 
@@ -196,6 +231,9 @@ class IssueCreateSerializer(BaseSerializer):
         ):
             raise serializers.ValidationError("Parent is not valid issue_id please pass a valid issue_id")
 
+        if "parent" in attrs:
+            validate_issue_parent(self.instance, attrs["parent"])
+
         if (
             attrs.get("estimate_point")
             and not EstimatePoint.objects.filter(
@@ -207,7 +245,10 @@ class IssueCreateSerializer(BaseSerializer):
 
         return attrs
 
+    @transaction.atomic
     def create(self, validated_data):
+        custom_values = validated_data.pop("custom_field_values", {})
+        custom_values = validate_project_custom_values(self, custom_values, lock=True)
         assignees = validated_data.pop("assignee_ids", None)
         labels = validated_data.pop("label_ids", None)
 
@@ -282,9 +323,16 @@ class IssueCreateSerializer(BaseSerializer):
             except IntegrityError:
                 pass
 
+        save_issue_custom_values(self, issue, custom_values, creating=True)
         return issue
 
+    @transaction.atomic
     def update(self, instance, validated_data):
+        if "parent" in validated_data:
+            # Serialize reparenting within a project so two concurrent edits cannot create a tree cycle.
+            Project.objects.select_for_update().get(pk=instance.project_id)
+            validate_issue_parent(instance, validated_data["parent"])
+        custom_values = validated_data.pop("custom_field_values", {})
         assignees = validated_data.pop("assignee_ids", None)
         labels = validated_data.pop("label_ids", None)
 
@@ -295,6 +343,23 @@ class IssueCreateSerializer(BaseSerializer):
         updated_by_id = instance.updated_by_id
 
         if assignees is not None:
+            removed_assignees = set(
+                IssueAssignee.objects.filter(issue=instance).values_list("assignee_id", flat=True)
+            ) - set(assignees)
+            eligible = set(
+                eligible_issue_members(instance)
+                .filter(member_id__in=removed_assignees)
+                .values_list("member_id", flat=True)
+            )
+            IssueSubscriber.objects.bulk_create(
+                [
+                    IssueSubscriber(
+                        issue=instance, project_id=project_id, workspace_id=workspace_id, subscriber_id=user_id
+                    )
+                    for user_id in eligible
+                ],
+                ignore_conflicts=True,
+            )
             IssueAssignee.objects.filter(issue=instance).delete()
             try:
                 IssueAssignee.objects.bulk_create(
@@ -338,7 +403,9 @@ class IssueCreateSerializer(BaseSerializer):
 
         # Time updation occues even when other related models are updated
         instance.updated_at = timezone.now()
-        return super().update(instance, validated_data)
+        instance = super().update(instance, validated_data)
+        save_issue_custom_values(self, instance, custom_values)
+        return instance
 
 
 class IssueActivitySerializer(BaseSerializer):

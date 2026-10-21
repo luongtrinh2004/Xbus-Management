@@ -88,6 +88,7 @@ type IssueRelation = {
 };
 
 export type TIssue = TBaseIssue & {
+  custom_field_values?: Record<string, string | number | string[] | null>;
   description_html?: string;
   is_subscribed?: boolean;
   parent?: Partial<TBaseIssue>;

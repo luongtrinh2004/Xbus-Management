@@ -236,6 +236,12 @@ export class InboxIssueStore implements IInboxIssueStore {
   };
 
   updateProjectIssue = async (issue: Partial<TIssue>) => {
+    if (
+      this.issue.id &&
+      ("start_date" in issue || "target_date" in issue) &&
+      !(await this.issueService.confirmIssueDateChange(this.workspaceSlug, this.projectId, this.issue.id, issue))
+    )
+      return;
     const inboxIssue = clone(this.issue);
     try {
       if (!this.issue.id) return;

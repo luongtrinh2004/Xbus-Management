@@ -1,18 +1,6 @@
 {
   "menuImageUrl": "",
-  "invitations": [
-    {
-      "id": "tea_1792390933770",
-      "type": "afternoon-tea",
-      "title": "Mời trà chiều",
-      "scheduledAt": "2026-10-19T14:00",
-      "note": "ssss",
-      "createdBy": "usr_admin_001",
-      "createdAt": "2026-10-19T06:22:13.771Z",
-      "registrations": [],
-      "menus": []
-    }
-  ],
+  "invitations": [],
   "menuCatalog": [
     {
       "id": "menu_catalog_1791822297246",

@@ -7,6 +7,7 @@
 import { Outlet, redirect } from "react-router";
 // plane imports
 import { cn } from "@plane/utils";
+import { DependencyDateConfirmation } from "@/components/issues/dependencies/date-confirmation";
 // local
 import { ensureTrailingSlash } from "./compat/next/helper";
 import { AppProvider } from "./provider";
@@ -28,6 +29,7 @@ export const clientMiddleware: Route.ClientMiddlewareFunction[] = [trailingSlash
 export default function AppShellLayout() {
   return (
     <AppProvider>
+      <DependencyDateConfirmation />
       <div className={cn("relative flex h-screen w-full flex-col overflow-hidden bg-canvas", "desktop-app-container")}>
         <main className="relative h-full w-full overflow-hidden">
           <Outlet />

@@ -9,7 +9,7 @@ import { useTranslation } from "@plane/i18n";
 import type { TQuickAddIssueForm } from "../root";
 
 export const SpreadsheetQuickAddIssueForm = observer(function SpreadsheetQuickAddIssueForm(props: TQuickAddIssueForm) {
-  const { ref, projectDetail, register, onSubmit, isEpic } = props;
+  const { ref, projectDetail, register, onSubmit, isEpic, isSubmitting } = props;
   const { t } = useTranslation();
   return (
     <div className="pb-2">
@@ -22,6 +22,8 @@ export const SpreadsheetQuickAddIssueForm = observer(function SpreadsheetQuickAd
         <input
           type="text"
           autoComplete="off"
+          readOnly={isSubmitting}
+          aria-busy={isSubmitting}
           placeholder={isEpic ? t("epic.title.label") : t("issue.title.label")}
           {...register("name", {
             required: isEpic ? t("epic.title.required") : t("issue.title.required"),

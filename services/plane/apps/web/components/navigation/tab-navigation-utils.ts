@@ -8,6 +8,7 @@
 export type TTabPreferences = {
   defaultTab: string;
   hiddenTabs: string[];
+  order?: string[];
 };
 
 // Constants

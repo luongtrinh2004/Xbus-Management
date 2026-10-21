@@ -1,3 +1,4 @@
+import { useTranslation } from "@plane/i18n";
 /**
  * Copyright (c) 2023-present Plane Software, Inc. and contributors
  * SPDX-License-Identifier: AGPL-3.0-only
@@ -18,6 +19,7 @@ type TIssuePeekOverviewError = {
 };
 
 export function IssuePeekOverviewError(props: TIssuePeekOverviewError) {
+  const { t } = useTranslation();
   const { removeRoutePeekId } = props;
   // hooks
   const { isMobile } = usePlatformOS();
@@ -25,7 +27,7 @@ export function IssuePeekOverviewError(props: TIssuePeekOverviewError) {
   return (
     <div className="relative flex h-full w-full flex-col overflow-hidden">
       <div className="flex flex-shrink-0 justify-start">
-        <Tooltip label={"Đóng chế độ xem lướt"} disabled={isMobile}>
+        <Tooltip label={t("work_item_ui.close_peek")} disabled={isMobile}>
           <button onClick={removeRoutePeekId} className="m-5 h-5 w-5">
             <ArrowNarrowRightOutline className="h-4 w-4 text-tertiary hover:text-secondary" />
           </button>
@@ -35,8 +37,8 @@ export function IssuePeekOverviewError(props: TIssuePeekOverviewError) {
       <div className="h-full w-full">
         <EmptyState
           image={emptyIssue ?? undefined}
-          title={"Công việc không tồn tại"}
-          description={"Công việc bạn đang tìm kiếm không tồn tại, đã được lưu trữ hoặc đã bị xóa."}
+          title={t("work_item_ui.not_found")}
+          description={t("work_item_ui.not_found_hint")}
         />
       </div>
     </div>

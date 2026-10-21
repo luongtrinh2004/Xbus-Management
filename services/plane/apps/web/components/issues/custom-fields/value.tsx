@@ -9,18 +9,23 @@ import { useMember } from "@/hooks/store/use-member";
 import type { CustomField, CustomFieldValue } from "@/types/custom-fields";
 import { formatCustomFieldValue, parseCustomFieldInput } from "./helpers";
 
-type Props = { field: CustomField; workspaceSlug: string; projectId: string; issueId: string; disabled: boolean };
+type Props = { field: CustomField; workspaceSlug: string; projectId: string; disabled: boolean } & (
+  | { issueId: string; value?: never; onChange?: never }
+  | { issueId?: undefined; value: CustomFieldValue; onChange: (value: CustomFieldValue) => void }
+);
 export const CustomFieldValueEditor = observer(function CustomFieldValueEditor({
   field,
   workspaceSlug,
   projectId,
   issueId,
   disabled,
+  value: controlledValue,
+  onChange,
 }: Props) {
   const store = useCustomFields();
   const { getUserDetails } = useMember();
   const { t, currentLocale } = useTranslation();
-  const value = store.valuesByIssue[issueId]?.[field.id] ?? null;
+  const value = onChange ? (controlledValue ?? null) : (store.valuesByIssue[issueId!]?.[field.id] ?? null);
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(false);
@@ -29,7 +34,7 @@ export const CustomFieldValueEditor = observer(function CustomFieldValueEditor({
   useEffect(() => {
     if (!open) setDraft(typeof value === "string" || typeof value === "number" ? String(value) : "");
   }, [value, open]);
-  const readOnly = disabled || !store.loadedIssues[issueId];
+  const readOnly = disabled || (!onChange && !store.loadedIssues[issueId!]);
   const formatted = formatCustomFieldValue(field, value, currentLocale, (id) => getUserDetails(id)?.display_name ?? id);
   const save = async (next: CustomFieldValue): Promise<boolean> => {
     if (saving.current) return saving.current;
@@ -39,7 +44,8 @@ export const CustomFieldValueEditor = observer(function CustomFieldValueEditor({
       setBusy(true);
       setError(false);
       try {
-        await store.saveValue(workspaceSlug, projectId, issueId, field.id, next);
+        if (onChange) await onChange(next);
+        else await store.saveValue(workspaceSlug, projectId, issueId!, field.id, next);
         return true;
       } catch {
         setError(true);
@@ -185,12 +191,21 @@ export const CustomFieldValueEditor = observer(function CustomFieldValueEditor({
                   void saveDraft();
                 }}
                 onKeyDown={(event) => {
-                  if (event.key === "Enter") event.currentTarget.blur();
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    event.currentTarget.blur();
+                  }
                 }}
               />
             )}
             <div className="flex justify-between text-12 text-tertiary">
-              <span aria-live="polite">{busy ? t("custom_fields.saving") : t("custom_fields.autosave")}</span>
+              <span aria-live="polite">
+                {busy
+                  ? t("custom_fields.saving")
+                  : onChange
+                    ? t("issue_form_draft.fields_saved_with_task")
+                    : t("custom_fields.autosave")}
+              </span>
               <button
                 type="button"
                 disabled={busy}

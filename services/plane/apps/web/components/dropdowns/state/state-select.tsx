@@ -13,22 +13,19 @@ import { useParams } from "next/navigation";
 // plane imports
 import { StateSelect as StateSelectBlock } from "@plane/blocks/property-select";
 import type { StateOption } from "@plane/blocks/property-select";
-import type {
-  SelectPaginationParams,
-  SelectTooltip,
-  SelectTooltipOverride,
-  SelectVariant,
-} from "@plane/blocks/select";
+import type { SelectPaginationParams, SelectTooltip, SelectTooltipOverride, SelectVariant } from "@plane/blocks/select";
 import { useTranslation } from "@plane/i18n";
-import type { IState, TPaginatedResponse } from "@plane/types";
+import type { IState, TIssueServiceType, TPaginatedResponse } from "@plane/types";
 // hooks
 import { useProjectState } from "@/hooks/store/use-project-state";
-import { setToast } from "@plane/blocks/toast";
-import { getStateChangeError } from "./change-error";
+import { useIssueStateChange } from "@/components/issues/completion/use-state-change";
 
 type StateSelectWebProps = {
   /** Project whose states are offered. */
   projectId: string | undefined;
+  /** Persisted work item; enables the unfinished-subtask confirmation before completion. */
+  issueId?: string;
+  issueServiceType?: TIssueServiceType;
   /** Current state id (`null` / `undefined` when none). */
   value: string | null | undefined;
   /** Emits the next state id. */
@@ -66,6 +63,8 @@ const toOption = (state: IState): StateOption => ({
 export const StateSelect = observer(function StateSelect(props: StateSelectWebProps) {
   const {
     projectId,
+    issueId,
+    issueServiceType,
     value,
     onChange,
     variant,
@@ -82,6 +81,15 @@ export const StateSelect = observer(function StateSelect(props: StateSelectWebPr
   const { workspaceSlug } = useParams();
   // store hooks
   const { getProjectStateIds, getStateById, fetchProjectStates } = useProjectState();
+  const { requestChange, isUpdating, isPending, confirmation } = useIssueStateChange({
+    workspaceSlug: workspaceSlug?.toString(),
+    projectId,
+    issueId,
+    issueServiceType,
+    value,
+    onChange,
+    disabled,
+  });
   // translation
   const { t } = useTranslation();
   const resolvedTooltip = useMemo<SelectTooltipOverride | undefined>(() => {
@@ -109,7 +117,7 @@ export const StateSelect = observer(function StateSelect(props: StateSelectWebPr
         .map(toOption);
       return { results, next_page_results: false };
     },
-    [workspaceSlug, projectId, getProjectStateIds, fetchProjectStates, getStateById],
+    [workspaceSlug, projectId, getProjectStateIds, fetchProjectStates, getStateById]
   );
 
   // Resolved in the observer render (not in a memo) so MobX re-renders when the state loads.
@@ -117,29 +125,22 @@ export const StateSelect = observer(function StateSelect(props: StateSelectWebPr
   const selected = selectedState ? toOption(selectedState) : null;
 
   return (
-    <StateSelectBlock
-      getValues={getValues}
-      value={selected}
-      onChange={async (stateId) => {
-        try {
-          await onChange(stateId);
-        } catch (error) {
-          setToast({
-            type: "error",
-            title: t("error"),
-            message: getStateChangeError(error, t("error")),
-          });
-        }
-      }}
-      variant={variant}
-      disabled={disabled}
-      placeholder={placeholder ?? t("state")}
-      onClose={onClose}
-      className={className}
-      tooltip={resolvedTooltip}
-      appendElement={appendElement}
-      testId={testId}
-      tabIndex={tabIndex}
-    />
+    <>
+      <StateSelectBlock
+        getValues={getValues}
+        value={selected}
+        onChange={requestChange}
+        variant={variant}
+        disabled={disabled || isUpdating || isPending}
+        placeholder={placeholder ?? t("state")}
+        onClose={onClose}
+        className={className}
+        tooltip={resolvedTooltip}
+        appendElement={appendElement}
+        testId={testId}
+        tabIndex={tabIndex}
+      />
+      {confirmation}
+    </>
   );
 });

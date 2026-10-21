@@ -4,6 +4,7 @@
  * See the LICENSE file for details.
  */
 
+import { ListAddRow } from "./add-row";
 import { useListTable } from "./table-context";
 import type { MutableRefObject } from "react";
 import { useEffect, useRef, useState } from "react";
@@ -37,6 +38,7 @@ import type { TSelectionHelper } from "@/hooks/use-multiple-select";
 // local imports
 import { GroupDragOverlay } from "../group-drag-overlay";
 import { ListQuickAddIssueButton, QuickAddIssueRoot } from "../quick-add";
+import type { TQuickAddIssueButton } from "../quick-add/root";
 import type { GroupDropLocation } from "../utils";
 import {
   getDestinationFromDropPayload,
@@ -47,6 +49,11 @@ import {
 import { IssueBlocksList } from "./blocks-list";
 import { HeaderGroupByCard } from "./headers/group-by-card";
 import type { TRenderQuickActions } from "./list-view-types";
+
+function AddTaskButton({ onClick }: TQuickAddIssueButton) {
+  const { t } = useTranslation();
+  return <ListAddRow onClick={onClick}>{t("issue.add.label")}</ListAddRow>;
+}
 
 interface Props {
   groupIssueIds: string[] | undefined;
@@ -201,6 +208,7 @@ export const ListGroup = observer(function ListGroup(props: Props) {
     return combine(
       dropTargetForElements({
         element,
+        canDrop: ({ source }) => source.data.type === "ISSUE",
         getData: () => ({ groupId: group.id, type: "COLUMN" }),
         onDragEnter: () => {
           setIsDraggingOverColumn(true);
@@ -358,15 +366,14 @@ export const ListGroup = observer(function ListGroup(props: Props) {
             ))}
 
           {enableIssueQuickAdd &&
-            !columns &&
             !disableIssueCreation &&
             !isGroupByCreatedBy &&
             !isCompletedCycle &&
             !isWorkflowIssueCreationDisabled && (
-              <div className="sticky bottom-0 z-[1] w-full flex-shrink-0">
+              <div className={cn("w-full flex-shrink-0", { "sticky bottom-0 z-[1]": !columns })}>
                 <QuickAddIssueRoot
                   layout={EIssueLayoutTypes.LIST}
-                  QuickAddButton={ListQuickAddIssueButton}
+                  QuickAddButton={columns ? AddTaskButton : ListQuickAddIssueButton}
                   prePopulatedData={prePopulateQuickAddData(group_by, group.id)}
                   containerClassName="border-b border-t border-subtle bg-surface-1 "
                   quickAddCallback={quickAddCallback}

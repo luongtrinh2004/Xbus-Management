@@ -1,3 +1,4 @@
+import { useTranslation } from "@plane/i18n";
 /**
  * Copyright (c) 2023-present Plane Software, Inc. and contributors
  * SPDX-License-Identifier: AGPL-3.0-only
@@ -26,6 +27,7 @@ const VARIANT_MAP: Record<TIdentifierTextVariant, string> = {
 };
 
 export function IdentifierText(props: TIdentifierTextProps) {
+  const { t } = useTranslation();
   const { identifier, enableClickToCopyIdentifier = false, size = "lg", variant = "default" } = props;
   // handlers
   const handleCopyIssueIdentifier = () => {
@@ -35,7 +37,7 @@ export function IdentifierText(props: TIdentifierTextProps) {
         .then(() => {
           setToast({
             type: "success",
-            title: "Đã sao chép mã công việc vào bộ nhớ tạm",
+            title: t("work_item_ui.copied_id"),
           });
           return;
         })
@@ -49,7 +51,7 @@ export function IdentifierText(props: TIdentifierTextProps) {
   const variantClassName = VARIANT_MAP[variant];
 
   return (
-    <Tooltip label={"Nhấn để sao chép"} disabled={!enableClickToCopyIdentifier}>
+    <Tooltip label={t("work_item_ui.click_copy")} disabled={!enableClickToCopyIdentifier}>
       <button
         type="button"
         className={cn("text-12 font-medium whitespace-nowrap text-tertiary", textSizeClassName, variantClassName, {

@@ -19,19 +19,23 @@ import { DisplayFiltersSelection, FiltersDropdown, LayoutSelection } from "@/com
 import { WorkItemFiltersToggle } from "@/components/work-item-filters/filters-toggle";
 // hooks
 import { useIssues } from "@/hooks/store/use-issues";
+import { useUser } from "@/hooks/store/user";
 
 export const ProfileIssuesFilter = observer(function ProfileIssuesFilter() {
   // i18n
   const { t } = useTranslation();
   // router
-  const { workspaceSlug, userId: routeUserId } = useParams();
+  const { workspaceSlug, userId: routeUserId, profileViewId } = useParams();
+  const { data: currentUser } = useUser();
   const userId = routeUserId ? routeUserId.toString() : undefined;
   // store hook
   const {
+    issues: { showPersonalPlanning },
     issuesFilter: { issueFilters, updateFilters },
   } = useIssues(EIssuesStoreType.PROFILE);
   // derived values
   const activeLayout = issueFilters?.displayFilters?.layout;
+  const isPlanning = userId === currentUser?.id && profileViewId === "assigned" && showPersonalPlanning;
 
   const handleLayoutChange = useCallback(
     (layout: EIssueLayoutTypes) => {
@@ -70,18 +74,20 @@ export const ProfileIssuesFilter = observer(function ProfileIssuesFilter() {
         onChange={(layout) => handleLayoutChange(layout)}
         selectedLayout={activeLayout}
       />
-      {userId && <WorkItemFiltersToggle entityType={EIssuesStoreType.PROFILE} entityId={userId} />}
-      <FiltersDropdown title={t("common.display")} placement="bottom-end">
-        <DisplayFiltersSelection
-          layoutDisplayFiltersOptions={
-            activeLayout ? ISSUE_DISPLAY_FILTERS_BY_PAGE.profile_issues.layoutOptions[activeLayout] : undefined
-          }
-          displayFilters={issueFilters?.displayFilters ?? {}}
-          handleDisplayFiltersUpdate={handleDisplayFilters}
-          displayProperties={issueFilters?.displayProperties ?? {}}
-          handleDisplayPropertiesUpdate={handleDisplayProperties}
-        />
-      </FiltersDropdown>
+      {userId && !isPlanning && <WorkItemFiltersToggle entityType={EIssuesStoreType.PROFILE} entityId={userId} />}
+      {!isPlanning && (
+        <FiltersDropdown title={t("common.display")} placement="bottom-end">
+          <DisplayFiltersSelection
+            layoutDisplayFiltersOptions={
+              activeLayout ? ISSUE_DISPLAY_FILTERS_BY_PAGE.profile_issues.layoutOptions[activeLayout] : undefined
+            }
+            displayFilters={issueFilters?.displayFilters ?? {}}
+            handleDisplayFiltersUpdate={handleDisplayFilters}
+            displayProperties={issueFilters?.displayProperties ?? {}}
+            handleDisplayPropertiesUpdate={handleDisplayProperties}
+          />
+        </FiltersDropdown>
+      )}
     </div>
   );
 });

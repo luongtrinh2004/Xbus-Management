@@ -7,6 +7,8 @@
 import React from "react";
 import { observer } from "mobx-react";
 import { setToast } from "@plane/blocks/toast";
+import { useTranslation } from "@plane/i18n";
+import { getDependencyError } from "@/components/issues/dependencies/errors";
 import type { ISearchIssueResponse, TIssue, TIssueServiceType, TWorkItemWidgets } from "@plane/types";
 // components
 import { ExistingIssuesListModal } from "@/components/core/modals/existing-issues-list-modal";
@@ -29,6 +31,7 @@ type Props = {
 
 export const IssueDetailWidgetModals = observer(function IssueDetailWidgetModals(props: Props) {
   const { workspaceSlug, projectId, issueId, issueServiceType, hideWidgets } = props;
+  const { t } = useTranslation();
   // store hooks
   const {
     isIssueLinkModalOpen,
@@ -192,6 +195,7 @@ export const IssueDetailWidgetModals = observer(function IssueDetailWidgetModals
           handleClose={handleRelationOnClose}
           searchParams={{ issue_relation: true, issue_id: issueId }}
           handleOnSubmit={handleExistingIssueModalOnSubmit}
+          getSubmitErrorMessage={(error) => getDependencyError(error, t)}
           workspaceLevelToggle
         />
       )}

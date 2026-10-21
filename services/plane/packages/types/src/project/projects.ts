@@ -115,6 +115,7 @@ export interface IProjectBulkAddFormData {
 export type IProjectMemberNavigationPreferences = {
   default_tab: string;
   hide_in_more_menu: string[];
+  tab_order?: string[];
 };
 
 export type IProjectMemberPreferencesUpdate = {

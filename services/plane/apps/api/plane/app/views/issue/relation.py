@@ -4,9 +4,12 @@
 
 # Python imports
 import json
+from uuid import UUID
 
 # Django imports
 from django.utils import timezone
+from django.db import transaction
+from django.shortcuts import get_object_or_404
 from django.db.models import Q, OuterRef, F, Func, UUIDField, Value, CharField, Subquery
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models.functions import Coalesce
@@ -28,10 +31,12 @@ from plane.db.models import (
     FileAsset,
     IssueLink,
     CycleIssue,
+    Workspace,
 )
 from plane.bgtasks.issue_activities_task import issue_activity
 from plane.utils.issue_relation_mapper import get_actual_relation
 from plane.utils.host import base_host
+from plane.utils.issue_dependencies import DEPENDENCY_RELATIONS, find_dependency_cycle
 
 
 class IssueRelationViewSet(BaseViewSet):
@@ -214,36 +219,95 @@ class IssueRelationViewSet(BaseViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        issues = request.data.get("issues", [])
-        project = Project.objects.get(pk=project_id)
+        allowed_types = {
+            "blocked_by",
+            "blocking",
+            "start_before",
+            "start_after",
+            "finish_before",
+            "finish_after",
+            "relates_to",
+            "duplicate",
+            "implemented_by",
+            "implements",
+        }
+        if relation_type not in allowed_types:
+            return Response({"error": "Invalid issue relation type", "code": "invalid_relation_type"}, status=400)
 
-        # Scope to workspace to prevent cross-tenant IDOR
-        # Relations can cross projects so only workspace scope is enforced
-        issues = list(
-            Issue.issue_objects.filter(
-                workspace__slug=slug,
-                pk__in=issues,
-            ).values_list("id", flat=True)
-        )
+        requested_issues = request.data.get("issues", [])
+        if not isinstance(requested_issues, list) or not requested_issues:
+            return Response({"error": "Select at least one issue", "code": "related_issues_required"}, status=400)
+        try:
+            requested_ids = {UUID(str(value)) for value in requested_issues}
+        except (ValueError, TypeError, AttributeError):
+            return Response({"error": "Invalid related issue identifier", "code": "invalid_related_issue"}, status=400)
 
-        issue_relation = IssueRelation.objects.bulk_create(
-            [
-                IssueRelation(
-                    issue_id=(issue if relation_type in ["blocking", "start_after", "finish_after"] else issue_id),
-                    related_issue_id=(
-                        issue_id if relation_type in ["blocking", "start_after", "finish_after"] else issue
-                    ),
-                    relation_type=(get_actual_relation(relation_type)),
-                    project_id=project_id,
-                    workspace_id=project.workspace_id,
-                    created_by=request.user,
-                    updated_by=request.user,
+        if UUID(str(issue_id)) in requested_ids:
+            return Response({"error": "A task cannot depend on itself", "code": "self_dependency"}, status=400)
+
+        project = get_object_or_404(Project, pk=project_id, workspace__slug=slug)
+        actual_type = get_actual_relation(relation_type)
+        reverse = relation_type in ["blocking", "start_after", "finish_after"]
+        with transaction.atomic():
+            # Relations may span projects. Serialize graph checks across the workspace so
+            # concurrent A -> B and B -> A requests cannot both pass validation.
+            Workspace.objects.select_for_update().get(pk=project.workspace_id)
+            get_object_or_404(Issue.issue_objects, pk=issue_id, project_id=project_id, workspace__slug=slug)
+            issues = list(
+                Issue.issue_objects.filter(workspace__slug=slug, pk__in=requested_ids).values_list("id", flat=True)
+            )
+            if set(issues) != requested_ids:
+                return Response({"error": "A related task is unavailable", "code": "invalid_related_issue"}, status=400)
+
+            proposed = [
+                (actual_type, issue if reverse else issue_id, issue_id if reverse else issue) for issue in issues
+            ]
+            pair_filter = (
+                Q(issue_id__in=issues, related_issue_id=issue_id)
+                if reverse
+                else Q(issue_id=issue_id, related_issue_id__in=issues)
+            )
+            if IssueRelation.objects.filter(pair_filter).exclude(relation_type=actual_type).exists():
+                return Response(
+                    {
+                        "error": "Another relation already links these tasks. Remove it before adding a new relation.",
+                        "code": "relation_conflict",
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
                 )
-                for issue in issues
-            ],
-            batch_size=10,
-            ignore_conflicts=True,
-        )
+            if actual_type in DEPENDENCY_RELATIONS:
+                existing = IssueRelation.objects.filter(
+                    workspace_id=project.workspace_id,
+                    relation_type__in=DEPENDENCY_RELATIONS,
+                    deleted_at__isnull=True,
+                    issue__deleted_at__isnull=True,
+                    related_issue__deleted_at__isnull=True,
+                ).values_list("relation_type", "issue_id", "related_issue_id")
+                if find_dependency_cycle(existing, proposed):
+                    return Response(
+                        {
+                            "error": "This dependency would create a circular dependency",
+                            "code": "dependency_cycle",
+                        },
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+
+            issue_relation = IssueRelation.objects.bulk_create(
+                [
+                    IssueRelation(
+                        issue_id=source,
+                        related_issue_id=target,
+                        relation_type=stored_type,
+                        project_id=project_id,
+                        workspace_id=project.workspace_id,
+                        created_by=request.user,
+                        updated_by=request.user,
+                    )
+                    for stored_type, source, target in proposed
+                ],
+                batch_size=10,
+                ignore_conflicts=True,
+            )
 
         issue_activity.delay(
             type="issue_relation.activity.created",
@@ -257,7 +321,7 @@ class IssueRelationViewSet(BaseViewSet):
             origin=base_host(request=request, is_app=True),
         )
 
-        if relation_type in ["blocking", "start_after", "finish_after"]:
+        if reverse:
             return Response(
                 RelatedIssueSerializer(issue_relation, many=True).data,
                 status=status.HTTP_201_CREATED,

@@ -101,13 +101,15 @@ export const useSubIssueOperations = (issueServiceType: TIssueServiceType): TSub
             title: t("toast.success"),
             message: t("sub_work_item.update.success"),
           });
-          setSubIssueHelpers(parentIssueId, "issue_loader", issueId);
         } catch (_error) {
+          if (issueData.state_id !== undefined) throw _error;
           setToast({
             type: "error",
             title: t("toast.error"),
             message: t("sub_work_item.update.error"),
           });
+        } finally {
+          setSubIssueHelpers(parentIssueId, "issue_loader", issueId);
         }
       },
       removeSubIssue: async (workspaceSlug, projectId, parentIssueId, issueId) => {

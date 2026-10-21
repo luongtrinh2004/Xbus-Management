@@ -19,6 +19,7 @@ import { Tooltip } from "@makeplane/propel/components/tooltip";
 import type { DateRangeValue } from "@plane/blocks/property-select";
 import { DateRangeSelect, DateSelect } from "@plane/blocks/property-select";
 import type { TIssue, IIssueDisplayProperties, TIssuePriorities } from "@plane/types";
+import { EIssueServiceType } from "@plane/types";
 // ui
 import {
   cn,
@@ -218,6 +219,8 @@ export const IssueProperties = observer(function IssueProperties(props: IIssuePr
         {/* oxlint-disable-next-line jsx_a11y/click-events-have-key-events oxlint-disable-next-line jsx_a11y/no-static-element-interactions */}
         <div className="h-5" onFocus={handleEventPropagation} onClick={handleEventPropagation}>
           <StateSelect
+            issueId={issue.id}
+            issueServiceType={isEpic ? EIssueServiceType.EPICS : EIssueServiceType.ISSUES}
             value={issue.state_id}
             onChange={handleState}
             projectId={issue.project_id}

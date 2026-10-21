@@ -21,6 +21,10 @@ export interface IIssueSubscriptionStoreActions {
 export interface IIssueSubscriptionStore extends IIssueSubscriptionStoreActions {
   // observables
   subscriptionMap: Record<string, Record<string, boolean>>; // Record defines subscriptionId as key and link as value
+  collaboratorMap: Record<string, string[]>;
+  savingCollaborators: Record<string, boolean>;
+  fetchCollaborators: (workspaceSlug: string, projectId: string, issueId: string) => Promise<void>;
+  saveCollaborators: (workspaceSlug: string, projectId: string, issueId: string, ids: string[]) => Promise<void>;
   // helper methods
   getSubscriptionByIssueId: (issueId: string) => boolean | undefined;
 }
@@ -28,6 +32,9 @@ export interface IIssueSubscriptionStore extends IIssueSubscriptionStoreActions 
 export class IssueSubscriptionStore implements IIssueSubscriptionStore {
   // observables
   subscriptionMap: Record<string, Record<string, boolean>> = {};
+  collaboratorMap: Record<string, string[]> = {};
+  savingCollaborators: Record<string, boolean> = {};
+  private collaboratorVersions: Record<string, number> = {};
   // root store
   rootIssueDetail: IIssueDetail;
   // services
@@ -37,11 +44,15 @@ export class IssueSubscriptionStore implements IIssueSubscriptionStore {
     makeObservable(this, {
       // observables
       subscriptionMap: observable,
+      collaboratorMap: observable,
+      savingCollaborators: observable,
       // actions
       addSubscription: action.bound,
       fetchSubscriptions: action,
       createSubscription: action,
       removeSubscription: action,
+      fetchCollaborators: action,
+      saveCollaborators: action,
     });
     // root store
     this.rootIssueDetail = rootStore;
@@ -76,6 +87,38 @@ export class IssueSubscriptionStore implements IIssueSubscriptionStore {
     return subscription?.subscribed;
   };
 
+  fetchCollaborators = async (workspaceSlug: string, projectId: string, issueId: string) => {
+    const version = this.collaboratorVersions[issueId] ?? 0;
+    const rows = await this.issueService.getIssueSubscribers(workspaceSlug, projectId, issueId);
+    if (version !== (this.collaboratorVersions[issueId] ?? 0) || this.savingCollaborators[issueId]) return;
+    runInAction(() => {
+      this.collaboratorMap[issueId] = rows.map((row) => row.subscriber);
+      const currentUserId = this.rootIssueDetail.rootIssueStore.currentUserId;
+      if (currentUserId) this.addSubscription(issueId, this.collaboratorMap[issueId].includes(currentUserId));
+    });
+  };
+
+  saveCollaborators = async (workspaceSlug: string, projectId: string, issueId: string, ids: string[]) => {
+    if (this.savingCollaborators[issueId]) return;
+    this.collaboratorVersions[issueId] = (this.collaboratorVersions[issueId] ?? 0) + 1;
+    runInAction(() => {
+      this.savingCollaborators[issueId] = true;
+    });
+    try {
+      const rows = await this.issueService.updateIssueSubscribers(workspaceSlug, projectId, issueId, ids);
+      runInAction(() => {
+        this.collaboratorMap[issueId] = rows.map((row) => row.subscriber);
+        const currentUserId = this.rootIssueDetail.rootIssueStore.currentUserId;
+        if (currentUserId) this.addSubscription(issueId, this.collaboratorMap[issueId].includes(currentUserId));
+      });
+    } finally {
+      this.collaboratorVersions[issueId] = (this.collaboratorVersions[issueId] ?? 0) + 1;
+      runInAction(() => {
+        this.savingCollaborators[issueId] = false;
+      });
+    }
+  };
+
   createSubscription = async (workspaceSlug: string, projectId: string, issueId: string) => {
     try {
       const currentUserId = this.rootIssueDetail.rootIssueStore.currentUserId;
@@ -86,6 +129,11 @@ export class IssueSubscriptionStore implements IIssueSubscriptionStore {
       });
 
       await this.issueService.subscribeToIssueNotifications(workspaceSlug, projectId, issueId);
+      this.collaboratorVersions[issueId] = (this.collaboratorVersions[issueId] ?? 0) + 1;
+      runInAction(() => {
+        const existing = this.collaboratorMap[issueId];
+        if (existing && !existing.includes(currentUserId)) this.collaboratorMap[issueId] = [...existing, currentUserId];
+      });
     } catch (error) {
       this.fetchSubscriptions(workspaceSlug, projectId, issueId);
       throw error;
@@ -102,6 +150,12 @@ export class IssueSubscriptionStore implements IIssueSubscriptionStore {
       });
 
       await this.issueService.unsubscribeFromIssueNotifications(workspaceSlug, projectId, issueId);
+      this.collaboratorVersions[issueId] = (this.collaboratorVersions[issueId] ?? 0) + 1;
+      runInAction(() => {
+        if (this.collaboratorMap[issueId]) {
+          this.collaboratorMap[issueId] = this.collaboratorMap[issueId].filter((id) => id !== currentUserId);
+        }
+      });
     } catch (error) {
       this.fetchSubscriptions(workspaceSlug, projectId, issueId);
       throw error;

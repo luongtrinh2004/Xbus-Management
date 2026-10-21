@@ -10,6 +10,7 @@ import json
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.contrib.postgres.fields import ArrayField
 from django.core.serializers.json import DjangoJSONEncoder
+from django.db import transaction
 from django.db.models import (
     Count,
     Exists,
@@ -28,7 +29,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.gzip import gzip_page
 
 # Third Party imports
-from rest_framework import status
+from rest_framework import status, serializers
 from rest_framework.response import Response
 
 # Module imports
@@ -70,6 +71,7 @@ from plane.utils.grouper import (
 )
 from plane.utils.host import base_host
 from plane.utils.issue_filters import issue_filters
+from plane.utils.issue_dependency_dates import dependency_date_conflicts
 from plane.utils.order_queryset import order_issue_queryset
 from plane.utils.paginator import GroupedOffsetPaginator, SubGroupedOffsetPaginator
 from plane.utils.timezone_converter import user_timezone_converter
@@ -411,6 +413,7 @@ class IssueViewSet(BaseViewSet):
                 "project_id": project_id,
                 "workspace_id": project.workspace_id,
                 "default_assignee_id": project.default_assignee_id,
+                "request": request,
             },
         )
 
@@ -468,6 +471,8 @@ class IssueViewSet(BaseViewSet):
                 .first()
             )
             datetime_fields = ["created_at", "updated_at"]
+            if "custom_field_values" in serializer.validated_data:
+                issue["custom_field_values"] = serializer.validated_data["custom_field_values"]
             issue = user_timezone_converter(issue, datetime_fields, request.user.user_timezone)
             # Send the model activity
             model_activity.delay(
@@ -677,8 +682,19 @@ class IssueViewSet(BaseViewSet):
         current_instance = json.dumps(IssueDetailSerializer(issue).data, cls=DjangoJSONEncoder)
 
         requested_data = json.dumps(self.request.data, cls=DjangoJSONEncoder)
-        serializer = IssueCreateSerializer(issue, data=request.data, partial=True, context={"project_id": project_id})
+        serializer = IssueCreateSerializer(
+            issue, data=request.data, partial=True, context={"project_id": project_id, "request": request}
+        )
         if serializer.is_valid():
+            if request.query_params.get("preview_dependency_dates") == "1":
+                dates = {
+                    key: value
+                    for key, value in serializer.validated_data.items()
+                    if key in ["start_date", "target_date"]
+                }
+                return Response(
+                    {"conflicts": dependency_date_conflicts(issue.workspace_id, {str(issue.id): dates}, request.user)}
+                )
             serializer.save()
             # Check if the update is a migration description update
             is_migration_description_update = skip_activity and is_description_update
@@ -744,21 +760,11 @@ class ProjectUserDisplayPropertyEndpoint(BaseAPIView):
     @allow_permission([ROLE.ADMIN, ROLE.MEMBER, ROLE.GUEST])
     def patch(self, request, slug, project_id):
         try:
-            issue_property = ProjectUserProperty.objects.get(
-                user=request.user, 
-                project_id=project_id
-            )
+            issue_property = ProjectUserProperty.objects.get(user=request.user, project_id=project_id)
         except ProjectUserProperty.DoesNotExist:
-            issue_property = ProjectUserProperty.objects.create(
-                user=request.user, 
-                project_id=project_id
-            )
+            issue_property = ProjectUserProperty.objects.create(user=request.user, project_id=project_id)
 
-        serializer = ProjectUserPropertySerializer(
-            issue_property, 
-            data=request.data,
-            partial=True
-        )
+        serializer = ProjectUserPropertySerializer(issue_property, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -1103,83 +1109,76 @@ class IssueDetailEndpoint(BaseAPIView):
         )
 
 
+class IssueDateUpdateInput(serializers.Serializer):
+    id = serializers.UUIDField()
+    start_date = serializers.DateField(required=False, allow_null=True)
+    target_date = serializers.DateField(required=False, allow_null=True)
+
+    def validate(self, data):
+        if not any(key in data for key in ["start_date", "target_date"]):
+            raise serializers.ValidationError("Provide at least one date to update.")
+        return data
+
+
+class IssueBulkDatesInput(serializers.Serializer):
+    updates = IssueDateUpdateInput(many=True, max_length=500)
+
+    def validate_updates(self, data):
+        if len({row["id"] for row in data}) != len(data):
+            raise serializers.ValidationError("Duplicate work item IDs are not allowed.")
+        return data
+
+
 class IssueBulkUpdateDateEndpoint(BaseAPIView):
-    def validate_dates(self, current_start, current_target, new_start, new_target):
-        """
-        Validate that start date is before target date.
-        """
-        from datetime import datetime
-
-        start = new_start or current_start
-        target = new_target or current_target
-
-        # Convert string dates to datetime objects if they're strings
-        if isinstance(start, str):
-            start = datetime.strptime(start, "%Y-%m-%d").date()
-        if isinstance(target, str):
-            target = datetime.strptime(target, "%Y-%m-%d").date()
-
-        if start and target and start > target:
-            return False
-        return True
-
     @allow_permission([ROLE.ADMIN, ROLE.MEMBER])
+    @transaction.atomic
     def post(self, request, slug, project_id):
-        updates = request.data.get("updates", [])
-
-        issue_ids = [update["id"] for update in updates]
-        epoch = int(timezone.now().timestamp())
-
-        # Fetch all relevant issues in a single query
-        issues = list(Issue.objects.filter(id__in=issue_ids, workspace__slug=slug, project_id=project_id))
-        issues_dict = {str(issue.id): issue for issue in issues}
-        issues_to_update = []
-
+        payload = IssueBulkDatesInput(data=request.data)
+        payload.is_valid(raise_exception=True)
+        updates = payload.validated_data["updates"]
+        issues = list(
+            Issue.objects.select_for_update().filter(
+                id__in=[row["id"] for row in updates],
+                workspace__slug=slug,
+                project_id=project_id,
+            )
+        )
+        issues_dict = {issue.id: issue for issue in issues}
+        if len(issues_dict) != len(updates):
+            return Response({"error": "A work item is unavailable in this project."}, status=status.HTTP_404_NOT_FOUND)
+        validated_dates = {}
         for update in updates:
-            issue_id = update["id"]
-            issue = issues_dict.get(issue_id)
-
-            if not issue:
-                continue
-
-            start_date = update.get("start_date")
-            target_date = update.get("target_date")
-            validate_dates = self.validate_dates(issue.start_date, issue.target_date, start_date, target_date)
-            if not validate_dates:
-                return Response(
-                    {"message": "Start date cannot exceed target date"},
-                    status=status.HTTP_400_BAD_REQUEST,
+            issue = issues_dict[update["id"]]
+            dates = {key: value for key, value in update.items() if key in ["start_date", "target_date"]}
+            serializer = IssueCreateSerializer(
+                issue, data=dates, partial=True, context={"project_id": project_id, "request": request}
+            )
+            serializer.is_valid(raise_exception=True)
+            validated_dates[str(issue.id)] = serializer.validated_data
+        if request.query_params.get("preview_dependency_dates") == "1":
+            workspace_id = issues[0].workspace_id if issues else None
+            return Response({"conflicts": dependency_date_conflicts(workspace_id, validated_dates, request.user)})
+        activity_data = []
+        for update in updates:
+            issue = issues_dict[update["id"]]
+            for key, value in validated_dates[str(issue.id)].items():
+                if getattr(issue, key) == value:
+                    continue
+                activity_data.append(
+                    dict(
+                        type="issue.activity.updated",
+                        requested_data=json.dumps({key: value}, cls=DjangoJSONEncoder),
+                        current_instance=json.dumps({key: getattr(issue, key)}, cls=DjangoJSONEncoder),
+                        issue_id=str(issue.id),
+                        actor_id=str(request.user.id),
+                        project_id=str(project_id),
+                        epoch=int(timezone.now().timestamp()),
+                    )
                 )
-
-            if start_date:
-                issue_activity.delay(
-                    type="issue.activity.updated",
-                    requested_data=json.dumps({"start_date": update.get("start_date")}),
-                    current_instance=json.dumps({"start_date": str(issue.start_date)}),
-                    issue_id=str(issue_id),
-                    actor_id=str(request.user.id),
-                    project_id=str(project_id),
-                    epoch=epoch,
-                )
-                issue.start_date = start_date
-                issues_to_update.append(issue)
-
-            if target_date:
-                issue_activity.delay(
-                    type="issue.activity.updated",
-                    requested_data=json.dumps({"target_date": update.get("target_date")}),
-                    current_instance=json.dumps({"target_date": str(issue.target_date)}),
-                    issue_id=str(issue_id),
-                    actor_id=str(request.user.id),
-                    project_id=str(project_id),
-                    epoch=epoch,
-                )
-                issue.target_date = target_date
-                issues_to_update.append(issue)
-
-        # Bulk update issues
-        Issue.objects.bulk_update(issues_to_update, ["start_date", "target_date"])
-
+                setattr(issue, key, value)
+        Issue.objects.bulk_update(issues, ["start_date", "target_date"])
+        for event in activity_data:
+            transaction.on_commit(lambda event=event: issue_activity.delay(**event))
         return Response({"message": "Issues updated successfully"}, status=status.HTTP_200_OK)
 
 

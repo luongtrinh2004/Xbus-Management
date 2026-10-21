@@ -8,7 +8,15 @@ import type { MutableRefObject } from "react";
 import React, { useEffect, useRef, useState } from "react";
 import { combine } from "@atlaskit/pragmatic-drag-and-drop/combine";
 import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
-import { attachInstruction, extractInstruction } from "@atlaskit/pragmatic-drag-and-drop-hitbox/tree-item";
+import {
+  attachInstruction,
+  extractInstruction,
+} from "@atlaskit/pragmatic-drag-and-drop-hitbox/tree-item";
+import { useTranslation } from "@plane/i18n";
+import { ListAddRow } from "./add-row";
+import { useParams } from "next/navigation";
+import { CreateUpdateIssueModal } from "@/components/issues/issue-modal/modal";
+import { useIssueStoreType } from "@/hooks/use-issue-layout-store";
 import { observer } from "mobx-react";
 // plane helpers
 import { useOutsideClickDetector } from "@plane/hooks";
@@ -31,7 +39,9 @@ import type { TRenderQuickActions } from "./list-view-types";
 type Props = {
   issueId: string;
   issuesMap: TIssueMap;
-  updateIssue: ((projectId: string | null, issueId: string, data: Partial<TIssue>) => Promise<void>) | undefined;
+  updateIssue:
+    | ((projectId: string | null, issueId: string, data: Partial<TIssue>) => Promise<void>)
+    | undefined;
   quickActions: TRenderQuickActions;
   canEditProperties: (projectId: string | undefined) => boolean;
   displayProperties: IIssueDisplayProperties | undefined;
@@ -46,6 +56,8 @@ type Props = {
   isLastChild?: boolean;
   shouldRenderByDefault?: boolean;
   isEpic?: boolean;
+  activeAddParentId?: string;
+  onActivateAddParent?: (id: string) => void;
 };
 
 export const IssueBlockRoot = observer(function IssueBlockRoot(props: Props) {
@@ -67,9 +79,18 @@ export const IssueBlockRoot = observer(function IssueBlockRoot(props: Props) {
     selectionHelpers,
     shouldRenderByDefault,
     isEpic = false,
+    activeAddParentId,
+    onActivateAddParent,
   } = props;
+  const { t } = useTranslation();
+  const { workspaceSlug } = useParams();
+  const storeType = useIssueStoreType();
+  const [isCreateSubIssueOpen, setCreateSubIssueOpen] = useState(false);
   // states
   const [isExpanded, setExpanded] = useState<boolean>(false);
+  const [localAddParentId, setLocalAddParentId] = useState(issueId);
+  const activeParentId = activeAddParentId ?? localAddParentId;
+  const activateAddParent = onActivateAddParent ?? setLocalAddParentId;
   const [instruction, setInstruction] = useState<"DRAG_OVER" | "DRAG_BELOW" | undefined>(undefined);
   const [isCurrentBlockDragging, setIsCurrentBlockDragging] = useState(false);
   // ref
@@ -77,7 +98,9 @@ export const IssueBlockRoot = observer(function IssueBlockRoot(props: Props) {
   // hooks
   const { isMobile } = usePlatformOS();
   // store hooks
-  const { subIssues: subIssuesStore } = useIssueDetail(isEpic ? EIssueServiceType.EPICS : EIssueServiceType.ISSUES);
+  const { subIssues: subIssuesStore } = useIssueDetail(
+    isEpic ? EIssueServiceType.EPICS : EIssueServiceType.ISSUES,
+  );
 
   const isSubIssue = nestingLevel !== 0;
 
@@ -89,7 +112,11 @@ export const IssueBlockRoot = observer(function IssueBlockRoot(props: Props) {
     return combine(
       dropTargetForElements({
         element: blockElement,
-        canDrop: ({ source }) => source?.data?.id !== issueId && !isSubIssue && canDropOverIssue,
+        canDrop: ({ source }) =>
+          source.data.type === "ISSUE" &&
+          source.data.id !== issueId &&
+          !isSubIssue &&
+          canDropOverIssue,
         getData: ({ input, element }) => {
           const data = { id: issueId, type: "ISSUE" };
 
@@ -110,7 +137,7 @@ export const IssueBlockRoot = observer(function IssueBlockRoot(props: Props) {
               ? extractedInstruction === "reorder-below" && isLastChild
                 ? "DRAG_BELOW"
                 : "DRAG_OVER"
-              : undefined
+              : undefined,
           );
         },
         onDragLeave: () => {
@@ -119,7 +146,7 @@ export const IssueBlockRoot = observer(function IssueBlockRoot(props: Props) {
         onDrop: () => {
           setInstruction(undefined);
         },
-      })
+      }),
     );
   }, [issueId, isLastChild, issueBlockRef, isSubIssue, canDropOverIssue, setInstruction]);
 
@@ -138,8 +165,12 @@ export const IssueBlockRoot = observer(function IssueBlockRoot(props: Props) {
         root={containerRef}
         classNames={`relative ${isLastChild && !isExpanded ? "" : "border-b border-b-subtle"}`}
         verticalOffset={100}
-        defaultValue={shouldRenderByDefault || (issuesMap[issueId] ? isIssueNew(issuesMap[issueId]) : false)}
-        placeholderChildren={<ListLoaderItemRow shouldAnimate={false} renderForPlaceHolder defaultPropertyCount={4} />}
+        defaultValue={
+          shouldRenderByDefault || (issuesMap[issueId] ? isIssueNew(issuesMap[issueId]) : false)
+        }
+        placeholderChildren={
+          <ListLoaderItemRow shouldAnimate={false} renderForPlaceHolder defaultPropertyCount={4} />
+        }
         shouldRecordHeights={isMobile}
       >
         <IssueBlock
@@ -151,7 +182,11 @@ export const IssueBlockRoot = observer(function IssueBlockRoot(props: Props) {
           canEditProperties={canEditProperties}
           displayProperties={displayProperties}
           isExpanded={isExpanded}
-          setExpanded={setExpanded}
+          setExpanded={(value) => {
+            const expanded = typeof value === "function" ? value(isExpanded) : value;
+            setExpanded(expanded);
+            activateAddParent(expanded ? issueId : (issuesMap[issueId].parent_id ?? issueId));
+          }}
           nestingLevel={nestingLevel}
           spacingLeft={spacingLeft}
           selectionHelpers={selectionHelpers}
@@ -174,7 +209,7 @@ export const IssueBlockRoot = observer(function IssueBlockRoot(props: Props) {
             canEditProperties={canEditProperties}
             displayProperties={displayProperties}
             nestingLevel={nestingLevel + 1}
-            spacingLeft={spacingLeft + 12}
+            spacingLeft={spacingLeft + 28}
             containerRef={containerRef}
             selectionHelpers={selectionHelpers}
             groupId={groupId}
@@ -182,9 +217,41 @@ export const IssueBlockRoot = observer(function IssueBlockRoot(props: Props) {
             canDropOverIssue={canDropOverIssue}
             isParentIssueBeingDragged={isParentIssueBeingDragged || isCurrentBlockDragging}
             shouldRenderByDefault={isExpanded}
+            activeAddParentId={activeParentId}
+            onActivateAddParent={activateAddParent}
+            isLastChild={subIssues?.at(-1) === subIssueId}
           />
         ))}
-      {isLastChild && <DropIndicator classNames={"absolute z-[2]"} isVisible={instruction === "DRAG_BELOW"} />}
+      {!isEpic &&
+        !issuesMap[issueId].archived_at &&
+        !issuesMap[issueId].is_draft &&
+        !issuesMap[issueId].tempId &&
+        canEditProperties(issuesMap[issueId].project_id ?? undefined) &&
+        isExpanded &&
+        activeParentId === issueId && (
+          <ListAddRow indent={80 + spacingLeft} onClick={() => setCreateSubIssueOpen(true)}>
+            {t("issue.add.sub_issue")}
+          </ListAddRow>
+        )}
+      {isCreateSubIssueOpen && (
+        <CreateUpdateIssueModal
+          isOpen={isCreateSubIssueOpen}
+          onClose={() => setCreateSubIssueOpen(false)}
+          data={{ project_id: issuesMap[issueId].project_id, parent_id: issueId }}
+          storeType={storeType}
+          isProjectSelectionDisabled
+          onSubmit={async () => {
+            const projectId = issuesMap[issueId].project_id;
+            if (!workspaceSlug || !projectId) return;
+            await subIssuesStore.fetchSubIssues(workspaceSlug.toString(), projectId, issueId);
+            setExpanded(true);
+            activateAddParent(issueId);
+          }}
+        />
+      )}
+      {isLastChild && (
+        <DropIndicator classNames={"absolute z-[2]"} isVisible={instruction === "DRAG_BELOW"} />
+      )}
     </div>
   );
 });

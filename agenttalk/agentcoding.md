@@ -141,3 +141,19 @@ Không coi toàn bộ P1 đã hoàn thành chỉ vì đã có phần nhắc hạ
 Chưa bao gồm: thư viện trường xuyên project, formula, mandatory, lọc/sắp xếp/nhóm theo custom field, đưa giá trị custom field vào form tạo task và import/export. Không đánh dấu các mục đó đã đáp ứng BA.
 
 Đã đạt: 80 test backend liên quan (34 custom field + 46 nhắc hạn/khoảng ngày), 10 test helper/store frontend, 7 test tiếng Việt; kiểm tra Chrome với dữ liệu giả cho tạo trường, sửa trực tiếp, chọn nhiều và mobile không tràn ngang. Migration 0124 đã được áp dụng trên PostgreSQL thử có project/task/assignee/history cũ và xác nhận các dữ liệu đó còn nguyên. Kiểm tra Chrome bổ sung: đóng bằng Escape vẫn lưu; giả lập lỗi lưu giữ ô mở và hiển thị lỗi, Hủy giữ nguyên dữ liệu đã lưu. Type check và build embedded cuối đã đạt; lint các file mới đạt 0 cảnh báo/0 lỗi, Ruff backend đạt. Preview không phải nghiệm thu trên tài khoản và dữ liệu production; chưa deploy.
+
+## 10. Cập nhật core P1 và các luồng liên quan — 21/10/2026
+
+Đã bổ sung hoàn thành/mở lại và cảnh báo subtask; cây subtask nhiều cấp/sắp xếp; tạo nhanh và Draft an toàn hơn khi lỗi; custom field trong form tạo; cộng tác viên; kế hoạch cá nhân; kiểm tra dependency; Workload theo số task/người/tuần với ngưỡng cấu hình. Dùng cùng model/store và các component Plane hiện có để giữ nhất quán List, chi tiết và peek.
+
+200 test backend và 53 test frontend liên quan đạt; TypeScript và build embedded đạt. Migration 0125–0126 đã kiểm tra trên bản sao dữ liệu cũ và áp dụng local với dấu kiểm tra 10 bảng giữ nguyên. Đã cập nhật backend/web/worker tại localhost; chưa deploy VPS. Các ghi chú “chưa deploy” ở mục 8–9 mô tả thời điểm kiểm tra trước, không phải trạng thái localhost sau đợt này.
+
+Danh sách hành vi, bằng chứng và giới hạn còn lại nằm trong [plane-update-status.md](plane-update-status.md). Không đánh dấu toàn bộ P1/Module 7 hoàn tất. Người dùng chọn tiếp tục P2/P3 sau kiểm tra P1; AI để lại, Workload dùng số task/người/tuần.
+
+## 11. P2 — Tổng quan dự án và báo cáo trạng thái
+
+Đã đối chiếu lại phần VII bản DOCX và bổ sung F0305 (báo cáo sức khỏe dự án với 5 trạng thái, lịch sử, chống đăng trùng), ngày dự án trong F0302 và một phần F0306 (mô tả hiện có, thành viên/vai trò Plane, tài liệu liên kết, thống kê task). Tổng quan có trong sidebar và tab project, UI Anh/Việt giữ nguyên dữ liệu người dùng. Không tự hoàn thành task khi báo cáo project Complete; mốc BA trong F0306 còn thiếu. Chi tiết API, kiểm tra và phạm vi còn lại được cập nhật ở `plane-update-status.md`, `docs/plane-project-overview-api.md`. Migration 0127 đã kiểm tra trên bản sao và local giữ nguyên 10 dấu dữ liệu; localhost đã chạy bản mới, chưa triển khai VPS.
+
+## 12. AI Gemini và thứ tự tab
+
+Người dùng đã yêu cầu triển khai AI bằng Gemini, gọi Google theo cách AI upload menu Trà chiều; quyết định này thay thế việc để lại AI trước đó. Đã bổ sung trợ lý tóm tắt/viết mô tả/gợi ý subtask, xem trước và chọn áp dụng; chống tạo subtask trùng và giữ kiểm tra quyền/workflow Plane. Đã bổ sung sắp xếp tab hệ thống theo người/project và sửa xử lý lỗi lưu tùy chọn tab. UI Anh/Việt, nội dung người dùng giữ nguyên. Bản local đã cập nhật; 256 test backend, 58 test frontend, 8 test ngôn ngữ và build/type/lint liên quan đạt. Gemini thật tạo được 7 subtask; tóm tắt/viết mô tả vẫn timeout 95 giây trong kiểm tra, chưa coi toàn bộ F0516 đạt nhà cung cấp. Giới hạn còn lại và bằng chứng nằm ở `plane-update-status.md`, hợp đồng ở `docs/plane-ai-api.md`. Không coi toàn bộ tài liệu đã triển khai xong.

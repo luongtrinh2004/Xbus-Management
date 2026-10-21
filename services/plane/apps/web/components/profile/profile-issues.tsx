@@ -11,6 +11,7 @@ import useSWR from "swr";
 // plane imports
 import { ISSUE_DISPLAY_FILTERS_BY_PAGE } from "@plane/constants";
 import { EIssuesStoreType } from "@plane/types";
+import { useTranslation } from "@plane/i18n";
 // components
 import { ProfileIssuesKanBanLayout } from "@/components/issues/issue-layouts/kanban/roots/profile-issues-root";
 import { ProfileIssuesListLayout } from "@/components/issues/issue-layouts/list/roots/profile-issues-root";
@@ -20,6 +21,8 @@ import { WorkItemFiltersRow } from "@/components/work-item-filters/filters-row";
 // hooks
 import { useIssues } from "@/hooks/store/use-issues";
 import { IssuesStoreContext } from "@/hooks/use-issue-layout-store";
+import { useUser } from "@/hooks/store/user";
+import { MyTaskPlanning } from "./planning/root";
 
 type Props = {
   type: "assigned" | "subscribed" | "created";
@@ -28,13 +31,17 @@ type Props = {
 export const ProfileIssuesPage = observer(function ProfileIssuesPage(props: Props) {
   const { type } = props;
   const { workspaceSlug, userId } = useParams();
+  const { t } = useTranslation();
+  const { data: currentUser } = useUser();
   // store hooks
   const {
-    issues: { setViewId },
+    issues: { setViewId, showPersonalPlanning, setShowPersonalPlanning },
     issuesFilter: { issueFilters, fetchFilters, updateFilterExpression },
   } = useIssues(EIssuesStoreType.PROFILE);
   // derived values
   const activeLayout = issueFilters?.displayFilters?.layout || undefined;
+  const isMyAssigned = type === "assigned" && userId === currentUser?.id;
+  const showPlanning = isMyAssigned && showPersonalPlanning;
 
   useEffect(() => {
     if (setViewId) setViewId(type);
@@ -63,9 +70,30 @@ export const ProfileIssuesPage = observer(function ProfileIssuesPage(props: Prop
         {({ filter: profileWorkItemsFilter }) => (
           <>
             <div className="flex h-full w-full flex-col">
-              {profileWorkItemsFilter && <WorkItemFiltersRow filter={profileWorkItemsFilter} />}
+              {isMyAssigned && (
+                <div className="flex gap-1 border-b border-subtle px-5 py-2">
+                  {[true, false].map((planning) => (
+                    <button
+                      key={String(planning)}
+                      type="button"
+                      aria-pressed={showPersonalPlanning === planning}
+                      className={`rounded-sm px-3 py-1.5 text-13 ${showPersonalPlanning === planning ? "bg-accent-subtle text-accent-primary" : "text-secondary hover:bg-layer-1"}`}
+                      onClick={() => setShowPersonalPlanning(planning)}
+                    >
+                      {t(planning ? "my_task_planning.plan" : "my_task_planning.all_tasks")}
+                    </button>
+                  ))}
+                </div>
+              )}
+              {!showPlanning && profileWorkItemsFilter && <WorkItemFiltersRow filter={profileWorkItemsFilter} />}
               <div className="relative h-full w-full overflow-auto">
-                {activeLayout === "list" ? (
+                {showPlanning ? (
+                  <MyTaskPlanning
+                    workspaceSlug={workspaceSlug.toString()}
+                    userId={userId.toString()}
+                    layout={activeLayout}
+                  />
+                ) : activeLayout === "list" ? (
                   <ProfileIssuesListLayout />
                 ) : activeLayout === "kanban" ? (
                   <ProfileIssuesKanBanLayout />

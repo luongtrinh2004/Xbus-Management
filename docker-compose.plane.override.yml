@@ -7,6 +7,9 @@ services:
       additional_contexts:
         xbus_integration: ./services/plane-xbus
     environment:
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.8-flash}
+      GEMINI_THINKING_LEVEL: ${GEMINI_THINKING_LEVEL:-low}
       # Do not inherit a host-level DEBUG value (for example "release").
       # Plane's Django settings require this value to be numeric.
       DEBUG: "0"

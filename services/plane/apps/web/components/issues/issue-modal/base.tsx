@@ -23,6 +23,7 @@ import { useModule } from "@/hooks/store/use-module";
 import { useProject } from "@/hooks/store/use-project";
 import { useIssueStoreType } from "@/hooks/use-issue-layout-store";
 import { useIssuesActions } from "@/hooks/use-issues-actions";
+import { IssueCreatedWithFollowUpError } from "@/helpers/issue-submission";
 // services
 import { FileService } from "@/services/file.service";
 const fileService = new FileService();
@@ -59,6 +60,7 @@ export const CreateUpdateIssueModalBase = observer(function CreateUpdateIssueMod
   }
   // ref
   const issueTitleRef = useRef<HTMLInputElement>(null);
+  const pendingCreatedIssue = useRef<{ issue: TIssue; isDraft: boolean } | null>(null);
   // states
   const [changesMade, setChangesMade] = useState<Partial<TIssue> | null>(null);
   const [createMore, setCreateMore] = useState(false);
@@ -167,8 +169,24 @@ export const CreateUpdateIssueModalBase = observer(function CreateUpdateIssueMod
 
     try {
       let response: TIssue | undefined;
+      const previouslyCreated = pendingCreatedIssue.current;
       // if draft issue, use draft issue store to create issue
-      if (is_draft_issue) {
+      if (previouslyCreated) {
+        if (previouslyCreated.isDraft !== is_draft_issue || previouslyCreated.issue.project_id !== payload.project_id)
+          throw new Error(t("issue_form_draft.finish_before_change"));
+        // Creation may have succeeded before a later property/attachment request
+        // failed. Continue on the same work item when the user retries.
+        if (is_draft_issue)
+          await draftIssues.updateIssue(workspaceSlug.toString(), previouslyCreated.issue.id, payload);
+        else
+          await projectIssues.updateIssue(
+            workspaceSlug.toString(),
+            payload.project_id,
+            previouslyCreated.issue.id,
+            payload
+          );
+        response = { ...previouslyCreated.issue, ...payload } as TIssue;
+      } else if (is_draft_issue) {
         response = (await draftIssues.createIssue(workspaceSlug.toString(), payload)) as TIssue;
       }
       // if cycle id in payload does not match the cycleId in url
@@ -183,6 +201,9 @@ export const CreateUpdateIssueModalBase = observer(function CreateUpdateIssueMod
       else if (createIssue) {
         response = await createIssue(payload.project_id, payload);
       }
+
+      if (!response) throw new Error(t("issue_creation_failed"));
+      pendingCreatedIssue.current = { issue: response, isDraft: is_draft_issue };
 
       // update uploaded assets' status
       if (uploadedAssetIds.length > 0) {
@@ -244,16 +265,25 @@ export const CreateUpdateIssueModalBase = observer(function CreateUpdateIssueMod
             ? buildCreateIssueToastActions({ workspaceSlug: workspaceSlug.toString(), issueId: response.id })
             : undefined,
       });
+      pendingCreatedIssue.current = null;
       if (!createMore) handleClose();
       if (createMore && issueTitleRef) issueTitleRef?.current?.focus();
       setDescription("<p></p>");
       setChangesMade(null);
       return response;
     } catch (error: any) {
+      if (error instanceof IssueCreatedWithFollowUpError)
+        pendingCreatedIssue.current = { issue: error.createdIssue, isDraft: is_draft_issue };
       setToast({
         type: "error",
         title: t("error"),
-        message: error?.error ?? t(is_draft_issue ? "draft_creation_failed" : "issue_creation_failed"),
+        message:
+          (error instanceof IssueCreatedWithFollowUpError
+            ? t("issue_form_draft.created_partial_retry")
+            : error?.error) ??
+          (error instanceof Error
+            ? error.message
+            : t(is_draft_issue ? "draft_creation_failed" : "issue_creation_failed")),
       });
       throw error;
     }
@@ -349,6 +379,7 @@ export const CreateUpdateIssueModalBase = observer(function CreateUpdateIssueMod
             : undefined,
       });
       handleClose();
+      return { ...data, ...payload } as TIssue;
     } catch (error: any) {
       console.error(error);
       setToast({
@@ -356,14 +387,13 @@ export const CreateUpdateIssueModalBase = observer(function CreateUpdateIssueMod
         title: t("error"),
         message: error?.error ?? t("issue_could_not_be_updated"),
       });
+      // A rejected save must reach the form so it keeps the user's current values.
+      throw error;
     }
   };
 
   const handleFormSubmit = async (payload: Partial<TIssue>, is_draft_issue: boolean = false) => {
     if (!workspaceSlug || !payload.project_id || !storeType) return;
-    // remove sourceIssueId from payload since it is not needed
-    if (data?.sourceIssueId) delete data.sourceIssueId;
-
     let response: TIssue | undefined = undefined;
 
     try {

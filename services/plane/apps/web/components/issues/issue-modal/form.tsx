@@ -1,3 +1,4 @@
+import { IssueAIAssistant } from "@/components/issues/ai/assistant";
 // oxlint-disable promise/always-return
 // oxlint-disable no-shadow
 // oxlint-disable jsx_a11y/prefer-tag-over-role
@@ -52,6 +53,8 @@ import { useProjectState } from "@/hooks/store/use-project-state";
 import { useWorkspaceDraftIssues } from "@/hooks/store/workspace-draft";
 import { usePlatformOS } from "@/hooks/use-platform-os";
 import { useProjectIssueProperties } from "@/hooks/use-project-issue-properties";
+import { createIssueSubmissionGuard } from "@/helpers/issue-submission";
+import { IssueFormCustomFields } from "./components/custom-fields";
 
 export interface IssueFormProps {
   data?: Partial<TIssue>;
@@ -73,6 +76,7 @@ export interface IssueFormProps {
   isDuplicateModalOpen: boolean;
   handleDuplicateIssueModal: (isOpen: boolean) => void;
   handleDraftAndClose?: () => void;
+  isSavingDraft?: boolean;
   isProjectSelectionDisabled?: boolean;
   showActionButtons?: boolean;
   dataResetProperties?: any[];
@@ -100,6 +104,8 @@ export const IssueFormRoot = observer(function IssueFormRoot(props: IssueFormPro
     isProjectSelectionDisabled = false,
     showActionButtons = true,
     dataResetProperties = [],
+    handleDraftAndClose,
+    isSavingDraft = false,
   } = props;
 
   // states
@@ -111,6 +117,7 @@ export const IssueFormRoot = observer(function IssueFormRoot(props: IssueFormPro
   const submitBtnRef = useRef<HTMLButtonElement | null>(null);
   const formRef = useRef<HTMLFormElement | null>(null);
   const modalContainerRef = useRef<HTMLDivElement | null>(null);
+  const submissionGuard = useRef(createIssueSubmissionGuard());
 
   // router
   const { workspaceSlug, projectId: routeProjectId } = useParams();
@@ -155,7 +162,7 @@ export const IssueFormRoot = observer(function IssueFormRoot(props: IssueFormPro
 
   const projectId = watch("project_id");
 
-  const isDisabled = isSubmitting || isApplyingTemplate;
+  const isDisabled = isSubmitting || isApplyingTemplate || isSavingDraft;
 
   const { getIndex } = getTabIndex(ETabIndices.ISSUE_FORM, isMobile);
 
@@ -258,7 +265,9 @@ export const IssueFormRoot = observer(function IssueFormRoot(props: IssueFormPro
             ...(isCreateMoreToggleEnabled ? { ...data } : {}),
             project_id: getValues<"project_id">("project_id"),
             type_id: getValues<"type_id">("type_id"),
-            description_html: data?.description_html ?? "<p></p>",
+            name: "",
+            description_html: "<p></p>",
+            custom_field_values: {},
           });
           editorRef?.current?.clearEditor();
         }
@@ -295,14 +304,9 @@ export const IssueFormRoot = observer(function IssueFormRoot(props: IssueFormPro
     }
   };
 
-  const condition =
-    (watch("name") && watch("name") !== "") || (watch("description_html") && watch("description_html") !== "<p></p>");
-
   const handleFormChange = () => {
     if (!onChange) return;
-
-    if (isDirty && condition) onChange(watch());
-    else onChange(null);
+    onChange(getValues());
   };
 
   // executing this useEffect when the parent_id coming from the component prop
@@ -329,7 +333,7 @@ export const IssueFormRoot = observer(function IssueFormRoot(props: IssueFormPro
   useEffect(() => {
     if (!onChange) return;
 
-    if (isDirty && condition) onChange(watch());
+    if (isDirty) onChange(getValues());
     else onChange(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDirty]);
@@ -358,7 +362,7 @@ export const IssueFormRoot = observer(function IssueFormRoot(props: IssueFormPro
       <div className="flex min-h-0 flex-1 gap-2 bg-transparent">
         <form
           ref={formRef}
-          onSubmit={handleSubmit((data) => handleFormSubmit(data))}
+          onSubmit={handleSubmit((data) => submissionGuard.current.run(() => handleFormSubmit(data)))}
           className="flex min-h-0 w-full flex-1 flex-col"
         >
           <DialogMain>
@@ -391,6 +395,21 @@ export const IssueFormRoot = observer(function IssueFormRoot(props: IssueFormPro
               />
             </DialogHeader>
             <DialogBody tabIndex={0} render={<div className="vertical-scrollbar scrollbar-sm" />}>
+              {projectId && workspaceSlug && (
+                <IssueAIAssistant
+                  key={projectId}
+                  workspaceSlug={workspaceSlug.toString()}
+                  projectId={projectId}
+                  name={watch("name") ?? ""}
+                  description={watch("description_html") ?? ""}
+                  disabled={isDisabled}
+                  onDescription={(html) => {
+                    setValue("description_html", html, { shouldDirty: true });
+                    editorRef.current?.setEditorValue(html, true);
+                    handleFormChange();
+                  }}
+                />
+              )}
               <IssueDescriptionEditor
                 control={control}
                 isDraft={isDraft}
@@ -409,8 +428,18 @@ export const IssueFormRoot = observer(function IssueFormRoot(props: IssueFormPro
                 setGptAssistantModal={setGptAssistantModal}
                 handleGptAssistantClose={() => reset(getValues())}
                 onAssetUpload={onAssetUpload}
-                onClose={onClose}
+                onClose={() => {
+                  if (!isDisabled && !submissionGuard.current.pending) onClose();
+                }}
               />
+              {projectId && workspaceSlug && (!data?.id || isDraft) && (
+                <IssueFormCustomFields
+                  workspaceSlug={workspaceSlug.toString()}
+                  projectId={projectId}
+                  disabled={isDisabled}
+                  onChange={handleFormChange}
+                />
+              )}
             </DialogBody>
             <div className="shrink-0">
               <IssueDefaultProperties
@@ -446,6 +475,7 @@ export const IssueFormRoot = observer(function IssueFormRoot(props: IssueFormPro
                   variant="secondary"
                   size="md"
                   stretch="auto"
+                  disabled={isDisabled}
                   onClick={() => {
                     if (editorRef.current?.isEditorReadyToDiscard()) {
                       onClose();
@@ -460,6 +490,25 @@ export const IssueFormRoot = observer(function IssueFormRoot(props: IssueFormPro
                   label={t("discard")}
                 />
               </div>
+              {!data?.id && handleDraftAndClose && (
+                <Button
+                  variant="secondary"
+                  size="md"
+                  stretch="auto"
+                  disabled={isDisabled}
+                  loading={isSavingDraft}
+                  onClick={() => {
+                    if (editorRef.current?.isEditorReadyToDiscard()) handleDraftAndClose();
+                    else
+                      setToast({
+                        type: "error",
+                        title: t("error"),
+                        message: t("editor_is_not_ready_to_discard_changes"),
+                      });
+                  }}
+                  label={t("issue_form_draft.save_minimize")}
+                />
+              )}
               <div tabIndex={isDraft ? getIndex("submit_button") : getIndex("draft_button")}>
                 <Button
                   variant={moveToIssue ? "secondary" : "primary"}

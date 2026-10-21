@@ -24,12 +24,11 @@ export const SpreadsheetStateColumn = observer(function SpreadsheetStateColumn(p
   return (
     <div className="h-11 border-b-[0.5px] border-subtle">
       <StateSelect
+        issueId={issue.id}
         testId="spreadsheet-state-select"
         projectId={issue.project_id ?? undefined}
         value={issue.state_id}
-        onChange={(data) =>
-          onChange(issue, { state_id: data }, { changed_property: "state", change_details: data })
-        }
+        onChange={(data) => onChange(issue, { state_id: data }, { changed_property: "state", change_details: data })}
         disabled={disabled}
         // `.clickable` is what the table's keyboard navigation clicks on Enter / Space in a focused cell.
         className="clickable"

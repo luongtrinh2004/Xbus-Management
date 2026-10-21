@@ -95,6 +95,7 @@ export const IssueDetailRoot = observer(function IssueDetailRoot(props: TIssueDe
         try {
           await updateIssue(workspaceSlug, projectId, issueId, data);
         } catch (error) {
+          if (data.state_id !== undefined || data.description_html !== undefined) throw error;
           console.log("Error in updating issue:", error);
           setToast({
             title: t("common.error.label"),

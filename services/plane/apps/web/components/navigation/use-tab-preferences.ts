@@ -1,10 +1,12 @@
+import { useTranslation } from "@plane/i18n";
+import { moveTab } from "./tab-order";
 /**
  * Copyright (c) 2023-present Plane Software, Inc. and contributors
  * SPDX-License-Identifier: AGPL-3.0-only
  * See the LICENSE file for details.
  */
 
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
 import { setToast } from "@plane/blocks/toast";
 import { useMember } from "@/hooks/store/use-member";
 import { useUser } from "@/hooks/store/user";
@@ -17,6 +19,7 @@ export type TTabPreferencesHook = {
   handleToggleDefaultTab: (tabKey: string) => void;
   handleHideTab: (tabKey: string) => void;
   handleShowTab: (tabKey: string) => void;
+  handleMoveTab: (key: string, direction: -1 | 1, available: string[]) => void;
 };
 
 /**
@@ -28,116 +31,62 @@ export type TTabPreferencesHook = {
  * @returns Tab preferences state and handlers
  */
 export const useTabPreferences = (workspaceSlug: string, projectId: string): TTabPreferencesHook => {
+  const { t } = useTranslation();
   const {
     project: { getProjectUserProperties, updateProjectUserProperties },
   } = useMember();
-  // const { projectUserInfo } = useUserPermissions();
   const { data } = useUser();
-
-  // Get member ID from projectUserInfo
-  // const projectMemberInfo = projectUserInfo[workspaceSlug]?.[projectId];
-  const memberId = data?.id || null;
-
-  // Get preferences from store
+  const pending = useRef(false);
   const storePreferences = getProjectUserProperties(projectId);
-  const defaultTab = storePreferences?.preferences?.navigation?.default_tab || DEFAULT_TAB_KEY;
-  const hideInMoreMenu = storePreferences?.preferences?.navigation?.hide_in_more_menu || [];
-
-  // Convert store preferences to component format
-  const tabPreferences: TTabPreferences = useMemo(() => {
-    return {
-      defaultTab,
-      hiddenTabs: hideInMoreMenu,
-    };
-  }, [defaultTab, hideInMoreMenu]);
-
-  const isLoading = !storePreferences && memberId !== null;
-
-  /**
-   * Update preferences via store
-   */
-  const updatePreferences = async (newPreferences: TTabPreferences) => {
-    await updateProjectUserProperties(workspaceSlug, projectId, {
-      preferences: {
-        pages: storePreferences?.preferences?.pages || { block_display: false },
-        navigation: {
-          default_tab: newPreferences.defaultTab,
-          hide_in_more_menu: newPreferences.hiddenTabs,
+  const nav = storePreferences?.preferences?.navigation;
+  const tabPreferences: TTabPreferences = useMemo(
+    () => ({
+      defaultTab: nav?.default_tab || DEFAULT_TAB_KEY,
+      hiddenTabs: nav?.hide_in_more_menu || [],
+      order: nav?.tab_order || [],
+    }),
+    [nav?.default_tab, nav?.hide_in_more_menu, nav?.tab_order]
+  );
+  const update = async (next: TTabPreferences) => {
+    if (pending.current) return;
+    pending.current = true;
+    try {
+      await updateProjectUserProperties(workspaceSlug, projectId, {
+        preferences: {
+          ...storePreferences?.preferences,
+          pages: storePreferences?.preferences?.pages || { block_display: false },
+          navigation: {
+            ...nav,
+            default_tab: next.defaultTab,
+            hide_in_more_menu: next.hiddenTabs,
+            tab_order: next.order ?? [],
+          },
         },
-      },
-    });
-  };
-
-  /**
-   * Toggle default tab setting
-   * If tab is already default, resets to work_items; otherwise sets as default
-   */
-  const handleToggleDefaultTab = (tabKey: string) => {
-    const newDefaultTab = tabKey === tabPreferences.defaultTab ? DEFAULT_TAB_KEY : tabKey;
-    const newPreferences = { ...tabPreferences, defaultTab: newDefaultTab };
-    updatePreferences(newPreferences)
-      .then(() => {
-        setToast({
-          type: "success",
-          title: "Thành công!",
-          message: "Đã cập nhật tab mặc định.",
-        });
-        return;
-      })
-      .catch(() => {
-        setToast({
-          type: "error",
-          title: "Lỗi!",
-          message: "Không thể cập nhật tab mặc định. Vui lòng thử lại.",
-        });
       });
-  };
-
-  /**
-   * Hide a tab (moves to overflow menu with "Show" option)
-   */
-  const handleHideTab = (tabKey: string) => {
-    const newPreferences = {
-      ...tabPreferences,
-      hiddenTabs: [...tabPreferences.hiddenTabs, tabKey],
-    };
-    try {
-      updatePreferences(newPreferences);
-    } catch (error) {
-      console.error("Error hiding tab:", error);
+    } catch {
       setToast({
         type: "error",
-        title: "Lỗi!",
-        message: "Không thể ẩn tab. Vui lòng thử lại sau.",
+        title: t("project_tab_preferences.error"),
+        message: t("project_tab_preferences.save_failed"),
       });
+    } finally {
+      pending.current = false;
     }
   };
-
-  /**
-   * Show a previously hidden tab (returns to visible pool)
-   */
-  const handleShowTab = (tabKey: string) => {
-    const newPreferences = {
-      ...tabPreferences,
-      hiddenTabs: tabPreferences.hiddenTabs.filter((key) => key !== tabKey),
-    };
-    try {
-      updatePreferences(newPreferences);
-    } catch (error) {
-      console.error("Error showing tab:", error);
-      setToast({
-        type: "error",
-        title: "Lỗi!",
-        message: "Đã xảy ra lỗi. Vui lòng thử lại sau.",
-      });
-    }
-  };
-
   return {
     tabPreferences,
-    isLoading,
-    handleToggleDefaultTab,
-    handleHideTab,
-    handleShowTab,
+    isLoading: !storePreferences && data?.id != null,
+    handleToggleDefaultTab: (key) => {
+      void update({ ...tabPreferences, defaultTab: key === tabPreferences.defaultTab ? DEFAULT_TAB_KEY : key });
+    },
+    handleHideTab: (key) => {
+      void update({ ...tabPreferences, hiddenTabs: [...new Set([...tabPreferences.hiddenTabs, key])] });
+    },
+    handleShowTab: (key) => {
+      void update({ ...tabPreferences, hiddenTabs: tabPreferences.hiddenTabs.filter((item) => item !== key) });
+    },
+    handleMoveTab: (key, direction, available) => {
+      void update({ ...tabPreferences, order: moveTab(tabPreferences.order ?? [], available, key, direction) });
+    },
   };
 };

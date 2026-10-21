@@ -38,10 +38,22 @@ export type TQuickAddIssueFormRoot = {
   onSubmit: () => void;
   onClose: () => void;
   isEpic: boolean;
+  isSubmitting: boolean;
 };
 
 export const QuickAddIssueFormRoot = observer(function QuickAddIssueFormRoot(props: TQuickAddIssueFormRoot) {
-  const { isOpen, layout, projectId, hasError = false, setFocus, register, onSubmit, onClose, isEpic } = props;
+  const {
+    isOpen,
+    layout,
+    projectId,
+    hasError = false,
+    setFocus,
+    register,
+    onSubmit,
+    onClose,
+    isEpic,
+    isSubmitting,
+  } = props;
   // store hooks
   const { getProjectById } = useProject();
   // derived values
@@ -79,6 +91,7 @@ export const QuickAddIssueFormRoot = observer(function QuickAddIssueFormRoot(pro
       register={register}
       onSubmit={onSubmit}
       isEpic={isEpic}
+      isSubmitting={isSubmitting}
     />
   );
 });

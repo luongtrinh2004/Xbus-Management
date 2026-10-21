@@ -3,6 +3,7 @@
 # See the LICENSE file for details.
 
 from .custom_field import urlpatterns as custom_field_urls
+from .my_task_planning import urlpatterns as my_task_planning_urls
 from .analytic import urlpatterns as analytic_urls
 from .api import urlpatterns as api_urls
 from .asset import urlpatterns as asset_urls
@@ -24,7 +25,17 @@ from .workspace import urlpatterns as workspace_urls
 from .timezone import urlpatterns as timezone_urls
 from .exporter import urlpatterns as exporter_urls
 
+from .workload import urlpatterns as workload_urls
+
+from .project_overview import urlpatterns as project_overview_urls
+
+from .issue_ai import urlpatterns as issue_ai_urls
+
 urlpatterns = [
+    *issue_ai_urls,
+    *project_overview_urls,
+    *workload_urls,
+    *my_task_planning_urls,
     *custom_field_urls,
     *analytic_urls,
     *asset_urls,

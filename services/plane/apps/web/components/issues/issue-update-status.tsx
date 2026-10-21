@@ -1,3 +1,4 @@
+import { useTranslation } from "@plane/i18n";
 /**
  * Copyright (c) 2023-present Plane Software, Inc. and contributors
  * SPDX-License-Identifier: AGPL-3.0-only
@@ -15,6 +16,7 @@ type Props = {
 };
 
 export const NameDescriptionUpdateStatus = observer(function NameDescriptionUpdateStatus(props: Props) {
+  const { t } = useTranslation();
   const { isSubmitting } = props;
 
   return (
@@ -27,7 +29,9 @@ export const NameDescriptionUpdateStatus = observer(function NameDescriptionUpda
         {isSubmitting !== "submitted" && isSubmitting !== "saved" && (
           <RefreshOutline className="size-3.5 animate-spin text-tertiary" />
         )}
-        <span className="text-13 text-tertiary">{isSubmitting === "submitting" ? "Đang lưu..." : "Đã lưu"}</span>
+        <span className="text-13 text-tertiary">
+          {isSubmitting === "submitting" ? t("work_item_ui.saving_progress") : t("work_item_ui.saved")}
+        </span>
       </div>
     </>
   );

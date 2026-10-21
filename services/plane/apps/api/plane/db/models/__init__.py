@@ -6,6 +6,7 @@ from .analytic import AnalyticView
 from .api import APIActivityLog, APIToken
 from .asset import FileAsset
 from .base import BaseModel
+from .issue_user_plan import IssueUserPlan
 from .cycle import Cycle, CycleIssue, CycleUserProperties
 from .deploy_board import DeployBoard
 from .draft import (
@@ -92,3 +93,5 @@ from .sticky import Sticky
 from .description import Description, DescriptionVersion
 
 from .custom_field import IssueCustomField, IssueCustomFieldValue
+from .project_overview import ProjectOverviewDetails, ProjectStatusUpdate
+from .project_overview import IssueAIApplication

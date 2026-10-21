@@ -16,7 +16,11 @@ import type {
   TGroupedIssues,
   TIssue,
 } from "@plane/types";
-import { getFilteredWorkItems, getGroupedWorkItemIds, updateSubWorkItemFilters } from "../helpers/base-issues-utils";
+import {
+  getFilteredWorkItems,
+  getGroupedWorkItemIds,
+  updateSubWorkItemFilters,
+} from "../helpers/base-issues-utils";
 import type { IssueSubIssuesStore } from "./sub_issues.store";
 
 export const DEFAULT_DISPLAY_PROPERTIES = {
@@ -35,7 +39,7 @@ export interface IWorkItemSubIssueFiltersStore {
   updateSubWorkItemFilters: (
     filterType: EIssueFilterType,
     filters: IIssueDisplayFilterOptions | IIssueDisplayProperties | IIssueFilterOptions,
-    workItemId: string
+    workItemId: string,
   ) => void;
   getGroupedSubWorkItems: (workItemId: string) => TGroupedIssues;
   getFilteredSubWorkItems: (workItemId: string, filters: IIssueFilterOptions) => TIssue[];
@@ -80,7 +84,7 @@ export class WorkItemSubIssueFiltersStore implements IWorkItemSubIssueFiltersSto
   initializeFilters = (workItemId: string) => {
     set(this.subIssueFilters, [workItemId, "displayProperties"], DEFAULT_DISPLAY_PROPERTIES);
     set(this.subIssueFilters, [workItemId, "filters"], {});
-    set(this.subIssueFilters, [workItemId, "displayFilters"], {});
+    set(this.subIssueFilters, [workItemId, "displayFilters"], { order_by: "sort_order" });
   };
 
   /**
@@ -91,7 +95,7 @@ export class WorkItemSubIssueFiltersStore implements IWorkItemSubIssueFiltersSto
   updateSubWorkItemFilters = (
     filterType: EIssueFilterType,
     filters: IIssueDisplayFilterOptions | IIssueDisplayProperties | IIssueFilterOptions,
-    workItemId: string
+    workItemId: string,
   ) => {
     runInAction(() => {
       updateSubWorkItemFilters(this.subIssueFilters, filterType, filters, workItemId);
@@ -106,7 +110,10 @@ export class WorkItemSubIssueFiltersStore implements IWorkItemSubIssueFiltersSto
   getGroupedSubWorkItems = computedFn((parentWorkItemId: string) => {
     const subIssueFilters = this.getSubIssueFilters(parentWorkItemId);
 
-    const filteredWorkItems = this.getFilteredSubWorkItems(parentWorkItemId, subIssueFilters.filters ?? {});
+    const filteredWorkItems = this.getFilteredSubWorkItems(
+      parentWorkItemId,
+      subIssueFilters.filters ?? {},
+    );
 
     // get group by and order by
     const groupByKey = subIssueFilters.displayFilters?.group_by;
@@ -125,8 +132,8 @@ export class WorkItemSubIssueFiltersStore implements IWorkItemSubIssueFiltersSto
   getFilteredSubWorkItems = computedFn((workItemId: string, filters: IIssueFilterOptions) => {
     const subIssueIds = this.subIssueStore.subIssuesByIssueId(workItemId);
     const workItems = this.subIssueStore.rootIssueDetailStore.rootIssueStore.issues.getIssuesByIds(
-      subIssueIds,
-      "un-archived"
+      subIssueIds ?? [],
+      "un-archived",
     );
 
     const filteredWorkItems = getFilteredWorkItems(workItems, filters);

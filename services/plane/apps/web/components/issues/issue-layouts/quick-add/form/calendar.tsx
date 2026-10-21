@@ -8,7 +8,7 @@ import { observer } from "mobx-react";
 import type { TQuickAddIssueForm } from "../root";
 
 export const CalendarQuickAddIssueForm = observer(function CalendarQuickAddIssueForm(props: TQuickAddIssueForm) {
-  const { ref, isOpen, projectDetail, register, onSubmit, isEpic } = props;
+  const { ref, isOpen, projectDetail, register, onSubmit, isEpic, isSubmitting } = props;
 
   return (
     <div
@@ -25,6 +25,8 @@ export const CalendarQuickAddIssueForm = observer(function CalendarQuickAddIssue
         <input
           type="text"
           autoComplete="off"
+          readOnly={isSubmitting}
+          aria-busy={isSubmitting}
           placeholder={isEpic ? "Tiêu đề Epic" : "Tiêu đề công việc"}
           {...register("name", {
             required: `${isEpic ? "Epic" : "Công việc"} cần có tiêu đề.`,

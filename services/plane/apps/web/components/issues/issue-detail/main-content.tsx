@@ -1,3 +1,4 @@
+import { IssueAIAssistant } from "@/components/issues/ai/assistant";
 // oxlint-disable no-shadow
 /**
  * Copyright (c) 2023-present Plane Software, Inc. and contributors
@@ -16,6 +17,7 @@ import { DescriptionVersionsRoot } from "@/components/core/description-versions"
 import { DescriptionInput } from "@/components/editor/rich-text/description-input";
 import { IssueTypeSwitcher } from "@/components/issues/issue-type-switcher";
 import { XBusReview } from "@/components/issues/xbus-review";
+import { IssueCompletionButton } from "@/components/issues/completion/button";
 // hooks
 import { useIssueDetail } from "@/hooks/store/use-issue-detail";
 import { useMember } from "@/hooks/store/use-member";
@@ -91,7 +93,18 @@ export const IssueMainContent = observer(function IssueMainContent(props: Props)
         )}
 
         <div className="mb-2.5 flex items-center justify-between gap-4">
-          <IssueTypeSwitcher issueId={issueId} disabled={isArchived || !isEditable} />
+          <div className="flex items-center gap-2">
+            <IssueCompletionButton
+              issue={issue}
+              workspaceSlug={workspaceSlug}
+              disabled={isArchived || !isEditable}
+              showLabel
+              onChange={(stateId) =>
+                issueOperations.update(workspaceSlug, issue.project_id!, issue.id, { state_id: stateId })
+              }
+            />
+            <IssueTypeSwitcher issueId={issueId} disabled={isArchived || !isEditable} />
+          </div>
           <div className="flex items-center gap-3">
             <NameDescriptionUpdateStatus isSubmitting={isSubmitting} />
           </div>
@@ -108,6 +121,18 @@ export const IssueMainContent = observer(function IssueMainContent(props: Props)
           value={issue.name}
         />
 
+        <IssueAIAssistant
+          key={`ai-${issue.id}`}
+          workspaceSlug={workspaceSlug}
+          projectId={issue.project_id}
+          issueId={issue.id}
+          name={issue.name}
+          disabled={isArchived || !isEditable}
+          onDescription={async (html) => {
+            await issueOperations.update(workspaceSlug, issue.project_id!, issue.id, { description_html: html });
+            editorRef.current?.setEditorValue(html, false);
+          }}
+        />
         <DescriptionInput
           issueSequenceId={issue.sequence_id}
           containerClassName="-ml-6 border-none p-0! pl-6!"

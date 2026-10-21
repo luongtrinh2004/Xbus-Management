@@ -10,7 +10,7 @@ import { cn } from "@plane/utils";
 import type { TQuickAddIssueForm } from "../root";
 
 export const GanttQuickAddIssueForm = observer(function GanttQuickAddIssueForm(props: TQuickAddIssueForm) {
-  const { ref, projectDetail, hasError, register, onSubmit, isEpic } = props;
+  const { ref, projectDetail, hasError, register, onSubmit, isEpic, isSubmitting } = props;
   const { t } = useTranslation();
   return (
     <div className={cn("shadow-raised-200", hasError && "border border-danger-strong/20 bg-danger-subtle")}>
@@ -24,6 +24,8 @@ export const GanttQuickAddIssueForm = observer(function GanttQuickAddIssueForm(p
           <input
             type="text"
             autoComplete="off"
+            readOnly={isSubmitting}
+            aria-busy={isSubmitting}
             placeholder={isEpic ? t("epic.title.label") : t("issue.title.label")}
             {...register("name", {
               required: isEpic ? t("epic.title.required") : t("issue.title.required"),

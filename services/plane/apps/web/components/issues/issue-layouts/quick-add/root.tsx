@@ -5,7 +5,7 @@
  */
 
 import type { FC } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react";
 import { useParams } from "next/navigation";
 import type { UseFormRegister } from "react-hook-form";
@@ -16,6 +16,7 @@ import { AddOutline } from "@makeplane/propel/icons";
 import { setPromiseToast } from "@plane/blocks/toast";
 import type { IProject, TIssue, EIssueLayoutTypes } from "@plane/types";
 import { cn, createIssuePayload } from "@plane/utils";
+import { createIssueSubmissionGuard, IssueCreatedWithFollowUpError } from "@/helpers/issue-submission";
 // local imports
 import { QuickAddIssueFormRoot } from "./form";
 import { useCreateIssueToastActions } from "../../create-issue-toast-action-items";
@@ -28,6 +29,7 @@ export type TQuickAddIssueForm = {
   register: UseFormRegister<TIssue>;
   onSubmit: () => void;
   isEpic: boolean;
+  isSubmitting: boolean;
 };
 
 export type TQuickAddIssueButton = {
@@ -71,12 +73,16 @@ export const QuickAddIssueRoot = observer(function QuickAddIssueRoot(props: TQui
   const buildCreateIssueToastActions = useCreateIssueToastActions();
   // states
   const [isOpen, setIsOpen] = useState(isQuickAddOpen ?? false);
+  const [isCreating, setIsCreating] = useState(false);
+  const submissionGuard = useRef(createIssueSubmissionGuard());
   // form info
   const {
     reset,
     handleSubmit,
     setFocus,
     register,
+    setError,
+    clearErrors,
     formState: { errors, isSubmitting },
   } = useForm<TIssue>({ defaultValues });
 
@@ -92,6 +98,7 @@ export const QuickAddIssueRoot = observer(function QuickAddIssueRoot(props: TQui
 
   // oxlint-disable-next-line no-shadow
   const handleIsOpen = (isOpen: boolean) => {
+    if (submissionGuard.current.pending) return;
     if (isQuickAddOpen !== undefined && setIsQuickAddOpen) {
       setIsQuickAddOpen(isOpen);
     } else {
@@ -100,34 +107,62 @@ export const QuickAddIssueRoot = observer(function QuickAddIssueRoot(props: TQui
   };
 
   const onSubmitHandler = async (formData: TIssue) => {
-    if (isSubmitting || !workspaceSlug || !projectId) return;
-
-    reset({ ...defaultValues });
-
-    const payload = createIssuePayload(projectId.toString(), {
-      // oxlint-disable-next-line unicorn/no-useless-fallback-in-spread
-      ...(prePopulatedData ?? {}),
-      ...formData,
-    });
-
-    if (quickAddCallback) {
-      const quickAddPromise = quickAddCallback(projectId.toString(), { ...payload });
-      setPromiseToast<any>(quickAddPromise, {
+    if (!workspaceSlug || !projectId || !quickAddCallback) return;
+    const name = formData.name.trim();
+    if (!name || name.length > 255) {
+      setError("name", {
+        message: !name ? t("title_is_required") : t("title_should_be_less_than_255_characters"),
+      });
+      setFocus("name");
+      return;
+    }
+    await submissionGuard.current.run(async () => {
+      setIsCreating(true);
+      clearErrors();
+      const payload = createIssuePayload(projectId.toString(), { ...prePopulatedData, ...formData, name });
+      let createdWithFollowUpError = false;
+      // Keep the entered name until the server confirms creation. Returning no issue
+      // is a failure too: clearing here would silently lose the user's input.
+      const quickAddPromise = Promise.resolve()
+        .then(() => quickAddCallback(projectId.toString(), { ...payload }))
+        .catch((error: unknown) => {
+          if (!(error instanceof IssueCreatedWithFollowUpError)) throw error;
+          createdWithFollowUpError = true;
+          return error.createdIssue;
+        })
+        .then((issue) => {
+          if (!issue) throw new Error(t("issue_creation_failed"));
+          return issue;
+        });
+      setPromiseToast<TIssue>(quickAddPromise, {
         loading: isEpic ? t("epic.adding") : t("issue.adding"),
         success: {
           title: t("common.success"),
-          message: () => `${isEpic ? t("epic.create.success") : t("issue.create.success")}`,
+          message: () =>
+            createdWithFollowUpError
+              ? t("issue_form_draft.created_partial")
+              : `${isEpic ? t("epic.create.success") : t("issue.create.success")}`,
           actionItems: (data) =>
             buildCreateIssueToastActions({ workspaceSlug: workspaceSlug.toString(), issueId: data.id, isEpic }),
         },
         error: {
           title: t("common.error.label"),
-          message: (err) => err?.message || t("common.error.message"),
+          message: (err: unknown) => (err instanceof Error ? err.message : t("common.error.message")),
         },
       });
 
-      await quickAddPromise;
-    }
+      try {
+        await quickAddPromise;
+        reset({ ...defaultValues });
+      } catch (error) {
+        setError("root.server", {
+          message: error instanceof Error ? error.message : t("issue_creation_failed"),
+        });
+      } finally {
+        setIsCreating(false);
+        setFocus("name");
+      }
+    });
   };
 
   if (!projectId) return null;
@@ -152,6 +187,7 @@ export const QuickAddIssueRoot = observer(function QuickAddIssueRoot(props: TQui
           onSubmit={handleSubmit(onSubmitHandler)}
           onClose={() => handleIsOpen(false)}
           isEpic={isEpic}
+          isSubmitting={isSubmitting || isCreating}
         />
       ) : (
         <>
@@ -167,6 +203,11 @@ export const QuickAddIssueRoot = observer(function QuickAddIssueRoot(props: TQui
             </button>
           )}
         </>
+      )}
+      {isOpen && (errors.name?.message || errors.root?.server?.message) && (
+        <p role="alert" className="px-3 py-2 text-11 text-danger-primary">
+          {errors.name?.message || errors.root?.server?.message}
+        </p>
       )}
     </div>
   );

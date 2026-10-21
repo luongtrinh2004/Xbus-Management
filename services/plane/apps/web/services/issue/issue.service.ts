@@ -20,6 +20,13 @@ import type {
 } from "@plane/types";
 // services
 import { APIService } from "@/services/api.service";
+import { confirmDependencyDates } from "@/helpers/dependency-date-confirmation";
+import type { TDependencyDateConflict } from "@/helpers/dependency-date-confirmation";
+
+export type TIssueSubscriber = {
+  id: string;
+  subscriber: string;
+};
 
 export class IssueService extends APIService {
   private serviceType: TIssueServiceType;
@@ -231,6 +238,41 @@ export class IssueService extends APIService {
       });
   }
 
+  async confirmIssueDateChange(
+    workspaceSlug: string,
+    projectId: string,
+    issueId: string,
+    data: Partial<TIssue>
+  ): Promise<boolean> {
+    const dates = Object.fromEntries(
+      Object.entries(data).filter(([key]) => key === "start_date" || key === "target_date")
+    );
+    if (Object.keys(dates).length === 0 || this.serviceType !== EIssueServiceType.ISSUES) return true;
+    const response = await this.patch(
+      `/api/workspaces/${workspaceSlug}/projects/${projectId}/${this.serviceType}/${issueId}/`,
+      dates,
+      { params: { preview_dependency_dates: "1" } }
+    ).catch((error) => {
+      throw error?.response?.data;
+    });
+    return confirmDependencyDates((response.data?.conflicts ?? []) as TDependencyDateConflict[]);
+  }
+
+  async confirmIssueDatesChange(
+    workspaceSlug: string,
+    projectId: string,
+    updates: { id: string; start_date?: string; target_date?: string }[]
+  ): Promise<boolean> {
+    const response = await this.post(
+      `/api/workspaces/${workspaceSlug}/projects/${projectId}/issue-dates/`,
+      { updates },
+      { params: { preview_dependency_dates: "1" } }
+    ).catch((error) => {
+      throw error?.response?.data;
+    });
+    return confirmDependencyDates((response.data?.conflicts ?? []) as TDependencyDateConflict[]);
+  }
+
   async deleteIssue(workspaceSlug: string, projectId: string, issuesId: string): Promise<any> {
     return this.delete(`/api/workspaces/${workspaceSlug}/projects/${projectId}/${this.serviceType}/${issuesId}/`)
       .then((response) => response?.data)
@@ -375,6 +417,28 @@ export class IssueService extends APIService {
   }
 
   // issue subscriptions
+  async getIssueSubscribers(workspaceSlug: string, projectId: string, issueId: string): Promise<TIssueSubscriber[]> {
+    return (
+      await this.get(
+        `/api/workspaces/${workspaceSlug}/projects/${projectId}/${this.serviceType}/${issueId}/issue-subscribers/`
+      )
+    ).data;
+  }
+
+  async updateIssueSubscribers(
+    workspaceSlug: string,
+    projectId: string,
+    issueId: string,
+    subscriberIds: string[]
+  ): Promise<TIssueSubscriber[]> {
+    return (
+      await this.put(
+        `/api/workspaces/${workspaceSlug}/projects/${projectId}/${this.serviceType}/${issueId}/issue-subscribers/`,
+        { subscriber_ids: subscriberIds }
+      )
+    ).data;
+  }
+
   async getIssueNotificationSubscriptionStatus(
     workspaceSlug: string,
     projectId: string,

@@ -84,6 +84,7 @@ export const IssuePeekOverview = observer(function IssuePeekOverview(props: IWor
               return;
             })
             .catch((_error) => {
+              if (data.state_id !== undefined || data.description_html !== undefined) throw _error;
               setToast({
                 title: t("toast.error"),
                 type: "error",

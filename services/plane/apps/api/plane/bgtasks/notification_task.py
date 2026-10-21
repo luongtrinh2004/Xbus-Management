@@ -5,7 +5,6 @@
 # Python imports
 import json
 import uuid
-from uuid import UUID
 
 
 # Module imports
@@ -25,6 +24,7 @@ from plane.db.models import (
     ProjectMember,
 )
 from django.db.models import Subquery
+from plane.utils.issue_visibility import eligible_issue_members
 
 # Third Party imports
 from celery import shared_task
@@ -85,8 +85,14 @@ def extract_mentions_as_subscribers(project_id, issue_id, mentions):
     # mentions is an array of User IDs representing the FILTERED set of mentioned users
 
     bulk_mention_subscribers = []
+    issue = Issue.objects.select_related("project").filter(pk=issue_id, project_id=project_id).first()
+    if not issue:
+        return []
+    eligible = {str(value) for value in eligible_issue_members(issue).values_list("member_id", flat=True)}
 
     for mention_id in mentions:
+        if str(mention_id) not in eligible:
+            continue
         # If the particular mention has not already been subscribed to the issue, he must be sent the mentioned notification # noqa: E501
         if (
             not IssueSubscriber.objects.filter(
@@ -227,14 +233,15 @@ def notifications(
             2. From the latest set of mentions, extract the users which are not a subscribers & make them subscribers
             """
 
-            # get the list of active project members
-            project_members = ProjectMember.objects.filter(project_id=project_id, is_active=True).values_list(
-                "member_id", flat=True
-            )
+            issue = Issue.objects.select_related("project").filter(pk=issue_id, project_id=project_id).first()
+            if not issue:
+                return
+            project_members = eligible_issue_members(issue).values_list("member_id", flat=True)
+            eligible_member_ids = {str(member) for member in project_members}
 
             # Get new mentions from the newer instance
             new_mentions = get_new_mentions(requested_instance=requested_data, current_instance=current_instance)
-            new_mentions = list(set(new_mentions) & {str(member) for member in project_members})
+            new_mentions = list(set(new_mentions) & eligible_member_ids)
             removed_mention = get_removed_mentions(requested_instance=requested_data, current_instance=current_instance)
 
             comment_mentions = []
@@ -243,7 +250,7 @@ def notifications(
             # Get New Subscribers from the mentions of the newer instance
             requested_mentions = extract_mentions(issue_instance=requested_data)
             mention_subscribers = extract_mentions_as_subscribers(
-                project_id=project_id, issue_id=issue_id, mentions=requested_mentions
+                project_id=project_id, issue_id=issue_id, mentions=[value for value in requested_mentions if str(value) in eligible_member_ids]
             )
 
             for issue_activity in issue_activities_created:
@@ -261,11 +268,11 @@ def notifications(
                     )
                     comment_mentions = comment_mentions + new_comment_mentions
                     comment_mentions = [
-                        mention for mention in comment_mentions if UUID(mention) in set(project_members)
+                        mention for mention in comment_mentions if str(mention) in eligible_member_ids
                     ]
 
             comment_mention_subscribers = extract_mentions_as_subscribers(
-                project_id=project_id, issue_id=issue_id, mentions=all_comment_mentions
+                project_id=project_id, issue_id=issue_id, mentions=[value for value in all_comment_mentions if str(value) in eligible_member_ids]
             )
             """
             We will not send subscription activity notification to the below mentioned user sets
@@ -289,7 +296,7 @@ def notifications(
 
             issue = Issue.objects.filter(pk=issue_id).first()
 
-            if subscriber:
+            if subscriber and str(actor_id) in eligible_member_ids:
                 # add the user to issue subscriber
                 try:
                     _ = IssueSubscriber.objects.get_or_create(

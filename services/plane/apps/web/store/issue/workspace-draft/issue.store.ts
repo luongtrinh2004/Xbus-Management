@@ -297,7 +297,9 @@ export class WorkspaceDraftIssues implements IWorkspaceDraftIssues {
       });
       const response = await workspaceDraftService.updateIssue(workspaceSlug, issueId, payload);
       this.loader = undefined;
-      return response;
+      // Draft PATCH returns 204. Keep the successful snapshot for callers that
+      // continue saving properties on this draft.
+      return response ?? this.getIssueById(issueId);
     } catch (error) {
       this.loader = undefined;
       runInAction(() => {

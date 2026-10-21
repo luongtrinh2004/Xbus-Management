@@ -5,6 +5,7 @@
  */
 
 import { useState } from "react";
+import { useTranslation } from "@plane/i18n";
 import { observer } from "mobx-react";
 import { useParams } from "next/navigation";
 import { useListTable } from "../table-context";
@@ -13,9 +14,9 @@ import { AddOutline } from "@makeplane/propel/icons";
 // types
 import { setToast } from "@plane/blocks/toast";
 import type { TIssue, ISearchIssueResponse, TIssueGroupByOptions } from "@plane/types";
-import { useTranslation } from "@plane/i18n";
 // ui
 import { Menu, MenuContent, MenuItem, MenuTrigger } from "@makeplane/propel/components/menu";
+import { Tooltip } from "@makeplane/propel/components/tooltip";
 // components
 import { cn } from "@plane/utils";
 import { ExistingIssuesListModal } from "@/components/core/modals/existing-issues-list-modal";
@@ -44,6 +45,7 @@ interface IHeaderGroupByCard {
 }
 
 export const HeaderGroupByCard = observer(function HeaderGroupByCard(props: IHeaderGroupByCard) {
+  const { t } = useTranslation();
   const columns = useListTable();
   const { getStateById } = useProjectState();
   const state = columns && props.groupBy === "state" ? getStateById(props.groupID) : undefined;
@@ -67,7 +69,6 @@ export const HeaderGroupByCard = observer(function HeaderGroupByCard(props: IHea
     isEpic = false,
   } = props;
   // plane hooks
-  const { t } = useTranslation();
   // states
   const [isOpen, setIsOpen] = useState(false);
   const [openExistingIssueListModal, setOpenExistingIssueListModal] = useState(false);
@@ -75,6 +76,9 @@ export const HeaderGroupByCard = observer(function HeaderGroupByCard(props: IHea
   const { workspaceSlug, projectId, moduleId, cycleId } = useParams();
   const storeType = useIssueStoreType();
   // derived values
+  const addIssueLabel = t("work_item_list.add_to_group");
+  const addButtonClassName =
+    "flex size-6 flex-shrink-0 cursor-pointer items-center justify-center rounded-xs opacity-0 transition-opacity hover:bg-layer-1 focus-visible:opacity-100 group-hover/list-header:opacity-100 group-focus-within/list-header:opacity-100 [@media(hover:none)]:opacity-100";
   const renderExistingIssueModal = moduleId || cycleId;
   const existingIssuesListModalPayload = moduleId
     ? { module: moduleId.toString() }
@@ -141,7 +145,7 @@ export const HeaderGroupByCard = observer(function HeaderGroupByCard(props: IHea
 
         {/* eslint-disable-next-line jsx_a11y/click-events-have-key-events eslint-disable-next-line jsx_a11y/no-static-element-interactions */}
         <div
-          className="relative flex w-full cursor-pointer flex-row items-center gap-1 overflow-hidden"
+          className="relative flex min-w-0 cursor-pointer flex-row items-center gap-1 overflow-hidden"
           onClick={() => handleCollapsedGroups(groupID)}
         >
           <div
@@ -153,7 +157,6 @@ export const HeaderGroupByCard = observer(function HeaderGroupByCard(props: IHea
           <div className="flex shrink-0 items-center pl-2 text-13 font-medium leading-5 text-tertiary">
             {count || 0}
           </div>
-          <div className="px-2.5"></div>
         </div>
 
         {!disableIssueCreation &&
@@ -163,8 +166,9 @@ export const HeaderGroupByCard = observer(function HeaderGroupByCard(props: IHea
                 render={
                   <button
                     type="button"
-                    aria-label={t("common.add")}
-                    className="flex h-5 w-5 flex-shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-xs transition-all hover:bg-layer-1"
+                    aria-label={addIssueLabel}
+                    title={addIssueLabel}
+                    className={addButtonClassName}
                   >
                     <AddOutline className="h-3.5 w-3.5" />
                   </button>
@@ -186,20 +190,16 @@ export const HeaderGroupByCard = observer(function HeaderGroupByCard(props: IHea
               </MenuContent>
             </Menu>
           ) : (
-            <button
-              type="button"
-              aria-label={t("common.add")}
-              className={cn(
-                "flex flex-shrink-0 cursor-pointer items-center justify-center gap-1 rounded-xs transition-all hover:bg-layer-1",
-                columns ? "h-7 px-2 text-13" : "h-5 w-5",
-              )}
-              onClick={() => {
-                setIsOpen(true);
-              }}
-            >
-              <AddOutline width={14} />
-              {columns && <span>{t("common.new_issue")}</span>}
-            </button>
+            <Tooltip label={addIssueLabel}>
+              <button
+                type="button"
+                aria-label={addIssueLabel}
+                className={addButtonClassName}
+                onClick={() => setIsOpen(true)}
+              >
+                <AddOutline width={14} />
+              </button>
+            </Tooltip>
           ))}
 
         {isEpic ? (
