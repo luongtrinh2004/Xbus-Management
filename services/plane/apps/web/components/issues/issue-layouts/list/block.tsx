@@ -14,12 +14,14 @@ import { combine } from "@atlaskit/pragmatic-drag-and-drop/combine";
 import { draggable } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 import { observer } from "mobx-react";
 import { useParams } from "next/navigation";
-import { ChevronRightOutline } from "@makeplane/propel/icons";
+import { ChevronRightOutline, AddOutline } from "@makeplane/propel/icons";
 // types
 import { setToast } from "@plane/blocks/toast";
 import { Tooltip } from "@makeplane/propel/components/tooltip";
 import type { TIssue, IIssueDisplayProperties, TIssueMap } from "@plane/types";
 import { EIssueServiceType } from "@plane/types";
+import { CreateUpdateIssueModal } from "@/components/issues/issue-modal/modal";
+import { useIssueStoreType } from "@/hooks/use-issue-layout-store";
 // ui
 import { ControlLink, Row } from "@plane/blocks/layout";
 import { Spinner } from "@plane/blocks/spinner";
@@ -98,6 +100,8 @@ export const IssueBlock = observer(function IssueBlock(props: IssueBlockProps) {
     setPeekIssue,
     subIssues: subIssuesStore,
   } = useIssueDetail(isEpic ? EIssueServiceType.EPICS : EIssueServiceType.ISSUES);
+  const storeType = useIssueStoreType();
+  const [isCreateSiblingOpen, setIsCreateSiblingOpen] = useState(false);
 
   const handleIssuePeekOverview = (issue: TIssue) =>
     workspaceSlug &&
@@ -215,6 +219,7 @@ export const IssueBlock = observer(function IssueBlock(props: IssueBlockProps) {
       >
         <Row
           ref={issueRef}
+          data-top-level={nestingLevel === 0 ? "true" : undefined}
           className={cn(
             "group/list-block relative flex min-h-11 flex-col gap-3 bg-layer-transparent py-3 text-13 transition-colors hover:bg-layer-transparent-hover",
             {
@@ -318,8 +323,63 @@ export const IssueBlock = observer(function IssueBlock(props: IssueBlockProps) {
                     }
                   />
                 )}
+
+                {issue?.tempId !== undefined && (
+                  <div className="absolute top-0 left-0 z-[99999] h-full w-full animate-pulse bg-surface-1/20" />
+                )}
+              </div>
+
+              <div className="flex min-w-0 flex-grow flex-col justify-center py-0.5 ml-2.5">
+                <div className="flex items-center min-w-0 gap-1.5">
+                  <Tooltip
+                    label={issue.name}
+                    layout="stacked"
+                    align="start"
+                    disabled={isCurrentBlockDragging || isMobile}
+                  >
+                    <p
+                      className={cn("cursor-pointer truncate text-primary transition-colors hover:text-accent-primary", {
+                        "text-[15px] font-semibold leading-snug": nestingLevel === 0,
+                        "text-[14px] font-medium leading-snug": nestingLevel !== 0,
+                      })}
+                    >
+                      {issue.name}
+                    </p>
+                  </Tooltip>
+                  {subIssuesCount > 0 && !isEpic && (
+                    <Tooltip label={t("work_item_list.subtask_count", { count: subIssuesCount })}>
+                      <button
+                        type="button"
+                        aria-label={t("work_item_list.subtask_count", { count: subIssuesCount })}
+                        aria-expanded={isExpanded}
+                        onClick={handleToggleExpand}
+                        className="flex shrink-0 items-center gap-0.5 text-[11px] text-tertiary hover:text-primary"
+                      >
+                        <span>{subIssuesCount}</span>
+                        <ListTree className="size-3" />
+                      </button>
+                    </Tooltip>
+                  )}
+                  {canEditIssueProperties && !isEpic && (
+                    <Tooltip label={nestingLevel === 0 ? "Thêm công việc cùng cấp" : "Thêm công việc phụ cùng cấp"}>
+                      <button
+                        type="button"
+                        aria-label="Thêm công việc cùng cấp"
+                        className="flex size-5 flex-shrink-0 cursor-pointer items-center justify-center rounded-xs text-tertiary opacity-0 transition-opacity hover:bg-layer-2 hover:text-primary focus-visible:opacity-100 group-hover/list-block:opacity-100 group-focus-within/list-block:opacity-100 [@media(hover:none)]:opacity-100"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setIsCreateSiblingOpen(true);
+                        }}
+                      >
+                        <AddOutline className="size-3" />
+                      </button>
+                    </Tooltip>
+                  )}
+                </div>
+
                 {displayProperties && (displayProperties.key || displayProperties.issue_type) && (
-                  <div className="flex-shrink-0" style={{ minWidth: `${keyMinWidth}px` }}>
+                  <div className="asana-list-identifier flex items-center text-[10px] leading-none text-tertiary mt-0.5">
                     {issue.project_id && (
                       <IssueIdentifier
                         issueId={issueId}
@@ -331,36 +391,7 @@ export const IssueBlock = observer(function IssueBlock(props: IssueBlockProps) {
                     )}
                   </div>
                 )}
-
-                {issue?.tempId !== undefined && (
-                  <div className="absolute top-0 left-0 z-[99999] h-full w-full animate-pulse bg-surface-1/20" />
-                )}
               </div>
-
-              <Tooltip
-                label={issue.name}
-                layout="stacked"
-                align="start"
-                disabled={isCurrentBlockDragging || isMobile}
-              >
-                <p className="cursor-pointer truncate text-body-xs-medium text-primary">
-                  {issue.name}
-                </p>
-              </Tooltip>
-              {subIssuesCount > 0 && !isEpic && (
-                <Tooltip label={t("work_item_list.subtask_count", { count: subIssuesCount })}>
-                  <button
-                    type="button"
-                    aria-label={t("work_item_list.subtask_count", { count: subIssuesCount })}
-                    aria-expanded={isExpanded}
-                    onClick={handleToggleExpand}
-                    className="ml-2 flex shrink-0 items-center gap-1 text-tertiary hover:text-primary"
-                  >
-                    <span>{subIssuesCount}</span>
-                    <ListTree className="size-3.5" />
-                  </button>
-                </Tooltip>
-              )}
             </div>
             {!issue?.tempId && (
               <div
@@ -417,6 +448,25 @@ export const IssueBlock = observer(function IssueBlock(props: IssueBlockProps) {
           </div>
         </Row>
       </ControlLink>
+      {isCreateSiblingOpen && (
+        <CreateUpdateIssueModal
+          isOpen={isCreateSiblingOpen}
+          onClose={() => setIsCreateSiblingOpen(false)}
+          data={{
+            project_id: issue.project_id,
+            parent_id: issue.parent_id ?? undefined,
+          }}
+          storeType={storeType}
+          isProjectSelectionDisabled
+          onSubmit={async () => {
+            const pId = issue.project_id;
+            if (!workspaceSlug || !pId) return;
+            if (issue.parent_id) {
+              await subIssuesStore.fetchSubIssues(workspaceSlug, pId, issue.parent_id);
+            }
+          }}
+        />
+      )}
     </>
   );
 });

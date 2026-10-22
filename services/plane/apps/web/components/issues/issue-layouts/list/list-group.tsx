@@ -11,8 +11,7 @@ import { useEffect, useRef, useState } from "react";
 import { combine } from "@atlaskit/pragmatic-drag-and-drop/combine";
 import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 import { observer } from "mobx-react";
-// plane imports
-import { DRAG_ALLOWED_GROUPS } from "@plane/constants";
+import { ALL_ISSUES, DRAG_ALLOWED_GROUPS } from "@plane/constants";
 import { useTranslation } from "@plane/i18n";
 import { setToast } from "@plane/blocks/toast";
 import type {
@@ -282,7 +281,8 @@ export const ListGroup = observer(function ListGroup(props: Props) {
   const isDropDisabled = isWorkflowDropDisabled || !!group.isDropDisabled;
 
   const isGroupByCreatedBy = group_by === "created_by";
-  const shouldExpand = (!!groupIssueCount && isExpanded) || !group_by;
+  const isAllIssuesGroup = group.id === ALL_ISSUES || group.id === "All Issues" || !group_by;
+  const shouldExpand = isAllIssuesGroup ? true : ((!!groupIssueCount && isExpanded) || !group_by);
 
   return validateEmptyIssueGroups(groupIssueCount) ? (
     <div
@@ -293,36 +293,38 @@ export const ListGroup = observer(function ListGroup(props: Props) {
         "border-danger-subtle": isDraggingOverColumn && isDropDisabled,
       })}
     >
-      <Row
-        className={cn(
-          "w-full flex-shrink-0 border-b border-subtle bg-layer-1 py-1 pr-3 hover:bg-layer-1-hover",
-          {
-            "sticky top-0 z-[2]": !columns && isExpanded && groupIssueCount > 0,
-            "asana-list-section-header": !!columns,
-          },
-        )}
-      >
-        <HeaderGroupByCard
-          groupID={group.id}
-          groupBy={group_by}
-          icon={group.icon}
-          title={group.name}
-          count={groupIssueCount}
-          issuePayload={group.payload}
-          canEditProperties={canEditProperties}
-          disableIssueCreation={
-            disableIssueCreation ||
-            isGroupByCreatedBy ||
-            isCompletedCycle ||
-            isWorkflowIssueCreationDisabled
-          }
-          addIssuesToView={addIssuesToView}
-          selectionHelpers={selectionHelpers}
-          handleCollapsedGroups={handleCollapsedGroups}
-          isEpic={isEpic}
-          isExpanded={isExpanded}
-        />
-      </Row>
+      {!isAllIssuesGroup && (
+        <Row
+          className={cn(
+            "w-full flex-shrink-0 border-b border-subtle bg-layer-1 py-1 pr-3 hover:bg-layer-1-hover",
+            {
+              "sticky top-0 z-[2]": !columns && isExpanded && groupIssueCount > 0,
+              "asana-list-section-header": !!columns,
+            },
+          )}
+        >
+          <HeaderGroupByCard
+            groupID={group.id}
+            groupBy={group_by}
+            icon={group.icon}
+            title={group.name}
+            count={groupIssueCount}
+            issuePayload={group.payload}
+            canEditProperties={canEditProperties}
+            disableIssueCreation={
+              disableIssueCreation ||
+              isGroupByCreatedBy ||
+              isCompletedCycle ||
+              isWorkflowIssueCreationDisabled
+            }
+            addIssuesToView={addIssuesToView}
+            selectionHelpers={selectionHelpers}
+            handleCollapsedGroups={handleCollapsedGroups}
+            isEpic={isEpic}
+            isExpanded={isExpanded}
+          />
+        </Row>
+      )}
       {shouldExpand && (
         <div className="relative">
           <GroupDragOverlay
@@ -369,7 +371,8 @@ export const ListGroup = observer(function ListGroup(props: Props) {
             !disableIssueCreation &&
             !isGroupByCreatedBy &&
             !isCompletedCycle &&
-            !isWorkflowIssueCreationDisabled && (
+            !isWorkflowIssueCreationDisabled &&
+            !columns && (
               <div className={cn("w-full flex-shrink-0", { "sticky bottom-0 z-[1]": !columns })}>
                 <QuickAddIssueRoot
                   layout={EIssueLayoutTypes.LIST}

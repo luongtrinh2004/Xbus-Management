@@ -11,6 +11,9 @@ import { CustomFieldManager } from "@/components/issues/custom-fields/manager";
 import { combine } from "@atlaskit/pragmatic-drag-and-drop/combine";
 import { autoScrollForElements } from "@atlaskit/pragmatic-drag-and-drop-auto-scroll/element";
 import { useTranslation } from "@plane/i18n";
+import { AddOutline } from "@makeplane/propel/icons";
+import { Tooltip } from "@makeplane/propel/components/tooltip";
+import { CreateUpdateIssueModal } from "@/components/issues/issue-modal/modal";
 import { observer } from "mobx-react";
 // plane constants
 import { ALL_ISSUES } from "@plane/constants";
@@ -97,6 +100,7 @@ export const List = observer(function List(props: IList) {
   const slug = workspaceSlug?.toString();
   const currentProjectId = projectId?.toString();
   const [customFieldsError, setCustomFieldsError] = useState(false);
+  const [isHeaderCreateOpen, setIsHeaderCreateOpen] = useState(false);
   const issueIdsKey = Object.values(issuesMap)
     .filter((issue) => issue.project_id === currentProjectId && !issue.tempId)
     .map((issue) => issue.id)
@@ -223,7 +227,21 @@ export const List = observer(function List(props: IList) {
                   <div style={tableStyle}>
                     {columns && (
                       <div className="asana-list-column-header">
-                        <div className="asana-list-name-heading">{t("common.name")}</div>
+                        <div className="asana-list-name-heading flex items-center justify-between pr-2">
+                          <span>{t("common.name")}</span>
+                          {slug && currentProjectId && !isEpic && canEditProperties(currentProjectId) && (
+                            <Tooltip label={t("issue.add.label") || "Tạo công việc"}>
+                              <button
+                                type="button"
+                                aria-label="Tạo công việc"
+                                className="flex size-6 cursor-pointer items-center justify-center rounded-xs text-tertiary hover:bg-layer-2 hover:text-primary"
+                                onClick={() => setIsHeaderCreateOpen(true)}
+                              >
+                                <AddOutline className="size-3.5" />
+                              </button>
+                            </Tooltip>
+                          )}
+                        </div>
                         <div className="asana-list-property-headings">
                           {columns.map((column) => (
                             <div key={column.key} role="columnheader">
@@ -278,6 +296,15 @@ export const List = observer(function List(props: IList) {
               </>
             )}
           </MultipleSelectGroup>
+        )}
+        {isHeaderCreateOpen && slug && currentProjectId && (
+          <CreateUpdateIssueModal
+            isOpen={isHeaderCreateOpen}
+            onClose={() => setIsHeaderCreateOpen(false)}
+            data={{ project_id: currentProjectId }}
+            storeType={storeType}
+            isProjectSelectionDisabled
+          />
         )}
       </div>
     </ListTableContext.Provider>

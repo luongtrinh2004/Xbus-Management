@@ -20,7 +20,7 @@ import type {
   TWorkItemFilterExpression,
   TSupportedFilterForUpdate,
 } from "@plane/types";
-import { EIssuesStoreType } from "@plane/types";
+import { EIssuesStoreType, EIssueLayoutTypes } from "@plane/types";
 import { handleIssueQueryParamsByLayout } from "@plane/utils";
 import type { IBaseIssueFilterStore } from "../helpers/issue-filter-helper.store";
 import { IssueFilterHelperStore } from "../helpers/issue-filter-helper.store";
@@ -137,9 +137,43 @@ export class ProjectIssuesFilter extends IssueFilterHelperStore implements IProj
   fetchFilters = async (workspaceSlug: string, projectId: string) => {
     const _filters = await this.projectService.getProjectUserProperties(workspaceSlug, projectId);
 
+    const defaultDisplayFilters: IIssueDisplayFilterOptions = {
+      layout: EIssueLayoutTypes.LIST,
+      group_by: null,
+      sub_group_by: null,
+      order_by: "-created_at",
+      sub_issue: true,
+      show_empty_groups: true,
+      calendar: {
+        show_weekends: false,
+        layout: "month",
+      },
+    };
+    const defaultDisplayProperties: IIssueDisplayProperties = {
+      key: true,
+      assignee: true,
+      start_date: true,
+      due_date: true,
+      labels: true,
+      priority: true,
+      state: true,
+      sub_issue_count: true,
+      attachment_count: true,
+      link: true,
+      estimate: true,
+      created_on: true,
+      updated_on: true,
+      modules: true,
+      cycle: true,
+      issue_type: true,
+    };
+
     const richFilters = _filters?.rich_filters;
-    const displayFilters = this.computedDisplayFilters(_filters?.display_filters);
-    const displayProperties = this.computedDisplayProperties(_filters?.display_properties);
+    const displayFilters = this.computedDisplayFilters(_filters?.display_filters, defaultDisplayFilters);
+    const displayProperties = this.computedDisplayProperties({
+      ...defaultDisplayProperties,
+      ...(_filters?.display_properties ?? {}),
+    });
 
     // fetching the kanban toggle helpers in the local storage
     const kanbanFilters = {

@@ -1,4 +1,4 @@
-import { Circle, CircleCheck, LoaderCircle } from "lucide-react";
+import { Check, CircleCheck, LoaderCircle } from "lucide-react";
 import { observer } from "mobx-react";
 import { useRef, useState } from "react";
 import { Tooltip } from "@makeplane/propel/components/tooltip";
@@ -55,9 +55,20 @@ export const IssueCompletionButton = observer(function IssueCompletionButton(pro
             !!issue.archived_at
           }
           className={cn(
-            "inline-flex shrink-0 items-center justify-center gap-1.5 rounded-sm text-tertiary transition-colors hover:text-success-primary focus-visible:outline-2 focus-visible:outline-accent-strong disabled:cursor-not-allowed disabled:opacity-50",
-            showLabel ? "h-7 border border-strong px-2 text-body-xs-medium" : "size-5",
-            { "text-success-primary": isCompleted }
+            "transition-all duration-150 focus-visible:outline-2 focus-visible:outline-accent-strong disabled:cursor-not-allowed disabled:opacity-50",
+            showLabel
+              ? cn(
+                  "inline-flex shrink-0 items-center justify-center gap-1.5 rounded-md px-3.5 py-1.5 text-xs font-medium cursor-pointer shadow-xs transition-transform active:scale-[0.98]",
+                  isCompleted
+                    ? "border border-success-primary/30 bg-success-primary/10 text-success-primary hover:bg-success-primary/20"
+                    : "bg-accent-primary text-white hover:opacity-90"
+                )
+              : cn(
+                  "group/completion flex size-4 shrink-0 cursor-pointer items-center justify-center rounded-full border transition-all duration-150",
+                  isCompleted
+                    ? "border-success-primary bg-success-primary text-white shadow-xs"
+                    : "border-neutral-300 dark:border-neutral-600 bg-transparent text-transparent hover:border-accent-primary hover:text-accent-primary hover:bg-accent-primary/10"
+                )
           )}
           onClick={async (event) => {
             event.stopPropagation();
@@ -92,11 +103,17 @@ export const IssueCompletionButton = observer(function IssueCompletionButton(pro
           }}
         >
           {isUpdating || isLoadingStates ? (
-            <LoaderCircle className="size-4 animate-spin" />
+            <LoaderCircle className={cn(showLabel ? "size-3.5" : "size-2.5", "animate-spin")} />
           ) : isCompleted ? (
-            <CircleCheck className="size-4" />
+            showLabel ? (
+              <CircleCheck className="size-3.5 text-success-primary" />
+            ) : (
+              <Check className="size-2.5 stroke-[3]" />
+            )
+          ) : showLabel ? (
+            <Check className="size-3.5 stroke-[2.5]" />
           ) : (
-            <Circle className="size-4" />
+            <Check className="size-2.5 stroke-[2.5] opacity-0 transition-opacity group-hover/completion:opacity-100" />
           )}
           {showLabel && (
             <span>{t(isCompleted ? "issue_completion.completed" : "issue_completion.complete_short")}</span>

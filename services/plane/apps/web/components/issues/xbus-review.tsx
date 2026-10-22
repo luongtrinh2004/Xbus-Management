@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "@plane/i18n";
 import { Button } from "@makeplane/propel/components/button";
 import { Select } from "@plane/blocks/select";
+import { cn } from "@plane/utils";
 import { useIssueDetail } from "@/hooks/store/use-issue-detail";
 
 type ReviewPerson = { id: string; name: string };
@@ -122,18 +123,31 @@ export function XBusReview({
   };
 
   return (
-    <section className="my-4 space-y-3 rounded-lg border border-subtle p-4" aria-label={label("aria_label")}>
+    <section className="my-3 space-y-3 rounded-lg border border-subtle/80 bg-surface-2/40 p-3.5" aria-label={label("aria_label")}>
       <div className="flex items-center justify-between">
-        <h3 className="font-semibold">{label("title")}</h3>
-        <span className="text-sm">{data ? label(data.status) : label("loading")}</span>
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-secondary">{label("title")}</h3>
+        <span
+          className={cn(
+            "rounded-full px-2.5 py-0.5 text-xs font-medium border",
+            data?.status === "pending"
+              ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20"
+              : data?.status === "approved"
+              ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+              : data?.status === "rejected"
+              ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20"
+              : "bg-surface-2 text-tertiary border-subtle"
+          )}
+        >
+          {data ? label(data.status) : label("loading")}
+        </span>
       </div>
       {error && (
-        <p role="alert" className="text-sm text-danger-primary">
+        <p role="alert" className="text-xs text-danger-primary">
           {label(error in reviewErrorKeys ? reviewErrorKeys[error] : error)}
         </p>
       )}
       {data?.can_configure ? (
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Select<ReviewPerson>
             getValues={() => data.candidates}
             getOptionValue={(person) => person.id}
@@ -151,7 +165,7 @@ export function XBusReview({
           <Button
             type="button"
             variant="secondary"
-            size="md"
+            size="sm"
             stretch="auto"
             label={label("save_reviewer")}
             disabled={busy || !reviewer || reviewer === data.reviewer_id}
@@ -162,20 +176,20 @@ export function XBusReview({
         </div>
       ) : (
         data?.reviewer_id && (
-          <p className="text-sm">
-            {label("reviewer")}:{" "}
-            {data.candidates.find((person) => person.id === data.reviewer_id)?.name ?? label("inactive_member")}
-          </p>
+          <div className="flex items-center gap-1.5 text-xs text-secondary">
+            <span className="font-medium text-primary">{label("reviewer")}:</span>{" "}
+            <span>{data.candidates.find((person) => person.id === data.reviewer_id)?.name ?? label("inactive_member")}</span>
+          </div>
         )
       )}
-      {data?.status === "disabled" && <p className="text-sm text-secondary">{label("enable_hint")}</p>}
+      {data?.status === "disabled" && <p className="text-xs text-secondary">{label("enable_hint")}</p>}
       {data && (data.can_submit || data.can_decide) && (
         <>
           <textarea
             aria-label={label("note_label")}
             placeholder={label("note_placeholder")}
-            className="text-sm w-full rounded border border-subtle bg-surface-1 p-2"
-            rows={3}
+            className="text-xs w-full rounded-md border border-subtle bg-surface-1 p-2.5 transition-colors focus:border-accent-primary focus:outline-none focus:ring-1 focus:ring-accent-primary placeholder:text-placeholder"
+            rows={2}
             value={note}
             maxLength={10000}
             disabled={busy}
@@ -187,7 +201,7 @@ export function XBusReview({
                 key={action}
                 type="button"
                 variant={action === "reject" ? "secondary" : "primary"}
-                size="md"
+                size="sm"
                 stretch="auto"
                 label={label(action)}
                 disabled={busy || !note.trim()}
@@ -200,15 +214,15 @@ export function XBusReview({
         </>
       )}
       {data && data.events.length > 0 && (
-        <details>
-          <summary className="text-sm cursor-pointer">{label("history")}</summary>
-          <ul className="mt-2 space-y-3">
+        <details className="pt-1 border-t border-subtle/50 text-xs">
+          <summary className="cursor-pointer text-tertiary hover:text-primary transition-colors">{label("history")}</summary>
+          <ul className="mt-2 space-y-2">
             {data.events.map((event) => (
-              <li key={event.id} className="text-sm">
-                <p className="font-medium">
+              <li key={event.id} className="text-xs text-secondary">
+                <p className="font-medium text-primary">
                   {event.actor} · {label(event.action)} · {new Date(event.created_at).toLocaleString(currentLocale)}
                 </p>
-                <p className="break-words whitespace-pre-wrap">
+                <p className="break-words whitespace-pre-wrap text-tertiary">
                   {event.action === "configure" && event.note.startsWith("Người nghiệm thu: ")
                     ? `${label("reviewer")}: ${event.note.slice("Người nghiệm thu: ".length)}`
                     : event.note}

@@ -274,15 +274,18 @@ export const getComputedDisplayFilters = (
   const filters = !isEmpty(displayFilters) ? displayFilters : defaultValues;
   return {
     calendar: {
-      show_weekends: filters?.calendar?.show_weekends || false,
-      layout: filters?.calendar?.layout || "month",
+      show_weekends: filters?.calendar?.show_weekends ?? defaultValues?.calendar?.show_weekends ?? false,
+      layout: filters?.calendar?.layout || defaultValues?.calendar?.layout || "month",
     },
-    layout: filters?.layout || EIssueLayoutTypes.LIST,
-    order_by: filters?.order_by || "sort_order",
-    group_by: filters?.group_by || null,
-    sub_group_by: filters?.sub_group_by || null,
-    sub_issue: filters?.sub_issue || false,
-    show_empty_groups: filters?.show_empty_groups || false,
+    layout: filters?.layout || defaultValues?.layout || EIssueLayoutTypes.LIST,
+    order_by:
+      filters?.order_by && filters?.order_by !== "sort_order"
+        ? filters.order_by
+        : defaultValues?.order_by || "-created_at",
+    group_by: filters?.group_by ?? defaultValues?.group_by ?? null,
+    sub_group_by: filters?.sub_group_by ?? defaultValues?.sub_group_by ?? null,
+    sub_issue: filters?.sub_issue ?? defaultValues?.sub_issue ?? true,
+    show_empty_groups: filters?.show_empty_groups ?? defaultValues?.show_empty_groups ?? true,
   };
 };
 

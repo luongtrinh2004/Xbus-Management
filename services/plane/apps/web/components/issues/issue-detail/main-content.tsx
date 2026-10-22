@@ -18,6 +18,7 @@ import { DescriptionInput } from "@/components/editor/rich-text/description-inpu
 import { IssueTypeSwitcher } from "@/components/issues/issue-type-switcher";
 import { XBusReview } from "@/components/issues/xbus-review";
 import { IssueCompletionButton } from "@/components/issues/completion/button";
+import { IssueIdentifier } from "./issue-identifier";
 // hooks
 import { useIssueDetail } from "@/hooks/store/use-issue-detail";
 import { useMember } from "@/hooks/store/use-member";
@@ -81,19 +82,8 @@ export const IssueMainContent = observer(function IssueMainContent(props: Props)
   return (
     <>
       <div className="space-y-4 rounded-lg">
-        <XBusReview workspaceSlug={workspaceSlug} projectId={projectId} issueId={issueId} />
-        {issue.parent_id && (
-          <IssueParentDetail
-            workspaceSlug={workspaceSlug}
-            projectId={projectId}
-            issueId={issueId}
-            issue={issue}
-            issueOperations={issueOperations}
-          />
-        )}
-
-        <div className="mb-2.5 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between gap-4 pb-3 border-b border-subtle">
+          <div className="flex items-center gap-2.5">
             <IssueCompletionButton
               issue={issue}
               workspaceSlug={workspaceSlug}
@@ -103,12 +93,31 @@ export const IssueMainContent = observer(function IssueMainContent(props: Props)
                 issueOperations.update(workspaceSlug, issue.project_id!, issue.id, { state_id: stateId })
               }
             />
+            <div className="h-4 w-px bg-subtle" />
             <IssueTypeSwitcher issueId={issueId} disabled={isArchived || !isEditable} />
+            <span className="rounded bg-surface-2 px-2 py-0.5 text-xs font-mono font-medium text-tertiary">
+              <IssueIdentifier
+                issueId={issueId}
+                projectId={issue.project_id}
+                size="xs"
+                variant="tertiary"
+              />
+            </span>
           </div>
           <div className="flex items-center gap-3">
             <NameDescriptionUpdateStatus isSubmitting={isSubmitting} />
           </div>
         </div>
+
+        {issue.parent_id && (
+          <IssueParentDetail
+            workspaceSlug={workspaceSlug}
+            projectId={projectId}
+            issueId={issueId}
+            issue={issue}
+            issueOperations={issueOperations}
+          />
+        )}
 
         <IssueTitleInput
           workspaceSlug={workspaceSlug}
@@ -120,6 +129,8 @@ export const IssueMainContent = observer(function IssueMainContent(props: Props)
           disabled={isArchived || !isEditable}
           value={issue.name}
         />
+
+        <XBusReview workspaceSlug={workspaceSlug} projectId={projectId} issueId={issueId} />
 
         <IssueAIAssistant
           key={`ai-${issue.id}`}

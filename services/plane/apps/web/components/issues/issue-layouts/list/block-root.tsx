@@ -14,6 +14,7 @@ import {
 } from "@atlaskit/pragmatic-drag-and-drop-hitbox/tree-item";
 import { useTranslation } from "@plane/i18n";
 import { ListAddRow } from "./add-row";
+import { useListTable } from "./table-context";
 import { useParams } from "next/navigation";
 import { CreateUpdateIssueModal } from "@/components/issues/issue-modal/modal";
 import { useIssueStoreType } from "@/hooks/use-issue-layout-store";
@@ -83,6 +84,7 @@ export const IssueBlockRoot = observer(function IssueBlockRoot(props: Props) {
     onActivateAddParent,
   } = props;
   const { t } = useTranslation();
+  const columns = useListTable();
   const { workspaceSlug } = useParams();
   const storeType = useIssueStoreType();
   const [isCreateSubIssueOpen, setCreateSubIssueOpen] = useState(false);
@@ -223,6 +225,7 @@ export const IssueBlockRoot = observer(function IssueBlockRoot(props: Props) {
           />
         ))}
       {!isEpic &&
+        !columns &&
         !issuesMap[issueId].archived_at &&
         !issuesMap[issueId].is_draft &&
         !issuesMap[issueId].tempId &&

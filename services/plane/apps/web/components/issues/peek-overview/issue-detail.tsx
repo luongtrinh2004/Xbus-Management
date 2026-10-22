@@ -17,6 +17,7 @@ import { DescriptionVersionsRoot } from "@/components/core/description-versions"
 import { DescriptionInput } from "@/components/editor/rich-text/description-input";
 import { XBusReview } from "@/components/issues/xbus-review";
 import { IssueCompletionButton } from "@/components/issues/completion/button";
+import { IssueIdentifier } from "@/components/issues/issue-detail/issue-identifier";
 // hooks
 import { useIssueDetail } from "@/hooks/store/use-issue-detail";
 import { useMember } from "@/hooks/store/use-member";
@@ -84,19 +85,9 @@ export const PeekOverviewIssueDetails = observer(function PeekOverviewIssueDetai
       : undefined;
 
   return (
-    <div className="space-y-2">
-      <XBusReview workspaceSlug={workspaceSlug} projectId={issue.project_id} issueId={issueId} />
-      {issue.parent_id && (
-        <IssueParentDetail
-          workspaceSlug={workspaceSlug}
-          projectId={issue.project_id}
-          issueId={issueId}
-          issue={issue}
-          issueOperations={issueOperations}
-        />
-      )}
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
+    <div className="space-y-3.5">
+      <div className="flex items-center justify-between gap-3 pb-2.5 border-b border-subtle">
+        <div className="flex items-center gap-2.5">
           <IssueCompletionButton
             issue={issue}
             workspaceSlug={workspaceSlug}
@@ -106,19 +97,43 @@ export const PeekOverviewIssueDetails = observer(function PeekOverviewIssueDetai
               issueOperations.update(workspaceSlug, issue.project_id!, issue.id, { state_id: stateId })
             }
           />
+          <div className="h-4 w-px bg-subtle" />
           <IssueTypeSwitcher issueId={issueId} disabled={isArchived || disabled} />
+          <span className="rounded bg-surface-2 px-2 py-0.5 text-xs font-mono font-medium text-tertiary">
+            <IssueIdentifier
+              issueId={issueId}
+              projectId={issue.project_id}
+              size="xs"
+              variant="tertiary"
+            />
+          </span>
         </div>
       </div>
-      <IssueTitleInput
-        workspaceSlug={workspaceSlug}
-        projectId={issue.project_id}
-        issueId={issue.id}
-        isSubmitting={isSubmitting}
-        setIsSubmitting={(value) => setIsSubmitting(value)}
-        issueOperations={issueOperations}
-        disabled={disabled || isArchived}
-        value={issue.name}
-      />
+
+      {issue.parent_id && (
+        <IssueParentDetail
+          workspaceSlug={workspaceSlug}
+          projectId={issue.project_id}
+          issueId={issueId}
+          issue={issue}
+          issueOperations={issueOperations}
+        />
+      )}
+
+      <div className="pt-0.5">
+        <IssueTitleInput
+          workspaceSlug={workspaceSlug}
+          projectId={issue.project_id}
+          issueId={issue.id}
+          isSubmitting={isSubmitting}
+          setIsSubmitting={(value) => setIsSubmitting(value)}
+          issueOperations={issueOperations}
+          disabled={disabled || isArchived}
+          value={issue.name}
+        />
+      </div>
+
+      <XBusReview workspaceSlug={workspaceSlug} projectId={issue.project_id} issueId={issueId} />
 
       <IssueAIAssistant
         key={`ai-${issue.id}`}
